@@ -146,7 +146,7 @@ export default class Helper {
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName) && ![undefined, null].includes(models[modelName][propertyName].default))
                         code += `        if (!newDocument.hasOwnProperty('${propertyName}') || [null, undefined].includes(newDocument.${propertyName}))\n` +
-                                `            newDocument.${propertyName} = ${specification.default}\n`
+                                `            newDocument.${propertyName} = ${models[modelName][propertyName].default}\n`
                 // endregion
             }
         code += '    }\n' +

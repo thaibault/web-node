@@ -2,20 +2,13 @@
 // -*- coding: utf-8 -*-
 'use strict'
 // region imports
-import {ChildProcess} from 'child_process'
-import {Duplex as DuplexStream} from 'stream'
-import * as fileSystem from 'fs'
-import path from 'path'
 import * as QUnit from 'qunit-cli'
 // NOTE: Only needed for debugging this file.
 try {
     module.require('source-map-support/register')
 } catch (error) {}
 
-import type {
-    BuildConfiguration, Path, TraverseFilesCallbackFunction
-} from '../type'
-import Helper from '../helper.compiled'
+import Helper from '../helper'
 // endregion
 QUnit.module('helper')
 QUnit.load()
