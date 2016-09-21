@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // @flow
 // -*- coding: utf-8 -*-
 'use strict'
@@ -29,8 +28,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     ]) {
         const validator:Function = new Function(
             'return ' + Helper.generateValidateDocumentUpdateFunctionCode(
-                test[0])
-        assert.strictEqual(typeof validator, 'function'))
+                test[0]))
+        assert.strictEqual(typeof validator, 'function')
         assert.ok(validator.apply(this, test.slice(1)))
     }
 })
