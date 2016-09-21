@@ -1,0 +1,111 @@
+{
+  "name": "webnode",
+  "version": "1.0.0",
+  "description": "A generic web backend.",
+  "documentationWebsite": {
+    "name": "webNode",
+    "trackingCode": "TODO"
+  },
+  "homepage": "http://torben.website/webNode",
+  "license": "CC-BY-3.0",
+  "bin": {
+    "webNode": "build/index.compiled.js"
+  },
+  "main": "build/index.compiled.js",
+  "keywords": [
+    "web",
+    "backend",
+    "rest",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thaibault/webNode.git"
+  },
+  "dependencies": {
+    "clientnode": "latest",
+    "pouchdb": "latest",
+    "pouchdb-server": "latest",
+    "weboptimizer": "latest"
+  },
+  "devDependencies": {
+    "documentation-website": "latest",
+    "qunit-cli": "latest",
+    "source-map-support": "latest"
+  },
+  "files": ["build"],
+  "scripts": {
+    "build": "webOptimizer build",
+    "buildDLL": "webOptimizer buildDLL",
+    "clear": "webOptimizer clear && rm --force log.txt &>/dev/null",
+    "document": "webOptimizer document",
+    "lint": "webOptimizer typeCheck && webOptimizer lint",
+    "prepublish": "npm run build",
+    "serve": "webOptimizer build && build/index.js & pouchdb-server --port 5984 --dir database --config ./database/database.json",
+    "start": "npm run serve",
+    "test": "webOptimizer test",
+    "update": "npm version patch && npm publish",
+    "updateDocumentation": "documentationWebsite --log-level info",
+    "watch": "webOptimizer build --watch",
+    "watchDLL": "webOptimizer buildDLL --watch"
+  },
+  "webNode": {
+    "debug": true,
+    "model": {
+      "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
+      "defaultPropertySpecification": {
+        "type": "string",
+        "default": null,
+        "onCreate": null,
+        "onUpdate": null,
+        "nullable": true,
+        "writable": true,
+        "minimum": -999999999999999999999,
+        "maximum": 999999999999999999999,
+        "regularExpressionPattern": null,
+        "constraint": null
+      },
+      "type": {
+        "_base": {
+          "creationDateTime": {
+            "type": "DateTime",
+            "onCreate": "new Date().getTime()",
+            "minimum": {"__evaluate__": "new Date().getTime()"},
+            "writable": false,
+            "nullable": false
+          },
+          "updateDateType": {
+            "type": "DateTime",
+            "onUpdate": "new Date().getTime()",
+            "minimum": {"__evaluate__": "new Date().getTime()"},
+            "nullable": false
+          }
+        },
+        "Test": {
+            "_extend": "_base",
+            "jau": {
+                "regularExpressionPattern": "hans",
+                "constraint": "newDocument[key] !== 'yolo'"
+            }
+        }
+      }
+    }
+  },
+  "webOptimizer": {
+    "targetTechnology": "node",
+    "assetPattern": {
+      "javaScript": {
+        "pattern": "#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n'use strict';\n{1}"
+      }
+    },
+    "exportFormat": {
+      "external": "commonjs2",
+      "self": "commonjs2"
+    },
+    "inPlace": {"externalLibrary": false},
+    "path": {
+      "source": {"base": "source"},
+      "target": {"base": "build"}
+    }
+  }
+}
