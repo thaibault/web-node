@@ -60,7 +60,7 @@ database.get('_design/validation').then((document) =>
     console.log(`Model specification updated: "${JSON.stringify(response, null, '    ')}".`)
 ).catch((rejection) => {
     console.log(
-        `Model specification couldn't be updated: "${JSON.stringify(rejection, null, '    ')}" ``creation ` +
+        `Model specification couldn't be updated: "${JSON.stringify(rejection, null, '    ')}" creation ` +
         `new one.`)
     database.put({
         _id: '_design/validation',
