@@ -8,7 +8,7 @@ try {
     module.require('source-map-support/register')
 } catch (error) {}
 
-import Helper from '../helper'
+import Helper from 'helper'
 // endregion
 QUnit.module('helper')
 QUnit.load()
