@@ -12,7 +12,7 @@ QUnit.module('configurator')
 QUnit.load()
 // region tests
 QUnit.test('main', (assert:Object):void => assert.strictEqual(
-    require('../configurator.compiled').default.name, 'mockup'))
+    typeof require('../configurator').default.debug, 'boolean'))
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

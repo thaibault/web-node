@@ -14,11 +14,12 @@
 */
 // region imports
 import Tools from 'clientnode'
+import path from 'path'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
 } catch (error) {}
-
+import Helper from './helper'
 import packageConfiguration from '../package'
 // endregion
 const parameterDescription:Array<string> = [

@@ -34,6 +34,7 @@ export default class Helper {
     static generateValidateDocumentUpdateFunctionCode(
         modelSpecification:PlainObject
     ):string {
+        // region  extend default specification with specific
         modelSpecification = Tools.extendObject(true, {
             typeNameRegularExpressionPattern: '^[a-zA-Z0-9]+$'
         }, modelSpecification)
@@ -45,28 +46,31 @@ export default class Helper {
                 if (!modelName.match(new RegExp(
                     modelSpecification.typeNameRegularExpressionPattern
                 )))
-                    throw Error(
+                    throw new Error(
                         'Model names have to match "' +
                         modelSpecification.typeNameRegularExpressionPattern +
                         `" (given name: "${modelName}").`)
                 models[modelName] = Tools.copyLimitedRecursively(
                     modelSpecification.types[modelName])
-                if (models[modelName].hasOwnProperty('_extend')) {
-                    for (const modelNameToExtend:string of [].concat(
-                        models[modelName]._extend
-                    ))
-                        models[modelName] = Tools.extendObject(
-                            true, models[modelName], modelSpecification.types[
-                                modelNameToExtend])
-                    delete models[modelName]._extend
-                }
+                // TODO must be done recursively to support nested extends.
+                if (models[modelName].hasOwnProperty('_extend'))
+                    models[modelName]._extend = ['_base'].concat(
+                        models[modelName]._extend)
+                else
+                    models[modelName]._extend = ['_base']
+                for (const modelNameToExtend:string of models[
+                    modelName
+                ]._extend)
+                    models[modelName] = Tools.extendObject(
+                        true, models[modelName], modelSpecification.types[
+                            modelNameToExtend])
+                delete models[modelName]._extend
             }
+        // endregion
         let code:string = 'function validator(newDocument, oldDocument, userContext, securitySettings) {\n' +
             '    function checkDocument(newDocument, oldDocument) {\n' +
             "        if (!newDocument.hasOwnProperty('webNodeType'))\n" +
-            `            throw({forbidden: 'You have to specify a model type via property "webNodeType".'})\n` +
-            `        if (!newDocument.webNodeType.match(/${modelSpecification.typeNameRegularExpressionPattern}/))\n` +
-            `            throw({forbidden: '"webNodeType" has to match "${modelSpecification.typeNameRegularExpressionPattern}".'})\n`
+            `            throw {forbidden: 'Type: You have to specify a model type via property "webNodeType".'}\n`
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName)) {
                 code += `        if (newDocument.webNodeType === '${modelName}') {\n` +
@@ -91,7 +95,7 @@ export default class Helper {
                             code += '                        if (oldDocument && toJSON(\n' +
                                     '                            oldDocument[key]\n' +
                                     '                        ) !== toJSON(newDocument[key]))\n' +
-                                    `                            throw({forbidden: 'Property "${propertyName}" is not writable.'})\n`
+                                    `                            throw {forbidden: 'Readonly: Property "${propertyName}" is not writable.'}\n`
                         // endregion
                         // region nullable
                         code += `                        if (newDocument[key] === null) {\n`
@@ -100,51 +104,57 @@ export default class Helper {
                                 '                            continue\n' +
                                 '                        }\n'
                         else
-                            code += `                            throw({forbidden: 'Property "${propertyName}" should not by "null".'})\n`
+                            code += `                            throw {forbidden: 'NotNull: Property "${propertyName}" should not by "null".'}\n`
                                     '                        }\n'
                         // endregion
                         // region type
                         if (['string', 'number', 'boolean'].includes(specification.type))
-                            code += `                        if (typeof newDocument[key] !== '${specification.type}')`
-                        if (['DateTime'].includes(specification.type))
-                            code += `                        if (typeof newDocument[key] !== 'number')`
+                            code += `                        if (typeof newDocument[key] !== '${specification.type}')\n`
+                        else if (['DateTime'].includes(specification.type))
+                            code += `                        if (typeof newDocument[key] !== 'number')\n`
+                        else if (models.hasOwnProperty(specification.type))
+                            code += "                        if (typeof newDocument[key] === 'object' && newDocument[key] !== null && Object.getPrototypeOf(newDocument[key]) === Object.prototype)\n" +
+                                    '                            checkDocument(newDocument[key], oldDocument[key], user)\n' +
+                                    '                        else\n' +
+                                    `                            throw {forbidden: 'NestedModel: Under key "' + key + '" isn't "${propertyName}" (given "' + newDocument[key] + '").'}\n`
                         else
                             code += `                        if (newDocument[key] !== ${specification.type})\n`
-                        code += `                            throw({forbidden: 'Property "${propertyName}" isn't of type "${specification.type}" (given "' + newDocument[key] + '").'})\n`
+                        code += `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn't value "${specification.type}" (given "' + newDocument[key] + '").'}\n`
                         // endregion
                         // region range
                         if (![undefined, null].includes(specification.minimum))
                             if ('string' === models[modelName][propertyName].type)
                                 code += `                        if (${specification.minimum} > newDocument[key].length)\n` +
-                                        `                            throw({forbidden: 'Property "${propertyName}" (type string) should have minimal length ${specification.minimum}.'})\n`
+                                        `                            throw {forbidden: 'MinimalLength: Property "${propertyName}" (type string) should have minimal length ${specification.minimum}.'}\n`
                             else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
                                 code += `                        if (${specification.minimum} > newDocument[key])\n` +
-                                        `                            throw({forbidden: 'Property "${propertyName}" (type ${specification.type}) should satisfy a minimum of ${specification.minimum}.'})\n`
+                                        `                            throw {forbidden: 'Minimum: Property "${propertyName}" (type ${specification.type}) should satisfy a minimum of ${specification.minimum}.'}\n`
                         if (![undefined, null].includes(specification.maximum))
                             if ('string' === models[modelName][propertyName].type)
                                 code += `                        if (${specification.maximum} < newDocument[key].length)\n` +
-                                        `                            throw({forbidden: 'Property "${propertyName}" (type string) should have minimal length ${specification.maximum}.'})\n`
+                                        `                            throw {forbidden: 'MaximalLength: Property "${propertyName}" (type string) should have maximal length ${specification.maximum}.'}\n`
                             else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
                                 code += `                        if (${specification.maximum} < newDocument[key])\n` +
-                                        `                            throw({forbidden: 'Property "${propertyName}" (type ${specification.type}) should satisfy a maximum of ${specification.maximum}.'})\n`
+                                        `                            throw {forbidden: 'Maximum: Property "${propertyName}" (type ${specification.type}) should satisfy a maximum of ${specification.maximum}.'}\n`
                         // endregion
                         // region pattern
                         if (![undefined, null].includes(specification.regularExpressionPattern))
                             code += `                        if (!/${specification.regularExpressionPattern}/.test(newDocument[key]))\n` +
-                                    `                            throw({forbidden: 'Property "${propertyName}" should match regular expression pattern ${specification.regularExpressionPattern} (given "' + newDocument[key] + '").'})\n`
+                                    `                            throw {forbidden: 'PatternMatch: Property "${propertyName}" should match regular expression pattern ${specification.regularExpressionPattern} (given "' + newDocument[key] + '").'}\n`
                         // endregion
                         // region generic constraint
                         if (![undefined, null].includes(specification.constraint))
                             code += `                        if (!(${specification.constraint}))` +
-                                    `                            throw({forbidden: 'Property "${propertyName}" should satisfy constraint "${specification.constraint}" (given "' + newDocument[key] + '").'})\n`
+                                    `                            throw {forbidden: 'Constraint: Property "${propertyName}" should satisfy constraint "${specification.constraint}" (given "' + newDocument[key] + '").'}\n`
                         // endregion
-                        code += "                        if (typeof newDocument[key] === 'object' && newDocument[key] !== null && Object.getPrototypeOf(newDocument[key]) === Object.prototype)\n" +
-                                '                            checkDocument(newDocument[key], oldDocument[key], user)\n' +
-                                '                        continue\n' +
+                        code += '                        continue\n' +
                                 '                    }\n'
                     }
-                    code += `                    throw({forbidden: 'Given property "' + key + '" isn\\'t specified in model "${modelName}".'})\n`
-                code += '                }\n'
+                    code += `                    throw {forbidden: 'Property: Given property "' + key + '" isn\\'t specified in model "${modelName}".'}\n`
+                code += '                }\n' +
+                        '            return\n' +
+                        '        }\n' +
+                        `        throw {forbidden: 'Model: Given model "' + newDocument.webNodeType + '" is not specified.'}\n`
                 // region default value
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName) && ![undefined, null].includes(models[modelName][propertyName].default))

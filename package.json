@@ -52,7 +52,6 @@
   "webNode": {
     "debug": true,
     "model": {
-      "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
       "defaultPropertySpecification": {
         "type": "string",
         "default": null,
@@ -79,14 +78,10 @@
             "onUpdate": "new Date().getTime()",
             "minimum": {"__evaluate__": "new Date().getTime()"},
             "nullable": false
+          },
+          "webNodeType": {
+            "regularExpressionPattern": "^[A-Z][a-z0-9]+$"
           }
-        },
-        "Test": {
-            "_extend": "_base",
-            "jau": {
-                "regularExpressionPattern": "hans",
-                "constraint": "newDocument[key] !== 'yolo'"
-            }
         }
       }
     }

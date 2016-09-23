@@ -2,6 +2,7 @@
 // -*- coding: utf-8 -*-
 'use strict'
 // region imports
+import Tools from 'clientnode'
 import * as QUnit from 'qunit-cli'
 // NOTE: Only needed for debugging this file.
 try {
@@ -18,20 +19,33 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     assert:Object
 ):void => {
     for (const test:Array<any> of [
-        [{}, {}, {}, {}, {}],
-        [{types: {}}, {a: 2}, {}, {}, {}]
+        [{}, {}, {}, {}, {}, 'Type:'],
+        [{}, {webNodeType: 'test'}, {}, {}, {}, 'TypeName:'],
+        [{types: {Test: {}}}, {webNodeType: 'Test'}, {}, {}, {}, 'TypeName:']
     ]) {
+        const modelSpecification:PlainObject = Tools.extendObject(
+            true, configuration.model, test[0])
         const functionCode:string =
-            Helper.generateValidateDocumentUpdateFunctionCode(test[0])
+            Helper.generateValidateDocumentUpdateFunctionCode(
+                modelSpecification)
+        console.log('A', functionCode)
         assert.strictEqual(typeof functionCode, 'string')
         const validatorGenerator:Function = new Function(
             `return ${functionCode}`)
         assert.strictEqual(typeof validatorGenerator, 'function')
         const validator:Function = validatorGenerator()
         assert.strictEqual(typeof validator, 'function')
-        console.log(validator.toString())
-        validator.apply(this, test.slice(1))
-        // assert.ok(validator.apply(this, test.slice(1)))
+        assert.throws(():void => validator.apply(this, test.slice(
+            1, test.length - 1
+        )), (error:Error):boolean => {
+            const result:boolean = error.forbidden.startsWith(
+                test[test.length - 1])
+            if (!result)
+                console.log(
+                    `Error "${error.forbidden} doesn't start with "` +
+                    `${test[test.length - 1]}".`)
+            return result
+        })
     }
 })
 // endregion

@@ -53,8 +53,7 @@ database.get('_design/validation').then((document) =>
     }).then((response) =>
         console.log(`Model specification installed: "${JSON.stringify(response, null, '    ')}".`)
     ).catch((rejection) => {
-        throw Error(
-            `Model specification couldn't be installed: "${JSON.stringify(rejection, null, '    ')}".`)
+        throw new Error(`Model specification couldn't be installed: "${JSON.stringify(rejection, null, '    ')}".`)
     })
 })
 // / endregion
@@ -69,7 +68,7 @@ database.put({
 }).then((response) =>
     console.log(JSON.stringify(response, null, '    '))
 ).catch((rejection) => {
-    throw Error(JSON.stringify(rejection, null, '    '))
+    throw new Error(JSON.stringify(rejection, null, '    '))
 })
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
