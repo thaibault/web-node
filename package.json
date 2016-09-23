@@ -65,7 +65,7 @@
         "regularExpressionPattern": null,
         "constraint": null
       },
-      "type": {
+      "types": {
         "_base": {
           "creationDateTime": {
             "type": "DateTime",

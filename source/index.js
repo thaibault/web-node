@@ -13,33 +13,17 @@
     endregion
 */
 // region imports
-import {
-    ChildProcess, exec as execChildProcess, spawn as spawnChildProcess
-} from 'child_process'
-import Tools from 'clientnode'
-import * as fileSystem from 'fs'
-import path from 'path'
 import PouchDB from 'pouchdb'
-import {sync as removeDirectoryRecursivelySync} from 'rimraf'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
 } catch (error) {}
 
 import Helper from './helper'
-import packageConfiguration from '../package'
-import type {Configuration} from './type'
-// endregion
-// region load configuration
-const parameterDescription:Array<string> = [
-    'self', 'webOptimizerPath', 'currentPath', 'path', 'helper', 'tools']
-const parameter:Array<any> = [
-    packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
-]
-const configuration:Configuration = Tools.resolveDynamicDataStructure(
-    packageConfiguration.webNode, parameterDescription, parameter)
+import configuration from './configurator'
 // endregion
 // region generate/update validation code
+// / region enforce model schema
 const validationCode:string =
     Helper.generateValidateDocumentUpdateFunctionCode(configuration.model)
 if (configuration.debug)
@@ -73,6 +57,10 @@ database.get('_design/validation').then((document) =>
             `Model specification couldn't be installed: "${JSON.stringify(rejection, null, '    ')}".`)
     })
 })
+// / endregion
+// / region enforce authorized data changes
+// TODO
+// / endregion
 // endregion
 process.exit()
 database.put({
