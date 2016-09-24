@@ -26,20 +26,45 @@ try {
  */
 export default class Helper {
     /**
-     * Generates a design document validation function for given model
-     * specification.
-     * @param modelSpecification - Model specification object.
-     * @returns Value generated code.
+     * Extend given model with all specified one.
+     * @param modelName - Name of model to extend.
+     * @param models - Pool of models to extend from.
+     * @returns Given model in extended version.
      */
-    static generateValidateDocumentUpdateFunctionCode(
+    static extendModel(
+        modelName:string, models:{[key:string]:PlainObject}
+    ):PlainObject {
+        if (models.hasOwnProperty('_base'))
+            if (models[modelName].hasOwnProperty('_extend'))
+                models[modelName]._extend = ['_base'].concat(
+                    models[modelName]._extend)
+            else
+                models[modelName]._extend = '_base'
+        if (models[modelName].hasOwnProperty('_extend')) {
+            for (const modelNameToExtend:string of [].concat(models[
+                modelName
+            ]._extend))
+                models[modelName] = Tools.extendObject(
+                    true, models[modelName], models[modelNameToExtend])
+            delete models[modelName]._extend
+        }
+        return models[modelName]
+    }
+    /**
+     * Extend default specification with specific one.
+     * @param modelSpecification - Model specification object.
+     * @returns Models with extended specific specifications.
+     */
+    static extendSpecification(
         modelSpecification:PlainObject
-    ):string {
-        // region  extend default specification with specific
+    ):{[key:string]:PlainObject} {
         modelSpecification = Tools.extendObject(true, {
             typeNameRegularExpressionPattern: '^[a-zA-Z0-9]+$'
         }, modelSpecification)
         const models:{[key:string]:PlainObject} = {}
-        for (const modelName:string in modelSpecification.types)
+        for (const modelName:string in Tools.copyLimitedRecursively(
+            modelSpecification.types
+        ))
             if (modelSpecification.types.hasOwnProperty(
                 modelName
             ) && !modelName.startsWith('_')) {
@@ -50,32 +75,31 @@ export default class Helper {
                         'Model names have to match "' +
                         modelSpecification.typeNameRegularExpressionPattern +
                         `" (given name: "${modelName}").`)
-                models[modelName] = Tools.copyLimitedRecursively(
-                    modelSpecification.types[modelName])
-                // TODO must be done recursively to support nested extends.
-                if (models[modelName].hasOwnProperty('_extend'))
-                    models[modelName]._extend = ['_base'].concat(
-                        models[modelName]._extend)
-                else
-                    models[modelName]._extend = ['_base']
-                for (const modelNameToExtend:string of models[
-                    modelName
-                ]._extend)
-                    models[modelName] = Tools.extendObject(
-                        true, models[modelName], modelSpecification.types[
-                            modelNameToExtend])
-                delete models[modelName]._extend
+                models[modelName] = Helper.extendModel(
+                    modelName, modelSpecification.types)
             }
-        // endregion
+        return models
+    }
+    /**
+     * Generates a design document validation function for given model
+     * specification.
+     * @param modelSpecification - Model specification object.
+     * @returns Value generated code.
+     */
+    static generateValidateDocumentUpdateFunctionCode(
+        modelSpecification:PlainObject
+    ):string {
+        const models:{[key:string]:PlainObject} = Helper.extendSpecification(
+            modelSpecification)
         let code:string = 'function validator(newDocument, oldDocument, userContext, securitySettings) {\n' +
             '    function checkDocument(newDocument, oldDocument) {\n' +
+            "        'use strict;'\n" +
             "        if (!newDocument.hasOwnProperty('webNodeType'))\n" +
             `            throw {forbidden: 'Type: You have to specify a model type via property "webNodeType".'}\n`
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName)) {
-                code += `        if (newDocument.webNodeType === '${modelName}') {\n` +
-                        '            for (var key in newDocument)\n' +
-                        `                if (newDocument.hasOwnProperty(key) && !['_id', '_rev'].includes(key)) {\n`
+                code += `        if (newDocument.webNodeType === '${modelName}') {\n`
+                // region missing property values
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName)) {
                         const specification:PlainObject = models[modelName][
@@ -84,13 +108,28 @@ export default class Helper {
                             true, {},
                             modelSpecification.defaultPropertySpecification,
                             models[modelName][propertyName])
-                        code += `                    if (key === '${propertyName}') {\n`
-                        // region runtime trigger
                         if (specification.onCreate)
-                            code += '                        if (!oldDocument)\n' +
-                                    `                            newDocument[key] = ${specification.onCreate}\n`
+                            code += '            if (!oldDocument)\n' +
+                                    `                newDocument['${propertyName}'] = ${specification.onCreate}\n`
                         if (specification.onUpdate)
-                            code += `                        newDocument[key] = ${specification.onUpdate}\n`
+                            code += `            newDocument['${propertyName}'] = ${specification.onUpdate}\n`
+                        if ([undefined, null].includes(specification.default)) {
+                            if (!specification.nullable)
+                                code += `            if (!(newDocument.hasOwnProperty('${propertyName}') || oldDocument && oldDocument.hasOwnProperty('${propertyName}')))\n` +
+                                        `                throw {forbidden: 'MissingProperty: Missing property "${propertyName}".'}\n`
+                        } else
+                            code += `            if (!newDocument.hasOwnProperty('${propertyName}') || [null, undefined].includes(newDocument['${propertyName}']))\n` +
+                                    `                newDocument['${propertyName}'] = ${specification.default}\n`
+                    }
+                // endregion
+                code += '            for (var key in newDocument)\n' +
+                        `                if (newDocument.hasOwnProperty(key) && !['_id', '_rev'].includes(key)) {\n`
+                for (const propertyName:string in models[modelName])
+                    if (models[modelName].hasOwnProperty(propertyName)) {
+                        const specification:PlainObject = models[modelName][
+                            propertyName]
+                        code += `                    if (key === '${propertyName}') {\n`
+                        // region writable
                         if (!specification.writable)
                             code += '                        if (oldDocument && toJSON(\n' +
                                     '                            oldDocument[key]\n' +
@@ -99,7 +138,7 @@ export default class Helper {
                         // endregion
                         // region nullable
                         code += `                        if (newDocument[key] === null) {\n`
-                        if (specification.nullable || specification.default)
+                        if (specification.nullable)
                             code += '                            delete newDocument[key]\n' +
                                 '                            continue\n' +
                                 '                        }\n'
@@ -111,26 +150,26 @@ export default class Helper {
                         if (['string', 'number', 'boolean'].includes(specification.type))
                             code += `                        if (typeof newDocument[key] !== '${specification.type}')\n`
                         else if (['DateTime'].includes(specification.type))
-                            code += `                        if (typeof newDocument[key] !== 'number')\n`
+                            code += "                        if (typeof newDocument[key] !== 'number')\n"
                         else if (models.hasOwnProperty(specification.type))
                             code += "                        if (typeof newDocument[key] === 'object' && newDocument[key] !== null && Object.getPrototypeOf(newDocument[key]) === Object.prototype)\n" +
-                                    '                            checkDocument(newDocument[key], oldDocument[key], user)\n' +
+                                    '                            checkDocument(newDocument[key], oldDocument && oldDocument.hasOwnProperty(key) && oldDocument[key] || undefined)\n' +
                                     '                        else\n' +
-                                    `                            throw {forbidden: 'NestedModel: Under key "' + key + '" isn\\'t "${propertyName}" (given "' + newDocument[key] + '").'}\n`
+                                    `                            throw {forbidden: 'NestedModel: Under key "' + key + '" isn\\'t "${specification.type}" (given "' + newDocument[key] + '").'}\n`
                         else
                             code += `                        if (newDocument[key] !== ${specification.type})\n`
                         code += `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t value "${specification.type}" (given "' + newDocument[key] + '").'}\n`
                         // endregion
                         // region range
                         if (![undefined, null].includes(specification.minimum))
-                            if ('string' === models[modelName][propertyName].type)
+                            if (models[modelName][propertyName].type === 'string')
                                 code += `                        if (${specification.minimum} > newDocument[key].length)\n` +
                                         `                            throw {forbidden: 'MinimalLength: Property "${propertyName}" (type string) should have minimal length ${specification.minimum}.'}\n`
                             else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
                                 code += `                        if (${specification.minimum} > newDocument[key])\n` +
                                         `                            throw {forbidden: 'Minimum: Property "${propertyName}" (type ${specification.type}) should satisfy a minimum of ${specification.minimum}.'}\n`
                         if (![undefined, null].includes(specification.maximum))
-                            if ('string' === models[modelName][propertyName].type)
+                            if (models[modelName][propertyName].type === 'string')
                                 code += `                        if (${specification.maximum} < newDocument[key].length)\n` +
                                         `                            throw {forbidden: 'MaximalLength: Property "${propertyName}" (type string) should have maximal length ${specification.maximum}.'}\n`
                             else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
@@ -144,7 +183,7 @@ export default class Helper {
                         // endregion
                         // region generic constraint
                         if (![undefined, null].includes(specification.constraint))
-                            code += `                        if (!(${specification.constraint}))` +
+                            code += `                        if (!(${specification.constraint}))\n` +
                                     `                            throw {forbidden: 'Constraint: Property "${propertyName}" should satisfy constraint "${specification.constraint}" (given "' + newDocument[key] + '").'}\n`
                         // endregion
                         code += '                        continue\n' +
@@ -154,16 +193,11 @@ export default class Helper {
                 code += '                }\n' +
                         '            return\n' +
                         '        }\n'
-                // region default value
-                for (const propertyName:string in models[modelName])
-                    if (models[modelName].hasOwnProperty(propertyName) && ![undefined, null].includes(models[modelName][propertyName].default))
-                        code += `        if (!newDocument.hasOwnProperty('${propertyName}') || [null, undefined].includes(newDocument.${propertyName}))\n` +
-                                `            newDocument.${propertyName} = ${models[modelName][propertyName].default}\n`
-                // endregion
             }
         code += `        throw {forbidden: 'Model: Given model "' + newDocument.webNodeType + '" is not specified.'}\n` +
         '    }\n' +
         '    checkDocument.apply(this, arguments)\n' +
+        '    return newDocument\n' +
         '}'
         return code
     }

@@ -32,28 +32,35 @@ if (configuration.debug)
         `${JSON.stringify(configuration.model, null, '    ')}" has ` +
         `generated validation code: \n\n"${validationCode}".`)
 const database:PouchDB = new PouchDB(
-    `http://127.0.0.1:5984/${packageConfiguration.name}`)
-database.get('_design/validation').then((document) =>
+    `http://127.0.0.1:5984/${configuration.name}`)
+database.get('_design/validation').then((document:Object):Object =>
     database.put({
         _id: '_design/validation',
         _rev: document._rev,
         language: 'javascript',
+        /* eslint-disable camelcase */
         validate_doc_update: validationCode
+        /* eslint-enable camelcase */
     })
-).then((response) =>
-    console.log(`Model specification updated: "${JSON.stringify(response, null, '    ')}".`)
-).catch((rejection) => {
+).then((response:Object):void => console.log(
+    `Model specification updated: "${JSON.stringify(response, null, '    ')}".`
+)).catch((rejection:Object):void => {
     console.log(
-        `Model specification couldn't be updated: "${JSON.stringify(rejection, null, '    ')}" creation ` +
-        `new one.`)
+        `Model specification couldn't be updated: "` +
+        `${JSON.stringify(rejection, null, '    ')}" creation new one.`)
     database.put({
         _id: '_design/validation',
         language: 'javascript',
+        /* eslint-disable camelcase */
         validate_doc_update: validationCode
-    }).then((response) =>
-        console.log(`Model specification installed: "${JSON.stringify(response, null, '    ')}".`)
-    ).catch((rejection) => {
-        throw new Error(`Model specification couldn't be installed: "${JSON.stringify(rejection, null, '    ')}".`)
+        /* eslint-enable camelcase */
+    }).then((response:Object):void => console.log(
+        'Model specification installed: "' +
+        `${JSON.stringify(response, null, '    ')}".`
+    )).catch((rejection:Object):void => {
+        throw new Error(
+            `Model specification couldn't be installed: "` +
+            `${JSON.stringify(rejection, null, '    ')}".`)
     })
 })
 // / endregion
@@ -65,9 +72,9 @@ process.exit()
 database.put({
     _id: 'fun',
     jau: 'yolo'
-}).then((response) =>
-    console.log(JSON.stringify(response, null, '    '))
-).catch((rejection) => {
+}).then((response:Object):void => console.log(JSON.stringify(
+    response, null, '    '
+))).catch((rejection:Object):void => {
     throw new Error(JSON.stringify(rejection, null, '    '))
 })
 // region vim modline

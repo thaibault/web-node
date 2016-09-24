@@ -31,8 +31,13 @@ export type ModelConfiguration = {
     type:{[key:string]:{[key:string]:PropertySpecification}};
 }
 export type Configuration = {
+    name:string;
     debug:boolean;
     model:ModelConfiguration;
+}
+export type DatabaseError = {
+    forbidden:string;
+    toString:() => string;
 }
 // endregion
 // region vim modline
