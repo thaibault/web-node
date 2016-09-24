@@ -74,7 +74,7 @@ export default class Helper {
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName)) {
                 code += `        if (newDocument.webNodeType === '${modelName}') {\n` +
-                        '            for (key in newDocument)\n' +
+                        '            for (var key in newDocument)\n' +
                         `                if (newDocument.hasOwnProperty(key) && !['_id', '_rev'].includes(key)) {\n`
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName)) {
@@ -95,7 +95,7 @@ export default class Helper {
                             code += '                        if (oldDocument && toJSON(\n' +
                                     '                            oldDocument[key]\n' +
                                     '                        ) !== toJSON(newDocument[key]))\n' +
-                                    `                            throw {forbidden: 'Readonly: Property "${propertyName}" is not writable.'}\n`
+                                    `                            throw {forbidden: 'Readonly: Property "${propertyName}" is not writable (old document "' + toJSON(oldDocument) + '").'}\n`
                         // endregion
                         // region nullable
                         code += `                        if (newDocument[key] === null) {\n`
@@ -104,7 +104,7 @@ export default class Helper {
                                 '                            continue\n' +
                                 '                        }\n'
                         else
-                            code += `                            throw {forbidden: 'NotNull: Property "${propertyName}" should not by "null".'}\n`
+                            code += `                            throw {forbidden: 'NotNull: Property "${propertyName}" should not by "null".'}\n` +
                                     '                        }\n'
                         // endregion
                         // region type
@@ -116,10 +116,10 @@ export default class Helper {
                             code += "                        if (typeof newDocument[key] === 'object' && newDocument[key] !== null && Object.getPrototypeOf(newDocument[key]) === Object.prototype)\n" +
                                     '                            checkDocument(newDocument[key], oldDocument[key], user)\n' +
                                     '                        else\n' +
-                                    `                            throw {forbidden: 'NestedModel: Under key "' + key + '" isn't "${propertyName}" (given "' + newDocument[key] + '").'}\n`
+                                    `                            throw {forbidden: 'NestedModel: Under key "' + key + '" isn\\'t "${propertyName}" (given "' + newDocument[key] + '").'}\n`
                         else
                             code += `                        if (newDocument[key] !== ${specification.type})\n`
-                        code += `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn't value "${specification.type}" (given "' + newDocument[key] + '").'}\n`
+                        code += `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t value "${specification.type}" (given "' + newDocument[key] + '").'}\n`
                         // endregion
                         // region range
                         if (![undefined, null].includes(specification.minimum))
@@ -153,8 +153,7 @@ export default class Helper {
                     code += `                    throw {forbidden: 'Property: Given property "' + key + '" isn\\'t specified in model "${modelName}".'}\n`
                 code += '                }\n' +
                         '            return\n' +
-                        '        }\n' +
-                        `        throw {forbidden: 'Model: Given model "' + newDocument.webNodeType + '" is not specified.'}\n`
+                        '        }\n'
                 // region default value
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName) && ![undefined, null].includes(models[modelName][propertyName].default))
@@ -162,7 +161,8 @@ export default class Helper {
                                 `            newDocument.${propertyName} = ${models[modelName][propertyName].default}\n`
                 // endregion
             }
-        code += '    }\n' +
+        code += `        throw {forbidden: 'Model: Given model "' + newDocument.webNodeType + '" is not specified.'}\n` +
+        '    }\n' +
         '    checkDocument.apply(this, arguments)\n' +
         '}'
         return code
