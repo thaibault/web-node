@@ -9,7 +9,6 @@ import type {PlainObject} from 'weboptimizer/type'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import configuration from '../configurator'
 import type {DatabaseError} from '../type'
 import Helper from '../helper'
 // endregion
@@ -33,16 +32,26 @@ QUnit.test('extendModel', (assert:Object):void => {
                 C: {c: {}, _extend: ['A', 'B']}
             },
             {a: {}, b: {}, c: {}}
-        ]/*,
+        ],
         [
-            {types: {
+            'C',
+            {
                 A: {a: {}},
                 B: {b: {}, _extend: 'A'},
                 C: {c: {}, _extend: 'B'}
-            }},
-            {A: {a: {}}, B: {a: {}, b: {}}, C: {a: {}, b: {}, c: {}}}
+            },
+            {a: {}, b: {}, c: {}}
+        ],
+        [
+            'C',
+            {
+                _base: {d: {type: 'number'}},
+                A: {a: {}},
+                B: {b: {}, _extend: 'A'},
+                C: {c: {}, _extend: 'B'}
+            },
+            {a: {}, b: {}, c: {}, d: {type: 'number'}}
         ]
-        */
     ])
         assert.deepEqual(Helper.extendModel(test[0], test[1]), test[2])
 })
@@ -65,10 +74,35 @@ QUnit.test('extendSpecification', (assert:Object):void => {
     assert.throws(Helper.extendSpecification({
         type: {a: {}}
     }))
+    assert.deepEqual(Helper.extendSpecification({
+        typeNameRegularExpressionPattern: /a/,
+        types: {a: {}}
+    }), {a: {}})
 })
 QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     assert:Object
 ):void => {
+    const defaultSpecification:PlainObject = {
+        defaultPropertySpecification: {
+            type: 'string',
+            default: null,
+            onCreate: null,
+            onUpdate: null,
+            nullable: true,
+            writable: true,
+            minimum: -999999999999999999999,
+            maximum: 999999999999999999999,
+            regularExpressionPattern: null,
+            constraint: null
+        },
+        types: {_base: {webNodeType: {
+            regularExpressionPattern: '^[A-Z][a-z0-9]+$',
+            nullable: false,
+            minimum: 1,
+            maximum: 999,
+            writable: false
+        }}}
+    }
     // region forbidden write tests
     for (const test:Array<any> of [
         // region model
@@ -96,21 +130,13 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         [
             {types: {Test: {a: {writable: false}}}},
             {webNodeType: 'Test', a: 'b'},
-            {
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {webNodeType: 'Test'}, {}, {}, 'Readonly'
         ],
         [
             {types: {Test: {a: {writable: false}}}},
             {webNodeType: 'Test', a: 'b'},
-            {
-                a: 'a',
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {a: 'a', webNodeType: 'Test'},
+            {}, {}, 'Readonly'
         ],
         // endregion
         // region property type
@@ -134,11 +160,6 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {webNodeType: 'Test', a: 'a'},
             null, {}, {}, 'PropertyType'
         ],
-        [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'NestedModel'
-        ],
         // / region nested property
         // // region property type
         [
@@ -158,7 +179,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         ],
         [
             {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: 2},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}, b: 'a'},
             null, {}, {}, 'PropertyType'
         ],
         // // endregion
@@ -193,43 +214,16 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         // // endregion
         // // region property readonly
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {writable: false}
-            }}}, {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: 'a'}
-            },
-            {
-                a: {
-                    b: 'b',
-                    creationDateTime: new Date().getTime(),
-                    updateDateTime: new Date().getTime(),
-                    webNodeType: 'Test'
-                },
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+            {a: {b: 'b', webNodeType: 'Test'}, webNodeType: 'Test'},
+            {}, {}, 'Readonly'
         ],
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {writable: false}
-            }}}, {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: 'a'}
-            },
-            {
-                a: {
-                    creationDateTime: new Date().getTime(),
-                    updateDateTime: new Date().getTime(),
-                    webNodeType: 'Test'
-                },
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+            {a: {webNodeType: 'Test'}, webNodeType: 'Test'},
+            {}, {}, 'Readonly'
         ],
         // // endregion
         // // region property range
@@ -316,11 +310,9 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         ]
         // endregion
     ]) {
-        const modelSpecification:PlainObject = Tools.extendObject(
-            true, {}, configuration.model, test[0])
         const functionCode:string =
             Helper.generateValidateDocumentUpdateFunctionCode(
-                modelSpecification)
+                Tools.extendObject(true, {}, defaultSpecification, test[0]))
         assert.strictEqual(typeof functionCode, 'string')
         const validatorGenerator:Function = new Function(
             'toJSON', `return ${functionCode}`)
@@ -336,7 +328,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                 if (!result)
                     console.log(
                         `Error "${error.forbidden}" doesn't start with "` +
-                        `${test[test.length - 1]}:".`)
+                        `${test[test.length - 1]}:". Given arguments: ` +
+                        `"${JSON.stringify(test.slice(1, test.length - 1))}".`)
                 return result
             }
             // IgnoreTypeCheck
@@ -346,167 +339,175 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     }
     // endregion
     // region allowed write tests
-    //for (const test:Array<any> of [
-        /*
-        // region model
-        [{}, {}, {}, {}, {}, 'Type'],
-        [{}, {webNodeType: 'test'}, null, {}, {}, 'Model'],
-        // endregion
-        // region property existents
+    for (const test:Array<any> of [
         [
             {types: {Test: {}}},
+            {webNodeType: 'Test'},
+            {webNodeType: 'Test'}
+        ],
+        [
+            {types: {Test: {class: {}}}},
+            {webNodeType: 'Test'},
+            {webNodeType: 'Test'},
+            {}
+        ],
+        [
+            {types: {Test: {a: {}}}},
+            {webNodeType: 'Test'},
+            {webNodeType: 'Test', a: '2'},
+            {}
+        ],
+        [
+            {types: {Test: {a: {}}}},
+            {webNodeType: 'Test', a: '2'},
+            {webNodeType: 'Test', a: '2'},
+            {}
+        ],
+        [
+            {types: {Test: {a: {}}}},
+            {webNodeType: 'Test', a: '3'},
+            {webNodeType: 'Test', a: '2'},
+            {a: '3'}
+        ],
+        // region property existents
+        [
+            {types: {Test: {a: {type: 'number'}}}},
             {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'Property'
+            {webNodeType: 'Test', a: 2}
+        ],
+        [
+            {types: {Test: {a: {}}}},
+            {webNodeType: 'Test', a: null},
+            {webNodeType: 'Test'}
         ],
         [
             {types: {Test: {a: {nullable: false}}}},
-            {webNodeType: 'Test', a: null},
-            null, {}, {}, 'NotNull'
+            {webNodeType: 'Test', a: 'a'},
+            {webNodeType: 'Test', a: 'a'}
         ],
         [
             {types: {Test: {a: {nullable: false}}}},
             {webNodeType: 'Test'},
-            null, {}, {}, 'MissingProperty'
+            {webNodeType: 'Test', a: 'a'},
+            {}
         ],
         // endregion
         // region property readonly
         [
             {types: {Test: {a: {writable: false}}}},
             {webNodeType: 'Test', a: 'b'},
-            {
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {a: 'b', webNodeType: 'Test'},
+            {}
         ],
         [
             {types: {Test: {a: {writable: false}}}},
-            {webNodeType: 'Test', a: 'b'},
-            {
-                a: 'a',
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {webNodeType: 'Test'},
+            {webNodeType: 'Test'},
+            {}
         ],
         // endregion
         // region property type
         [
             {types: {Test: {a: {}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'PropertyType'
+            {webNodeType: 'Test', a: '2'},
+            {webNodeType: 'Test', a: '2'}
         ],
         [
             {types: {Test: {a: {type: 'number'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'PropertyType'
+            {webNodeType: 'Test', a: 2},
+            {webNodeType: 'Test', a: 2}
         ],
         [
             {types: {Test: {a: {type: 'boolean'}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'PropertyType'
+            {webNodeType: 'Test', a: true},
+            {webNodeType: 'Test', a: true}
         ],
         [
             {types: {Test: {a: {type: 'DateTime'}}}},
-            {webNodeType: 'Test', a: 'a'},
-            null, {}, {}, 'PropertyType'
-        ],
-        [
-            {types: {Test: {a: {type: 'Test'}}}},
             {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'NestedModel'
+            {webNodeType: 'Test', a: 1}
         ],
         // / region nested property
         // // region property type
         [
             {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'NestedModel'
-        ],
-        [
-            {types: {Test: {a: {type: 'Test', nullable: false}}}},
-            {webNodeType: 'Test', a: null},
-            null, {}, {}, 'NotNull'
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}}
         ],
         [
             {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: {}},
-            null, {}, {}, 'Type'
+            {webNodeType: 'Test', a: null},
+            {webNodeType: 'Test'}
         ],
         [
             {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: 2},
-            null, {}, {}, 'PropertyType'
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: null}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+        ],
+        [
+            {types: {Test: {a: {type: 'Test'}, b: {}}}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
+            {}
+        ],
+        [
+            {types: {Test: {a: {type: 'Test'}, b: {}}}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'},
         ],
         // // endregion
         // // region property existents
         [
             {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}},
-            null, {}, {}, 'Property'
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}}
         ],
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {nullable: false}
-            }}}, {
+            {types: {Test: {a: {type: 'Test'}, b: {}}}},
+            {
                 webNodeType: 'Test',
                 a: {webNodeType: 'Test', b: null},
                 b: 'a'
             },
-            null, {}, {}, 'NotNull'
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}, b: 'a'}
         ],
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {nullable: false}
-            }}}, {
+            {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+            {
                 webNodeType: 'Test',
-                a: {webNodeType: 'Test'},
+                a: {webNodeType: 'Test', b: '2'},
                 b: 'a'
             },
-            null, {}, {}, 'MissingProperty'
+            {
+                webNodeType: 'Test',
+                a: {webNodeType: 'Test', b: '2'},
+                b: 'a'
+            }
         ],
         // // endregion
         // // region property readonly
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {writable: false}
-            }}}, {
+            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+            {
                 webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: 'a'}
+                a: {webNodeType: 'Test', b: 'b'}
             },
             {
                 a: {
                     b: 'b',
-                    creationDateTime: new Date().getTime(),
-                    updateDateTime: new Date().getTime(),
                     webNodeType: 'Test'
                 },
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
                 webNodeType: 'Test'
             }, {}, {}, 'Readonly'
-        ],
+        ]/*,
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {writable: false}
-            }}}, {
+            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+            {
                 webNodeType: 'Test',
                 a: {webNodeType: 'Test', b: 'a'}
             },
-            {
-                a: {
-                    creationDateTime: new Date().getTime(),
-                    updateDateTime: new Date().getTime(),
-                    webNodeType: 'Test'
-                },
-                creationDateTime: new Date().getTime(),
-                updateDateTime: new Date().getTime(),
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {a: {webNodeType: 'Test'}, webNodeType: 'Test'},
+            {}, {}, 'Readonly'
         ],
         // // endregion
         // // region property range
@@ -593,23 +594,24 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         ]
         // endregion
         */
-    /*]) {
-        const modelSpecification:PlainObject = Tools.extendObject(
-            true, {}, configuration.model, test[0])
+    ]) {
         const functionCode:string =
             Helper.generateValidateDocumentUpdateFunctionCode(
-                modelSpecification)
+                Tools.extendObject(true, {}, defaultSpecification, test[0]))
         assert.strictEqual(typeof functionCode, 'string')
         const validatorGenerator:Function = new Function(
             'toJSON', `return ${functionCode}`)
         assert.strictEqual(typeof validatorGenerator, 'function')
         const validator:Function = validatorGenerator(JSON.stringify)
         assert.strictEqual(typeof validator, 'function')
-        assert.strictEqual(typeof validator.apply(this, test.slice(
-            1, test.length - 1
-        )), 'object')
+        let result:Object
+        try {
+            result = validator.apply(this, test.slice(1, test.length - 1))
+        } catch (error) {
+            console.log(error)
+        }
+        assert.deepEqual(result, test[test.length - 1])
     }
-    */
     // endregion
 })
 // endregion
