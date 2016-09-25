@@ -190,10 +190,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             null, {}, {}, 'Property'
         ],
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {nullable: false}
-            }}}, {
+            {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+            {
                 webNodeType: 'Test',
                 a: {webNodeType: 'Test', b: null},
                 b: 'a'
@@ -201,10 +199,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             null, {}, {}, 'NotNull'
         ],
         [
-            {types: {Test: {
-                a: {type: 'Test'},
-                b: {nullable: false}
-            }}}, {
+            {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+            {
                 webNodeType: 'Test',
                 a: {webNodeType: 'Test'},
                 b: 'a'
@@ -216,13 +212,19 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         [
             {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
             {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {a: {b: 'b', webNodeType: 'Test'}, webNodeType: 'Test'},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
             {}, {}, 'Readonly'
         ],
         [
             {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
             {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {a: {webNodeType: 'Test'}, webNodeType: 'Test'},
+            {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+            {}, {}, 'Readonly'
+        ],
+        [
+            {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
             {}, {}, 'Readonly'
         ],
         // // endregion
@@ -253,8 +255,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         // // endregion
         // // region property constraint
         [
-            {types: {Test: {
-                a: {constraint: 'newDocument.a === "b"'},
+            {types: {Test: {a: {constraint: 'newDocument.a === "b"'},
                 b: {type: 'Test'}
             }}},
             {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'a'}},
@@ -488,24 +489,15 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         // // region property readonly
         [
             {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: 'b'}
-            },
-            {
-                a: {
-                    b: 'b',
-                    webNodeType: 'Test'
-                },
-                webNodeType: 'Test'
-            }, {}, {}, 'Readonly'
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+            {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
             {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {a: {webNodeType: 'Test', b: 'a'}, webNodeType: 'Test'},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
             {}
-        ]/*,
+        ],
         // // endregion
         // // region property range
         [
@@ -513,13 +505,13 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                 a: {type: 'number', minimum: 3},
                 b: {type: 'Test'}
             }}},
-            {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 2}},
-            null, {}, {}, 'Minimum'
+            {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 3}},
+            {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 3}}
         ],
         [
             {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '12'}},
-            null, {}, {}, 'MaximalLength'
+            {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '1'}},
+            {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '1'}}
         ],
         // // endregion
         // // region property pattern
@@ -528,8 +520,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                 a: {regularExpressionPattern: 'a'},
                 b: {type: 'Test'}
             }}},
-            {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'b'}},
-            null, {}, {}, 'PatternMatch'
+            {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}},
+            {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}}
         ],
         // // endregion
         // // region property constraint
@@ -538,59 +530,58 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                 a: {constraint: 'newDocument.a === "b"'},
                 b: {type: 'Test'}
             }}},
-            {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'a'}},
-            null, {}, {}, 'Constraint'
+            {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'b'}},
+            {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'b'}}
         ],
         // // endregion
         // / endregion
         [
             {types: {Test: {a: {type: 2}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'PropertyType'
+            {webNodeType: 'Test', a: 2},
+            {webNodeType: 'Test', a: 2}
         ],
         // endregion
         // region property range
         [
             {types: {Test: {a: {type: 'number', minimum: 3}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'Minimum'
+            {webNodeType: 'Test', a: 3},
+            {webNodeType: 'Test', a: 3}
         ],
         [
             {types: {Test: {a: {type: 'number', maximum: 1}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'Maximum'
+            {webNodeType: 'Test', a: 1},
+            {webNodeType: 'Test', a: 1}
         ],
         [
             {types: {Test: {a: {minimum: 3}}}},
-            {webNodeType: 'Test', a: '12'},
-            null, {}, {}, 'MinimalLength'
+            {webNodeType: 'Test', a: '123'},
+            {webNodeType: 'Test', a: '123'}
         ],
         [
             {types: {Test: {a: {maximum: 1}}}},
-            {webNodeType: 'Test', a: '12'},
-            null, {}, {}, 'MaximalLength'
+            {webNodeType: 'Test', a: '1'},
+            {webNodeType: 'Test', a: '1'}
         ],
         // endregion
         // region property pattern
         [
             {types: {Test: {a: {regularExpressionPattern: 'a'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'PatternMatch'
+            {webNodeType: 'Test', a: 'a'},
+            {webNodeType: 'Test', a: 'a'}
         ],
         // endregion
         // region property constraint
         [
-            {types: {Test: {a: {constraint: 'false'}}}},
+            {types: {Test: {a: {constraint: 'true'}}}},
             {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'Constraint'
+            {webNodeType: 'Test', a: 'b'}
         ],
         [
             {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'Constraint'
+            {webNodeType: 'Test', a: 'a'},
+            {webNodeType: 'Test', a: 'a'}
         ]
         // endregion
-        */
     ]) {
         const functionCode:string =
             Helper.generateValidateDocumentUpdateFunctionCode(
