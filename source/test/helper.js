@@ -499,16 +499,13 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                 },
                 webNodeType: 'Test'
             }, {}, {}, 'Readonly'
-        ]/*,
+        ],
         [
             {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: 'a'}
-            },
-            {a: {webNodeType: 'Test'}, webNodeType: 'Test'},
-            {}, {}, 'Readonly'
-        ],
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+            {a: {webNodeType: 'Test', b: 'a'}, webNodeType: 'Test'},
+            {}
+        ]/*,
         // // endregion
         // // region property range
         [
