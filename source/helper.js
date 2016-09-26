@@ -94,9 +94,9 @@ export default class Helper {
     ):string {
         const models:{[key:string]:PlainObject} = Helper.extendSpecification(
             modelSpecification)
-        let code:string = 'function validator(newDocument, oldDocument, userContext, securitySettings) {\n' +
+        let code:string = 'function(newDocument, oldDocument, userContext, securitySettings) {\n' +
             "    'use strict';\n" +
-            '    function checkDocument(newDocument, oldDocument) {\n' +
+            '    const checkDocument = (newDocument, oldDocument) => {\n' +
             "        if (!newDocument.hasOwnProperty('webNodeType'))\n" +
             `            throw {forbidden: 'Type: You have to specify a model type via property "webNodeType".'}\n`
         for (const modelName:string in models)
@@ -105,9 +105,9 @@ export default class Helper {
                 // region run hooks and check for needed data
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName)) {
-                        let assignment:string = `.${propertyName}`
+                        let newDocumentAssignment:string = `newDocument.${propertyName}`
                         if (propertyName === 'class')
-                            assignment = `['${propertyName}']`
+                            newDocumentAssignment = `newDocument['${propertyName}']`
                         const specification:PlainObject = models[modelName][
                             propertyName
                         ] = Tools.extendObject(
@@ -116,20 +116,20 @@ export default class Helper {
                             models[modelName][propertyName])
                         if (specification.onCreate)
                             code += '            if (!oldDocument)\n' +
-                                    `                newDocument${assignment} = ${specification.onCreate}\n`
+                                    `                ${newDocumentAssignment} = ${specification.onCreate}\n`
                         if (specification.onUpdate)
-                            code += `            newDocument${assignment} = ${specification.onUpdate}\n`
+                            code += `            ${newDocumentAssignment} = ${specification.onUpdate}\n`
                         if ([undefined, null].includes(specification.default)) {
                             if (!specification.nullable)
                                 code += `            if (!(newDocument.hasOwnProperty('${propertyName}') || oldDocument && oldDocument.hasOwnProperty('${propertyName}')))\n` +
                                         `                throw {forbidden: 'MissingProperty: Missing property "${propertyName}".'}\n`
                         } else
-                            code += `            if (!newDocument.hasOwnProperty('${propertyName}') || [null, undefined].includes(newDocument${assignment}))\n` +
-                                    `                newDocument${assignment} = ${specification.default}\n`
+                            code += `            if (!newDocument.hasOwnProperty('${propertyName}') || [null, undefined].includes(${newDocumentAssignment}))\n` +
+                                    `                ${newDocumentAssignment} = ${specification.default}\n`
                     }
                 // endregion
                 // region generate check given data code
-                code += '            for (var key in newDocument)\n' +
+                code += '            for (const key in newDocument)\n' +
                         `                if (newDocument.hasOwnProperty(key) && !['_id', '_rev'].includes(key)) {\n` +
                         `                    if (oldDocument && oldDocument.hasOwnProperty(key) && oldDocument[key] === newDocument[key]) {\n` +
                         '                        delete newDocument[key]\n' +
@@ -137,25 +137,33 @@ export default class Helper {
                         '                    }\n'
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName)) {
-                        let assignment:string = `.${propertyName}`
-                        if (propertyName === 'class')
-                            assignment = `['${propertyName}']`
+                        let newDocumentAssignment:string = `newDocument.${propertyName}`
+                        let oldDocumentAssignment:string = `oldDocument.${propertyName}`
+                        if (propertyName === 'class') {
+                            newDocumentAssignment = `newDocument['${propertyName}']`
+                            oldDocumentAssignment = `oldDocument['${propertyName}']`
+                        }
+                        const parentNewDocumentAssignment:string =
+                            newDocumentAssignment
                         const specification:PlainObject = models[modelName][
                             propertyName]
                         code += `                    if (key === '${propertyName}') {\n`
                         // region writable
                         if (!specification.writable)
                             code += '                        if (oldDocument) {\n' +
-                                    `                            if (!(oldDocument.hasOwnProperty('${propertyName}') && toJSON(oldDocument${assignment}) === toJSON(newDocument${assignment})))\n` +
+                                    `                            if (!(oldDocument.hasOwnProperty('${propertyName}') && toJSON(${newDocumentAssignment}) === toJSON(${oldDocumentAssignment})))\n` +
                                     `                                throw {forbidden: 'Readonly: Property "${propertyName}" is not mutable (old document "' + toJSON(oldDocument) + '").'}\n` +
-                                    `                            delete newDocument${assignment}\n` +
+                                    `                            delete ${newDocumentAssignment}\n` +
                                     '                            continue\n' +
                                     '                        }\n'
                         // endregion
                         // region nullable
-                        code += `                        if (newDocument${assignment} === null) {\n`
+                        if (typeof specification.type === 'string' && specification.type.endsWith('[]'))
+                            code += `                        if (${newDocumentAssignment} === null || Array.isArray(${newDocumentAssignment}) && ${newDocumentAssignment}.length === 0) {\n`
+                        else
+                            code += `                        if (${newDocumentAssignment} === null) {\n`
                         if (specification.nullable)
-                            code += `                            delete newDocument${assignment}\n` +
+                            code += `                            delete ${newDocumentAssignment}\n` +
                                 '                            continue\n' +
                                 '                        }\n'
                         else
@@ -163,51 +171,76 @@ export default class Helper {
                                     '                        }\n'
                         // endregion
                         // region type
+                        let indent:string = ''
+                        if (typeof specification.type === 'string' && specification.type.endsWith('[]')) {
+                            specification.type = specification.type.substring(0, specification.type.length - '[]'.length)
+                            code += `                        if (!Array.isArray(${newDocumentAssignment}))\n` +
+                                    `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "array" (given "' + ${newDocumentAssignment} + '").'}\n` +
+                                    '                        let index = 0\n' +
+                                    `                        for (const value of ${newDocumentAssignment}.slice()) {\n`
+                            // TODO beschreibung in error meldungen welches feld betroffen ist muss verbessert werden.
+                            newDocumentAssignment = 'value'
+                            indent = '    '
+                        }
                         if (['string', 'number', 'boolean'].includes(specification.type))
-                            code += `                        if (typeof newDocument${assignment} !== '${specification.type}')\n` +
-                                    `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "${specification.type}" (given "' + newDocument${assignment} + '").'}\n`
+                            code += `${indent}                        if (typeof ${newDocumentAssignment} !== '${specification.type}')\n` +
+                                    `${indent}                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "${specification.type}" (given "' + ${newDocumentAssignment} + '").'}\n`
                         else if (['DateTime'].includes(specification.type))
-                            code += `                        if (typeof newDocument${assignment} !== 'number')\n` +
-                                    `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "DateTime" (given "' + newDocument${assignment} + '").'}\n`
-                        else if (models.hasOwnProperty(specification.type))
-                            code += `                        if (typeof newDocument${assignment} === 'object' && Object.getPrototypeOf(newDocument${assignment}) === Object.prototype) {\n` +
-                                    `                            newDocument${assignment} = checkDocument(newDocument${assignment}, oldDocument && oldDocument.hasOwnProperty(key) && oldDocument${assignment} || undefined)\n` +
-                                    `                            if (toJSON(newDocument${assignment}) === toJSON({})) {\n` +
-                                    `                                delete newDocument${assignment}\n` +
-                                    '                                continue\n' +
-                                    '                            }\n' +
-                                    '                        } else\n' +
-                                    `                            throw {forbidden: 'NestedModel: Under key "${propertyName}" isn\\'t "${specification.type}" (given "' + newDocument${assignment} + '").'}\n`
-                        else
-                            code += `                        if (newDocument${assignment} !== ${specification.type})\n` +
-                                    `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t value "${specification.type}" (given "' + newDocument${assignment} + '").'}\n`
+                            code += `${indent}                        if (typeof ${newDocumentAssignment} !== 'number')\n` +
+                                    `${indent}                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "DateTime" (given "' + ${newDocumentAssignment} + '").'}\n`
+                        else if (models.hasOwnProperty(specification.type)) {
+                            code += `${indent}                        if (typeof ${newDocumentAssignment} === 'object' && Object.getPrototypeOf(${newDocumentAssignment}) === Object.prototype) {\n`
+                            if (indent)
+                                code += `                                ${parentNewDocumentAssignment}[index] = checkDocument(${newDocumentAssignment})\n` +
+                                        `                                if (toJSON(${parentNewDocumentAssignment}[index]) === toJSON({})) {\n` +
+                                        `                                    if (${parentNewDocumentAssignment}.length === 1)\n` +
+                                        `                                        delete ${parentNewDocumentAssignment}\n` +
+                                        '                                    else\n' +
+                                        `                                        ${parentNewDocumentAssignment}.splice(index, 1)\n` +
+                                        '                                    continue\n' +
+                                        '                                }\n' +
+                                        '                            }\n'
+                            else
+                                code += `                            ${newDocumentAssignment} = checkDocument(${newDocumentAssignment}, oldDocument && oldDocument.hasOwnProperty(key) && ${oldDocumentAssignment} || undefined)\n` +
+                                        `                            if (toJSON(${newDocumentAssignment}) === toJSON({})) {\n` +
+                                        `                                delete ${newDocumentAssignment}\n` +
+                                        '                                continue\n' +
+                                        '                            }\n' +
+                                        '                        } else\n' +
+                                        `                            throw {forbidden: 'NestedModel: Under key "${propertyName}" isn\\'t "${specification.type}" (given "' + ${newDocumentAssignment} + '").'}\n`
+                        } else
+                            code += `${indent}                        if (${newDocumentAssignment} !== ${specification.type})\n` +
+                                    `${indent}                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t value "${specification.type}" (given "' + ${newDocumentAssignment} + '").'}\n`
                         // endregion
                         // region range
                         if (![undefined, null].includes(specification.minimum))
                             if (models[modelName][propertyName].type === 'string')
-                                code += `                        if (${specification.minimum} > newDocument${assignment}.length)\n` +
-                                        `                            throw {forbidden: 'MinimalLength: Property "${propertyName}" (type string) should have minimal length ${specification.minimum}.'}\n`
+                                code += `${indent}                        if (${newDocumentAssignment}.length < ${specification.minimum})\n` +
+                                        `${indent}                            throw {forbidden: 'MinimalLength: Property "${propertyName}" (type string) should have minimal length ${specification.minimum}.'}\n`
                             else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
-                                code += `                        if (${specification.minimum} > newDocument${assignment})\n` +
-                                        `                            throw {forbidden: 'Minimum: Property "${propertyName}" (type ${specification.type}) should satisfy a minimum of ${specification.minimum}.'}\n`
+                                code += `${indent}                        if (${newDocumentAssignment} < ${specification.minimum})\n` +
+                                        `${indent}                            throw {forbidden: 'Minimum: Property "${propertyName}" (type ${specification.type}) should satisfy a minimum of ${specification.minimum}.'}\n`
                         if (![undefined, null].includes(specification.maximum))
                             if (models[modelName][propertyName].type === 'string')
-                                code += `                        if (${specification.maximum} < newDocument${assignment}.length)\n` +
-                                        `                            throw {forbidden: 'MaximalLength: Property "${propertyName}" (type string) should have maximal length ${specification.maximum}.'}\n`
+                                code += `${indent}                        if (${newDocumentAssignment}.length > ${specification.maximum})\n` +
+                                        `${indent}                            throw {forbidden: 'MaximalLength: Property "${propertyName}" (type string) should have maximal length ${specification.maximum}.'}\n`
                             else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
-                                code += `                        if (${specification.maximum} < newDocument${assignment})\n` +
-                                        `                            throw {forbidden: 'Maximum: Property "${propertyName}" (type ${specification.type}) should satisfy a maximum of ${specification.maximum}.'}\n`
+                                code += `${indent}                        if (${newDocumentAssignment} > ${specification.maximum})\n` +
+                                        `${indent}                            throw {forbidden: 'Maximum: Property "${propertyName}" (type ${specification.type}) should satisfy a maximum of ${specification.maximum}.'}\n`
                         // endregion
                         // region pattern
                         if (![undefined, null].includes(specification.regularExpressionPattern))
-                            code += `                        if (!(/${specification.regularExpressionPattern}/.test(newDocument${assignment})))\n` +
-                                    `                            throw {forbidden: 'PatternMatch: Property "${propertyName}" should match regular expression pattern ${specification.regularExpressionPattern} (given "' + newDocument${assignment} + '").'}\n`
+                            code += `${indent}                        if (!(/${specification.regularExpressionPattern}/.test(${newDocumentAssignment})))\n` +
+                                    `${indent}                            throw {forbidden: 'PatternMatch: Property "${propertyName}" should match regular expression pattern ${specification.regularExpressionPattern} (given "' + ${newDocumentAssignment} + '").'}\n`
                         // endregion
                         // region generic constraint
                         if (![undefined, null].includes(specification.constraint))
-                            code += `                        if (!(${specification.constraint}))\n` +
-                                    `                            throw {forbidden: 'Constraint: Property "${propertyName}" should satisfy constraint "${specification.constraint}" (given "' + newDocument${assignment} + '").'}\n`
+                            code += `${indent}                        if (!(${specification.constraint}))\n` +
+                                    `${indent}                            throw {forbidden: 'Constraint: Property "${propertyName}" should satisfy constraint "${specification.constraint}" (given "' + ${newDocumentAssignment} + '").'}\n`
                         // endregion
+                        if (indent)
+                            code += '                            index += 1\n' +
+                                    '                        }\n'
                         code += '                        continue\n' +
                                 '                    }\n'
                     }

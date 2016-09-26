@@ -135,7 +135,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         [
             {types: {Test: {a: {writable: false}}}},
             {webNodeType: 'Test', a: 'b'},
-            {a: 'a', webNodeType: 'Test'},
+            {webNodeType: 'Test', a: 'a'},
             {}, {}, 'Readonly'
         ],
         // endregion
@@ -160,6 +160,68 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {webNodeType: 'Test', a: 'a'},
             null, {}, {}, 'PropertyType'
         ],
+        // / region array
+        // // region type
+        [
+            {types: {Test: {a: {type: 'string[]'}}}},
+            {webNodeType: 'Test', a: 2},
+            null, {}, {}, 'PropertyType'
+        ],
+        [
+            {types: {Test: {a: {type: 'string[]'}}}},
+            {webNodeType: 'Test', a: [2]},
+            null, {}, {}, 'PropertyType'
+        ],
+        [
+            {types: {Test: {a: {type: 'number[]'}}}},
+            {webNodeType: 'Test', a: ['b']},
+            null, {}, {}, 'PropertyType'
+        ],
+        [
+            {types: {Test: {a: {type: 'boolean[]'}}}},
+            {webNodeType: 'Test', a: [1]},
+            null, {}, {}, 'PropertyType'
+        ],
+        [
+            {types: {Test: {a: {type: 'DateTime'}}}},
+            {webNodeType: 'Test', a: [1]},
+            null, {}, {}, 'PropertyType'
+        ],
+        [
+            {types: {Test: {a: {type: 'DateTime[]'}}}},
+            {webNodeType: 'Test', a: ['a']},
+            null, {}, {}, 'PropertyType'
+        ],
+        // // endregion
+        [
+            {types: {Test: {a: {type: 'Test[]'}}}},
+            {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 2}]},
+            null, {}, {}, 'Property'
+        ],
+        [
+            {types: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}},
+            {
+                webNodeType: 'Test',
+                a: [{webNodeType: 'Test', b: null}],
+                b: 'a'
+            },
+            null, {}, {}, 'NotNull'
+        ],
+        [
+            {types: {Test: {a: {type: 'Test[]', writable: false}, b: {}}}},
+            {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'a'}]},
+            {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'b'}]},
+            {}, {}, 'Readonly'
+        ],
+        [
+            {types: {Test: {
+                a: {type: 'number[]', minimum: 3},
+                b: {type: 'Test[]'}
+            }}},
+            {webNodeType: 'Test', a: [4], b: [{webNodeType: 'Test', a: [2]}]},
+            null, {}, {}, 'Minimum'
+        ],
+        // / endregion
         // / region nested property
         // // region property type
         [
@@ -428,6 +490,44 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {webNodeType: 'Test', a: 1},
             {webNodeType: 'Test', a: 1}
         ],
+        // / region array
+        [
+            {types: {Test: {a: {type: 'string[]'}}}},
+            {webNodeType: 'Test', a: ['2']},
+            {webNodeType: 'Test', a: ['2']}
+        ],
+        [
+            {types: {Test: {a: {type: 'string[]'}}}},
+            {webNodeType: 'Test', a: null},
+            {webNodeType: 'Test'}
+        ],
+        [
+            {types: {Test: {a: {type: 'number[]'}}}},
+            {webNodeType: 'Test', a: [2]},
+            {webNodeType: 'Test', a: [2]}
+        ],
+        [
+            {types: {Test: {a: {type: 'boolean[]'}}}},
+            {webNodeType: 'Test', a: [true]},
+            {webNodeType: 'Test', a: [true]}
+        ],
+        [
+            {types: {Test: {a: {type: 'DateTime[]'}}}},
+            {webNodeType: 'Test', a: [1]},
+            {webNodeType: 'Test', a: [1]}
+        ],
+        [
+            {types: {Test: {a: {type: 'DateTime[]'}}}},
+            {webNodeType: 'Test', a: []},
+            {webNodeType: 'Test'}
+        ],
+        [
+            {types: {Test: {a: {type: 'DateTime[]', writable: false}}}},
+            {webNodeType: 'Test', a: [2]},
+            {webNodeType: 'Test', a: [2]},
+            {webNodeType: 'Test'}
+        ]/*,
+        // / endregion
         // / region nested property
         // // region property type
         [
@@ -582,6 +682,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {webNodeType: 'Test', a: 'a'}
         ]
         // endregion
+        */
     ]) {
         const functionCode:string =
             Helper.generateValidateDocumentUpdateFunctionCode(
@@ -598,6 +699,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         } catch (error) {
             console.log(error)
         }
+        console.log(validator.toString())
+        console.log(result, test[0])
         assert.deepEqual(result, test[test.length - 1])
     }
     // endregion
