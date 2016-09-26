@@ -560,7 +560,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         [
             {types: {Test: {a: {type: 'Test'}, b: {}}}},
             {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'},
+            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'}
         ],
         // // endregion
         // // region property existents

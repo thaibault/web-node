@@ -94,6 +94,7 @@ export default class Helper {
     ):string {
         const models:{[key:string]:PlainObject} = Helper.extendSpecification(
             modelSpecification)
+        /* eslint-disable max-len */
         let code:string = 'function(newDocument, oldDocument, userContext, securitySettings) {\n' +
             "    'use strict';\n" +
             '    const checkDocument = (newDocument, oldDocument) => {\n' +
@@ -244,8 +245,8 @@ export default class Helper {
                         code += '                        continue\n' +
                                 '                    }\n'
                     }
-                    code += `                    throw {forbidden: 'Property: Given property "' + key + '" isn\\'t specified in model "${modelName}".'}\n`
-                code += '                }\n' +
+                code += `                    throw {forbidden: 'Property: Given property "' + key + '" isn\\'t specified in model "${modelName}".'}\n` +
+                        '                }\n' +
                         '            return newDocument\n' +
                         '        }\n'
                 // endregion
@@ -254,6 +255,7 @@ export default class Helper {
         '    }\n' +
         '    return checkDocument.apply(this, arguments)\n' +
         '}'
+        /* eslint-enable max-len */
         return code
     }
 }
