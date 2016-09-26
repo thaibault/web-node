@@ -525,8 +525,14 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {types: {Test: {a: {type: 'DateTime[]', writable: false}}}},
             {webNodeType: 'Test', a: [2]},
             {webNodeType: 'Test', a: [2]},
-            {webNodeType: 'Test'}
-        ]/*,
+            {}
+        ],
+        [
+            {types: {Test: {a: {type: 'number[]'}}}},
+            {webNodeType: 'Test', a: [2, 1]},
+            {webNodeType: 'Test', a: [2]},
+            {a: [2, 1]}
+        ],
         // / endregion
         // / region nested property
         // // region property type
@@ -682,7 +688,6 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {webNodeType: 'Test', a: 'a'}
         ]
         // endregion
-        */
     ]) {
         const functionCode:string =
             Helper.generateValidateDocumentUpdateFunctionCode(
@@ -699,8 +704,6 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         } catch (error) {
             console.log(error)
         }
-        console.log(validator.toString())
-        console.log(result, test[0])
         assert.deepEqual(result, test[test.length - 1])
     }
     // endregion
