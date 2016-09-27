@@ -33,31 +33,36 @@ if (configuration.debug)
         `generated validation code: \n\n"${validationCode}".`)
 const database:PouchDB = new PouchDB(
     `http://127.0.0.1:5984/${configuration.name}`)
-database.get('_design/validation').then((document:Object):Object =>
-    database.put({
+const databaseInitilisation:Promise<Object> = database.get(
+    '_design/validation'
+).then((document:Object):Promise<Object> => database.put({
+    _id: '_design/validation',
+    _rev: document._rev,
+    language: 'javascript',
+    /* eslint-disable camelcase */
+    validate_doc_update: validationCode
+    /* eslint-enable camelcase */
+})).then((response:Object):Object => {
+    console.log('Model specification updated.')
+    return response
+}).catch((rejection:Object):Promise<Object> => {
+    if (rejection.error === 'not_found')
+        console.log(
+            `Model specification not available: creation new one.`)
+    else
+        console.log(
+            `Model specification couldn't be updated: "` +
+            `${JSON.stringify(rejection, null, '    ')}" creation new one.`)
+    return database.put({
         _id: '_design/validation',
-        _rev: document._rev,
         language: 'javascript',
         /* eslint-disable camelcase */
         validate_doc_update: validationCode
         /* eslint-enable camelcase */
-    })
-).then((response:Object):void => console.log(
-    `Model specification updated: "${JSON.stringify(response, null, '    ')}".`
-)).catch((rejection:Object):void => {
-    console.log(
-        `Model specification couldn't be updated: "` +
-        `${JSON.stringify(rejection, null, '    ')}" creation new one.`)
-    database.put({
-        _id: '_design/validation',
-        language: 'javascript',
-        /* eslint-disable camelcase */
-        validate_doc_update: validationCode
-        /* eslint-enable camelcase */
-    }).then((response:Object):void => console.log(
-        'Model specification installed: "' +
-        `${JSON.stringify(response, null, '    ')}".`
-    )).catch((rejection:Object):void => {
+    }).then((response:Object):Object => {
+        console.log('Model specification installed.')
+        return response
+    }).catch((rejection:Object):void => {
         throw new Error(
             `Model specification couldn't be installed: "` +
             `${JSON.stringify(rejection, null, '    ')}".`)
@@ -68,15 +73,17 @@ database.get('_design/validation').then((document:Object):Object =>
 // TODO
 // / endregion
 // endregion
-process.exit()
-database.put({
-    _id: 'fun',
-    jau: 'yolo'
-}).then((response:Object):void => console.log(JSON.stringify(
-    response, null, '    '
-))).catch((rejection:Object):void => {
-    throw new Error(JSON.stringify(rejection, null, '    '))
-})
+databaseInitilisation.then(():Promise<Object> =>
+    database.put({
+        _id: 'hans',
+        _rev: 'latest',
+        webNodeType: 'Test'
+    }).then((response:Object):void => console.log('A', JSON.stringify(
+        response, null, '    '
+    ))).catch((rejection:Object):void => {
+        console.log('B', JSON.stringify(rejection, null, '    '))
+    })
+)
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

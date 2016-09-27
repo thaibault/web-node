@@ -64,8 +64,11 @@
         "regularExpressionPattern": null,
         "constraint": null
       },
+      "updateStrategy": "fillUp",
+      "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
       "types": {
         "_base": {
+          "_id": {},
           "creationDateTime": {
             "type": "DateTime",
             "onCreate": "new Date().getTime()",
@@ -80,13 +83,22 @@
             "nullable": false
           },
           "webNodeType": {
-            "regularExpressionPattern": "^[A-Z][a-z0-9]+$",
+            "regularExpressionPattern": {
+                "__evaluate__": "self.model.typeNameRegularExpressionPattern"
+            },
             "nullable": false,
             "minimum": 1,
             "maximum": 999,
             "writable": false
           }
+        },
+
+        "Test": {
+            "_id": {
+                "pattern": "/^[a-z]$/"
+            }
         }
+
       }
     }
   },

@@ -62,7 +62,7 @@ export default class Helper {
         modelSpecification:PlainObject
     ):{[key:string]:PlainObject} {
         modelSpecification = Tools.extendObject(true, {
-            typeNameRegularExpressionPattern: '^[a-zA-Z0-9]+$'
+            typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
         }, modelSpecification)
         const models:{[key:string]:PlainObject} = {}
         for (const modelName:string in Tools.copyLimitedRecursively(
@@ -97,6 +97,21 @@ export default class Helper {
         /* eslint-disable max-len */
         let code:string = 'function(newDocument, oldDocument, userContext, securitySettings) {\n' +
             "    'use strict';\n" +
+            '    if (!userContext)\n' +
+            '        userContext = {}\n' +
+            '    if (!securitySettings)\n' +
+            '        securitySettings = {}\n' +
+            "    if (newDocument.hasOwnProperty('_deleted') && newDocument._deleted)\n" +
+            '        return newDocument\n' +
+            "    if (securitySettings.hasOwnProperty('validatedDocuments') && securitySettings.validatedDocuments.has(`${newDocument._id}-${newDocument._rev}`)) {\n" +
+            '        securitySettings.validatedDocuments.delete(`${newDocument._id}-${newDocument._rev}`)\n' +
+            '        return newDocument\n' +
+            '    }\n' +
+            "    if (newDocument.hasOwnProperty('_rev') && newDocument._rev === 'latest')\n" +
+            "        if (oldDocument && oldDocument.hasOwnProperty('_rev'))\n" +
+            '            newDocument._rev = oldDocument._rev\n' +
+            '        else\n' +
+            "            throw {forbidden: 'Revision: No old document to update available.'}\n" +
             '    const checkDocument = (newDocument, oldDocument) => {\n' +
             "        if (!newDocument.hasOwnProperty('webNodeType'))\n" +
             `            throw {forbidden: 'Type: You have to specify a model type via property "webNodeType".'}\n`
@@ -107,8 +122,11 @@ export default class Helper {
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName)) {
                         let newDocumentAssignment:string = `newDocument.${propertyName}`
-                        if (propertyName === 'class')
+                        let oldDocumentAssignment:string = `oldDocument.${propertyName}`
+                        if (propertyName === 'class') {
                             newDocumentAssignment = `newDocument['${propertyName}']`
+                            oldDocumentAssignment = `oldDocument['${propertyName}']`
+                        }
                         const specification:PlainObject = models[modelName][
                             propertyName
                         ] = Tools.extendObject(
@@ -124,18 +142,29 @@ export default class Helper {
                             if (!specification.nullable)
                                 code += `            if (!(newDocument.hasOwnProperty('${propertyName}') || oldDocument && oldDocument.hasOwnProperty('${propertyName}')))\n` +
                                         `                throw {forbidden: 'MissingProperty: Missing property "${propertyName}".'}\n`
-                        } else
-                            code += `            if (!newDocument.hasOwnProperty('${propertyName}') || [null, undefined].includes(${newDocumentAssignment}))\n` +
-                                    `                ${newDocumentAssignment} = ${specification.default}\n`
+                            if (modelSpecification.updateStrategy === 'fillUp')
+                                code += `            if (!newDocument.hasOwnProperty('${propertyName}') && oldDocument && oldDocument.hasOwnProperty('${propertyName}'))\n` +
+                                        `                ${newDocumentAssignment} = ${oldDocumentAssignment}\n`
+                        } else {
+                            code += `            if (!newDocument.hasOwnProperty('${propertyName}'))\n`
+                            if (modelSpecification.updateStrategy === 'fillUp')
+                                code += '                if (oldDocument)\n' +
+                                        `                    ${newDocumentAssignment} = ${oldDocumentAssignment}\n` +
+                                        '                else\n'
+                            else
+                                code += '                if (!oldDocument)\n'
+                            code += `                    ${newDocumentAssignment} = ${specification.default}\n`
+                        }
                     }
                 // endregion
                 // region generate check given data code
                 code += '            for (const key in newDocument)\n' +
-                        `                if (newDocument.hasOwnProperty(key) && !['_id', '_rev'].includes(key)) {\n` +
-                        `                    if (oldDocument && oldDocument.hasOwnProperty(key) && oldDocument[key] === newDocument[key]) {\n` +
-                        '                        delete newDocument[key]\n' +
-                        '                        continue\n' +
-                        '                    }\n'
+                        `                if (!['_rev', '_revisions', '_deleted'].includes(key) && newDocument.hasOwnProperty(key)) {\n`
+                if (modelSpecification.updateStrategy === 'incremental')
+                    code += "                    if (key !== '_id' && oldDocument && oldDocument.hasOwnProperty(key) && oldDocument[key] === newDocument[key]) {\n" +
+                            '                        delete newDocument[key]\n' +
+                            '                        continue\n' +
+                            '                    }\n'
                 for (const propertyName:string in models[modelName])
                     if (models[modelName].hasOwnProperty(propertyName)) {
                         let newDocumentAssignment:string = `newDocument.${propertyName}`
@@ -150,13 +179,15 @@ export default class Helper {
                             propertyName]
                         code += `                    if (key === '${propertyName}') {\n`
                         // region writable
-                        if (!specification.writable)
+                        if (!specification.writable) {
                             code += '                        if (oldDocument) {\n' +
                                     `                            if (!(oldDocument.hasOwnProperty('${propertyName}') && toJSON(${newDocumentAssignment}) === toJSON(${oldDocumentAssignment})))\n` +
-                                    `                                throw {forbidden: 'Readonly: Property "${propertyName}" is not mutable (old document "' + toJSON(oldDocument) + '").'}\n` +
-                                    `                            delete ${newDocumentAssignment}\n` +
-                                    '                            continue\n' +
+                                    `                                throw {forbidden: 'Readonly: Property "${propertyName}" is not mutable (old document "' + toJSON(oldDocument) + '").'}\n`
+                            if (propertyName !== '_id' && modelSpecification.updateStrategy === 'incremental')
+                                code += `                            delete ${newDocumentAssignment}\n`
+                            code += '                            continue\n' +
                                     '                        }\n'
+                        }
                         // endregion
                         // region nullable
                         if (typeof specification.type === 'string' && specification.type.endsWith('[]'))
@@ -253,7 +284,12 @@ export default class Helper {
             }
         code += `        throw {forbidden: 'Model: Given model "' + newDocument.webNodeType + '" is not specified.'}\n` +
         '    }\n' +
-        '    return checkDocument.apply(this, arguments)\n' +
+        '    newDocument = checkDocument(newDocument, oldDocument)\n' +
+        "    if (securitySettings.hasOwnProperty('checkedDocuments'))\n" +
+        '        securitySettings.validatedDocuments.add(`${newDocument._id}-${newDocument._rev}`)\n' +
+        '    else\n' +
+        '        securitySettings.validatedDocuments = new Set([`${newDocument._id}-${newDocument._rev}`])\n' +
+        '    return newDocument\n' +
         '}'
         /* eslint-enable max-len */
         return code

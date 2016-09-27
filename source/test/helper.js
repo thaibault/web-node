@@ -101,7 +101,8 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             minimum: 1,
             maximum: 999,
             writable: false
-        }}}
+        }}},
+        updateStrategy: 'incremental'
     }
     // region forbidden write tests
     for (const test:Array<any> of [
