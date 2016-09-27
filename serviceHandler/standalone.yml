@@ -1,0 +1,12 @@
+version: '2'
+services:
+    webnode:
+        extends:
+            file: ./base.yml
+            service: webnode
+        ports:
+            - '80:80'
+            - '443:443'
+        labels:
+            webnode/admin: 'Backend'
+            webnode/: 'Frontend'

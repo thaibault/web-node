@@ -1,0 +1,11 @@
+version: '2'
+services:
+    webnode:
+        build:
+            context: ./
+            dockerfile: ./dockerBuild
+        container_name: webnode
+        restart: always
+        image: tsickert/webNode:latest
+        volumes:
+            - ../:/srv/http/app

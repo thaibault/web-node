@@ -1,0 +1,9 @@
+version: '2'
+services:
+    webnode:
+        extends:
+            file: ./base.yml
+            service: webnode
+        labels:
+            webnode/admin: 'Backend'
+            webnode/: 'Frontend'
