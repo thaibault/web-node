@@ -22,6 +22,27 @@ try {
 import Helper from './helper'
 import configuration from './configurator'
 // endregion
+// region ensure presence of admin user
+const userDatabase:PouchDB = new PouchDB(
+    `http://admin:${configuration.masterPassword}@127.0.0.1:5984/_config/admins`)
+try {
+    console.log('A', await userDatabase.get({_id: 'admin'}))
+} catch (error) {
+    console.log(error)
+}
+/*
+userDatabase.get({_id: 'admin'}).catch((rejection:Object):Promise<Object> =>
+    userDatabase.put({_id: 'admin'}).then((response:Object):void =>
+        console.log('Created new admin user.')
+    ).catch((rejection:Object):void => console.log(
+        `Can't create missing admin user: ` + JSON.stringify(
+            rejection, null, '    '))))
+*/
+// endregion
+process.exit()
+const database:PouchDB = new PouchDB(
+    `http://admin:${configuration.masterPassword}@127.0.0.1:5984/` +
+    configuration.name)
 // region generate/update validation code
 // / region enforce model schema
 const validationCode:string =
@@ -31,8 +52,6 @@ if (configuration.debug)
         'Specification \n\n"' +
         `${JSON.stringify(configuration.model, null, '    ')}" has ` +
         `generated validation code: \n\n"${validationCode}".`)
-const database:PouchDB = new PouchDB(
-    `http://127.0.0.1:5984/${configuration.name}`)
 const databaseInitilisation:Promise<Object> = database.get(
     '_design/validation'
 ).then((document:Object):Promise<Object> => database.put({
@@ -73,17 +92,6 @@ const databaseInitilisation:Promise<Object> = database.get(
 // TODO
 // / endregion
 // endregion
-databaseInitilisation.then(():Promise<Object> =>
-    database.put({
-        _id: 'hans',
-        _rev: 'latest',
-        webNodeType: 'Test'
-    }).then((response:Object):void => console.log('A', JSON.stringify(
-        response, null, '    '
-    ))).catch((rejection:Object):void => {
-        console.log('B', JSON.stringify(rejection, null, '    '))
-    })
-)
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

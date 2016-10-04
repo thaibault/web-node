@@ -97,6 +97,7 @@ export default class Helper {
         /* eslint-disable max-len */
         let code:string = 'function(newDocument, oldDocument, userContext, securitySettings) {\n' +
             "    'use strict';\n" +
+            '    console.log(userContext)\n' +
             '    if (!userContext)\n' +
             '        userContext = {}\n' +
             '    if (!securitySettings)\n' +

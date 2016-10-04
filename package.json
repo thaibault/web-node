@@ -51,6 +51,7 @@
   },
   "webNode": {
     "debug": true,
+    "masterPassword": "admin",
     "model": {
       "defaultPropertySpecification": {
         "type": "string",
@@ -93,12 +94,14 @@
           }
         },
 
-        "Test": {
+        "Test1": {
             "_id": {
                 "pattern": "/^[a-z]$/"
             }
+        },
+        "Test2": {
+            
         }
-
       }
     }
   },
