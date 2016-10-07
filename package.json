@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "clientnode": "latest",
+    "node-fetch": "latest",
     "pouchdb": "latest",
     "pouchdb-server": "latest",
     "weboptimizer": "latest"
@@ -51,7 +52,10 @@
   },
   "webNode": {
     "debug": true,
-    "masterPassword": "admin",
+    "database": {
+        "url": "http://{1}127.0.0.1:5984",
+        "user": {"name": "admin", "password": "admin"}
+    },
     "model": {
       "defaultPropertySpecification": {
         "type": "string",

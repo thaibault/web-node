@@ -15,6 +15,15 @@ import Helper from '../helper'
 QUnit.module('helper')
 QUnit.load()
 // region tests
+QUnit.test('representObject', (assert:Object):void => {
+    for (const test:Array<any> of [
+        [{}, '{}'],
+        [5, '5'],
+        [[], '[]'],
+        [{a: 2, b: 3}, '{\n    "a": 2,\n    "b": 3\n}']
+    ])
+        assert.strictEqual(Helper.representObject(test[0]), test[1])
+})
 QUnit.test('extendModel', (assert:Object):void => {
     for (const test:Array<any> of [
         ['A', {A: {}}, {}],

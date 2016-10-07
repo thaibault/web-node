@@ -25,6 +25,62 @@ try {
  * Provides a class of static methods with generic use cases.
  */
 export default class Helper {
+    // TODO
+    static async ensureValidationDocumentPresence(
+        database:Object, documentName:string, validationCode:string,
+        description:string
+    ):void {
+        try {
+            const document:Object = await database.get(
+                `_design/${documentName}`)
+            await database.put({
+                _id: `_design/${documentName}`,
+                _rev: document._rev,
+                language: 'javascript',
+                /* eslint-disable camelcase */
+                validate_doc_update: validationCode
+                /* eslint-enable camelcase */
+            })
+            console.log(`${description} updated.`)
+        } catch (error) {
+            if (error.error === 'not_found')
+                console.log(`${description} not available: create new one.`)
+            else
+                console.log(
+                    `${description} couldn't be updated: "` +
+                    `${Helper.representObject(rejection)}" create new one.`)
+            try {
+                await database.put({
+                    _id: `_design/${documentName}`,
+                    language: 'javascript',
+                    /* eslint-disable camelcase */
+                    validate_doc_update: validationCode
+                    /* eslint-enable camelcase */
+                })
+                console.log(`${description} installed/updated.`)
+            } catch (error) {
+                throw new Error(
+                    `${description} couldn't be installed/updated: "` +
+                    `${Helper.representObject(error)}".`)
+            }
+        }
+    }
+    // TODO
+    static authenticate(
+        newDocument:Object, oldDocument:?Object, userContext:?Object,
+        securitySettings:?Object
+    ):void {
+        if (!(userContext && userContext.roles.includes('_admin')))
+            throw({forbidden: "Only users with role " + role + " or an admin can modify this database."})
+    }
+    /**
+     * Represents given object as formatted string.
+     * @param object - Object to Represents.
+     * @returns Representation string.
+     */
+    static representObject(object:any):string {
+        return JSON.stringify(object, null, '    ')
+    }
     /**
      * Extend given model with all specified one.
      * @param modelName - Name of model to extend.
@@ -97,7 +153,6 @@ export default class Helper {
         /* eslint-disable max-len */
         let code:string = 'function(newDocument, oldDocument, userContext, securitySettings) {\n' +
             "    'use strict';\n" +
-            '    console.log(userContext)\n' +
             '    if (!userContext)\n' +
             '        userContext = {}\n' +
             '    if (!securitySettings)\n' +
