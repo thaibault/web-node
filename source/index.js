@@ -24,7 +24,7 @@ try {
 import configuration from './configurator'
 import Helper from './helper'
 // endregion
-(async ():void => {
+(async ():Promise<any> => {
     // region ensure presence of admin user
     let userDatabase:PouchDB = new PouchDB(
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)

@@ -29,7 +29,7 @@ export default class Helper {
     static async ensureValidationDocumentPresence(
         database:Object, documentName:string, validationCode:string,
         description:string
-    ):void {
+    ):Promise<void> {
         try {
             const document:Object = await database.get(
                 `_design/${documentName}`)
@@ -48,7 +48,7 @@ export default class Helper {
             else
                 console.log(
                     `${description} couldn't be updated: "` +
-                    `${Helper.representObject(rejection)}" create new one.`)
+                    `${Helper.representObject(error)}" create new one.`)
             try {
                 await database.put({
                     _id: `_design/${documentName}`,
@@ -71,7 +71,8 @@ export default class Helper {
         securitySettings:?Object
     ):void {
         if (!(userContext && userContext.roles.includes('_admin')))
-            throw({forbidden: "Only users with role " + role + " or an admin can modify this database."})
+            throw({forbidden:
+                'Only admin users with role can modify this database.'})
     }
     /**
      * Represents given object as formatted string.
