@@ -26,10 +26,10 @@ import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
     // region ensure presence of admin user
-    let userDatabase:PouchDB = new PouchDB(
+    const unauthenticatedUserDatabaseConnection:PouchDB = new PouchDB(
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)
     try {
-        await userDatabase.allDocs()
+        await unauthenticatedUserDatabaseConnection.allDocs()
         console.log(
             'No admin user available. Automatically creating admin user "' +
             `${configuration.database.user.name}".`)
@@ -42,20 +42,21 @@ import Helper from './helper'
             })
     } catch (error) {
         if (error.hasOwnProperty('name') && error.name === 'unauthorized') {
-            userDatabase = new PouchDB(Tools.stringFormat(
-                configuration.database.url,
-                `${configuration.database.user.name}:` +
-                `${configuration.database.user.password}@`
-            ) + '/_users')
+            const authenticatedUserDatabaseConnection = new PouchDB(
+                Tools.stringFormat(
+                    configuration.database.url,
+                    `${configuration.database.user.name}:` +
+                    `${configuration.database.user.password}@`
+                ) + '/_users')
             try {
-                await userDatabase.allDocs()
+                await authenticatedUserDatabaseConnection.allDocs()
             } catch (error) {
                 throw new Error(
                     `Can't login as existing admin user "` +
                     `${configuration.database.user.name}": "` +
                     `${Helper.representObject(error)}".`)
             } finally {
-                userDatabase.close()
+                authenticatedUserDatabaseConnection.close()
             }
         } else
             throw new Error(
@@ -63,10 +64,10 @@ import Helper from './helper'
                 `${configuration.database.user.name}": "` +
                 `${Helper.representObject(error)}".`)
     } finally {
-        userDatabase.close()
+        unauthenticatedUserDatabaseConnection.close()
     }
     // endregion
-    const database:PouchDB = new PouchDB(Tools.stringFormat(
+    const databaseConnection:PouchDB = new PouchDB(Tools.stringFormat(
         configuration.database.url,
         `${configuration.database.user.name}:` +
         `${configuration.database.user.password}@`
@@ -82,17 +83,24 @@ import Helper from './helper'
                 `${JSON.stringify(configuration.model, null, '    ')}" has ` +
                 `generated validation code: \n\n"${validationCode}".`)
         await Helper.ensureValidationDocumentPresence(
-            database, 'validation', validationCode, 'Model specification')
+            databaseConnection, 'validation', validationCode,
+            'Model specification')
         let authenticationCode = Helper.authenticate.toString()
-        authenticationCode = authenticationCode.substring(
-            authenticationCode.indexOf('{') + 1,
-            authenticationCode.lastIndexOf('}')
-        ).trim()
+        authenticationCode = 'const allowedModelRolesMapping = ' +
+            JSON.stringify(Helper.determineAllowedModelRolesMapping(
+                configuration.model
+            )) + '\n' +
+            "const typePropertyName = '" +
+            `${configuration.model.typePropertyName}'\n` +
+            authenticationCode.substring(
+                authenticationCode.indexOf('{') + 1,
+                authenticationCode.lastIndexOf('}')
+            ).trim().replace(/^ {12}/gm, '')
         if (configuration.debug)
             console.log(
                 `Authentication code "${authenticationCode}" generated.`)
         await Helper.ensureValidationDocumentPresence(
-            database, 'authentication', authenticationCode,
+            databaseConnection, 'authentication', authenticationCode,
             'Authentication logic')
         // endregion
     } catch (error) {
@@ -101,7 +109,7 @@ import Helper from './helper'
         else
             console.log(error)
     } finally {
-        database.close()
+        databaseConnection.close()
     }
 })()
 // region vim modline

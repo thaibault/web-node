@@ -25,15 +25,76 @@ try {
  * Provides a class of static methods with generic use cases.
  */
 export default class Helper {
-    // TODO
+    /**
+     * Authenticates given document update against given mapping of allowed
+     * roles for writing into corresponding model instances.
+     * @param newDocument - Updated document.
+     * @param oldDocument - If an existing document should be updated its given
+     * here.
+     * @param userContext - Contains meta information about currently acting
+     * user.
+     * @param securitySettings - Database security settings.
+     * @param allowedModelRolesMapping - Allowed roles for given models.
+     * @param typePropertyName - Property name indicating to which model a
+     * document belongs to.
+     */
+    static authenticate(
+        newDocument:Object, oldDocument:?Object, userContext:?Object,
+        securitySettings:?Object,
+        allowedModelRolesMapping:{[key:string]:Array<string>},
+        typePropertyName:string
+    ):?true {
+        const allowedRoles:Array<string> = ['_admin']
+        if (userContext && allowedModelRolesMapping.hasOwnProperty(
+            newDocument[typePropertyName]
+        )) {
+            allowedRoles.concat(
+                allowedModelRolesMapping[newDocument[typePropertyName]])
+            for (const userRole:string of userContext.roles)
+                if (allowedRoles.includes(userRole))
+                    return true
+        }
+        /* eslint-disable no-throw-literal */
+        throw {unauthorized:
+            'Only users with a least on of these roles are allowed to ' +
+            `perform requested action: "${allowedRoles.join('", "')}".`}
+        /* eslint-enable no-throw-literal */
+    }
+    /**
+     * Determines a mapping of all models to roles who are allowed to edit
+     * corresponding model instances.
+     * @param modelSpecification - Model specification object.
+     * @returns The mapping object.
+     */
+    static determineAllowedModelRolesMapping(
+        modelSpecification:PlainObject
+    ):{[key:string]:Array<string>} {
+        const allowedModelRolesMapping:{[key:string]:Array<string>} = {}
+        const models:{[key:string]:PlainObject} = Helper.extendSpecification(
+            modelSpecification)
+        for (const modelName:string in models)
+            if (models.hasOwnProperty(modelName))
+                allowedModelRolesMapping[modelName] = models[modelName][
+                    modelSpecification.allowedRolesPropertyName]
+        return allowedModelRolesMapping
+    }
+    /**
+     * Updates/creates a design document in database with a validation function
+     * set to given code.
+     * @param databaseConnection - Database connection to use for document
+     * updates.
+     * @param documentName - Design document name.
+     * @param validationCode - Code of validation function.
+     * @param description - Used to produce semantic logging messages.
+     */
     static async ensureValidationDocumentPresence(
-        database:Object, documentName:string, validationCode:string,
+        databaseConnection:Object, documentName:string, validationCode:string,
         description:string
     ):Promise<void> {
         try {
-            const document:Object = await database.get(
+            const document:Object = await databaseConnection.get(
                 `_design/${documentName}`)
-            await database.put({
+            await databaseConnection.put({
                 _id: `_design/${documentName}`,
                 _rev: document._rev,
                 language: 'javascript',
@@ -50,7 +111,7 @@ export default class Helper {
                     `${description} couldn't be updated: "` +
                     `${Helper.representObject(error)}" create new one.`)
             try {
-                await database.put({
+                await databaseConnection.put({
                     _id: `_design/${documentName}`,
                     language: 'javascript',
                     /* eslint-disable camelcase */
@@ -64,23 +125,6 @@ export default class Helper {
                     `${Helper.representObject(error)}".`)
             }
         }
-    }
-    // TODO
-    static authenticate(
-        newDocument:Object, oldDocument:?Object, userContext:?Object,
-        securitySettings:?Object
-    ):void {
-        if (!(userContext && userContext.roles.includes('_admin')))
-            throw({forbidden:
-                'Only admin users with role can modify this database.'})
-    }
-    /**
-     * Represents given object as formatted string.
-     * @param object - Object to Represents.
-     * @returns Representation string.
-     */
-    static representObject(object:any):string {
-        return JSON.stringify(object, null, '    ')
     }
     /**
      * Extend given model with all specified one.
@@ -170,14 +214,14 @@ export default class Helper {
             '        else\n' +
             "            throw {forbidden: 'Revision: No old document to update available.'}\n" +
             '    const checkDocument = (newDocument, oldDocument) => {\n' +
-            "        if (!newDocument.hasOwnProperty('webNodeType'))\n" +
-            `            throw {forbidden: 'Type: You have to specify a model type via property "webNodeType".'}\n`
+            `        if (!newDocument.hasOwnProperty('${modelSpecification.typePropertyName}'))\n` +
+            `            throw {forbidden: 'Type: You have to specify a model type via property "${modelSpecification.typePropertyName}".'}\n`
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName)) {
-                code += `        if (newDocument.webNodeType === '${modelName}') {\n`
+                code += `        if (newDocument.${modelSpecification.typePropertyName} === '${modelName}') {\n`
                 // region run hooks and check for needed data
                 for (const propertyName:string in models[modelName])
-                    if (models[modelName].hasOwnProperty(propertyName)) {
+                    if (propertyName !== modelSpecification.allowedRolesPropertyName && models[modelName].hasOwnProperty(propertyName)) {
                         let newDocumentAssignment:string = `newDocument.${propertyName}`
                         let oldDocumentAssignment:string = `oldDocument.${propertyName}`
                         if (propertyName === 'class') {
@@ -223,7 +267,7 @@ export default class Helper {
                             '                        continue\n' +
                             '                    }\n'
                 for (const propertyName:string in models[modelName])
-                    if (models[modelName].hasOwnProperty(propertyName)) {
+                    if (propertyName !== modelSpecification.allowedRolesPropertyName && models[modelName].hasOwnProperty(propertyName)) {
                         let newDocumentAssignment:string = `newDocument.${propertyName}`
                         let oldDocumentAssignment:string = `oldDocument.${propertyName}`
                         if (propertyName === 'class') {
@@ -339,7 +383,7 @@ export default class Helper {
                         '        }\n'
                 // endregion
             }
-        code += `        throw {forbidden: 'Model: Given model "' + newDocument.webNodeType + '" is not specified.'}\n` +
+        code += `        throw {forbidden: 'Model: Given model "' + newDocument.${modelSpecification.typePropertyName} + '" is not specified.'}\n` +
         '    }\n' +
         '    newDocument = checkDocument(newDocument, oldDocument)\n' +
         "    if (securitySettings.hasOwnProperty('checkedDocuments'))\n" +
@@ -350,6 +394,14 @@ export default class Helper {
         '}'
         /* eslint-enable max-len */
         return code
+    }
+    /**
+     * Represents given object as formatted string.
+     * @param object - Object to Represents.
+     * @returns Representation string.
+     */
+    static representObject(object:any):string {
+        return JSON.stringify(object, null, '    ')
     }
 }
 // endregion

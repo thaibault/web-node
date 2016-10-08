@@ -15,14 +15,27 @@ import Helper from '../helper'
 QUnit.module('helper')
 QUnit.load()
 // region tests
-QUnit.test('representObject', (assert:Object):void => {
+QUnit.test('authenticate', (assert:Object):void => {
     for (const test:Array<any> of [
-        [{}, '{}'],
-        [5, '5'],
-        [[], '[]'],
-        [{a: 2, b: 3}, '{\n    "a": 2,\n    "b": 3\n}']
+        // TODO
     ])
-        assert.strictEqual(Helper.representObject(test[0]), test[1])
+        assert.ok(Helper.authenticate.apply(Helper, test))
+})
+QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
+    for (const test:Array<any> of [
+        // TODO
+    ])
+        assert.deepEqual(
+            Helper.determineAllowedModelRolesMapping(test[0]), test[1])
+})
+QUnit.test('ensureValidationDocumentPresence', async (
+    assert:Object
+):Promise<void> => {
+    for (const test:Array<any> of [
+        // TODO
+    ])
+        assert.ok(await Helper.ensureValidationDocumentPresence.apply(
+            Helper, test))
 })
 QUnit.test('extendModel', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -717,6 +730,15 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         assert.deepEqual(result, test[test.length - 1])
     }
     // endregion
+})
+QUnit.test('representObject', (assert:Object):void => {
+    for (const test:Array<any> of [
+        [{}, '{}'],
+        [5, '5'],
+        [[], '[]'],
+        [{a: 2, b: 3}, '{\n    "a": 2,\n    "b": 3\n}']
+    ])
+        assert.strictEqual(Helper.representObject(test[0]), test[1])
 })
 // endregion
 // region vim modline
