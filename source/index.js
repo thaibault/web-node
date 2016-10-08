@@ -25,7 +25,7 @@ import configuration from './configurator'
 import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
-    // region ensure presence of admin user
+    // region ensure presence of global admin user
     const unauthenticatedUserDatabaseConnection:PouchDB = new PouchDB(
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)
     try {
@@ -72,6 +72,28 @@ import Helper from './helper'
         `${configuration.database.user.name}:` +
         `${configuration.database.user.password}@`
     ) + `/${configuration.name}`)
+    // region ensure presence of database specific admin user
+    // TODO curl http://localhost:5984/webnode ist noch erlaubt:
+    // see: http://docs.couchdb.org/en/2.0.0/intro/security.html
+    await fetch(Tools.stringFormat(
+        configuration.database.url,
+        `${configuration.database.user.name}:` +
+        `${configuration.database.user.password}@`
+    ) + `/${configuration.name}/_security`,
+    {
+        method: 'PUT',
+        body: JSON.stringify({
+            admins: {
+                names: ['admin'],
+                roles: ['users']
+            },
+            members: {
+                names: ['admin'],
+                roles: ['users']
+            }
+        })
+    })
+    // endregion
     try {
         // region generate/update authentication/validation code
         const validationCode:string =
