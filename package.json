@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "clientnode": "latest",
+    "node-fetch": "latest",
     "pouchdb": "latest",
     "pouchdb-server": "latest",
     "weboptimizer": "latest"
@@ -50,9 +51,41 @@
     "watchDLL": "webOptimizer buildDLL --watch"
   },
   "webNode": {
-    "debug": true,
+    "debug": false,
+    "encoding": "utf8",
+    "plugin": {
+        "directoryPaths": [
+            {"__evaluate__": "`${currentPath}/plugins/`"},
+            {"__evaluate__": "`${currentPath}/node_modules/`"}
+        ],
+        "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+WebNodePlugin$",
+        "optionsPropertyNames": ["webNode"]
+    },
+    "database": {
+        "url": {
+            "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database['httpd/port']}`"
+        },
+        "user": {"name": "admin", "password": "admin"},
+        "log/file": "-",
+        "log/level": "info",
+        "httpd/host": {"__evaluate__": "self.server.application.hostName"},
+        "httpd/port": "5984"
+    },
+    "server": {
+        "application": {
+            "rootPath": {"__evaluate__": "currentPath"},
+            "options": {},
+            "port": 8080,
+            "hostName": "127.0.0.1"
+        },
+        "proxy": {
+            "logFilePath": {
+                "access": "/dev/stdout",
+                "error": "/dev/stderr"
+            }
+        }
+    },
     "model": {
-      "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
       "defaultPropertySpecification": {
         "type": "string",
         "default": null,
@@ -65,8 +98,13 @@
         "regularExpressionPattern": null,
         "constraint": null
       },
-      "type": {
+      "typePropertyName": "webNodeType",
+      "allowedRolesPropertyName": "webNodeAllowedRoles",
+      "updateStrategy": "fillUp",
+      "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
+      "types": {
         "_base": {
+          "_id": {},
           "creationDateTime": {
             "type": "DateTime",
             "onCreate": "new Date().getTime()",
@@ -79,14 +117,17 @@
             "onUpdate": "new Date().getTime()",
             "minimum": {"__evaluate__": "new Date().getTime()"},
             "nullable": false
-          }
-        },
-        "Test": {
-            "_extend": "_base",
-            "jau": {
-                "regularExpressionPattern": "hans",
-                "constraint": "newDocument[key] !== 'yolo'"
-            }
+          },
+          "webNodeType": {
+            "regularExpressionPattern": {
+                "__evaluate__": "self.model.typeNameRegularExpressionPattern"
+            },
+            "nullable": false,
+            "minimum": 1,
+            "maximum": 999,
+            "writable": false
+          },
+          "webNodeAllowedRoles": ["users"]
         }
       }
     }

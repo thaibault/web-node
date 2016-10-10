@@ -32,7 +32,13 @@ export type ModelConfiguration = {
 }
 export type Configuration = {
     debug:boolean;
+    encoding:string;
+    name:string;
     model:ModelConfiguration;
+}
+export type DatabaseError = {
+    forbidden:string;
+    toString:() => string;
 }
 // endregion
 // region vim modline

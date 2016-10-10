@@ -13,76 +13,163 @@
     endregion
 */
 // region imports
-import {
-    ChildProcess, exec as execChildProcess, spawn as spawnChildProcess
-} from 'child_process'
 import Tools from 'clientnode'
-import * as fileSystem from 'fs'
-import path from 'path'
+import http from 'http'
+import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
-import {sync as removeDirectoryRecursivelySync} from 'rimraf'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
 } catch (error) {}
 
+import baseConfiguration from './configurator'
 import Helper from './helper'
-import packageConfiguration from '../package'
-import type {Configuration} from './type'
 // endregion
-// region load configuration
-const parameterDescription:Array<string> = [
-    'self', 'webOptimizerPath', 'currentPath', 'path', 'helper', 'tools']
-const parameter:Array<any> = [
-    packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
-]
-const configuration:Configuration = Tools.resolveDynamicDataStructure(
-    packageConfiguration.webNode, parameterDescription, parameter)
-// endregion
-// region generate/update validation code
-const validationCode:string =
-    Helper.generateValidateDocumentUpdateFunctionCode(configuration.model)
-if (configuration.debug)
-    console.log(
-        'Specification \n\n"' +
-        `${JSON.stringify(configuration.model, null, '    ')}" has ` +
-        `generated validation code: \n\n"${validationCode}".`)
-const database:PouchDB = new PouchDB(
-    `http://127.0.0.1:5984/${packageConfiguration.name}`)
-database.get('_design/validation').then((document) =>
-    database.put({
-        _id: '_design/validation',
-        _rev: document._rev,
-        language: 'javascript',
-        validate_doc_update: validationCode
-    })
-).then((response) =>
-    console.log(`Model specification updated: "${JSON.stringify(response, null, '    ')}".`)
-).catch((rejection) => {
-    console.log(
-        `Model specification couldn't be updated: "${JSON.stringify(rejection, null, '    ')}" creation ` +
-        `new one.`)
-    database.put({
-        _id: '_design/validation',
-        language: 'javascript',
-        validate_doc_update: validationCode
-    }).then((response) =>
-        console.log(`Model specification installed: "${JSON.stringify(response, null, '    ')}".`)
-    ).catch((rejection) => {
-        throw Error(
-            `Model specification couldn't be installed: "${JSON.stringify(rejection, null, '    ')}".`)
-    })
-})
-// endregion
-process.exit()
-database.put({
-    _id: 'fun',
-    jau: 'yolo'
-}).then((response) =>
-    console.log(JSON.stringify(response, null, '    '))
-).catch((rejection) => {
-    throw Error(JSON.stringify(rejection, null, '    '))
-})
+(async ():Promise<any> => {
+    const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
+    // region ensure presence of global admin user
+    const unauthenticatedUserDatabaseConnection:PouchDB = new PouchDB(
+        `${Tools.stringFormat(configuration.database.url, '')}/_users`)
+    try {
+        await unauthenticatedUserDatabaseConnection.allDocs()
+        console.info(
+            'No admin user available. Automatically creating admin user "' +
+            `${configuration.database.user.name}".`)
+        await fetch(
+            `${Tools.stringFormat(configuration.database.url, '')}/_config/` +
+            `admins/${configuration.database.user.name}`,
+            {
+                method: 'PUT',
+                body: `"${configuration.database.user.password}"`
+            })
+    } catch (error) {
+        if (error.hasOwnProperty('name') && error.name === 'unauthorized') {
+            const authenticatedUserDatabaseConnection = new PouchDB(
+                Tools.stringFormat(
+                    configuration.database.url,
+                    `${configuration.database.user.name}:` +
+                    `${configuration.database.user.password}@`
+                ) + '/_users')
+            try {
+                await authenticatedUserDatabaseConnection.allDocs()
+            } catch (error) {
+                throw new Error(
+                    `Can't login as existing admin user "` +
+                    `${configuration.database.user.name}": "` +
+                    `${Helper.representObject(error)}".`)
+            } finally {
+                authenticatedUserDatabaseConnection.close()
+            }
+        } else
+            throw new Error(
+                `Can't create new admin user "` +
+                `${configuration.database.user.name}": "` +
+                `${Helper.representObject(error)}".`)
+    } finally {
+        unauthenticatedUserDatabaseConnection.close()
+    }
+    // endregion
+    // region apply database/rest api configuration
+    for (const path:string in configuration.database)
+        if (configuration.database.hasOwnProperty(path) && ![
+            'url', 'user'
+        ].includes(path))
+            try {
+                await fetch(Tools.stringFormat(
+                    configuration.database.url,
+                    `${configuration.database.user.name}:` +
+                    `${configuration.database.user.password}@`
+                ) + `/_config/${path}`, {
+                    method: 'PUT', body: `"${configuration.database[path]}"`
+                })
+            } catch (error) {
+                console.error(
+                    `Configuration "${path}" couldn't be applied to "` +
+                    `${configuration.database[path]}": ` +
+                    Helper.representObject(error))
+            }
+    // endregion
+    const databaseConnection:PouchDB = new PouchDB(Tools.stringFormat(
+        configuration.database.url,
+        `${configuration.database.user.name}:` +
+        `${configuration.database.user.password}@`
+    ) + `/${configuration.name}`)
+    // region ensure presence of database security settings
+    try {
+        await fetch(Tools.stringFormat(
+            configuration.database.url,
+            `${configuration.database.user.name}:` +
+            `${configuration.database.user.password}@`
+        ) + `/${configuration.name}/_security`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                admins: {
+                    names: [],
+                    roles: []
+                },
+                members: {
+                    names: [],
+                    roles: ['users']
+                }
+            })
+        })
+    } catch (error) {
+        console.error(
+            `Security object couldn't be applied.: ` +
+            Helper.representObject(error))
+    }
+    // endregion
+    try {
+        // region generate/update authentication/validation code
+        const validationCode:string =
+            Helper.generateValidateDocumentUpdateFunctionCode(
+                configuration.model)
+        if (configuration.debug)
+            console.info(
+                'Specification \n\n"' +
+                `${JSON.stringify(configuration.model, null, '    ')}" has ` +
+                `generated validation code: \n\n"${validationCode}".`)
+        await Helper.ensureValidationDocumentPresence(
+            databaseConnection, 'validation', validationCode,
+            'Model specification')
+        let authenticationCode = Helper.authenticate.toString()
+        authenticationCode = 'const allowedModelRolesMapping = ' +
+            JSON.stringify(Helper.determineAllowedModelRolesMapping(
+                configuration.model
+            )) + '\n' +
+            "const typePropertyName = '" +
+            `${configuration.model.typePropertyName}'\n` +
+            authenticationCode.substring(
+                authenticationCode.indexOf('{') + 1,
+                authenticationCode.lastIndexOf('}')
+            ).trim().replace(/^ {12}/gm, '')
+        if (configuration.debug)
+            console.info(
+                `Authentication code "${authenticationCode}" generated.`)
+        await Helper.ensureValidationDocumentPresence(
+            databaseConnection, 'authentication', authenticationCode,
+            'Authentication logic')
+        // endregion
+        const server = http.createServer(async (
+            request:Object, response:Object
+        ):any => {
+            await Helper.callPluginStack('request', plugins, request, response)
+            response.end()
+        }).listen(
+            configuration.server.application.port,
+            configuration.server.application.hostName)
+        await Helper.callPluginStack(
+            'initialize', plugins, server, databaseConnection, configuration)
+    } catch (error) {
+        if (configuration.debug)
+            throw error
+        else
+            console.error(error)
+    } finally {
+        databaseConnection.close()
+    }
+})()
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

@@ -1,0 +1,10 @@
+version: '2'
+services:
+    webnodereload:
+        container_name: webnodereload
+        extends:
+            file: ./base.yml
+            service: webnode
+        environment:
+            extra: '--reload'
+        restart: 'no'

@@ -1,0 +1,10 @@
+version: '2'
+services:
+    webnodestagingreload:
+        container_name: webnodestagingreload
+        extends:
+            file: ./base.yml
+            service: webnode
+        environment:
+            extra: '--reload --flags staging'
+        restart: 'no'
