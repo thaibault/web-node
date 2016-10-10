@@ -113,10 +113,13 @@
         "regularExpressionPattern": null,
         "constraint": null
       },
-      "typePropertyName": "webNodeType",
-      "allowedRolesPropertyName": "webNodeAllowedRoles",
+      "specialPropertyNames": {
+        "allowedRoles": "webNodeAllowedRoles",
+        "extend": "webNodeExtends",
+        "type": "webNodeType",
+        "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$"
+      },
       "updateStrategy": "fillUp",
-      "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
       "types": {
         "_base": {
           "_id": {},
@@ -137,9 +140,14 @@
             },
             "nullable": false
           },
+          "lastUser": {
+            "onUpdate": "userContext._id",
+            "writable": false,
+            "nullable": false
+          },
           "webNodeType": {
             "regularExpressionPattern": {
-              "__evaluate__": "self.model.typeNameRegularExpressionPattern"
+              "__evaluate__": "self.model.specialPropertyNames.typeNameRegularExpressionPattern"
             },
             "nullable": false,
             "minimum": 1,

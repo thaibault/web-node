@@ -41,14 +41,23 @@ QUnit.test('callPluginStack', (assert:Object):void => {
 QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, {}],
-        [{allowedRolesPropertyName: 'roles', types: {Test: {}}}, {}],
         [
-            {allowedRolesPropertyName: 'roles', types: {Test: {roles: []}}},
+            {
+                specialPropertyNames: {allowedRoles: 'roles'},
+                types: {Test: {}}
+            },
+            {}
+        ],
+        [
+            {
+                specialPropertyNames: {allowedRoles: 'roles'},
+                types: {Test: {roles: []}}
+            },
             {Test: []}
         ],
         [
             {
-                allowedRolesPropertyName: 'roles',
+                specialPropertyNames: {allowedRoles: 'roles'},
                 types: {Test: {roles: ['a']}}
             },
             {Test: ['a']}
@@ -76,7 +85,7 @@ QUnit.test('extendModel', (assert:Object):void => {
         ['A', {A: {}}, {}],
         [
             'Test',
-            {_baseTest: {b: {}}, Test: {a: {}, _extend: '_baseTest'}},
+            {_baseTest: {b: {}}, Test: {a: {}, webNodeExtends: '_baseTest'}},
             {a: {}, b: {}}
         ],
         [
@@ -84,7 +93,7 @@ QUnit.test('extendModel', (assert:Object):void => {
             {
                 A: {a: {}},
                 B: {b: {}},
-                C: {c: {}, _extend: ['A', 'B']}
+                C: {c: {}, webNodeExtends: ['A', 'B']}
             },
             {a: {}, b: {}, c: {}}
         ],
@@ -92,8 +101,8 @@ QUnit.test('extendModel', (assert:Object):void => {
             'C',
             {
                 A: {a: {}},
-                B: {b: {}, _extend: 'A'},
-                C: {c: {}, _extend: 'B'}
+                B: {b: {}, webNodeExtends: 'A'},
+                C: {c: {}, webNodeExtends: 'B'}
             },
             {a: {}, b: {}, c: {}}
         ],
@@ -102,8 +111,8 @@ QUnit.test('extendModel', (assert:Object):void => {
             {
                 _base: {d: {type: 'number'}},
                 A: {a: {}},
-                B: {b: {}, _extend: 'A'},
-                C: {c: {}, _extend: 'B'}
+                B: {b: {}, webNodeExtends: 'A'},
+                C: {c: {}, webNodeExtends: 'B'}
             },
             {a: {}, b: {}, c: {}, d: {type: 'number'}}
         ]
@@ -117,7 +126,7 @@ QUnit.test('extendSpecification', (assert:Object):void => {
         [{types: {Test: {}}}, {Test: {}}],
         [{types: {Test: {}}}, {Test: {}}],
         [
-            {types: {Base: {b: {}}, Test: {a: {}, _extend: 'Base'}}},
+            {types: {Base: {b: {}}, Test: {a: {}, webNodeExtends: 'Base'}}},
             {Base: {b: {}}, Test: {a: {}, b: {}}}
         ],
         [
@@ -125,12 +134,18 @@ QUnit.test('extendSpecification', (assert:Object):void => {
             {Test: {a: {}, b: {}}}
         ]
     ])
-        assert.deepEqual(Helper.extendSpecification(test[0]), test[1])
+        assert.deepEqual(Helper.extendSpecification(Tools.extendObject(
+            {specialPropertyNames: {extend: 'webNodeExtends'}}, test[0]
+        )), test[1])
     assert.throws(():{[key:string]:PlainObject} => Helper.extendSpecification({
+        specialPropertyNames: {extend: 'webNodeExtends'},
         types: {a: {}}
     }))
     assert.deepEqual(Helper.extendSpecification({
-        typeNameRegularExpressionPattern: /a/,
+        specialPropertyNames: {
+            extend: 'webNodeExtends',
+            typeNameRegularExpressionPattern: /a/
+        },
         types: {a: {}}
     }), {a: {}})
 })
@@ -138,7 +153,10 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     assert:Object
 ):void => {
     const defaultSpecification:PlainObject = {
-        allowedRolesPropertyName: 'webNodeAllowedRoles',
+        specialPropertyNames: {
+            allowedRoles: 'webNodeAllowedRoles',
+            type: 'webNodeType'
+        },
         defaultPropertySpecification: {
             type: 'string',
             default: null,
@@ -151,7 +169,6 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             regularExpressionPattern: null,
             constraint: null
         },
-        typePropertyName: 'webNodeType',
         types: {_base: {webNodeType: {
             regularExpressionPattern: '^[A-Z][a-z0-9]+$',
             nullable: false,
@@ -774,9 +791,9 @@ QUnit.test('isDirectorySync', (assert:Object):void => {
 })
 QUnit.test('isFileSync', (assert:Object):void => {
     for (const filePath:string of [
-        __filename, path.join(__dirname, path.basename(__filename))
+        __dirname, path.resolve(__dirname, '../')
     ])
-        assert.ok(Helper.isFileSync(filePath))
+        assert.notOk(Helper.isFileSync(filePath))
 })
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [
