@@ -17,13 +17,35 @@ QUnit.load()
 // region tests
 QUnit.test('authenticate', (assert:Object):void => {
     for (const test:Array<any> of [
-        // TODO
+        [{}],
+        [{}, null, {roles: []}],
+        [{type: 'Test'}, {}, {roles: []}, {}, {Test: ['users']}, 'type'],
+        [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: []}, 'type']
+    ])
+        assert.throws(():?true => Helper.authenticate.apply(Helper, test))
+    for (const test:Array<any> of [
+        [{}, null, {roles: ['_admin']}],
+        [{}, {}, {roles: ['_admin']}, {}, {}, 'type'],
+        [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: 'users'}, 'type'],
+        [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: ['users']}, 'type']
     ])
         assert.ok(Helper.authenticate.apply(Helper, test))
 })
 QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     for (const test:Array<any> of [
-        // TODO
+        [{}, {}],
+        [{allowedRolesPropertyName: 'roles', types: {Test: {}}}, {}],
+        [
+            {allowedRolesPropertyName: 'roles', types: {Test: {roles: []}}},
+            {Test: []}
+        ],
+        [
+            {
+                allowedRolesPropertyName: 'roles',
+                types: {Test: {roles: ['a']}}
+            },
+            {Test: ['a']}
+        ]
     ])
         assert.deepEqual(
             Helper.determineAllowedModelRolesMapping(test[0]), test[1])
@@ -31,11 +53,15 @@ QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
 QUnit.test('ensureValidationDocumentPresence', async (
     assert:Object
 ):Promise<void> => {
+    const done:Function = assert.async()
     for (const test:Array<any> of [
-        // TODO
+        [{put: ():Promise<void> =>
+            new Promise((resolve:Function):number => setTimeout(resolve, 0))
+        }, 'test', '', 'Description']
     ])
-        assert.ok(await Helper.ensureValidationDocumentPresence.apply(
+        assert.strictEqual(await Helper.ensureValidationDocumentPresence.apply(
             Helper, test))
+    done()
 })
 QUnit.test('extendModel', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -93,8 +119,8 @@ QUnit.test('extendSpecification', (assert:Object):void => {
         ]
     ])
         assert.deepEqual(Helper.extendSpecification(test[0]), test[1])
-    assert.throws(Helper.extendSpecification({
-        type: {a: {}}
+    assert.throws(():{[key:string]:PlainObject} => Helper.extendSpecification({
+        types: {a: {}}
     }))
     assert.deepEqual(Helper.extendSpecification({
         typeNameRegularExpressionPattern: /a/,
@@ -105,6 +131,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     assert:Object
 ):void => {
     const defaultSpecification:PlainObject = {
+        allowedRolesPropertyName: 'webNodeAllowedRoles',
         defaultPropertySpecification: {
             type: 'string',
             default: null,
@@ -117,6 +144,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             regularExpressionPattern: null,
             constraint: null
         },
+        typePropertyName: 'webNodeType',
         types: {_base: {webNodeType: {
             regularExpressionPattern: '^[A-Z][a-z0-9]+$',
             nullable: false,

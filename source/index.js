@@ -98,8 +98,7 @@ import Helper from './helper'
             configuration.database.url,
             `${configuration.database.user.name}:` +
             `${configuration.database.user.password}@`
-        ) + `/${configuration.name}/_security`,
-        {
+        ) + `/${configuration.name}/_security`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({

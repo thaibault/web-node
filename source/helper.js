@@ -44,12 +44,16 @@ export default class Helper {
         allowedModelRolesMapping:{[key:string]:Array<string>},
         typePropertyName:string
     ):?true {
-        const allowedRoles:Array<string> = ['_admin']
-        if (userContext && allowedModelRolesMapping.hasOwnProperty(
-            newDocument[typePropertyName]
-        )) {
-            allowedRoles.concat(
-                allowedModelRolesMapping[newDocument[typePropertyName]])
+        let allowedRoles:Array<string> = ['_admin']
+        if (userContext) {
+            if (
+                allowedModelRolesMapping && typePropertyName &&
+                newDocument.hasOwnProperty(typePropertyName) &&
+                allowedModelRolesMapping.hasOwnProperty(
+                    newDocument[typePropertyName])
+            )
+                allowedRoles = allowedRoles.concat(
+                    allowedModelRolesMapping[newDocument[typePropertyName]])
             for (const userRole:string of userContext.roles)
                 if (allowedRoles.includes(userRole))
                     return true
@@ -73,7 +77,11 @@ export default class Helper {
         const models:{[key:string]:PlainObject} = Helper.extendSpecification(
             modelSpecification)
         for (const modelName:string in models)
-            if (models.hasOwnProperty(modelName))
+            if (models.hasOwnProperty(
+                modelName
+            ) && models[modelName].hasOwnProperty(
+                modelSpecification.allowedRolesPropertyName
+            ))
                 allowedModelRolesMapping[modelName] = models[modelName][
                     modelSpecification.allowedRolesPropertyName]
         return allowedModelRolesMapping
@@ -102,12 +110,12 @@ export default class Helper {
                 validate_doc_update: validationCode
                 /* eslint-enable camelcase */
             })
-            console.log(`${description} updated.`)
+            console.info(`${description} updated.`)
         } catch (error) {
             if (error.error === 'not_found')
-                console.log(`${description} not available: create new one.`)
+                console.info(`${description} not available: create new one.`)
             else
-                console.log(
+                console.info(
                     `${description} couldn't be updated: "` +
                     `${Helper.representObject(error)}" create new one.`)
             try {
@@ -118,7 +126,7 @@ export default class Helper {
                     validate_doc_update: validationCode
                     /* eslint-enable camelcase */
                 })
-                console.log(`${description} installed/updated.`)
+                console.info(`${description} installed/updated.`)
             } catch (error) {
                 throw new Error(
                     `${description} couldn't be installed/updated: "` +
