@@ -14,6 +14,8 @@
 */
 // region imports
 import Tools from 'clientnode'
+import fileSystem from 'fs'
+import path from 'path'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
 try {
@@ -63,6 +65,20 @@ export default class Helper {
             'Only users with a least on of these roles are allowed to ' +
             `perform requested action: "${allowedRoles.join('", "')}".`}
         /* eslint-enable no-throw-literal */
+    }
+    /**
+     * Calls all plugin methods for given trigger description.
+     * @param type - Type of trigger.
+     * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param parameter - List of parameter to forward to found callbacks.
+     * @returns A promise which resolves when all callbacks have resolved their
+     * promise.
+     */
+    static async callPluginStack(
+        type:string, plugins:Array<Object>, ...parameter:Array<any>
+    ):Promise<any> {
+        for (const plugin:Object of plugins)
+            await plugin[type].apply(Helper, parameter)
     }
     /**
      * Determines a mapping of all models to roles who are allowed to edit
@@ -402,6 +418,108 @@ export default class Helper {
         '}'
         /* eslint-enable max-len */
         return code
+    }
+    /**
+     * Checks if given path points to a valid directory.
+     * @param filePath - Path to directory.
+     * @returns A boolean which indicates directory existents.
+     */
+    static isDirectorySync(filePath:string):boolean {
+        try {
+            return fileSystem.statSync(filePath).isDirectory()
+        } catch (error) {
+            return false
+        }
+    }
+    /**
+     * Checks if given path points to a valid file.
+     * @param filePath - Path to file.
+     * @returns A boolean which indicates file existents.
+     */
+    static isFileSync(filePath:string):boolean {
+        try {
+            return fileSystem.statSync(filePath).isFile()
+        } catch (error) {
+            return false
+        }
+    }
+    /**
+     * Extends given configuration object with all plugin specific ones and
+     * returns a topological sorted list of plugins with plugins specific
+     * meta informations stored.
+     * @param configuration - Configuration object to extend and use.
+     * @returns A topological sorted list of plugins objects.
+     */
+    static loadPlugins(configuration:PlainObject):{
+        configuration:PlainObject;
+        plugins:Array<Object>
+    } {
+        const plugins:{[key:string]:Object} = {}
+        for (const pluginPath:string of configuration.plugin.directoryPaths)
+            if (Helper.isDirectorySync(pluginPath))
+                fileSystem.readdirSync(pluginPath).forEach((
+                    pluginName:string
+                ):void => {
+                    if (!pluginName.match(new RegExp(
+                        configuration.plugin.directoryNameRegularExpressionPattern
+                    )))
+                        return
+                    const currentPluginPath:string = path.resolve(
+                        pluginPath, pluginName)
+                    const stat:Object = fileSystem.statSync(currentPluginPath)
+                    if (stat && stat.isDirectory() && Helper.isFileSync(
+                        `${currentPluginPath}/package.json`
+                    )) {
+                        let pluginConfiguration:Object
+                        try {
+                            pluginConfiguration = JSON.parse(
+                                fileSystem.readFileSync(currentPluginPath, {
+                                    encoding: configuration.encoding}))
+                        } catch (error) {
+                            console.warn(
+                                'Failed to load options for plugin ' +
+                                `"${pluginName}": ` +
+                                Helper.representObject(error))
+                            return
+                        }
+                        for (const name:string of configuration.plugin.optionsPropertyNames)
+                            if (configuration.hasOwnProperty(name)) {
+                                plugins[pluginName] = {
+                                    name: pluginName,
+                                    path: currentPluginPath,
+                                    configuration: pluginConfiguration[name]
+                                }
+                                break
+                            }
+                    }
+                })
+        const sortedPlugins:Array<Object> = []
+        const temporaryPlugins:{[key:string]:Array<string>} = {}
+        for (const pluginName:string in plugins)
+            if (plugins.hasOwnProperty(pluginName))
+                if (plugins[pluginName].hasOwnProperty('dependencies'))
+                    temporaryPlugins[pluginName] = plugins[
+                        pluginName
+                    ].dependencies
+                else
+                    temporaryPlugins[pluginName] = []
+        for (const pluginName:string of Tools.arraySortTopological(
+            temporaryPlugins
+        ))
+            sortedPlugins.push(plugins[pluginName])
+        for (const plugin:Object of sortedPlugins)
+            configuration = Tools.extendObject(true, Tools.modifyObject(
+                configuration, plugin.configuration
+            ), plugin.configuration)
+        const parameterDescription:Array<string> = [
+            'self', 'webOptimizerPath', 'currentPath', 'path', 'helper',
+            'tools', 'plugins']
+        const parameter:Array<any> = [
+            configuration, __dirname, process.cwd(), path, Helper, Tools,
+            sortedPlugins]
+        configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
+            configuration, parameterDescription, parameter))
+        return {plugins: sortedPlugins, configuration}
     }
     /**
      * Represents given object as formatted string.

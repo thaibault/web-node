@@ -28,8 +28,8 @@ const parameter:Array<any> = [
     packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
 ]
 packageConfiguration.webNode.name = packageConfiguration.name
-export default Tools.resolveDynamicDataStructure(
-    packageConfiguration.webNode, parameterDescription, parameter)
+export default Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
+    packageConfiguration.webNode, parameterDescription, parameter))
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

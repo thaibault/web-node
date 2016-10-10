@@ -52,21 +52,37 @@
   },
   "webNode": {
     "debug": false,
+    "encoding": "utf8",
+    "plugin": {
+        "directoryPaths": [
+            {"__evaluate__": "`${currentPath}/plugins/`"},
+            {"__evaluate__": "`${currentPath}/node_modules/`"}
+        ],
+        "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+WebNodePlugin$",
+        "optionsPropertyNames": ["webNode"]
+    },
     "database": {
         "url": {
-            "__evaluate__": "`http://{1}${self.database['httpd/host']}:${self.database['httpd/port']}`"
+            "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database['httpd/port']}`"
         },
         "user": {"name": "admin", "password": "admin"},
         "log/file": "-",
         "log/level": "info",
-        "httpd/host": "127.0.0.1",
+        "httpd/host": {"__evaluate__": "self.server.application.hostName"},
         "httpd/port": "5984"
     },
-    "proxy": {
-        "encoding": "utf-8",
-        "logFilePath": {
-            "access": "/dev/stdout",
-            "error": "/dev/stderr"
+    "server": {
+        "application": {
+            "rootPath": {"__evaluate__": "currentPath"},
+            "options": {},
+            "port": 8080,
+            "hostName": "127.0.0.1"
+        },
+        "proxy": {
+            "logFilePath": {
+                "access": "/dev/stdout",
+                "error": "/dev/stderr"
+            }
         }
     },
     "model": {

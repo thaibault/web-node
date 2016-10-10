@@ -7,9 +7,9 @@ proxy_set_header      Host "\${host}";
 proxy_set_header      X-Real-IP "\${remote_addr}";
 proxy_set_header      X-Forwarded-For "\${proxy_add_x_forwarded_for}";
 client_max_body_size  50M;
-charset               ${options.proxy.encoding};
-access_log            ${options.proxy.logFilePath.access};
-error_log             ${options.proxy.logFilePath.error} info;
+charset               ${options.encoding};
+access_log            ${options.server.proxy.logFilePath.access};
+error_log             ${options.server.proxy.logFilePath.error} info;
 # endregion
 <% # region initialisation
 <% for file in __file__.directory:

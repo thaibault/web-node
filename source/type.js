@@ -31,8 +31,9 @@ export type ModelConfiguration = {
     type:{[key:string]:{[key:string]:PropertySpecification}};
 }
 export type Configuration = {
-    name:string;
     debug:boolean;
+    encoding:string;
+    name:string;
     model:ModelConfiguration;
 }
 export type DatabaseError = {

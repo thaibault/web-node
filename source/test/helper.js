@@ -3,6 +3,7 @@
 'use strict'
 // region imports
 import Tools from 'clientnode'
+import path from 'path'
 import * as QUnit from 'qunit-cli'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
@@ -30,6 +31,12 @@ QUnit.test('authenticate', (assert:Object):void => {
         [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: ['users']}, 'type']
     ])
         assert.ok(Helper.authenticate.apply(Helper, test))
+})
+QUnit.test('callPluginStack', (assert:Object):void => {
+    for (const test:Array<any> of [
+        // TODO
+    ])
+        assert.deepEqual(Helper.callPluginStack((test[0]), test[1]))
 })
 QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -758,6 +765,24 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         assert.deepEqual(result, test[test.length - 1])
     }
     // endregion
+})
+QUnit.test('isDirectorySync', (assert:Object):void => {
+    for (const filePath:string of [
+        __dirname, path.resolve(__dirname, '../')
+    ])
+        assert.ok(Helper.isDirectorySync(filePath))
+})
+QUnit.test('isFileSync', (assert:Object):void => {
+    for (const filePath:string of [
+        __filename, path.join(__dirname, path.basename(__filename))
+    ])
+        assert.ok(Helper.isFileSync(filePath))
+})
+QUnit.test('loadPlugins', (assert:Object):void => {
+    for (const test:Array<any> of [
+        // TODO
+    ])
+        assert.deepEqual(Helper.loadPlugins(test[0], test[1]), test[2])
 })
 QUnit.test('representObject', (assert:Object):void => {
     for (const test:Array<any> of [

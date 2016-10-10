@@ -13,18 +13,20 @@
     endregion
 */
 // region imports
-import fetch from 'node-fetch'
 import Tools from 'clientnode'
+import http from 'http'
+import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
 } catch (error) {}
 
-import configuration from './configurator'
+import baseConfiguration from './configurator'
 import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
+    const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
     // region ensure presence of global admin user
     const unauthenticatedUserDatabaseConnection:PouchDB = new PouchDB(
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)
@@ -149,6 +151,16 @@ import Helper from './helper'
             databaseConnection, 'authentication', authenticationCode,
             'Authentication logic')
         // endregion
+        const server = http.createServer(async (
+            request:Object, response:Object
+        ):any => {
+            await Helper.callPluginStack('request', plugins, request, response)
+            response.end()
+        }).listen(
+            configuration.server.application.port,
+            configuration.server.application.hostName)
+        await Helper.callPluginStack(
+            'initialize', plugins, server, databaseConnection, configuration)
     } catch (error) {
         if (configuration.debug)
             throw error
