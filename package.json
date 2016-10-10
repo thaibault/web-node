@@ -1,6 +1,6 @@
 {
   "name": "webnode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A generic web backend.",
   "documentationWebsite": {
     "name": "webNode",
@@ -34,7 +34,9 @@
     "qunit-cli": "latest",
     "source-map-support": "latest"
   },
-  "files": ["build"],
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "webOptimizer build",
     "buildDLL": "webOptimizer buildDLL",
@@ -54,36 +56,49 @@
     "debug": false,
     "encoding": "utf8",
     "plugin": {
-        "directoryPaths": [
-            {"__evaluate__": "`${currentPath}/plugins/`"},
-            {"__evaluate__": "`${currentPath}/node_modules/`"}
-        ],
-        "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+WebNodePlugin$",
-        "optionsPropertyNames": ["webNode"]
+      "directoryPaths": [
+        {
+          "__evaluate__": "`${currentPath}/plugins/`"
+        },
+        {
+          "__evaluate__": "`${currentPath}/node_modules/`"
+        }
+      ],
+      "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+WebNodePlugin$",
+      "optionsPropertyNames": [
+        "webNode"
+      ]
     },
     "database": {
-        "url": {
-            "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database['httpd/port']}`"
-        },
-        "user": {"name": "admin", "password": "admin"},
-        "log/file": "-",
-        "log/level": "info",
-        "httpd/host": {"__evaluate__": "self.server.application.hostName"},
-        "httpd/port": "5984"
+      "url": {
+        "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database['httpd/port']}`"
+      },
+      "user": {
+        "name": "admin",
+        "password": "admin"
+      },
+      "log/file": "-",
+      "log/level": "info",
+      "httpd/host": {
+        "__evaluate__": "self.server.application.hostName"
+      },
+      "httpd/port": "5984"
     },
     "server": {
-        "application": {
-            "rootPath": {"__evaluate__": "currentPath"},
-            "options": {},
-            "port": 8080,
-            "hostName": "127.0.0.1"
+      "application": {
+        "rootPath": {
+          "__evaluate__": "currentPath"
         },
-        "proxy": {
-            "logFilePath": {
-                "access": "/dev/stdout",
-                "error": "/dev/stderr"
-            }
+        "options": {},
+        "port": 8080,
+        "hostName": "127.0.0.1"
+      },
+      "proxy": {
+        "logFilePath": {
+          "access": "/dev/stdout",
+          "error": "/dev/stderr"
         }
+      }
     },
     "model": {
       "defaultPropertySpecification": {
@@ -93,8 +108,8 @@
         "onUpdate": null,
         "nullable": true,
         "writable": true,
-        "minimum": -999999999999999999999,
-        "maximum": 999999999999999999999,
+        "minimum": -1e+21,
+        "maximum": 1e+21,
         "regularExpressionPattern": null,
         "constraint": null
       },
@@ -108,26 +123,32 @@
           "creationDateTime": {
             "type": "DateTime",
             "onCreate": "new Date().getTime()",
-            "minimum": {"__evaluate__": "new Date().getTime()"},
+            "minimum": {
+              "__evaluate__": "new Date().getTime()"
+            },
             "writable": false,
             "nullable": false
           },
           "updateDateType": {
             "type": "DateTime",
             "onUpdate": "new Date().getTime()",
-            "minimum": {"__evaluate__": "new Date().getTime()"},
+            "minimum": {
+              "__evaluate__": "new Date().getTime()"
+            },
             "nullable": false
           },
           "webNodeType": {
             "regularExpressionPattern": {
-                "__evaluate__": "self.model.typeNameRegularExpressionPattern"
+              "__evaluate__": "self.model.typeNameRegularExpressionPattern"
             },
             "nullable": false,
             "minimum": 1,
             "maximum": 999,
             "writable": false
           },
-          "webNodeAllowedRoles": ["users"]
+          "webNodeAllowedRoles": [
+            "users"
+          ]
         }
       }
     }
@@ -143,10 +164,16 @@
       "external": "commonjs2",
       "self": "commonjs2"
     },
-    "inPlace": {"externalLibrary": false},
+    "inPlace": {
+      "externalLibrary": false
+    },
     "path": {
-      "source": {"base": "source"},
-      "target": {"base": "build"}
+      "source": {
+        "base": "source"
+      },
+      "target": {
+        "base": "build"
+      }
     }
   }
 }
