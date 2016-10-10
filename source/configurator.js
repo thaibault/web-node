@@ -27,7 +27,8 @@ const parameterDescription:Array<string> = [
 const parameter:Array<any> = [
     packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
 ]
-packageConfiguration.webNode.name = packageConfiguration.name
+packageConfiguration.webNode.name =
+    packageConfiguration.documentationWebsite.name
 export default Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
     packageConfiguration.webNode, parameterDescription, parameter))
 // region vim modline
