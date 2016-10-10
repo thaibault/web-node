@@ -62,6 +62,13 @@
         "httpd/host": "127.0.0.1",
         "httpd/port": "5984"
     },
+    "proxy": {
+        "encoding": "utf-8",
+        "logFilePath": {
+            "access": "/dev/stdout",
+            "error": "/dev/stderr"
+        }
+    },
     "model": {
       "defaultPropertySpecification": {
         "type": "string",
@@ -105,15 +112,6 @@
             "writable": false
           },
           "webNodeAllowedRoles": ["users"]
-        },
-
-        "Test1": {
-            "_id": {
-                "pattern": "/^[a-z]$/"
-            }
-        },
-        "Test2": {
-            
         }
       }
     }

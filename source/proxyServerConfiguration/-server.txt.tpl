@@ -3,12 +3,13 @@ proxy_connect_timeout 1200s;
 proxy_send_timeout    1200s;
 proxy_read_timeout    1200s;
 send_timeout          1200s;
-proxy_set_header      Host "${host}";
-proxy_set_header      X-Real-IP "${remote_addr}";
-proxy_set_header      X-Forwarded-For "${proxy_add_x_forwarded_for}";
+proxy_set_header      Host "\${host}";
+proxy_set_header      X-Real-IP "\${remote_addr}";
+proxy_set_header      X-Forwarded-For "\${proxy_add_x_forwarded_for}";
 client_max_body_size  50M;
-charset               <% options['encoding'].replace('_', '-') %>;
-access_log            <% root.path %><% options['location']['proxyServerLog'][1:] %>;
+charset               ${options.proxy.encoding};
+access_log            ${options.proxy.logFilePath.access};
+error_log             ${options.proxy.logFilePath.error} info;
 # endregion
 <% # region initialisation
 <% for file in __file__.directory:
