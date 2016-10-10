@@ -26,7 +26,12 @@ export type PropertySpecification = {
     validator:string;
 }
 export type ModelConfiguration = {
-    typeNameRegularExpressionPattern:string;
+    specialPropertyNames:{
+        allowedRoles:string;
+        extend:string;
+        type:string;
+        typeNameRegularExpressionPattern:string;
+    };
     defaultPropertySpecification:PropertySpecification;
     type:{[key:string]:{[key:string]:PropertySpecification}};
 }

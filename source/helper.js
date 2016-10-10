@@ -96,10 +96,10 @@ export default class Helper {
             if (models.hasOwnProperty(
                 modelName
             ) && models[modelName].hasOwnProperty(
-                modelSpecification.allowedRolesPropertyName
+                modelSpecification.specialPropertyNames.allowedRoles
             ))
                 allowedModelRolesMapping[modelName] = models[modelName][
-                    modelSpecification.allowedRolesPropertyName]
+                    modelSpecification.specialPropertyNames.allowedRoles]
         return allowedModelRolesMapping
     }
     /**
@@ -154,27 +154,30 @@ export default class Helper {
      * Extend given model with all specified one.
      * @param modelName - Name of model to extend.
      * @param models - Pool of models to extend from.
+     * @param extendPropertyName - Property name which indicates model
+     * inheritance.
      * @returns Given model in extended version.
      */
     static extendModel(
-        modelName:string, models:{[key:string]:PlainObject}
+        modelName:string, models:{[key:string]:PlainObject},
+        extendPropertyName:string = 'webNodeExtends'
     ):PlainObject {
         if (modelName === '_base')
             return models[modelName]
         if (models.hasOwnProperty('_base'))
-            if (models[modelName].hasOwnProperty('_extend'))
-                models[modelName]._extend = ['_base'].concat(
-                    models[modelName]._extend)
+            if (models[modelName].hasOwnProperty(extendPropertyName))
+                models[modelName][extendPropertyName] = ['_base'].concat(
+                    models[modelName][extendPropertyName])
             else
-                models[modelName]._extend = '_base'
-        if (models[modelName].hasOwnProperty('_extend')) {
+                models[modelName][extendPropertyName] = '_base'
+        if (models[modelName].hasOwnProperty(extendPropertyName)) {
             for (const modelNameToExtend:string of [].concat(models[
                 modelName
-            ]._extend))
+            ][extendPropertyName]))
                 models[modelName] = Tools.extendObject(
                     true, models[modelName], Helper.extendModel(
-                        modelNameToExtend, models))
-            delete models[modelName]._extend
+                        modelNameToExtend, models, extendPropertyName))
+            delete models[modelName][extendPropertyName]
         }
         return models[modelName]
     }
@@ -186,9 +189,9 @@ export default class Helper {
     static extendSpecification(
         modelSpecification:PlainObject
     ):{[key:string]:PlainObject} {
-        modelSpecification = Tools.extendObject(true, {
+        modelSpecification = Tools.extendObject(true, {specialPropertyNames: {
             typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
-        }, modelSpecification)
+        }}, modelSpecification)
         const models:{[key:string]:PlainObject} = {}
         for (const modelName:string in Tools.copyLimitedRecursively(
             modelSpecification.types
@@ -197,14 +200,17 @@ export default class Helper {
                 modelName
             ) && !modelName.startsWith('_')) {
                 if (!modelName.match(new RegExp(
-                    modelSpecification.typeNameRegularExpressionPattern
+                    modelSpecification.specialPropertyNames
+                        .typeNameRegularExpressionPattern
                 )))
                     throw new Error(
                         'Model names have to match "' +
-                        modelSpecification.typeNameRegularExpressionPattern +
+                        modelSpecification.specialPropertyNames
+                            .typeNameRegularExpressionPattern +
                         `" (given name: "${modelName}").`)
                 models[modelName] = Helper.extendModel(
-                    modelName, modelSpecification.types)
+                    modelName, modelSpecification.types,
+                    modelSpecification.specialPropertyNames.extend)
             }
         return models
     }
@@ -238,14 +244,14 @@ export default class Helper {
             '        else\n' +
             "            throw {forbidden: 'Revision: No old document to update available.'}\n" +
             '    const checkDocument = (newDocument, oldDocument) => {\n' +
-            `        if (!newDocument.hasOwnProperty('${modelSpecification.typePropertyName}'))\n` +
-            `            throw {forbidden: 'Type: You have to specify a model type via property "${modelSpecification.typePropertyName}".'}\n`
+            `        if (!newDocument.hasOwnProperty('${modelSpecification.specialPropertyNames.type}'))\n` +
+            `            throw {forbidden: 'Type: You have to specify a model type via property "${modelSpecification.specialPropertyNames.type}".'}\n`
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName)) {
-                code += `        if (newDocument.${modelSpecification.typePropertyName} === '${modelName}') {\n`
+                code += `        if (newDocument.${modelSpecification.specialPropertyNames.type} === '${modelName}') {\n`
                 // region run hooks and check for needed data
                 for (const propertyName:string in models[modelName])
-                    if (propertyName !== modelSpecification.allowedRolesPropertyName && models[modelName].hasOwnProperty(propertyName)) {
+                    if (propertyName !== modelSpecification.specialPropertyNames.allowedRoles && models[modelName].hasOwnProperty(propertyName)) {
                         let newDocumentAssignment:string = `newDocument.${propertyName}`
                         let oldDocumentAssignment:string = `oldDocument.${propertyName}`
                         if (propertyName === 'class') {
@@ -291,7 +297,7 @@ export default class Helper {
                             '                        continue\n' +
                             '                    }\n'
                 for (const propertyName:string in models[modelName])
-                    if (propertyName !== modelSpecification.allowedRolesPropertyName && models[modelName].hasOwnProperty(propertyName)) {
+                    if (propertyName !== modelSpecification.specialPropertyNames.allowedRoles && models[modelName].hasOwnProperty(propertyName)) {
                         let newDocumentAssignment:string = `newDocument.${propertyName}`
                         let oldDocumentAssignment:string = `oldDocument.${propertyName}`
                         if (propertyName === 'class') {
@@ -407,7 +413,7 @@ export default class Helper {
                         '        }\n'
                 // endregion
             }
-        code += `        throw {forbidden: 'Model: Given model "' + newDocument.${modelSpecification.typePropertyName} + '" is not specified.'}\n` +
+        code += `        throw {forbidden: 'Model: Given model "' + newDocument.${modelSpecification.specialPropertyNames.type} + '" is not specified.'}\n` +
         '    }\n' +
         '    newDocument = checkDocument(newDocument, oldDocument)\n' +
         "    if (securitySettings.hasOwnProperty('checkedDocuments'))\n" +

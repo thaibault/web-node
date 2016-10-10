@@ -139,7 +139,7 @@ import Helper from './helper'
                 configuration.model
             )) + '\n' +
             "const typePropertyName = '" +
-            `${configuration.model.typePropertyName}'\n` +
+            `${configuration.model.specialPropertyNames.type}'\n` +
             authenticationCode.substring(
                 authenticationCode.indexOf('{') + 1,
                 authenticationCode.lastIndexOf('}')
