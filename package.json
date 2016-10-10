@@ -51,10 +51,16 @@
     "watchDLL": "webOptimizer buildDLL --watch"
   },
   "webNode": {
-    "debug": true,
+    "debug": false,
     "database": {
-        "url": "http://{1}127.0.0.1:5984",
-        "user": {"name": "admin", "password": "admin"}
+        "url": {
+            "__evaluate__": "`http://{1}${self.database['httpd/host']}:${self.database['httpd/port']}`"
+        },
+        "user": {"name": "admin", "password": "admin"},
+        "log/file": "-",
+        "log/level": "info",
+        "httpd/host": "127.0.0.1",
+        "httpd/port": "5984"
     },
     "model": {
       "defaultPropertySpecification": {

@@ -1,0 +1,251 @@
+[Mon, 10 Oct 2016 10:55:47 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_node/node1@127.0.0.1/_config/log/file 200
+[Mon, 10 Oct 2016 10:55:57 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 10:55:57 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 10:55:57 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 10:56:00 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 10:56:00 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 401
+[Mon, 10 Oct 2016 10:56:00 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 200
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 200
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 200
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 200
+[Mon, 10 Oct 2016 10:56:01 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 10:56:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 10:56:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 10:56:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 304
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 10:56:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476096973737 200
+[Mon, 10 Oct 2016 10:56:15 GMT] [info] [<0.000.0>] 127.0.0.1 - - POST /_session 200
+[Mon, 10 Oct 2016 10:56:15 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 10:56:15 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 200
+[Mon, 10 Oct 2016 10:56:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_node/node1@127.0.0.1/_config/log/file 200
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 200
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 200
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 200
+[Mon, 10 Oct 2016 11:08:39 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 11:24:07 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:24:09 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 11:24:09 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:24:09 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 304
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 11:24:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476098650722 200
+[Mon, 10 Oct 2016 11:24:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - POST /_session 200
+[Mon, 10 Oct 2016 11:24:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:24:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 200
+[Mon, 10 Oct 2016 11:24:50 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:24:50 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:24:50 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:24:50 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_node/node1@127.0.0.1/_config/httpd/port 200
+[Mon, 10 Oct 2016 11:25:11 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 11:25:11 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:25:11 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 200
+[Mon, 10 Oct 2016 11:25:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476098712720 200
+[Mon, 10 Oct 2016 11:25:15 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_membership 304
+[Mon, 10 Oct 2016 11:25:15 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 304
+[Mon, 10 Oct 2016 11:25:26 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:25:26 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:25:26 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:25:26 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_node/node1@127.0.0.1/_config/httpd/port 200
+[Mon, 10 Oct 2016 11:27:05 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:27:05 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:27:05 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:27:20 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:27:20 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:27:20 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:27:57 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:27:57 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:27:57 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/level 200
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/host 200
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/port 200
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 404
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 404
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/ 201
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 404
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 404
+[Mon, 10 Oct 2016 11:29:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 11:29:58 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:29:58 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:29:58 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 401
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/level 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/host 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/port 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 200
+[Mon, 10 Oct 2016 11:30:02 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 11:31:07 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 11:31:07 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:31:07 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 200
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 11:31:08 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476099068663 200
+[Mon, 10 Oct 2016 11:31:09 GMT] [info] [<0.000.0>] 127.0.0.1 - - POST /_session 200
+[Mon, 10 Oct 2016 11:31:09 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:31:09 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 200
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 11:31:13 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 11:31:14 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 304
+[Mon, 10 Oct 2016 11:31:14 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476099073905 200
+[Mon, 10 Oct 2016 11:31:16 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config/cors 304
+[Mon, 10 Oct 2016 11:31:16 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config/httpd 200
+[Mon, 10 Oct 2016 11:31:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 304
+[Mon, 10 Oct 2016 11:31:56 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /mydatabase/ 404
+[Mon, 10 Oct 2016 11:32:00 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode 200
+[Mon, 10 Oct 2016 11:33:12 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:33:37 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode 200
+[Mon, 10 Oct 2016 11:33:38 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:33:46 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 401
+[Mon, 10 Oct 2016 11:33:55 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:35:37 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode 200
+[Mon, 10 Oct 2016 11:37:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode 200
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/level 200
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/host 200
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/port 200
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 404
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 404
+[Mon, 10 Oct 2016 11:38:21 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/ 201
+[Mon, 10 Oct 2016 11:38:22 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 404
+[Mon, 10 Oct 2016 11:38:22 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:38:22 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 404
+[Mon, 10 Oct 2016 11:38:22 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 11:38:50 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode 200
+[Mon, 10 Oct 2016 11:38:51 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode 200
+[Mon, 10 Oct 2016 11:38:57 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 11:38:57 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:38:57 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 200
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 11:38:58 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476099538237 200
+[Mon, 10 Oct 2016 11:38:59 GMT] [info] [<0.000.0>] 127.0.0.1 - - POST /_session 200
+[Mon, 10 Oct 2016 11:38:59 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:38:59 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 200
+[Mon, 10 Oct 2016 11:39:13 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:39:13 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:39:13 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 401
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/level 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/host 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/port 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 200
+[Mon, 10 Oct 2016 11:39:17 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 11:39:18 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/ 304
+[Mon, 10 Oct 2016 11:39:18 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/css/index-6688cd4426ead40b085270f8cb007530.css 304
+[Mon, 10 Oct 2016 11:39:18 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/require-34a7e370ea98389d118cc328682c0939.js 304
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 304
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET / 304
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/img/pouchdb-site.png 304
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fauxtonicon.woff 304
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/fonts/fontawesome-webfont.woff?v=3.2.1 304
+[Mon, 10 Oct 2016 11:39:19 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_utils/js/zeroclipboard/ZeroClipboard.swf?noCache=1476099559669 200
+[Mon, 10 Oct 2016 11:39:20 GMT] [info] [<0.000.0>] 127.0.0.1 - - POST /_session 200
+[Mon, 10 Oct 2016 11:39:20 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_session 200
+[Mon, 10 Oct 2016 11:39:20 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_node/node1@127.0.0.1/_config 200
+[Mon, 10 Oct 2016 11:39:36 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:39:36 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:39:36 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 401
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/level 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/host 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/port 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 200
+[Mon, 10 Oct 2016 11:39:40 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201
+[Mon, 10 Oct 2016 11:41:05 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:41:05 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:41:05 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 401
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/ 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /_users/_all_docs? 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/file 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/log/level 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/host 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] pouchdb-server has started on http://127.0.0.1:5984/
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] database files will be saved to database
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] navigate to http://127.0.0.1:5984/_utils for the Fauxton UI.
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /_config/httpd/port 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_security 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/ 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/validation? 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/validation 201
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - GET /webnode/_design/authentication? 200
+[Mon, 10 Oct 2016 11:41:10 GMT] [info] [<0.000.0>] 127.0.0.1 - - PUT /webnode/_design/authentication 201

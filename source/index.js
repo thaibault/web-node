@@ -30,7 +30,7 @@ import Helper from './helper'
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)
     try {
         await unauthenticatedUserDatabaseConnection.allDocs()
-        console.log(
+        console.info(
             'No admin user available. Automatically creating admin user "' +
             `${configuration.database.user.name}".`)
         await fetch(
@@ -67,32 +67,57 @@ import Helper from './helper'
         unauthenticatedUserDatabaseConnection.close()
     }
     // endregion
+    // region apply database/rest api configuration
+    for (const path:string in configuration.database)
+        if (configuration.database.hasOwnProperty(path) && ![
+            'url', 'user'
+        ].includes(path))
+            try {
+                await fetch(Tools.stringFormat(
+                    configuration.database.url,
+                    `${configuration.database.user.name}:` +
+                    `${configuration.database.user.password}@`
+                ) + `/_config/${path}`, {
+                    method: 'PUT', body: `"${configuration.database[path]}"`
+                })
+            } catch (error) {
+                console.error(
+                    `Configuration "${path}" couldn't be applied to "` +
+                    `${configuration.database[path]}": ` +
+                    Helper.representObject(error))
+            }
+    // endregion
     const databaseConnection:PouchDB = new PouchDB(Tools.stringFormat(
         configuration.database.url,
         `${configuration.database.user.name}:` +
         `${configuration.database.user.password}@`
     ) + `/${configuration.name}`)
-    // region ensure presence of database specific admin user
-    // TODO curl http://localhost:5984/webnode ist noch erlaubt:
-    // see: http://docs.couchdb.org/en/2.0.0/intro/security.html
-    await fetch(Tools.stringFormat(
-        configuration.database.url,
-        `${configuration.database.user.name}:` +
-        `${configuration.database.user.password}@`
-    ) + `/${configuration.name}/_security`,
-    {
-        method: 'PUT',
-        body: JSON.stringify({
-            admins: {
-                names: ['admin'],
-                roles: ['users']
-            },
-            members: {
-                names: ['admin'],
-                roles: ['users']
-            }
+    // region ensure presence of database security settings
+    try {
+        await fetch(Tools.stringFormat(
+            configuration.database.url,
+            `${configuration.database.user.name}:` +
+            `${configuration.database.user.password}@`
+        ) + `/${configuration.name}/_security`,
+        {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                admins: {
+                    names: [],
+                    roles: []
+                },
+                members: {
+                    names: [],
+                    roles: ['users']
+                }
+            })
         })
-    })
+    } catch (error) {
+        console.error(
+            `Security object couldn't be applied.: ` +
+            Helper.representObject(error))
+    }
     // endregion
     try {
         // region generate/update authentication/validation code
@@ -100,7 +125,7 @@ import Helper from './helper'
             Helper.generateValidateDocumentUpdateFunctionCode(
                 configuration.model)
         if (configuration.debug)
-            console.log(
+            console.info(
                 'Specification \n\n"' +
                 `${JSON.stringify(configuration.model, null, '    ')}" has ` +
                 `generated validation code: \n\n"${validationCode}".`)
@@ -119,7 +144,7 @@ import Helper from './helper'
                 authenticationCode.lastIndexOf('}')
             ).trim().replace(/^ {12}/gm, '')
         if (configuration.debug)
-            console.log(
+            console.info(
                 `Authentication code "${authenticationCode}" generated.`)
         await Helper.ensureValidationDocumentPresence(
             databaseConnection, 'authentication', authenticationCode,
@@ -129,7 +154,7 @@ import Helper from './helper'
         if (configuration.debug)
             throw error
         else
-            console.log(error)
+            console.error(error)
     } finally {
         databaseConnection.close()
     }
