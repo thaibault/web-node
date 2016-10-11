@@ -782,6 +782,12 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         assert.deepEqual(result, test[test.length - 1])
     }
     // endregion
+QUnit.test('loadPlugin', (assert:Object):void => {
+    for (const test:Array<any> of [
+        // TODO
+    ])
+        assert.deepEqual(Helper.loadPlugin(test[0], test[1]), test[2])
+})
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [
         // TODO
