@@ -433,30 +433,33 @@ export default class Helper {
     /**
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
-     * @param pluginName - Name of plugin to extend.
+     * @param name - Name of plugin to extend.
+     * @param plugins - List of all yet determined plugin informations.
      * @param configuration - Plugin specific configurations.
      * @param optionsPropertyNames - Property names to search for to use as
      * entry in plugin configuration file.
+     * @param pluginPath - Path to given plugin.
      * @return An object of plugin specific meta informations.
      */
     static loadPlugin(
-        pluginName:string, configuration:PlainObject,
-        optionsPropertyNames:Array<string>
-    ) {
+        name:string, plugins:{[key:string]:Object},
+        configuration:PlainObject, optionsPropertyNames:Array<string>,
+        pluginPath:string
+    ):Object {
         for (const name:string of optionsPropertyNames)
             if (configuration.hasOwnProperty(name)) {
                 let indexFilePath:string = 'index.js'
                 if (configuration.hasOwnProperty('main'))
                     indexFilePath = configuration.main
-                indexFilePath = path.resolve(currentPluginPath, indexFilePath)
+                indexFilePath = path.resolve(pluginPath, indexFilePath)
                 if (!WebOptimizerHelper.isFileSync(indexFilePath))
-                    fileSystem.readdirSync(currentPluginPath).forEach((
+                    fileSystem.readdirSync(pluginPath).forEach((
                         fileName:string
                     ):void => {
                         if (
                             fileName !== 'package.json' &&
                             WebOptimizerHelper.isFileSync(path.resolve(
-                                currentPluginPath, fileName))
+                                pluginPath, fileName))
                         )
                             if (!(WebOptimizerHelper.isFileSync(
                                 indexFilePath
@@ -464,32 +467,37 @@ export default class Helper {
                                 indexFilePath, path.extname(fileName)
                             ))))
                                 indexFilePath = path.resolve(
-                                    currentPluginPath, indexFilePath)
+                                    pluginPath, indexFilePath)
                     })
                 if (!WebOptimizerHelper.isFileSync(indexFilePath))
                     throw new Error(
-                        `Can't find an entry file in "${currentPluginPath}" ` +
-                        `for plugin "${pluginName}".`)
+                        `Can't find an entry file in "${pluginPath}" for ` +
+                        `plugin "${name}".`)
                 let api:Function
                 if (indexFilePath.endsWith('.js'))
                     api = async (type:string, ...parameter:Array<any>):any => {
                         const currentTimestamp:number = fileSystem.statSync(
-                            currentPluginPath
+                            pluginPath
                         ).mtime.getTime()
                         if (plugins[
-                            pluginName
+                            name
                         ].lastLoadTimestamp < currentTimestamp) {
                             // Enforce to reload new module version.
                             delete require.cache[require.resolve(
                                 indexFilePath)]
-                            plugins[pluginName].module = require(indexFilePath)
+                            try {
+                                plugins[name].module = require(indexFilePath)
+                            } catch (error) {
+                                throw new Error(
+                                    `Couln't load plugin file "` +
+                                    `${indexFilePath}" for plugin "${name}":` +
+                                    ` ${Helper.representObject(error)}.`)
+                            }
                         }
-                        plugins[pluginName].lastLoadTimestamp =
-                            currentTimestamp
-                        if (type in plugins[pluginName].module)
-                            return await plugins[pluginName].module[
-                                type
-                            ].apply(plugins[pluginName].module, parameter)
+                        plugins[name].lastLoadTimestamp = currentTimestamp
+                        if (type in plugins[name].module)
+                            return await plugins[name].module[type].apply(
+                                plugins[name].module, parameter)
                     }
                 else
                     api = ():Promise<any> => new Promise((
@@ -513,19 +521,31 @@ export default class Helper {
                                 WebOptimizerHelper.getProcessCloseHandler(
                                     resolve, reject, closeEventName))
                     })
+                let module:Object
+                try {
+                    // IgnoreTypeCheck
+                    module = require(indexFilePath)
+                } catch (error) {
+                    throw new Error(
+                        `Couln't load plugin file "${indexFilePath}" for ` +
+                        `plugin "${name}": ` +
+                        Helper.representObject(error))
+                }
                 return {
                     api,
                     configuration: configuration[name],
                     indexFilePath,
-                    name: pluginName,
-                    path: currentPluginPath,
+                    name,
+                    path: pluginPath,
                     lastLoadTimestamp: fileSystem.statSync(
-                        currentPluginPath
+                        pluginPath
                     ).mtime.getTime(),
-                    // IgnoreTypeCheck
-                    module: require(indexFilePath)
+                    module
                 }
             }
+        throw new Error(
+            `Plugin "${name}" hasn't working configuration object under one ` +
+            `of the following keys: "${optionsPropertyNames.join(", ")}".`)
     }
     /**
      * Extends given configuration object with all plugin specific ones and
@@ -568,8 +588,9 @@ export default class Helper {
                             return
                         }
                         plugins[pluginName] = Helper.loadPlugin(
-                            pluginName, pluginConfiguration,
-                            configuration.plugin.optionsPropertyNames)
+                            pluginName, plugins, pluginConfiguration,
+                            configuration.plugin.optionsPropertyNames,
+                            currentPluginPath)
                     }
                 })
         const sortedPlugins:Array<Object> = []
