@@ -15,9 +15,10 @@
 // region imports
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
-import WebOptimizerHelper from 'weboptimizer/helper'
 import fileSystem from 'fs'
+import fetch from 'node-fetch'
 import path from 'path'
+import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
 try {
@@ -84,6 +85,54 @@ export default class Helper {
             data = await plugin.api.apply(Helper, [type, data].concat(
                 parameter))
         return data
+    }
+    /**
+     * Checks if given url response with given status code.
+     * @param url - Url to check reachability.
+     * @param wait - Boolean indicating if we should retry until a status code
+     * will be given.
+     * @param expectedStatusCode - Status code to check for.
+     * @param pollIntervallInSeconds - Seconds between two tries to reach given
+     * url.
+     * @returns A promise which will be resolved if a request to given url has
+     * finished and resulting status code matches given expectedstatus code.
+     * Otherwise returned promise will be rejected.
+     *
+     */
+    static async checkReachability(
+        url:string, wait:boolean = false, expectedStatusCode:number = 200,
+        pollIntervallInSeconds:number = 0.1
+    ):Promise<?Object> {
+        const check:Function = (response:?Object):?Object => {
+            if (
+                response && 'status' in response &&
+                response.status !== expectedStatusCode
+            )
+                throw new Error(
+                    `Given status code ${response.status} differs from ` +
+                    `${expectedStatusCode}.`)
+            return response
+        }
+        if (wait)
+            return new Promise((resolve:Function, reject:Function):void => {
+                const wrapper:Function = async ():Promise<?Object> => {
+                    let response:Object
+                    try {
+                        response = await fetch(url)
+                    } catch (error) {
+                        setTimeout(wrapper, pollIntervallInSeconds * 1000)
+                        return response
+                    }
+                    try {
+                        resolve(check(response))
+                    } catch (error) {
+                        reject(error)
+                    }
+                    return response
+                }
+                setTimeout(wrapper, 0)
+            })
+        return check(await fetch(url))
     }
     /**
      * Determines a mapping of all models to roles who are allowed to edit
