@@ -13,7 +13,9 @@
     endregion
 */
 // region imports
+import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
+import WebOptimizerHelper from 'weboptimizer/helper'
 import fileSystem from 'fs'
 import path from 'path'
 import type {PlainObject} from 'weboptimizer/type'
@@ -77,8 +79,11 @@ export default class Helper {
     static async callPluginStack(
         type:string, plugins:Array<Object>, ...parameter:Array<any>
     ):Promise<any> {
+        let data:any = null
         for (const plugin:Object of plugins)
-            await plugin[type].apply(Helper, parameter)
+            data = await plugin.api.apply(Helper, [type, data].concat(
+                parameter))
+        return data
     }
     /**
      * Determines a mapping of all models to roles who are allowed to edit
@@ -426,30 +431,6 @@ export default class Helper {
         return code
     }
     /**
-     * Checks if given path points to a valid directory.
-     * @param filePath - Path to directory.
-     * @returns A boolean which indicates directory existents.
-     */
-    static isDirectorySync(filePath:string):boolean {
-        try {
-            return fileSystem.statSync(filePath).isDirectory()
-        } catch (error) {
-            return false
-        }
-    }
-    /**
-     * Checks if given path points to a valid file.
-     * @param filePath - Path to file.
-     * @returns A boolean which indicates file existents.
-     */
-    static isFileSync(filePath:string):boolean {
-        try {
-            return fileSystem.statSync(filePath).isFile()
-        } catch (error) {
-            return false
-        }
-    }
-    /**
      * Extends given configuration object with all plugin specific ones and
      * returns a topological sorted list of plugins with plugins specific
      * meta informations stored.
@@ -462,7 +443,7 @@ export default class Helper {
     } {
         const plugins:{[key:string]:Object} = {}
         for (const pluginPath:string of configuration.plugin.directoryPaths)
-            if (Helper.isDirectorySync(pluginPath))
+            if (WebOptimizerHelper.isDirectorySync(pluginPath))
                 fileSystem.readdirSync(pluginPath).forEach((
                     pluginName:string
                 ):void => {
@@ -472,8 +453,9 @@ export default class Helper {
                         return
                     const currentPluginPath:string = path.resolve(
                         pluginPath, pluginName)
-                    const stat:Object = fileSystem.statSync(currentPluginPath)
-                    if (stat && stat.isDirectory() && Helper.isFileSync(
+                    if (WebOptimizerHelper.isDirectorySync(
+                        currentPluginPath
+                    ) && WebOptimizerHelper.isFileSync(
                         `${currentPluginPath}/package.json`
                     )) {
                         let pluginConfiguration:Object
@@ -488,12 +470,115 @@ export default class Helper {
                                 Helper.representObject(error))
                             return
                         }
-                        for (const name:string of configuration.plugin.optionsPropertyNames)
+                        for (
+                            const name:string of
+                            configuration.plugin.optionsPropertyNames
+                        )
                             if (configuration.hasOwnProperty(name)) {
+                                let indexFilePath:string = 'index.js'
+                                if (pluginConfiguration.hasOwnProperty('main'))
+                                    indexFilePath = pluginConfiguration.main
+                                indexFilePath = path.resolve(
+                                    currentPluginPath, indexFilePath)
+                                if (!WebOptimizerHelper.isFileSync(
+                                    indexFilePath
+                                ))
+                                    fileSystem.readdirSync(
+                                        currentPluginPath
+                                    ).forEach((fileName:string):void => {
+                                        if (
+                                            fileName !== 'package.json' &&
+                                            WebOptimizerHelper.isFileSync(
+                                                path.resolve(
+                                                    currentPluginPath,
+                                                    fileName))
+                                        )
+                                            if (!(
+                                                WebOptimizerHelper.isFileSync(
+                                                    indexFilePath
+                                                ) && [
+                                                    'index', 'main'
+                                                ].includes(path.basename(
+                                                    indexFilePath,
+                                                    path.extname(fileName)))
+                                            ))
+                                                indexFilePath = path.resolve(
+                                                    currentPluginPath,
+                                                    indexFilePath)
+                                    })
+                                if (!WebOptimizerHelper.isFileSync(
+                                    indexFilePath
+                                ))
+                                    throw new Error(
+                                        `Can't find an entry file in "` +
+                                        `${currentPluginPath}" for plugin "` +
+                                        `${pluginName}".`)
+                                let api:Function
+                                if (indexFilePath.endsWith('.js'))
+                                    api = async (
+                                        type:string, ...parameter:Array<any>
+                                    ):any => {
+                                        const currentTimestamp:number =
+                                            fileSystem.statSync(
+                                                currentPluginPath
+                                            ).mtime.getTime()
+                                        if (plugins[
+                                            pluginName
+                                        ].lastLoadTimestamp <
+                                        currentTimestamp) {
+                                            // Enforce to reload new module
+                                            // version.
+                                            delete require.cache[
+                                                require.resolve(indexFilePath)]
+                                            plugins[pluginName].module =
+                                                require(indexFilePath)
+                                        }
+                                        plugins[
+                                            pluginName
+                                        ].lastLoadTimestamp = currentTimestamp
+                                        return await plugins[
+                                            pluginName
+                                        ].module[type].apply(
+                                            plugins[pluginName].module,
+                                            parameter)
+                                    }
+                                else
+                                    api = ():Promise<any> => new Promise((
+                                        resolve:Function, reject:Function
+                                    ):void => {
+                                        const childProcess:ChildProcess =
+                                            spawnChildProcess(
+                                                indexFilePath,
+                                                Tools.arrayMake(arguments),
+                                                {
+                                                    cwd: process.cwd(),
+                                                    env: process.env,
+                                                    shell: true,
+                                                    stdio: 'inherit'
+                                                })
+                                        for (const closeEventName:string of [
+                                            'exit', 'close',
+                                            'uncaughtException', 'SIGINT',
+                                            'SIGTERM', 'SIGQUIT'
+                                        ])
+                                            childProcess.on(
+                                                closeEventName,
+                                                WebOptimizerHelper
+                                                    .getProcessCloseHandler(
+                                                        resolve, reject,
+                                                        closeEventName))
+                                    })
                                 plugins[pluginName] = {
+                                    api,
+                                    configuration: pluginConfiguration[name],
+                                    indexFilePath,
                                     name: pluginName,
                                     path: currentPluginPath,
-                                    configuration: pluginConfiguration[name]
+                                    lastLoadTimestamp: fileSystem.statSync(
+                                        currentPluginPath
+                                    ).mtime.getTime(),
+                                    // IgnoreTypeCheck
+                                    module: require(indexFilePath)
                                 }
                                 break
                             }

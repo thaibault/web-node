@@ -782,19 +782,6 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         assert.deepEqual(result, test[test.length - 1])
     }
     // endregion
-})
-QUnit.test('isDirectorySync', (assert:Object):void => {
-    for (const filePath:string of [
-        __dirname, path.resolve(__dirname, '../')
-    ])
-        assert.ok(Helper.isDirectorySync(filePath))
-})
-QUnit.test('isFileSync', (assert:Object):void => {
-    for (const filePath:string of [
-        __dirname, path.resolve(__dirname, '../')
-    ])
-        assert.notOk(Helper.isFileSync(filePath))
-})
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [
         // TODO
