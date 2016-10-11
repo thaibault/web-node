@@ -101,20 +101,24 @@ import Helper from './helper'
     }
     // endregion
     // region apply database/rest api configuration
-    for (const path:string in configuration.database)
-        if (configuration.database.hasOwnProperty(path) && path.includes('/'))
+    for (const configurationPath:string in configuration.database)
+        if (configuration.database.hasOwnProperty(
+            configurationPath
+        ) && configurationPath.includes('/'))
             try {
                 await fetch(Tools.stringFormat(
                     configuration.database.url,
                     `${configuration.database.user.name}:` +
                     `${configuration.database.user.password}@`
-                ) + `/_config/${path}`, {
-                    method: 'PUT', body: `"${configuration.database[path]}"`
+                ) + `/_config/${configurationPath}`, {
+                    method: 'PUT',
+                    body: `"${configuration.database[configurationPath]}"`
                 })
             } catch (error) {
                 console.error(
-                    `Configuration "${path}" couldn't be applied to "` +
-                    `${configuration.database[path]}": ` +
+                    `Configuration "${configurationPath}" couldn't be ` +
+                    'applied to "' +
+                    `${configuration.database[configurationPath]}": ` +
                     Helper.representObject(error))
             }
     // endregion
