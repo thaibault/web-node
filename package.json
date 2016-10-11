@@ -45,7 +45,7 @@
     "document": "webOptimizer document",
     "lint": "webOptimizer typeCheck && webOptimizer lint",
     "prepublish": "npm run build",
-    "serve": "webOptimizer build && build/index.js & pouchdb-server --port 5984 --dir database --config ./database/database.json",
+    "serve": "webOptimizer build && build/index.js",
     "start": "npm run serve",
     "test": "webOptimizer test",
     "update": "npm version patch && npm publish",
@@ -77,8 +77,13 @@
     },
     "database": {
       "url": {
-        "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database['httpd/port']}`"
+        "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database.port}`"
       },
+      "path": "database",
+      "configFilePath": {
+        "__evaluate__": "`./${self.database.path}/database.json`"
+      },
+      "port": "5984",
       "user": {
         "name": "admin",
         "password": "admin"
@@ -87,8 +92,7 @@
       "log/level": "info",
       "httpd/host": {
         "__evaluate__": "self.server.application.hostName"
-      },
-      "httpd/port": "5984"
+      }
     },
     "server": {
       "application": {

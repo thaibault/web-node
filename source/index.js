@@ -12,11 +12,13 @@
     3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-// region imports
+// region  imports
+import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
 import http from 'http'
 import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
+import WebOptimizerHelper from 'weboptimizer/helper'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
@@ -26,12 +28,36 @@ import baseConfiguration from './configurator'
 import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
+    // region load plugins
     const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
     if (plugins.length)
         console.info(
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
                 plugin.name
             ).join('", "') + '".')
+    // endregion
+    // region start database server
+    const databaseServerProcess:ChildProcess = spawnChildProcess(
+        'pouchdb-server', [
+            '--port', configuration.database.port,
+            '--dir', configuration.database.path,
+            '--config', configuration.database.configFilePath
+        ], {
+            cwd: process.cwd(),
+            env: process.env,
+            shell: true,
+            stdio: 'inherit'
+        })
+    for (const closeEventName:string of [
+        'exit', 'close', 'uncaughtException', 'SIGINT', 'SIGTERM',
+        'SIGQUIT'
+    ])
+        databaseServerProcess.on(
+            closeEventName, WebOptimizerHelper.getProcessCloseHandler(
+                Tools.noop, Tools.noop, closeEventName))
+    await Helper.checkReachability(
+        Tools.stringFormat(configuration.database.url, ''), true)
+    // endregion
     // region ensure presence of global admin user
     const unauthenticatedUserDatabaseConnection:PouchDB = new PouchDB(
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)
@@ -76,9 +102,7 @@ import Helper from './helper'
     // endregion
     // region apply database/rest api configuration
     for (const path:string in configuration.database)
-        if (configuration.database.hasOwnProperty(path) && ![
-            'url', 'user'
-        ].includes(path))
+        if (configuration.database.hasOwnProperty(path) && !path.includes('/'))
             try {
                 await fetch(Tools.stringFormat(
                     configuration.database.url,
@@ -156,6 +180,7 @@ import Helper from './helper'
             databaseConnection, 'authentication', authenticationCode,
             'Authentication logic')
         // endregion
+        // region start application server
         const server = http.createServer(async (
             request:Object, response:Object
         ):any => {
@@ -166,6 +191,7 @@ import Helper from './helper'
             configuration.server.application.hostName)
         await Helper.callPluginStack(
             'initialize', plugins, server, databaseConnection, configuration)
+        // endregion
     } catch (error) {
         if (configuration.debug)
             throw error
