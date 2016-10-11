@@ -102,7 +102,7 @@ import Helper from './helper'
     // endregion
     // region apply database/rest api configuration
     for (const path:string in configuration.database)
-        if (configuration.database.hasOwnProperty(path) && !path.includes('/'))
+        if (configuration.database.hasOwnProperty(path) && path.includes('/'))
             try {
                 await fetch(Tools.stringFormat(
                     configuration.database.url,
