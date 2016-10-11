@@ -532,11 +532,16 @@ export default class Helper {
                             name
                         ].lastLoadTimestamp < currentTimestamp) {
                             // Enforce to reload new module version.
-                            delete module.require.cache[module.require.resolve(
-                                indexFilePath)]
+                            /* eslint-disable no-eval */
+                            delete eval('require').cache[eval(
+                                'require'
+                            ).resolve(indexFilePath)]
+                            /* eslint-enable no-eval */
                             try {
-                                plugins[name].scope = module.require(
+                                /* eslint-disable no-eval */
+                                plugins[name].scope = eval('require')(
                                     indexFilePath)
+                                /* eslint-enable no-eval */
                             } catch (error) {
                                 throw new Error(
                                     `Couln't load plugin file "` +
@@ -573,7 +578,9 @@ export default class Helper {
                     })
                 let scope:Object
                 try {
-                    scope = module.require(indexFilePath)
+                    /* eslint-disable no-eval */
+                    scope = eval('require')(indexFilePath)
+                    /* eslint-enable no-eval */
                 } catch (error) {
                     throw new Error(
                         `Couln't load plugin file "${indexFilePath}" for ` +

@@ -42,6 +42,7 @@ while (true) {
         break
 }
 if (
+    packageConfiguration.context.path === '/' ||
     path.basename(path.dirname(process.cwd())) === 'node_modules' ||
     path.basename(path.dirname(process.cwd())) === '.staging' &&
     path.basename(path.dirname(path.dirname(process.cwd()))) === 'node_modules'
@@ -65,8 +66,10 @@ if (
     } catch (error) {}
 let specificConfiguration:PlainObject = {}
 try {
-    specificConfiguration = module.require(path.join(
+    /* eslint-disable no-eval */
+    specificConfiguration = eval('require')(path.join(
         packageConfiguration.context.path, 'package'))
+    /* eslint-enable no-eval */
 } catch (error) {
     packageConfiguration.context.path = process.cwd()
 }
