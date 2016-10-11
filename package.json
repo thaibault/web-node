@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "A generic web backend.",
   "documentationWebsite": {
     "name": "webNode",
@@ -58,12 +58,16 @@
     "plugin": {
       "directories": {
         "internal": {
-            "path": {"__evaluate__": "`${currentPath}/plugins/`"},
-            "nameRegularExpressionPattern": "^[a-z].*$"
+          "path": {
+            "__evaluate__": "`${currentPath}/plugins/`"
+          },
+          "nameRegularExpressionPattern": "^[a-z].*$"
         },
         "external": {
-            "path": {"__evaluate__": "`${currentPath}/node_modules/`"},
-            "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
+          "path": {
+            "__evaluate__": "`${currentPath}/node_modules/`"
+          },
+          "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
         }
       },
       "optionsPropertyNames": [
