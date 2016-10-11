@@ -486,8 +486,10 @@ export default class Helper {
                         }
                         plugins[pluginName].lastLoadTimestamp =
                             currentTimestamp
-                        return await plugins[pluginName].module[type].apply(
-                            plugins[pluginName].module, parameter)
+                        if (type in plugins[pluginName].module)
+                            return await plugins[pluginName].module[
+                                type
+                            ].apply(plugins[pluginName].module, parameter)
                     }
                 else
                     api = ():Promise<any> => new Promise((

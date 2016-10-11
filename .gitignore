@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 
-## Generic
-
 # Generated documentations
 documentation/build
+api
 apiDocumentation/
 
+# Generated runtime bytecode files.
+__pycache__
+*.py[cod]
+
 # Temporary compile files
-log.txt
-database
 *.compiled.*
 *.compiled
-!/api/**/*
-*Bundle.*
-!/data/**/*
 .dynamicConfiguration-*.json
 *.dll-manifest.json
 
@@ -21,6 +19,7 @@ database
 *.profile
 
 # Packages
+.SRCINFO
 *.egg
 *.egg-info
 dist
