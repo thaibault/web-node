@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
-## Generic
-
 # Generated documentations
 documentation/build
+api
 apiDocumentation/
 
-# Temporary compile files
-log.txt
+# Generated runtime bytecode files.
+__pycache__
+*.py[cod]
+
+# Runtime data
 database
+log.txt
+
+# Temporary compile files
 *.compiled.*
 *.compiled
-!/api/**/*
-*Bundle.*
-!/data/**/*
 .dynamicConfiguration-*.json
 *.dll-manifest.json
 
@@ -21,6 +23,7 @@ database
 *.profile
 
 # Packages
+.SRCINFO
 *.egg
 *.egg-info
 dist
@@ -73,7 +76,7 @@ nosetests.xml
 # Temporary windows files
 *Thumbs.db
 
-# Node Modules
+# NPM's runtime files
 node_modules/
 .npm/
 .v8flags.*
