@@ -9,6 +9,9 @@ apiDocumentation/
 __pycache__
 *.py[cod]
 
+# Runtime data
+database
+
 # Temporary compile files
 *.compiled.*
 *.compiled
