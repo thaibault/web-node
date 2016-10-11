@@ -9,9 +9,9 @@
   "homepage": "http://torben.website/webNode",
   "license": "CC-BY-3.0",
   "bin": {
-    "webNode": "build/index.compiled.js"
+    "webNode": "build/index.js"
   },
-  "main": "build/index.compiled.js",
+  "main": "build/index.js",
   "keywords": [
     "web",
     "backend",
