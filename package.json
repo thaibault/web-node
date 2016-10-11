@@ -35,6 +35,7 @@
     "source-map-support": "latest"
   },
   "files": [
+    "source",
     "build"
   ],
   "scripts": {
