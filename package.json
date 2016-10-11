@@ -64,7 +64,7 @@
           "__evaluate__": "`${currentPath}/node_modules/`"
         }
       ],
-      "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+WebNodePlugin$",
+      "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+webnodeplugin$",
       "optionsPropertyNames": [
         "webNode"
       ]
