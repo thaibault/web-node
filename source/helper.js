@@ -483,10 +483,11 @@ export default class Helper {
                             name
                         ].lastLoadTimestamp < currentTimestamp) {
                             // Enforce to reload new module version.
-                            delete require.cache[require.resolve(
+                            delete module.require.cache[module.require.resolve(
                                 indexFilePath)]
                             try {
-                                plugins[name].module = require(indexFilePath)
+                                plugins[name].scope = module.require(
+                                    indexFilePath)
                             } catch (error) {
                                 throw new Error(
                                     `Couln't load plugin file "` +
@@ -495,9 +496,9 @@ export default class Helper {
                             }
                         }
                         plugins[name].lastLoadTimestamp = currentTimestamp
-                        if (type in plugins[name].module)
-                            return await plugins[name].module[type].apply(
-                                plugins[name].module, parameter)
+                        if (type in plugins[name].scope)
+                            return await plugins[name].scope[type].apply(
+                                plugins[name].scope, parameter)
                     }
                 else
                     api = ():Promise<any> => new Promise((
@@ -521,10 +522,9 @@ export default class Helper {
                                 WebOptimizerHelper.getProcessCloseHandler(
                                     resolve, reject, closeEventName))
                     })
-                let module:Object
+                let scope:Object
                 try {
-                    // IgnoreTypeCheck
-                    module = require(indexFilePath)
+                    scope = module.require(indexFilePath)
                 } catch (error) {
                     throw new Error(
                         `Couln't load plugin file "${indexFilePath}" for ` +
@@ -540,7 +540,7 @@ export default class Helper {
                     lastLoadTimestamp: fileSystem.statSync(
                         pluginPath
                     ).mtime.getTime(),
-                    module
+                    scope
                 }
             }
         throw new Error(
@@ -559,17 +559,22 @@ export default class Helper {
         plugins:Array<Object>
     } {
         const plugins:{[key:string]:Object} = {}
-        for (const pluginPath:string of configuration.plugin.directoryPaths)
-            if (WebOptimizerHelper.isDirectorySync(pluginPath))
-                fileSystem.readdirSync(pluginPath).forEach((
-                    pluginName:string
-                ):void => {
-                    if (!pluginName.match(new RegExp(configuration.plugin
-                        .directoryNameRegularExpressionPattern
-                    )))
+        for (const type:string in configuration.plugin.directories)
+            if (configuration.plugin.directories.hasOwnProperty(
+                type
+            ) && WebOptimizerHelper.isDirectorySync(
+                configuration.plugin.directories[type].path
+            ))
+                fileSystem.readdirSync(
+                    configuration.plugin.directories[type].path
+                ).forEach((pluginName:string):void => {
+                    if (!(new RegExp(configuration.plugin.directories[
+                        type
+                    ].nameRegularExpressionPattern)).test(pluginName))
                         return
                     const currentPluginPath:string = path.resolve(
-                        pluginPath, pluginName)
+                        configuration.plugin.directories[type].path, pluginName
+                    )
                     if (WebOptimizerHelper.isDirectorySync(
                         currentPluginPath
                     ) && WebOptimizerHelper.isFileSync(

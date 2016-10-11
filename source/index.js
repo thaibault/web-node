@@ -27,6 +27,11 @@ import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
     const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
+    if (plugins.length)
+        console.info(
+            'Loaded plugins: "' + plugins.map((plugin:Object):string =>
+                plugin.name
+            ).join('", "') + '".')
     // region ensure presence of global admin user
     const unauthenticatedUserDatabaseConnection:PouchDB = new PouchDB(
         `${Tools.stringFormat(configuration.database.url, '')}/_users`)

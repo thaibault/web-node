@@ -56,15 +56,16 @@
     "debug": false,
     "encoding": "utf8",
     "plugin": {
-      "directoryPaths": [
-        {
-          "__evaluate__": "`${currentPath}/plugins/`"
+      "directories": {
+        "internal": {
+            "path": {"__evaluate__": "`${currentPath}/plugins/`"},
+            "nameRegularExpressionPattern": "^[a-z].*$"
         },
-        {
-          "__evaluate__": "`${currentPath}/node_modules/`"
+        "external": {
+            "path": {"__evaluate__": "`${currentPath}/node_modules/`"},
+            "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
         }
-      ],
-      "directoryNameRegularExpressionPattern": "[a-z][a-zA-Z0-9]+webnodeplugin$",
+      },
       "optionsPropertyNames": [
         "webNode"
       ]
@@ -77,7 +78,7 @@
         "name": "admin",
         "password": "admin"
       },
-      "log/file": "-",
+      "log/file": "/dev/stdout",
       "log/level": "info",
       "httpd/host": {
         "__evaluate__": "self.server.application.hostName"
