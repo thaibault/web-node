@@ -431,6 +431,101 @@ export default class Helper {
         return code
     }
     /**
+     * Extends given configuration object with given plugin specific ones and
+     * returns a plugin specific meta information object.
+     * @param pluginName - Name of plugin to extend.
+     * @param configuration - Plugin specific configurations.
+     * @param optionsPropertyNames - Property names to search for to use as
+     * entry in plugin configuration file.
+     * @return An object of plugin specific meta informations.
+     */
+    static loadPlugin(
+        pluginName:string, configuration:PlainObject,
+        optionsPropertyNames:Array<string>
+    ) {
+        for (const name:string of optionsPropertyNames)
+            if (configuration.hasOwnProperty(name)) {
+                let indexFilePath:string = 'index.js'
+                if (configuration.hasOwnProperty('main'))
+                    indexFilePath = configuration.main
+                indexFilePath = path.resolve(currentPluginPath, indexFilePath)
+                if (!WebOptimizerHelper.isFileSync(indexFilePath))
+                    fileSystem.readdirSync(currentPluginPath).forEach((
+                        fileName:string
+                    ):void => {
+                        if (
+                            fileName !== 'package.json' &&
+                            WebOptimizerHelper.isFileSync(path.resolve(
+                                currentPluginPath, fileName))
+                        )
+                            if (!(WebOptimizerHelper.isFileSync(
+                                indexFilePath
+                            ) && ['index', 'main'].includes(path.basename(
+                                indexFilePath, path.extname(fileName)
+                            ))))
+                                indexFilePath = path.resolve(
+                                    currentPluginPath, indexFilePath)
+                    })
+                if (!WebOptimizerHelper.isFileSync(indexFilePath))
+                    throw new Error(
+                        `Can't find an entry file in "${currentPluginPath}" ` +
+                        `for plugin "${pluginName}".`)
+                let api:Function
+                if (indexFilePath.endsWith('.js'))
+                    api = async (type:string, ...parameter:Array<any>):any => {
+                        const currentTimestamp:number = fileSystem.statSync(
+                            currentPluginPath
+                        ).mtime.getTime()
+                        if (plugins[
+                            pluginName
+                        ].lastLoadTimestamp < currentTimestamp) {
+                            // Enforce to reload new module version.
+                            delete require.cache[require.resolve(
+                                indexFilePath)]
+                            plugins[pluginName].module = require(indexFilePath)
+                        }
+                        plugins[pluginName].lastLoadTimestamp =
+                            currentTimestamp
+                        return await plugins[pluginName].module[type].apply(
+                            plugins[pluginName].module, parameter)
+                    }
+                else
+                    api = ():Promise<any> => new Promise((
+                        resolve:Function, reject:Function
+                    ):void => {
+                        const childProcess:ChildProcess =
+                            spawnChildProcess(
+                                indexFilePath, Tools.arrayMake(arguments),
+                                {
+                                    cwd: process.cwd(),
+                                    env: process.env,
+                                    shell: true,
+                                    stdio: 'inherit'
+                                })
+                        for (const closeEventName:string of [
+                            'exit', 'close', 'uncaughtException', 'SIGINT',
+                            'SIGTERM', 'SIGQUIT'
+                        ])
+                            childProcess.on(
+                                closeEventName,
+                                WebOptimizerHelper.getProcessCloseHandler(
+                                    resolve, reject, closeEventName))
+                    })
+                return {
+                    api,
+                    configuration: configuration[name],
+                    indexFilePath,
+                    name: pluginName,
+                    path: currentPluginPath,
+                    lastLoadTimestamp: fileSystem.statSync(
+                        currentPluginPath
+                    ).mtime.getTime(),
+                    // IgnoreTypeCheck
+                    module: require(indexFilePath)
+                }
+            }
+    }
+    /**
      * Extends given configuration object with all plugin specific ones and
      * returns a topological sorted list of plugins with plugins specific
      * meta informations stored.
@@ -447,8 +542,8 @@ export default class Helper {
                 fileSystem.readdirSync(pluginPath).forEach((
                     pluginName:string
                 ):void => {
-                    if (!pluginName.match(new RegExp(
-                        configuration.plugin.directoryNameRegularExpressionPattern
+                    if (!pluginName.match(new RegExp(configuration.plugin
+                        .directoryNameRegularExpressionPattern
                     )))
                         return
                     const currentPluginPath:string = path.resolve(
@@ -470,118 +565,9 @@ export default class Helper {
                                 Helper.representObject(error))
                             return
                         }
-                        for (
-                            const name:string of
-                            configuration.plugin.optionsPropertyNames
-                        )
-                            if (configuration.hasOwnProperty(name)) {
-                                let indexFilePath:string = 'index.js'
-                                if (pluginConfiguration.hasOwnProperty('main'))
-                                    indexFilePath = pluginConfiguration.main
-                                indexFilePath = path.resolve(
-                                    currentPluginPath, indexFilePath)
-                                if (!WebOptimizerHelper.isFileSync(
-                                    indexFilePath
-                                ))
-                                    fileSystem.readdirSync(
-                                        currentPluginPath
-                                    ).forEach((fileName:string):void => {
-                                        if (
-                                            fileName !== 'package.json' &&
-                                            WebOptimizerHelper.isFileSync(
-                                                path.resolve(
-                                                    currentPluginPath,
-                                                    fileName))
-                                        )
-                                            if (!(
-                                                WebOptimizerHelper.isFileSync(
-                                                    indexFilePath
-                                                ) && [
-                                                    'index', 'main'
-                                                ].includes(path.basename(
-                                                    indexFilePath,
-                                                    path.extname(fileName)))
-                                            ))
-                                                indexFilePath = path.resolve(
-                                                    currentPluginPath,
-                                                    indexFilePath)
-                                    })
-                                if (!WebOptimizerHelper.isFileSync(
-                                    indexFilePath
-                                ))
-                                    throw new Error(
-                                        `Can't find an entry file in "` +
-                                        `${currentPluginPath}" for plugin "` +
-                                        `${pluginName}".`)
-                                let api:Function
-                                if (indexFilePath.endsWith('.js'))
-                                    api = async (
-                                        type:string, ...parameter:Array<any>
-                                    ):any => {
-                                        const currentTimestamp:number =
-                                            fileSystem.statSync(
-                                                currentPluginPath
-                                            ).mtime.getTime()
-                                        if (plugins[
-                                            pluginName
-                                        ].lastLoadTimestamp <
-                                        currentTimestamp) {
-                                            // Enforce to reload new module
-                                            // version.
-                                            delete require.cache[
-                                                require.resolve(indexFilePath)]
-                                            plugins[pluginName].module =
-                                                require(indexFilePath)
-                                        }
-                                        plugins[
-                                            pluginName
-                                        ].lastLoadTimestamp = currentTimestamp
-                                        return await plugins[
-                                            pluginName
-                                        ].module[type].apply(
-                                            plugins[pluginName].module,
-                                            parameter)
-                                    }
-                                else
-                                    api = ():Promise<any> => new Promise((
-                                        resolve:Function, reject:Function
-                                    ):void => {
-                                        const childProcess:ChildProcess =
-                                            spawnChildProcess(
-                                                indexFilePath,
-                                                Tools.arrayMake(arguments),
-                                                {
-                                                    cwd: process.cwd(),
-                                                    env: process.env,
-                                                    shell: true,
-                                                    stdio: 'inherit'
-                                                })
-                                        for (const closeEventName:string of [
-                                            'exit', 'close',
-                                            'uncaughtException', 'SIGINT',
-                                            'SIGTERM', 'SIGQUIT'
-                                        ])
-                                            childProcess.on(
-                                                closeEventName,
-                                                WebOptimizerHelper
-                                                    .getProcessCloseHandler(
-                                                        resolve, reject,
-                                                        closeEventName))
-                                    })
-                                plugins[pluginName] = {
-                                    api,
-                                    configuration: pluginConfiguration[name],
-                                    indexFilePath,
-                                    name: pluginName,
-                                    path: currentPluginPath,
-                                    lastLoadTimestamp: fileSystem.statSync(
-                                        currentPluginPath
-                                    ).mtime.getTime(),
-                                    // IgnoreTypeCheck
-                                    module: require(indexFilePath)
-                                }
-                                break
-                            }
+                        plugins[pluginName] = Helper.loadPlugin(
+                            pluginName, pluginConfiguration,
+                            configuration.plugin.optionsPropertyNames)
                     }
                 })
         const sortedPlugins:Array<Object> = []
