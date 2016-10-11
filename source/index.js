@@ -58,7 +58,7 @@ import Helper from './helper'
             try {
                 await authenticatedUserDatabaseConnection.allDocs()
             } catch (error) {
-                throw new Error(
+                console.error(
                     `Can't login as existing admin user "` +
                     `${configuration.database.user.name}": "` +
                     `${Helper.representObject(error)}".`)
@@ -66,7 +66,7 @@ import Helper from './helper'
                 authenticatedUserDatabaseConnection.close()
             }
         } else
-            throw new Error(
+            console.error(
                 `Can't create new admin user "` +
                 `${configuration.database.user.name}": "` +
                 `${Helper.representObject(error)}".`)
