@@ -153,10 +153,6 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     assert:Object
 ):void => {
     const defaultSpecification:PlainObject = {
-        specialPropertyNames: {
-            allowedRoles: 'webNodeAllowedRoles',
-            type: 'webNodeType'
-        },
         defaultPropertySpecification: {
             type: 'string',
             default: null,

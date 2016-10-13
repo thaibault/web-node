@@ -123,6 +123,7 @@
         "regularExpressionPattern": null,
         "constraint": null
       },
+      "reservedPropertyNames": ["_rev", "_revisions", "_deleted"],
       "specialPropertyNames": {
         "allowedRoles": "webNodeAllowedRoles",
         "extend": "webNodeExtends",
