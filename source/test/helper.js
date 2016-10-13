@@ -156,14 +156,18 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         defaultPropertySpecification: {
             type: 'string',
             default: null,
-            onCreate: null,
-            onUpdate: null,
+            onCreateEvaluation: null,
+            onCreateExpression: null,
+            onUpdateEvaluation: null,
+            onUpdateExpression: null,
             nullable: true,
             writable: true,
+            mutable: true,
             minimum: -999999999999999999999,
             maximum: 999999999999999999999,
             regularExpressionPattern: null,
-            constraint: null
+            constraintEvaluation: null,
+            constraintExpression: null
         },
         types: {_base: {webNodeType: {
             regularExpressionPattern: '^[A-Z][a-z0-9]+$',
@@ -421,10 +425,11 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                     a: 'b',
                     b: {webNodeType: 'Test', a: 'a'}
                 },
-                {types: {Test: {a: {constraint: 'newDocument.a === "b"'},
+                {types: {Test: {
+                    a: {constraintEvaluation: 'newDocument.a === "b"'},
                     b: {type: 'Test'}
                 }}},
-            ], 'Constraint'
+            ], 'ConstraintEvaluation'
         ],
         // // endregion
         // / endregion
@@ -471,14 +476,16 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         [
             [
                 {webNodeType: 'Test', a: 'b'},
-                {types: {Test: {a: {constraint: 'false'}}}}
-            ], 'Constraint'
+                {types: {Test: {a: {constraintEvaluation: 'false'}}}}
+            ], 'ConstraintEvaluation'
         ],
         [
             [
                 {webNodeType: 'Test', a: 'b'},
-                {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}}
-            ], 'Constraint'
+                {types: {Test: {a: {
+                    constraintEvaluation: 'newDocument[key] === "a"'
+                }}}}
+            ], 'ConstraintEvaluation'
         ]
         // endregion
     ]) {
@@ -549,7 +556,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         // endregion
         // region property readonly
         [
-            [{webNodeType: 'Test', a: 'b'}, {a: 'b', webNodeType: 'Test'}],
+            [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'b'}],
             {types: {Test: {a: {writable: false}}}}
         ],
         [

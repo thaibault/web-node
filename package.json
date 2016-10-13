@@ -114,14 +114,18 @@
       "defaultPropertySpecification": {
         "type": "string",
         "default": null,
-        "onCreate": null,
-        "onUpdate": null,
+        "onCreateEvaluation": null,
+        "onCreateExpression": null,
+        "onUpdateEvaluation": null,
+        "onUpdateExpression": null,
         "nullable": true,
         "writable": true,
+        "mutable": true,
         "minimum": -1e+21,
         "maximum": 1e+21,
         "regularExpressionPattern": null,
-        "constraint": null
+        "constraintEvaluation": null,
+        "constraintExpression": null
       },
       "reservedPropertyNames": ["_rev", "_revisions", "_deleted"],
       "specialPropertyNames": {
@@ -136,7 +140,7 @@
           "_id": {},
           "creationDateTime": {
             "type": "DateTime",
-            "onCreate": "new Date().getTime()",
+            "onCreateEvaluation": "new Date().getTime()",
             "minimum": {
               "__evaluate__": "new Date().getTime()"
             },
@@ -145,14 +149,14 @@
           },
           "updateDateType": {
             "type": "DateTime",
-            "onUpdate": "new Date().getTime()",
+            "onUpdateEvaluation": "new Date().getTime()",
             "minimum": {
               "__evaluate__": "new Date().getTime()"
             },
             "nullable": false
           },
           "lastUser": {
-            "onUpdate": "userContext._id",
+            "onUpdateEvaluation": "userContext._id",
             "writable": false,
             "nullable": false
           },

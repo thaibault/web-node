@@ -360,14 +360,16 @@ export default class Helper {
                 if (['DateTime'].includes(specification.type)) {
                     if (typeof newValue !== 'number')
                         throw {
-                            forbidden: 'PropertyType: Property "' +
-                                `${name}" isn't of type "DateTime" (given "` +
+                            forbidden: `PropertyType: Property "${name}" ` +
+                                `isn't of type "DateTime" (given "` +
                                 `${newValue}").`
                         }
-                } else if (modelSpecification.hasOwnProperty(specification.type)) {
+                } else if (modelSpecification.hasOwnProperty(
+                    specification.type
+                ))
                     if (typeof newValue === 'object' && Object.getPrototypeOf(
                         newValue
-                    ) === Object.prototype)
+                    ) === Object.prototype) {
                         newValue = checkDocument(newValue, oldValue)
                         if (toJSON(newValue) === toJSON({}))
                             return null
@@ -382,9 +384,9 @@ export default class Helper {
                 )) {
                     if (typeof newValue !== specification.type)
                         throw {
-                            forbidden: 'PropertyType: Property "' +
-                                `${name}" isn't of type "` +
-                                `${specification.type}" (given "${newValue}").`
+                            forbidden: `PropertyType: Property "${name}" ` +
+                                `isn't of type "${specification.type}" ` +
+                                `(given "${newValue}").`
                         }
                 } else if (newValue !== specification.type)
                     throw {
@@ -444,18 +446,37 @@ export default class Helper {
                     }
                 // endregion
                 // region generic constraint
-                if (![undefined, null].includes(
-                    specification.constraint
-                ) && !eval(specification.constraint))
-                    throw {
-                        forbidden: `Constraint: Property "${name}" should ` +
-                            `satisfy constraint "${specification.constraint}` +
-                            `" (given "${newDocumentAssignment}").`
-                    }
+                for (const type:string of [
+                    'constraintEvaluation', 'constraintExpression'
+                ])
+                    if (!([undefined, null].includes(
+                        specification[type]
+                    ) || (new Function(
+                        'newDocument', 'oldDocument', 'userContext',
+                        'securitySettings', 'models', 'options', 'modelName',
+                        'modelSpecification', 'checkDocument',
+                        'checkPropertyContent', 'newValue', 'name',
+                        'specification', 'oldValue', (type.endsWith(
+                            'Evaluation'
+                        ) ? 'return ' : '') + specification[type]
+                    )(
+                        newDocument, oldDocument, userContext,
+                        securitySettings, models, options, modelName,
+                        modelSpecification, checkDocument,
+                        checkPropertyContent, newValue, name, specification,
+                        oldValue
+                    ))))
+                        throw {
+                            forbidden: type.charAt(0).toUpperCase(
+                            ) + type.substring(1) + ` Property "${name}" ` +
+                            `should satisfy constraint "` +
+                            `${specification[type]}" (given "` +
+                            `${newDocumentAssignment}").`
+                        }
                 // endregion
                 return newValue
             }
-            // region run hooks and check for needed data
+            // region run hooks and check for presence of needed data
             for (const propertyName:string in modelSpecification)
                 if (
                     propertyName !== allowedRolesPropertyName
@@ -463,12 +484,46 @@ export default class Helper {
                 ) {
                     const specification:PlainObject = modelSpecification[
                         propertyName]
-                    if (specification.onCreate)
-                        if (!oldDocument)
-                            newDocument[propertyName] = eval(
-                                specification.onCreate)
-                    if (specification.onUpdate)
-                        newDocument = eval(specification.onUpdate)
+                    if (!oldDocument)
+                        for (const type:string of [
+                            'onCreateEvaluation', 'onCreateExpression'
+                        ])
+                            if (specification[type])
+                                newDocument[propertyName] = (new Function(
+                                    'newDocument', 'oldDocument',
+                                    'userContext', 'securitySettings', 'name',
+                                    'models', 'options', 'modelName',
+                                    'modelSpecification', 'checkDocument',
+                                    'checkPropertyContent', 'specification',
+                                    (type.endsWith(
+                                        'Evaluation'
+                                    ) ? 'return ' : '') + specification[type]
+                                )(
+                                    newDocument, oldDocument, userContext,
+                                    securitySettings, propertyName, models,
+                                    options, modelName, modelSpecification,
+                                    checkDocument, checkPropertyContent,
+                                    specification
+                                ))
+                    for (const type:string of [
+                        'onUpdateEvaluation', 'onUpdateExpression'
+                    ])
+                        if (specification[type])
+                            newDocument[propertyName] = (new Function(
+                                'newDocument', 'oldDocument', 'userContext',
+                                'securitySettings', 'name', 'models',
+                                'options', 'modelName', 'modelSpecification',
+                                'checkDocument', 'checkPropertyContent',
+                                'specification', (type.endsWith(
+                                    'Evaluation'
+                                ) ? 'return ' : '') + specification[type]
+                            )(
+                                newDocument, oldDocument, userContext,
+                                securitySettings, propertyName, models,
+                                options, modelName, modelSpecification,
+                                checkDocument, checkPropertyContent,
+                                specification
+                            ))
                     if ([undefined, null].includes(specification.default)) {
                         if (!(specification.nullable || (
                             newDocument.hasOwnProperty(propertyName) ||
@@ -522,25 +577,48 @@ export default class Helper {
                     const specification:PlainObject = modelSpecification[
                         modelName
                     ][propertyName]
-                    // region writable
-                    if (!specification.writable) {
-                        if (oldDocument && !(oldDocument.hasOwnProperty(
-                            propertyName
-                        ) && toJSON(newDocument[propertyName]) === toJSON(
-                            oldDocument[propertyName]
-                        )))
+                    // region writable/mutable
+                    if (!specification.writable)
+                        if (oldDocument)
+                            if (oldDocument.hasOwnProperty(
+                                propertyName
+                            ) && toJSON(newDocument[propertyName]) === toJSON(
+                                oldDocument[propertyName]
+                            )) {
+                                if (
+                                    propertyName !== '_id' &&
+                                    updateStrategy === 'incremental'
+                                )
+                                    delete newDocument[propertyName]
+                                continue
+                            } else
+                                throw {
+                                    forbidden: 'Readonly: Property "' +
+                                        `${propertyName}" is not writable ` +
+                                        `(old document "` +
+                                        `${toJSON(oldDocument)}").`
+                                }
+                        else
                             throw {
                                 forbidden: 'Readonly: Property "' +
-                                    `${propertyName}" is not mutable (old ` +
+                                    `${propertyName}" is not writable.`
+                            }
+                    if (!specification.mutable && oldDocument)
+                        if (oldDocument.hasOwnProperty(propertyName) && toJSON(
+                            newDocument[propertyName]
+                        ) === toJSON(oldDocument[propertyName])) {
+                            if (
+                                propertyName !== '_id' &&
+                                updateStrategy === 'incremental'
+                            )
+                                delete newDocument[propertyName]
+                            continue
+                        } else
+                            throw {
+                                forbidden: 'Readonly: Property "' +
+                                    `${propertyName}" is not writable (old ` +
                                     `document "${toJSON(oldDocument)}").`
                             }
-                        else if (
-                            propertyName !== '_id' &&
-                            updateStrategy === 'incremental'
-                        )
-                            delete newDocument[propertyName]
-                        continue
-                    }
                     // endregion
                     // region nullable
                     if (newDocument[propertyName] === null)
@@ -562,8 +640,9 @@ export default class Helper {
                         if (!Array.isArray(newDocument[name]))
                             throw {
                                 forbidden: 'PropertyType: Property "' +
-                                    `${propertyName}" isn't of type "array" ` +
-                                    `(given "${newDocument[propertyName]}").`
+                                    `${propertyName}" isn't of type "array ` +
+                                    `-> ${specification.type}" (given "` +
+                                    `${newDocument[propertyName]}").`
                             }
                         const specification.type =
                             specification.type.substring(
@@ -581,13 +660,16 @@ export default class Helper {
                                 newDocument[propertyName].splice(index, 1)
                             index += 1
                         }
-                    } else
+                    } else {
                         newDocument[propertyName] = checkPropertyContent(
                             newDocument[propertyName], propertyName,
                             specification,
                             oldDocument && oldDocument.hasOwnProperty(
                                 propertyName
                             ) && oldDocument[propertyName] || undefined)
+                        if (newDocument[propertyName] === null)
+                            delete newDocument[propertyName]
+                    }
                 }
             // endregion
             return newDocument
@@ -601,211 +683,6 @@ export default class Helper {
                 `${newDocument._id}-${newDocument._rev}`])
         return newDocument
     }
-    /*
-    static generateValidateDocumentUpdateFunctionCode(
-        modelSpecification:PlainObject
-    ):string {
-        const models:{[key:string]:PlainObject} = Helper.extendSpecification(
-            modelSpecification)
-        let code:string = 'function(newDocument, oldDocument, userContext, securitySettings) {\n' +
-            "    'use strict';\n" +
-            '    if (!userContext)\n' +
-            '        userContext = {}\n' +
-            '    if (!securitySettings)\n' +
-            '        securitySettings = {}\n' +
-            "    if (newDocument.hasOwnProperty('_deleted') && newDocument._deleted)\n" +
-            '        return newDocument\n' +
-            "    if (securitySettings.hasOwnProperty('validatedDocuments') && securitySettings.validatedDocuments.has(`${newDocument._id}-${newDocument._rev}`)) {\n" +
-            '        securitySettings.validatedDocuments.delete(`${newDocument._id}-${newDocument._rev}`)\n' +
-            '        return newDocument\n' +
-            '    }\n' +
-            "    if (newDocument.hasOwnProperty('_rev') && newDocument._rev === 'latest')\n" +
-            "        if (oldDocument && oldDocument.hasOwnProperty('_rev'))\n" +
-            '            newDocument._rev = oldDocument._rev\n' +
-            '        else\n' +
-            "            throw {forbidden: 'Revision: No old document to update available.'}\n" +
-            '    const checkDocument = (newDocument, oldDocument) => {\n' +
-            `        if (!newDocument.hasOwnProperty('${modelSpecification.specialPropertyNames.type}'))\n` +
-            `            throw {forbidden: 'Type: You have to specify a model type via property "${modelSpecification.specialPropertyNames.type}".'}\n`
-        for (const modelName:string in models)
-            if (models.hasOwnProperty(modelName)) {
-                code += `        if (newDocument.${modelSpecification.specialPropertyNames.type} === '${modelName}') {\n`
-                // region run hooks and check for needed data
-                for (const propertyName:string in models[modelName])
-                    if (propertyName !== modelSpecification.specialPropertyNames.allowedRoles && models[modelName].hasOwnProperty(propertyName)) {
-                        let newDocumentAssignment:string = `newDocument.${propertyName}`
-                        let oldDocumentAssignment:string = `oldDocument.${propertyName}`
-                        if (propertyName === 'class') {
-                            newDocumentAssignment = `newDocument['${propertyName}']`
-                            oldDocumentAssignment = `oldDocument['${propertyName}']`
-                        }
-                        const specification:PlainObject = models[modelName][
-                            propertyName
-                        ] = Tools.extendObject(
-                            true, {},
-                            modelSpecification.defaultPropertySpecification,
-                            models[modelName][propertyName])
-                        if (specification.onCreate)
-                            code += '            if (!oldDocument)\n' +
-                                    `                ${newDocumentAssignment} = ${specification.onCreate}\n`
-                        if (specification.onUpdate)
-                            code += `            ${newDocumentAssignment} = ${specification.onUpdate}\n`
-                        if ([undefined, null].includes(specification.default)) {
-                            if (!specification.nullable)
-                                code += `            if (!(newDocument.hasOwnProperty('${propertyName}') || oldDocument && oldDocument.hasOwnProperty('${propertyName}')))\n` +
-                                        `                throw {forbidden: 'MissingProperty: Missing property "${propertyName}".'}\n`
-                            if (modelSpecification.updateStrategy === 'fillUp')
-                                code += `            if (!newDocument.hasOwnProperty('${propertyName}') && oldDocument && oldDocument.hasOwnProperty('${propertyName}'))\n` +
-                                        `                ${newDocumentAssignment} = ${oldDocumentAssignment}\n`
-                        } else {
-                            code += `            if (!newDocument.hasOwnProperty('${propertyName}'))\n`
-                            if (modelSpecification.updateStrategy === 'fillUp')
-                                code += '                if (oldDocument)\n' +
-                                        `                    ${newDocumentAssignment} = ${oldDocumentAssignment}\n` +
-                                        '                else\n'
-                            else
-                                code += '                if (!oldDocument)\n'
-                            code += `                    ${newDocumentAssignment} = ${specification.default}\n`
-                        }
-                    }
-                // endregion
-                // region generate check given data code
-                code += '            for (const key in newDocument)\n' +
-                        `                if (!['_rev', '_revisions', '_deleted'].includes(key) && newDocument.hasOwnProperty(key)) {\n`
-                if (modelSpecification.updateStrategy === 'incremental')
-                    code += "                    if (key !== '_id' && oldDocument && oldDocument.hasOwnProperty(key) && oldDocument[key] === newDocument[key]) {\n" +
-                            '                        delete newDocument[key]\n' +
-                            '                        continue\n' +
-                            '                    }\n'
-                for (const propertyName:string in models[modelName])
-                    if (propertyName !== modelSpecification.specialPropertyNames.allowedRoles && models[modelName].hasOwnProperty(propertyName)) {
-                        let newDocumentAssignment:string = `newDocument.${propertyName}`
-                        let oldDocumentAssignment:string = `oldDocument.${propertyName}`
-                        if (propertyName === 'class') {
-                            newDocumentAssignment = `newDocument['${propertyName}']`
-                            oldDocumentAssignment = `oldDocument['${propertyName}']`
-                        }
-                        const parentNewDocumentAssignment:string =
-                            newDocumentAssignment
-                        const specification:PlainObject = models[modelName][
-                            propertyName]
-                        code += `                    if (key === '${propertyName}') {\n`
-                        // region writable
-                        if (!specification.writable) {
-                            code += '                        if (oldDocument) {\n' +
-                                    `                            if (!(oldDocument.hasOwnProperty('${propertyName}') && toJSON(${newDocumentAssignment}) === toJSON(${oldDocumentAssignment})))\n` +
-                                    `                                throw {forbidden: 'Readonly: Property "${propertyName}" is not mutable (old document "' + toJSON(oldDocument) + '").'}\n`
-                            if (propertyName !== '_id' && modelSpecification.updateStrategy === 'incremental')
-                                code += `                            delete ${newDocumentAssignment}\n`
-                            code += '                            continue\n' +
-                                    '                        }\n'
-                        }
-                        // endregion
-                        // region nullable
-                        if (typeof specification.type === 'string' && specification.type.endsWith('[]'))
-                            code += `                        if (${newDocumentAssignment} === null || Array.isArray(${newDocumentAssignment}) && ${newDocumentAssignment}.length === 0) {\n`
-                        else
-                            code += `                        if (${newDocumentAssignment} === null) {\n`
-                        if (specification.nullable)
-                            code += `                            delete ${newDocumentAssignment}\n` +
-                                '                            continue\n' +
-                                '                        }\n'
-                        else
-                            code += `                            throw {forbidden: 'NotNull: Property "${propertyName}" should not by "null".'}\n` +
-                                    '                        }\n'
-                        // endregion
-                        // region type
-                        let indent:string = ''
-                        if (typeof specification.type === 'string' && specification.type.endsWith('[]')) {
-                            specification.type = specification.type.substring(0, specification.type.length - '[]'.length)
-                            code += `                        if (!Array.isArray(${newDocumentAssignment}))\n` +
-                                    `                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "array" (given "' + ${newDocumentAssignment} + '").'}\n` +
-                                    '                        let index = 0\n' +
-                                    `                        for (const value of ${newDocumentAssignment}.slice()) {\n`
-                            // TODO beschreibung in error meldungen welches feld betroffen ist muss verbessert werden.
-                            newDocumentAssignment = 'value'
-                            indent = '    '
-                        }
-                        if (['string', 'number', 'boolean'].includes(specification.type))
-                            code += `${indent}                        if (typeof ${newDocumentAssignment} !== '${specification.type}')\n` +
-                                    `${indent}                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "${specification.type}" (given "' + ${newDocumentAssignment} + '").'}\n`
-                        else if (['DateTime'].includes(specification.type))
-                            code += `${indent}                        if (typeof ${newDocumentAssignment} !== 'number')\n` +
-                                    `${indent}                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t of type "DateTime" (given "' + ${newDocumentAssignment} + '").'}\n`
-                        else if (models.hasOwnProperty(specification.type)) {
-                            code += `${indent}                        if (typeof ${newDocumentAssignment} === 'object' && Object.getPrototypeOf(${newDocumentAssignment}) === Object.prototype) {\n`
-                            if (indent)
-                                code += `                                ${parentNewDocumentAssignment}[index] = checkDocument(${newDocumentAssignment})\n` +
-                                        `                                if (toJSON(${parentNewDocumentAssignment}[index]) === toJSON({})) {\n` +
-                                        `                                    if (${parentNewDocumentAssignment}.length === 1)\n` +
-                                        `                                        delete ${parentNewDocumentAssignment}\n` +
-                                        '                                    else\n' +
-                                        `                                        ${parentNewDocumentAssignment}.splice(index, 1)\n` +
-                                        '                                    continue\n' +
-                                        '                                }\n' +
-                                        '                            }\n'
-                            else
-                                code += `                            ${newDocumentAssignment} = checkDocument(${newDocumentAssignment}, oldDocument && oldDocument.hasOwnProperty(key) && ${oldDocumentAssignment} || undefined)\n` +
-                                        `                            if (toJSON(${newDocumentAssignment}) === toJSON({})) {\n` +
-                                        `                                delete ${newDocumentAssignment}\n` +
-                                        '                                continue\n' +
-                                        '                            }\n' +
-                                        '                        } else\n' +
-                                        `                            throw {forbidden: 'NestedModel: Under key "${propertyName}" isn\\'t "${specification.type}" (given "' + ${newDocumentAssignment} + '").'}\n`
-                        } else
-                            code += `${indent}                        if (${newDocumentAssignment} !== ${specification.type})\n` +
-                                    `${indent}                            throw {forbidden: 'PropertyType: Property "${propertyName}" isn\\'t value "${specification.type}" (given "' + ${newDocumentAssignment} + '").'}\n`
-                        // endregion
-                        // region range
-                        if (![undefined, null].includes(specification.minimum))
-                            if (models[modelName][propertyName].type === 'string')
-                                code += `${indent}                        if (${newDocumentAssignment}.length < ${specification.minimum})\n` +
-                                        `${indent}                            throw {forbidden: 'MinimalLength: Property "${propertyName}" (type string) should have minimal length ${specification.minimum}.'}\n`
-                            else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
-                                code += `${indent}                        if (${newDocumentAssignment} < ${specification.minimum})\n` +
-                                        `${indent}                            throw {forbidden: 'Minimum: Property "${propertyName}" (type ${specification.type}) should satisfy a minimum of ${specification.minimum}.'}\n`
-                        if (![undefined, null].includes(specification.maximum))
-                            if (models[modelName][propertyName].type === 'string')
-                                code += `${indent}                        if (${newDocumentAssignment}.length > ${specification.maximum})\n` +
-                                        `${indent}                            throw {forbidden: 'MaximalLength: Property "${propertyName}" (type string) should have maximal length ${specification.maximum}.'}\n`
-                            else if (['number', 'integer', 'float', 'DateTime'].includes(models[modelName][propertyName].type))
-                                code += `${indent}                        if (${newDocumentAssignment} > ${specification.maximum})\n` +
-                                        `${indent}                            throw {forbidden: 'Maximum: Property "${propertyName}" (type ${specification.type}) should satisfy a maximum of ${specification.maximum}.'}\n`
-                        // endregion
-                        // region pattern
-                        if (![undefined, null].includes(specification.regularExpressionPattern))
-                            code += `${indent}                        if (!(/${specification.regularExpressionPattern}/.test(${newDocumentAssignment})))\n` +
-                                    `${indent}                            throw {forbidden: 'PatternMatch: Property "${propertyName}" should match regular expression pattern ${specification.regularExpressionPattern} (given "' + ${newDocumentAssignment} + '").'}\n`
-                        // endregion
-                        // region generic constraint
-                        if (![undefined, null].includes(specification.constraint))
-                            code += `${indent}                        if (!(${specification.constraint}))\n` +
-                                    `${indent}                            throw {forbidden: 'Constraint: Property "${propertyName}" should satisfy constraint "${specification.constraint}" (given "' + ${newDocumentAssignment} + '").'}\n`
-                        // endregion
-                        if (indent)
-                            code += '                            index += 1\n' +
-                                    '                        }\n'
-                        code += '                        continue\n' +
-                                '                    }\n'
-                    }
-                code += `                    throw {forbidden: 'Property: Given property "' + key + '" isn\\'t specified in model "${modelName}".'}\n` +
-                        '                }\n' +
-                        '            return newDocument\n' +
-                        '        }\n'
-                // endregion
-            }
-        code += `        throw {forbidden: 'Model: Given model "' + newDocument.${modelSpecification.specialPropertyNames.type} + '" is not specified.'}\n` +
-        '    }\n' +
-        '    newDocument = checkDocument(newDocument, oldDocument)\n' +
-        "    if (securitySettings.hasOwnProperty('checkedDocuments'))\n" +
-        '        securitySettings.validatedDocuments.add(`${newDocument._id}-${newDocument._rev}`)\n' +
-        '    else\n' +
-        '        securitySettings.validatedDocuments = new Set([`${newDocument._id}-${newDocument._rev}`])\n' +
-        '    return newDocument\n' +
-        '}'
-        return code
-    }
-    */
     /**
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
