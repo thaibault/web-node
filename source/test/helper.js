@@ -181,293 +181,329 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     // region forbidden write tests
     for (const test:Array<any> of [
         // region model
-        [{}, {}, {}, {}, {}, 'Type'],
-        [{}, {webNodeType: 'test'}, null, {}, {}, 'Model'],
+        [[{}, {}], 'Type'],
+        [[{webNodeType: 'test'}], 'Model'],
         // endregion
         // region property existents
+        [[{webNodeType: 'Test', a: 2}], {types: {Test: {}}}, 'Property'],
         [
-            {types: {Test: {}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'Property'
+            [{webNodeType: 'Test', a: null}],
+            {types: {Test: {a: {nullable: false}}}}, 'NotNull'
         ],
         [
-            {types: {Test: {a: {nullable: false}}}},
-            {webNodeType: 'Test', a: null},
-            null, {}, {}, 'NotNull'
-        ],
-        [
-            {types: {Test: {a: {nullable: false}}}},
-            {webNodeType: 'Test'},
-            null, {}, {}, 'MissingProperty'
+            [{webNodeType: 'Test'}], {types: {Test: {a: {nullable: false}}}},
+            'MissingProperty'
         ],
         // endregion
         // region property readonly
         [
-            {types: {Test: {a: {writable: false}}}},
-            {webNodeType: 'Test', a: 'b'},
-            {webNodeType: 'Test'}, {}, {}, 'Readonly'
+            [
+                {webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test'},
+                {types: {Test: {a: {writable: false}}}}
+            ], 'Readonly'
         ],
         [
-            {types: {Test: {a: {writable: false}}}},
-            {webNodeType: 'Test', a: 'b'},
-            {webNodeType: 'Test', a: 'a'},
-            {}, {}, 'Readonly'
+            [
+                {webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'a'},
+                {types: {Test: {a: {writable: false}}}},
+            ], 'Readonly'
         ],
         // endregion
         // region property type
         [
-            {types: {Test: {a: {}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'PropertyType'
+            [{webNodeType: 'Test', a: 2}, {types: {Test: {a: {}}}}],
+            'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'number'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: 'b'},
+                {types: {Test: {a: {type: 'number'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'boolean'}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: 1},
+                {types: {Test: {a: {type: 'boolean'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'DateTime'}}}},
-            {webNodeType: 'Test', a: 'a'},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: 'a'},
+                {types: {Test: {a: {type: 'DateTime'}}}}
+            ], 'PropertyType'
         ],
         // / region array
         // // region type
         [
-            {types: {Test: {a: {type: 'string[]'}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: 2},
+                {types: {Test: {a: {type: 'string[]'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'string[]'}}}},
-            {webNodeType: 'Test', a: [2]},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: [2]},
+                {types: {Test: {a: {type: 'string[]'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'number[]'}}}},
-            {webNodeType: 'Test', a: ['b']},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: ['b']},
+                {types: {Test: {a: {type: 'number[]'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'boolean[]'}}}},
-            {webNodeType: 'Test', a: [1]},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: [1]},
+                {types: {Test: {a: {type: 'boolean[]'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'DateTime'}}}},
-            {webNodeType: 'Test', a: [1]},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: [1]},
+                {types: {Test: {a: {type: 'DateTime'}}}}
+            ], 'PropertyType'
         ],
         [
-            {types: {Test: {a: {type: 'DateTime[]'}}}},
-            {webNodeType: 'Test', a: ['a']},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: ['a']},
+                {types: {Test: {a: {type: 'DateTime[]'}}}},
+            ], 'PropertyType'
         ],
         // // endregion
         [
-            {types: {Test: {a: {type: 'Test[]'}}}},
-            {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 2}]},
-            null, {}, {}, 'Property'
+            [
+                {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 2}]},
+                {types: {Test: {a: {type: 'Test[]'}}}}
+            ], 'Property'
         ],
         [
-            {types: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}},
-            {
-                webNodeType: 'Test',
-                a: [{webNodeType: 'Test', b: null}],
-                b: 'a'
-            },
-            null, {}, {}, 'NotNull'
+            [
+                {
+                    webNodeType: 'Test',
+                    a: [{webNodeType: 'Test', b: null}],
+                    b: 'a'
+                },
+                {types: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}}
+            ], 'NotNull'
         ],
         [
-            {types: {Test: {a: {type: 'Test[]', writable: false}, b: {}}}},
-            {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'a'}]},
-            {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'b'}]},
-            {}, {}, 'Readonly'
+            [
+                {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'a'}]},
+                {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'b'}]},
+                {types: {Test: {a: {type: 'Test[]', writable: false}, b: {}}}}
+            ], 'Readonly'
         ],
         [
-            {types: {Test: {
-                a: {type: 'number[]', minimum: 3},
-                b: {type: 'Test[]'}
-            }}},
-            {webNodeType: 'Test', a: [4], b: [{webNodeType: 'Test', a: [2]}]},
-            null, {}, {}, 'Minimum'
+            [
+                {webNodeType: 'Test', a: [4], b: [{
+                    webNodeType: 'Test', a: [2]
+                }]},
+                {types: {Test: {
+                    a: {type: 'number[]', minimum: 3},
+                    b: {type: 'Test[]'}
+                }}}
+            ], 'Minimum'
         ],
         // / endregion
         // / region nested property
         // // region property type
         [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'NestedModel'
+            [
+                {webNodeType: 'Test', a: 1},
+                {types: {Test: {a: {type: 'Test'}}}}
+            ], 'NestedModel'
         ],
         [
-            {types: {Test: {a: {type: 'Test', nullable: false}}}},
-            {webNodeType: 'Test', a: null},
-            null, {}, {}, 'NotNull'
+            [
+                {webNodeType: 'Test', a: null},
+                {types: {Test: {a: {type: 'Test', nullable: false}}}}
+            ], 'NotNull'
         ],
         [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: {}},
-            null, {}, {}, 'Type'
+            [
+                {webNodeType: 'Test', a: {}},
+                {types: {Test: {a: {type: 'Test'}}}}
+            ], 'Type'
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}, b: 'a'},
-            null, {}, {}, 'PropertyType'
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}, b: 'a'},
+                {types: {Test: {a: {type: 'Test'}, b: {}}}}
+            ], 'PropertyType'
         ],
         // // endregion
         // // region property existents
         [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}},
-            null, {}, {}, 'Property'
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}},
+                {types: {Test: {a: {type: 'Test'}}}}
+            ], 'Property'
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: null},
-                b: 'a'
-            },
-            null, {}, {}, 'NotNull'
+            [
+                {
+                    webNodeType: 'Test',
+                    a: {webNodeType: 'Test', b: null},
+                    b: 'a'
+                },
+                {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}}
+            ], 'NotNull'
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test'},
-                b: 'a'
-            },
-            null, {}, {}, 'MissingProperty'
+            [
+                {
+                    webNodeType: 'Test',
+                    a: {webNodeType: 'Test'},
+                    b: 'a'
+                },
+                {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}}
+            ], 'MissingProperty'
         ],
         // // endregion
         // // region property readonly
         [
-            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
-            {}, {}, 'Readonly'
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
+                {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}}
+            ], 'Readonly'
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}},
-            {}, {}, 'Readonly'
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+                {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}}
+            ], 'Readonly'
         ],
         [
-            {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
-            {}, {}, 'Readonly'
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
+                {}, {},
+                {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}}
+            ], 'Readonly'
         ],
         // // endregion
         // // region property range
         [
-            {types: {Test: {
-                a: {type: 'number', minimum: 3},
-                b: {type: 'Test'}
-            }}},
-            {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 2}},
-            null, {}, {}, 'Minimum'
+            [
+                {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 2}},
+                {types: {Test: {
+                    a: {type: 'number', minimum: 3},
+                    b: {type: 'Test'}
+                }}},
+            ], 'Minimum'
         ],
         [
-            {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '12'}},
-            null, {}, {}, 'MaximalLength'
+            [
+                {
+                    webNodeType: 'Test',
+                    a: '1',
+                    b: {webNodeType: 'Test', a: '12'}
+                },
+                {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
+            ], 'MaximalLength'
         ],
         // // endregion
         // // region property pattern
         [
-            {types: {Test: {
-                a: {regularExpressionPattern: 'a'},
-                b: {type: 'Test'}
-            }}},
-            {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'b'}},
-            null, {}, {}, 'PatternMatch'
+            [
+                {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'b'}},
+                {types: {Test: {
+                    a: {regularExpressionPattern: 'a'},
+                    b: {type: 'Test'}
+                }}},
+            ], 'PatternMatch'
         ],
         // // endregion
         // // region property constraint
         [
-            {types: {Test: {a: {constraint: 'newDocument.a === "b"'},
-                b: {type: 'Test'}
-            }}},
-            {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'a'}},
-            null, {}, {}, 'Constraint'
+            [
+                {
+                    webNodeType: 'Test',
+                    a: 'b',
+                    b: {webNodeType: 'Test', a: 'a'}
+                },
+                {types: {Test: {a: {constraint: 'newDocument.a === "b"'},
+                    b: {type: 'Test'}
+                }}},
+            ], 'Constraint'
         ],
         // // endregion
         // / endregion
         [
-            {types: {Test: {a: {type: 2}}}},
-            {webNodeType: 'Test', a: 1},
-            null, {}, {}, 'PropertyType'
+            [{webNodeType: 'Test', a: 1}, {types: {Test: {a: {type: 2}}}}],
+            'PropertyType'
         ],
         // endregion
         // region property range
         [
-            {types: {Test: {a: {type: 'number', minimum: 3}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'Minimum'
+            [
+                {webNodeType: 'Test', a: 2},
+                {types: {Test: {a: {type: 'number', minimum: 3}}}}
+            ], 'Minimum'
         ],
         [
-            {types: {Test: {a: {type: 'number', maximum: 1}}}},
-            {webNodeType: 'Test', a: 2},
-            null, {}, {}, 'Maximum'
+            [
+                {webNodeType: 'Test', a: 2},
+                {types: {Test: {a: {type: 'number', maximum: 1}}}},
+            ], 'Maximum'
         ],
         [
-            {types: {Test: {a: {minimum: 3}}}},
-            {webNodeType: 'Test', a: '12'},
-            null, {}, {}, 'MinimalLength'
+            [
+                {webNodeType: 'Test', a: '12'},
+                {types: {Test: {a: {minimum: 3}}}}
+            ], 'MinimalLength'
         ],
         [
-            {types: {Test: {a: {maximum: 1}}}},
-            {webNodeType: 'Test', a: '12'},
-            null, {}, {}, 'MaximalLength'
+            [
+                {webNodeType: 'Test', a: '12'},
+                {types: {Test: {a: {maximum: 1}}}}
+            ], 'MaximalLength'
         ],
         // endregion
         // region property pattern
         [
-            {types: {Test: {a: {regularExpressionPattern: 'a'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'PatternMatch'
+            [
+                {webNodeType: 'Test', a: 'b'},
+                {types: {Test: {a: {regularExpressionPattern: 'a'}}}}
+            ], 'PatternMatch'
         ],
         // endregion
         // region property constraint
         [
-            {types: {Test: {a: {constraint: 'false'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'Constraint'
+            [
+                {webNodeType: 'Test', a: 'b'},
+                {types: {Test: {a: {constraint: 'false'}}}}
+            ], 'Constraint'
         ],
         [
-            {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            null, {}, {}, 'Constraint'
+            [
+                {webNodeType: 'Test', a: 'b'},
+                {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}}
+            ], 'Constraint'
         ]
         // endregion
     ]) {
-        const functionCode:string =
-            Helper.generateValidateDocumentUpdateFunctionCode(
-                Tools.extendObject(true, {}, defaultSpecification, test[0]))
-        assert.strictEqual(typeof functionCode, 'string')
-        const validatorGenerator:Function = new Function(
-            'toJSON', `return ${functionCode}`)
-        assert.strictEqual(typeof validatorGenerator, 'function')
-        const validator:Function = validatorGenerator(JSON.stringify)
-        assert.strictEqual(typeof validator, 'function')
-        assert.throws(():void => validator.apply(this, test.slice(
-            1, test.length - 1
-        )), (error:DatabaseError):boolean => {
+        const models:PlainObject = Helper.extendSpecification(
+            Tools.extendObject(true, {}, defaultSpecification, test[1]))
+        const options:PlainObject = Tools.copyLimitedRecursively(test[1])
+        delete options.type
+        const parameter:Array<any> = test[0].concat([null, null, null].slice(
+            0, 3 - test.length
+        )).concat([models, options])
+        assert.throws(():void => Helper.validateDocumentUpdate.apply(
+            this, parameter
+        ), (error:DatabaseError):boolean => {
             if (error.hasOwnProperty('forbidden')) {
                 const result:boolean = error.forbidden.startsWith(
-                    `${test[test.length - 1]}:`)
+                    `${test[2]}:`)
                 if (!result)
                     console.log(
                         `Error "${error.forbidden}" doesn't start with "` +
-                        `${test[test.length - 1]}:". Given arguments: ` +
-                        `"${JSON.stringify(test.slice(1, test.length - 1))}".`)
+                        `${test[2]}:". Given arguments: ` +
+                        `"${JSON.stringify(parameter)}".`)
                 return result
             }
             // IgnoreTypeCheck
@@ -478,310 +514,291 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
     // endregion
     // region allowed write tests
     for (const test:Array<any> of [
+        [[{webNodeType: 'Test'}, {webNodeType: 'Test'}], {types: {Test: {}}}],
         [
-            {types: {Test: {}}},
-            {webNodeType: 'Test'},
-            {webNodeType: 'Test'}
+            [{webNodeType: 'Test'}, {webNodeType: 'Test'}],
+            {types: {Test: {class: {}}}}
         ],
         [
-            {types: {Test: {class: {}}}},
-            {webNodeType: 'Test'},
-            {webNodeType: 'Test'},
-            {}
+            [{webNodeType: 'Test'}, {webNodeType: 'Test', a: '2'}],
+            {types: {Test: {a: {}}}}
         ],
         [
-            {types: {Test: {a: {}}}},
-            {webNodeType: 'Test'},
-            {webNodeType: 'Test', a: '2'},
-            {}
+            [{webNodeType: 'Test', a: '2'}, {webNodeType: 'Test', a: '2'}],
+            {types: {Test: {a: {}}}}
         ],
         [
-            {types: {Test: {a: {}}}},
-            {webNodeType: 'Test', a: '2'},
-            {webNodeType: 'Test', a: '2'},
-            {}
-        ],
-        [
-            {types: {Test: {a: {}}}},
-            {webNodeType: 'Test', a: '3'},
-            {webNodeType: 'Test', a: '2'},
-            {a: '3'}
+            [
+                {webNodeType: 'Test', a: '3'}, {webNodeType: 'Test', a: '2'},
+                {a: '3'}
+            ], {types: {Test: {a: {}}}}
         ],
         // region property existents
         [
-            {types: {Test: {a: {type: 'number'}}}},
-            {webNodeType: 'Test', a: 2},
-            {webNodeType: 'Test', a: 2}
+            [{webNodeType: 'Test', a: 2}, {webNodeType: 'Test', a: 2}],
+            {types: {Test: {a: {type: 'number'}}}}
         ],
         [
-            {types: {Test: {a: {}}}},
-            {webNodeType: 'Test', a: null},
-            {webNodeType: 'Test'}
+            [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
+            {types: {Test: {a: {}}}}
         ],
         [
-            {types: {Test: {a: {nullable: false}}}},
-            {webNodeType: 'Test', a: 'a'},
-            {webNodeType: 'Test', a: 'a'}
+            [{webNodeType: 'Test', a: 'a'}, {webNodeType: 'Test', a: 'a'}],
+            {types: {Test: {a: {nullable: false}}}}
         ],
         [
-            {types: {Test: {a: {nullable: false}}}},
-            {webNodeType: 'Test'},
-            {webNodeType: 'Test', a: 'a'},
-            {}
+            [{webNodeType: 'Test'}, {webNodeType: 'Test', a: 'a'}],
+            {types: {Test: {a: {nullable: false}}}}
         ],
         // endregion
         // region property readonly
         [
-            {types: {Test: {a: {writable: false}}}},
-            {webNodeType: 'Test', a: 'b'},
-            {a: 'b', webNodeType: 'Test'},
-            {}
+            [{webNodeType: 'Test', a: 'b'}, {a: 'b', webNodeType: 'Test'}],
+            {types: {Test: {a: {writable: false}}}}
         ],
         [
-            {types: {Test: {a: {writable: false}}}},
-            {webNodeType: 'Test'},
-            {webNodeType: 'Test'},
-            {}
+            [{webNodeType: 'Test'}, {webNodeType: 'Test'}],
+            {types: {Test: {a: {writable: false}}}}
         ],
         // endregion
         // region property type
         [
-            {types: {Test: {a: {}}}},
-            {webNodeType: 'Test', a: '2'},
-            {webNodeType: 'Test', a: '2'}
+            [{webNodeType: 'Test', a: '2'}, {webNodeType: 'Test', a: '2'}],
+            {types: {Test: {a: {}}}}
         ],
         [
-            {types: {Test: {a: {type: 'number'}}}},
-            {webNodeType: 'Test', a: 2},
-            {webNodeType: 'Test', a: 2}
+            [{webNodeType: 'Test', a: 2}, {webNodeType: 'Test', a: 2}],
+            {types: {Test: {a: {type: 'number'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'boolean'}}}},
-            {webNodeType: 'Test', a: true},
-            {webNodeType: 'Test', a: true}
+            [{webNodeType: 'Test', a: true}, {webNodeType: 'Test', a: true}],
+            {types: {Test: {a: {type: 'boolean'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'DateTime'}}}},
-            {webNodeType: 'Test', a: 1},
-            {webNodeType: 'Test', a: 1}
+            [{webNodeType: 'Test', a: 1}, {webNodeType: 'Test', a: 1}],
+            {types: {Test: {a: {type: 'DateTime'}}}}
         ],
         // / region array
         [
-            {types: {Test: {a: {type: 'string[]'}}}},
-            {webNodeType: 'Test', a: ['2']},
-            {webNodeType: 'Test', a: ['2']}
+            [{webNodeType: 'Test', a: ['2']}, {webNodeType: 'Test', a: ['2']}],
+            {types: {Test: {a: {type: 'string[]'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'string[]'}}}},
-            {webNodeType: 'Test', a: null},
-            {webNodeType: 'Test'}
+            [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
+            {types: {Test: {a: {type: 'string[]'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'number[]'}}}},
-            {webNodeType: 'Test', a: [2]},
-            {webNodeType: 'Test', a: [2]}
+            [{webNodeType: 'Test', a: [2]}, {webNodeType: 'Test', a: [2]}],
+            {types: {Test: {a: {type: 'number[]'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'boolean[]'}}}},
-            {webNodeType: 'Test', a: [true]},
-            {webNodeType: 'Test', a: [true]}
+            [
+                {webNodeType: 'Test', a: [true]},
+                {webNodeType: 'Test', a: [true]}
+            ], {types: {Test: {a: {type: 'boolean[]'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'DateTime[]'}}}},
-            {webNodeType: 'Test', a: [1]},
-            {webNodeType: 'Test', a: [1]}
+            [{webNodeType: 'Test', a: [1]}, {webNodeType: 'Test', a: [1]}],
+            {types: {Test: {a: {type: 'DateTime[]'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'DateTime[]'}}}},
-            {webNodeType: 'Test', a: []},
-            {webNodeType: 'Test'}
+            [{webNodeType: 'Test', a: []}, {webNodeType: 'Test'}],
+            {types: {Test: {a: {type: 'DateTime[]'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'DateTime[]', writable: false}}}},
-            {webNodeType: 'Test', a: [2]},
-            {webNodeType: 'Test', a: [2]},
-            {}
+            [{webNodeType: 'Test', a: [2]}, {webNodeType: 'Test', a: [2]}],
+            {types: {Test: {a: {type: 'DateTime[]', writable: false}}}}
         ],
         [
-            {types: {Test: {a: {type: 'number[]'}}}},
-            {webNodeType: 'Test', a: [2, 1]},
-            {webNodeType: 'Test', a: [2]},
-            {a: [2, 1]}
+            [
+                {webNodeType: 'Test', a: [2, 1]},
+                {webNodeType: 'Test', a: [2]}, {a: [2, 1]}
+            ], {types: {Test: {a: {type: 'number[]'}}}}
         ],
         // / endregion
         // / region nested property
         // // region property type
         [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+            ], {types: {Test: {a: {type: 'Test'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: null},
-            {webNodeType: 'Test'}
+            [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
+            {types: {Test: {a: {type: 'Test'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: null}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: null}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+            ], {types: {Test: {a: {type: 'Test'}, b: {}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
-            {}
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}}
+            ], {types: {Test: {a: {type: 'Test'}, b: {}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'}
+            [
+                {
+                    webNodeType: 'Test',
+                    a: {webNodeType: 'Test', b: 'a'},
+                    b: '2'
+                },
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}, b: '2'}
+            ], {types: {Test: {a: {type: 'Test'}, b: {}}}}
         ],
         // // endregion
         // // region property existents
         [
-            {types: {Test: {a: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+            ], {types: {Test: {a: {type: 'Test'}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {}}}},
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: null},
-                b: 'a'
-            },
-            {webNodeType: 'Test', a: {webNodeType: 'Test'}, b: 'a'}
+            [
+                {
+                    webNodeType: 'Test',
+                    a: {webNodeType: 'Test', b: null},
+                    b: 'a'
+                },
+                {webNodeType: 'Test', a: {webNodeType: 'Test'}, b: 'a'}
+            ], {types: {Test: {a: {type: 'Test'}, b: {}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: '2'},
-                b: 'a'
-            },
-            {
-                webNodeType: 'Test',
-                a: {webNodeType: 'Test', b: '2'},
-                b: 'a'
-            }
+            [
+                {
+                    webNodeType: 'Test',
+                    a: {webNodeType: 'Test', b: '2'},
+                    b: 'a'
+                },
+                {
+                    webNodeType: 'Test',
+                    a: {webNodeType: 'Test', b: '2'},
+                    b: 'a'
+                }
+            ], {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}}
         ],
         // // endregion
         // // region property readonly
         [
-            {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
+            ], {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}}
         ],
         [
-            {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-            {}
+            [
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
+                {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}}
+            ], {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}}
         ],
         // // endregion
         // // region property range
         [
-            {types: {Test: {
+
+            [
+                {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 3}},
+                {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 3}}
+            ], {types: {Test: {
                 a: {type: 'number', minimum: 3},
                 b: {type: 'Test'}
-            }}},
-            {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 3}},
-            {webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 3}}
+            }}}
         ],
         [
-            {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
-            {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '1'}},
-            {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '1'}}
+            [
+                {
+                    webNodeType: 'Test',
+                    a: '1',
+                    b: {webNodeType: 'Test', a: '1'}
+                },
+                {webNodeType: 'Test', a: '1', b: {webNodeType: 'Test', a: '1'}}
+            ], {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}}
         ],
         // // endregion
         // // region property pattern
         [
-            {types: {Test: {
+            [
+                {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}},
+                {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}}
+            ], {types: {Test: {
                 a: {regularExpressionPattern: 'a'},
                 b: {type: 'Test'}
-            }}},
-            {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}},
-            {webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}}
+            }}}
         ],
         // // endregion
         // // region property constraint
         [
-            {types: {Test: {
+            [
+                {
+                    webNodeType: 'Test',
+                    a: 'b',
+                    b: {webNodeType: 'Test', a: 'b'}
+                },
+                {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'b'}}
+            ], {types: {Test: {
                 a: {constraint: 'newDocument.a === "b"'},
                 b: {type: 'Test'}
-            }}},
-            {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'b'}},
-            {webNodeType: 'Test', a: 'b', b: {webNodeType: 'Test', a: 'b'}}
+            }}}
         ],
         // // endregion
         // / endregion
         [
-            {types: {Test: {a: {type: 2}}}},
-            {webNodeType: 'Test', a: 2},
-            {webNodeType: 'Test', a: 2}
+            [
+                {webNodeType: 'Test', a: 2}, {webNodeType: 'Test', a: 2}
+            ], {types: {Test: {a: {type: 2}}}}
         ],
         // endregion
         // region property range
         [
-            {types: {Test: {a: {type: 'number', minimum: 3}}}},
-            {webNodeType: 'Test', a: 3},
-            {webNodeType: 'Test', a: 3}
+            [{webNodeType: 'Test', a: 3}, {webNodeType: 'Test', a: 3}],
+            {types: {Test: {a: {type: 'number', minimum: 3}}}}
         ],
         [
-            {types: {Test: {a: {type: 'number', maximum: 1}}}},
-            {webNodeType: 'Test', a: 1},
-            {webNodeType: 'Test', a: 1}
+            [{webNodeType: 'Test', a: 1}, {webNodeType: 'Test', a: 1}],
+            {types: {Test: {a: {type: 'number', maximum: 1}}}}
         ],
         [
-            {types: {Test: {a: {minimum: 3}}}},
-            {webNodeType: 'Test', a: '123'},
-            {webNodeType: 'Test', a: '123'}
+            [{webNodeType: 'Test', a: '123'}, {webNodeType: 'Test', a: '123'}],
+            {types: {Test: {a: {minimum: 3}}}}
         ],
         [
-            {types: {Test: {a: {maximum: 1}}}},
-            {webNodeType: 'Test', a: '1'},
-            {webNodeType: 'Test', a: '1'}
+            [{webNodeType: 'Test', a: '1'}, {webNodeType: 'Test', a: '1'}],
+            {types: {Test: {a: {maximum: 1}}}}
         ],
         // endregion
         // region property pattern
         [
-            {types: {Test: {a: {regularExpressionPattern: 'a'}}}},
-            {webNodeType: 'Test', a: 'a'},
-            {webNodeType: 'Test', a: 'a'}
+            [{webNodeType: 'Test', a: 'a'}, {webNodeType: 'Test', a: 'a'}],
+            {types: {Test: {a: {regularExpressionPattern: 'a'}}}}
         ],
         // endregion
         // region property constraint
         [
-            {types: {Test: {a: {constraint: 'true'}}}},
-            {webNodeType: 'Test', a: 'b'},
-            {webNodeType: 'Test', a: 'b'}
+            [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'b'}],
+            {types: {Test: {a: {constraint: 'true'}}}}
         ],
         [
-            {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}},
-            {webNodeType: 'Test', a: 'a'},
-            {webNodeType: 'Test', a: 'a'}
+            [{webNodeType: 'Test', a: 'a'}, {webNodeType: 'Test', a: 'a'}]
+            {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}}
         ]
         // endregion
     ]) {
-        const functionCode:string =
-            Helper.generateValidateDocumentUpdateFunctionCode(
-                Tools.extendObject(true, {}, defaultSpecification, test[0]))
-        assert.strictEqual(typeof functionCode, 'string')
-        const validatorGenerator:Function = new Function(
-            'toJSON', `return ${functionCode}`)
-        assert.strictEqual(typeof validatorGenerator, 'function')
-        const validator:Function = validatorGenerator(JSON.stringify)
-        assert.strictEqual(typeof validator, 'function')
-        let result:Object
-        try {
-            result = validator.apply(this, test.slice(1, test.length - 1))
-        } catch (error) {
-            console.log(error)
-        }
-        assert.deepEqual(result, test[test.length - 1])
+        const models:PlainObject = Helper.extendSpecification(
+            Tools.extendObject(true, {}, defaultSpecification, test[1]))
+        const options:PlainObject = Tools.copyLimitedRecursively(test[1])
+        delete options.type
+        assert.deepEqual(Helper.validateDocumentUpdate.apply(this, test[
+            0
+        ].concat([null, null, null].slice(0, 3 - test.length)).concat([
+            models, options
+        ])), test[2])
     }
     // endregion
+})
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
         // TODO

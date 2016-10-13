@@ -155,9 +155,19 @@ import Helper from './helper'
     // endregion
     try {
         // region generate/update authentication/validation code
-        const validationCode:string =
-            Helper.generateValidateDocumentUpdateFunctionCode(
-                configuration.model)
+        let validationCode = Helper.validateDocumentUpdate.toString()
+        const modelOptions:PlainObject = Tools.copyLimitedRecursively(
+            configuration.model)
+        delete modelOptions.type
+        validationCode = 'const models = ' +
+            JSON.stringify(Helper.extendSpecification(
+                configuration.model
+            )) + '\n' +
+            `const options = ${modelOptions}\n` +
+            validationCode.substring(
+                validationCode.indexOf('{') + 1,
+                validationCode.lastIndexOf('}')
+            ).trim().replace(/^ {12}/gm, '')
         if (configuration.debug)
             console.info(
                 'Specification \n\n"' +
