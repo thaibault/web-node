@@ -290,12 +290,11 @@ export default class Helper {
      * @returns Modified given new document.
      */
     static validateDocumentUpdate(
-        newDocument:Object, oldDocument:?Object, userContext:?Object = {},
-        securitySettings:?Object = {}, models:PlainObject, options:PlainObject,
-        toJSON:?Function
+        newDocument:Object, oldDocument:?Object, userContext:Object = {},
+        securitySettings:Object = {}, models:PlainObject, options:PlainObject,
+        toJSON:Function
     ):Object {
         // TODO clear securitySettings on startup.
-        // TODO replace evals by new Functions
         // region ensure needed environment
         if (newDocument.hasOwnProperty('_deleted') && newDocument._deleted)
             return newDocument
@@ -319,6 +318,8 @@ export default class Helper {
                 }
         if (!options)
             options = {}
+        if (!options.hasOwnProperty('specialPropertyNames'))
+            options.specialPropertyNames = {}
         if (!toJSON)
             if (JSON && JSON.hasOwnProperty('stringify'))
                 toJSON:Function = (object:Object):string => JSON.stringify(
@@ -329,33 +330,30 @@ export default class Helper {
             options.reservedPropertyNames || []
         const updateStrategy:string = options.updateStrategy || 'fillUp'
         const allowedRolesPropertyName:string =
-                options.specialPropertyNames.allowedRoles ||
-                'webNodeAllowedRoles'
+            options.specialPropertyNames.allowedRoles || 'webNodeAllowedRoles'
+        const typePropertyName:string = options.specialPropertyNames.type ||
+            'webNodeType'
         // endregion
         const checkDocument:Function = (
             newDocument:Object, oldDocument:?Object
         ):Object => {
             // region check for model type
-            if (!newDocument.hasOwnProperty(options.specialPropertyNames.type))
+            if (!newDocument.hasOwnProperty(typePropertyName))
                 throw {
                     forbidden: 'Type: You have to specify a model type via ' +
-                        `property "${options.specialPropertyNames.type}".`
+                        `property "${typePropertyName}".`
                 }
-            if (!models.hasOwnProperty(
-                newDocument[options.specialPropertyNames.type]
-            ))
+            if (!models.hasOwnProperty(newDocument[typePropertyName]))
                 throw {
                     forbidden: 'Model: Given model "' +
-                        newDocument[options.specialPropertyNames.type] +
-                        '" is not specified.'
+                        `${newDocument[typePropertyName]}" is not specified.`
                 }
             // endregion
-            const modelName:string = newDocument[
-                options.specialPropertyNames.type]
+            const specialPropertyName:string = newDocument[typePropertyName]
             const modelSpecification:PlainObject = models[modelName]
             const checkPropertyContent:Function = (
                 newValue:any, name:string, specification:Object, oldValue:?any
-            ):any {
+            ):any => {
                 // region type
                 if (['DateTime'].includes(specification.type)) {
                     if (typeof newValue !== 'number')
@@ -369,6 +367,7 @@ export default class Helper {
                 ))
                     if (typeof newValue === 'object' && Object.getPrototypeOf(
                         newValue
+                    // IgnoreTypeCheck
                     ) === Object.prototype) {
                         newValue = checkDocument(newValue, oldValue)
                         if (toJSON(newValue) === toJSON({}))
@@ -470,8 +469,7 @@ export default class Helper {
                             forbidden: type.charAt(0).toUpperCase(
                             ) + type.substring(1) + ` Property "${name}" ` +
                             `should satisfy constraint "` +
-                            `${specification[type]}" (given "` +
-                            `${newDocumentAssignment}").`
+                            `${specification[type]}" (given "${newValue}").`
                         }
                 // endregion
                 return newValue
@@ -637,16 +635,15 @@ export default class Helper {
                     ) {
                         specification.type = specification.type.substring(
                             0, specification.type.length - '[]'.length)
-                        if (!Array.isArray(newDocument[name]))
+                        if (!Array.isArray(newDocument[propertyName]))
                             throw {
                                 forbidden: 'PropertyType: Property "' +
                                     `${propertyName}" isn't of type "array ` +
                                     `-> ${specification.type}" (given "` +
                                     `${newDocument[propertyName]}").`
                             }
-                        const specification.type =
-                            specification.type.substring(
-                                0, specification.type.length - '[]'.length)
+                        specification.type = specification.type.substring(
+                            0, specification.type.length - '[]'.length)
                         let index:number = 0
                         for (const value:any of newDocument[
                             propertyName

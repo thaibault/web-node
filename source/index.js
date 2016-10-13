@@ -15,6 +15,7 @@
 // region  imports
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
+import type {PlainObject} from 'clientnode'
 import http from 'http'
 import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'

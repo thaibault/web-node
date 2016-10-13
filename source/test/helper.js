@@ -149,9 +149,7 @@ QUnit.test('extendSpecification', (assert:Object):void => {
         types: {a: {}}
     }), {a: {}})
 })
-QUnit.test('generateValidateDocumentUpdateFunctionCode', (
-    assert:Object
-):void => {
+QUnit.test('validateDocumentUpdate', (assert:Object):void => {
     const defaultSpecification:PlainObject = {
         defaultPropertySpecification: {
             type: 'string',
@@ -496,7 +494,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
         const parameter:Array<any> = test[0].concat([null, null, null].slice(
             0, 3 - test.length
         )).concat([models, options])
-        assert.throws(():void => Helper.validateDocumentUpdate.apply(
+        assert.throws(():Object => Helper.validateDocumentUpdate.apply(
             this, parameter
         ), (error:DatabaseError):boolean => {
             if (error.hasOwnProperty('forbidden')) {
@@ -506,7 +504,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
                     console.log(
                         `Error "${error.forbidden}" doesn't start with "` +
                         `${test[2]}:". Given arguments: ` +
-                        `"${JSON.stringify(parameter)}".`)
+                        `"${parameter.map(JSON.stringify).join('", "')}".`)
                 return result
             }
             // IgnoreTypeCheck
@@ -785,7 +783,7 @@ QUnit.test('generateValidateDocumentUpdateFunctionCode', (
             {types: {Test: {a: {constraint: 'true'}}}}
         ],
         [
-            [{webNodeType: 'Test', a: 'a'}, {webNodeType: 'Test', a: 'a'}]
+            [{webNodeType: 'Test', a: 'a'}, {webNodeType: 'Test', a: 'a'}],
             {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}}
         ]
         // endregion
@@ -806,7 +804,7 @@ QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
         // TODO
     ])
-        assert.deepEqual(Helper.loadPlugin(test[0], test[1]), test[2])
+        assert.deepEqual(Helper.loadPlugin.apply(Helper, test[0]), test[1])
 })
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [
