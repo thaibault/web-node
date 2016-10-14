@@ -172,7 +172,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             nullable: false,
             minimum: 1,
             maximum: 999,
-            writable: false
+            mutable: false
         }}},
         updateStrategy: 'incremental'
     }
@@ -191,7 +191,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         [
             [{webNodeType: 'Test'}], {types: {Test: {a: {nullable: false}}}},
             'MissingProperty'
-        ],
+        ]/*,
         // endregion
         // region property readonly
         [
@@ -486,14 +486,17 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ], 'ConstraintEvaluation'
         ]
         // endregion
+        */
     ]) {
-        const models:PlainObject = Helper.extendSpecification(
+        if (test.length < 3)
+            test.splice(1, 0, {})
+        const modelSpecifications:PlainObject = Helper.extendSpecification(
             Tools.extendObject(true, {}, defaultSpecification, test[1]))
         const options:PlainObject = Tools.copyLimitedRecursively(test[1])
-        delete options.type
-        const parameter:Array<any> = test[0].concat([null, null, null].slice(
-            0, 3 - test.length
-        )).concat([models, options])
+        delete options.types
+        const parameter:Array<any> = test[0].concat([null, {}, {}].slice(
+            0, 4 - test[0].length
+        )).concat([modelSpecifications, options])
         assert.throws(():Object => Helper.validateDocumentUpdate.apply(
             this, parameter
         ), (error:DatabaseError):boolean => {
@@ -503,8 +506,8 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 if (!result)
                     console.log(
                         `Error "${error.forbidden}" doesn't start with "` +
-                        `${test[2]}:". Given arguments: ` +
-                        `"${parameter.map(JSON.stringify).join('", "')}".`)
+                        `${test[2]}:". Given arguments: "` +
+                        `${parameter.map(JSON.stringify).join('", "')}".`)
                 return result
             }
             // IgnoreTypeCheck
@@ -515,6 +518,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
     // endregion
     // region allowed write tests
     for (const test:Array<any> of [
+        /*
         [[{webNodeType: 'Test'}, {webNodeType: 'Test'}], {types: {Test: {}}}],
         [
             [{webNodeType: 'Test'}, {webNodeType: 'Test'}],
@@ -787,15 +791,16 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             {types: {Test: {a: {constraint: 'newDocument[key] === "a"'}}}}
         ]
         // endregion
+        */
     ]) {
-        const models:PlainObject = Helper.extendSpecification(
+        const modelSpecifications:PlainObject = Helper.extendSpecification(
             Tools.extendObject(true, {}, defaultSpecification, test[1]))
         const options:PlainObject = Tools.copyLimitedRecursively(test[1])
-        delete options.type
+        delete options.types
         assert.deepEqual(Helper.validateDocumentUpdate.apply(this, test[
             0
-        ].concat([null, null, null].slice(0, 3 - test.length)).concat([
-            models, options
+        ].concat([null, {}, {}].slice(0, 4 - test.length)).concat([
+            modelSpecifications, options
         ])), test[2])
     }
     // endregion

@@ -291,8 +291,8 @@ export default class Helper {
      */
     static validateDocumentUpdate(
         newDocument:Object, oldDocument:?Object, userContext:Object = {},
-        securitySettings:Object = {}, models:PlainObject, options:PlainObject,
-        toJSON:Function
+        securitySettings:Object = {}, modelSpecifications:PlainObject,
+        options:PlainObject, toJSON:Function
     ):Object {
         // TODO clear securitySettings on startup.
         // region ensure needed environment
@@ -343,14 +343,17 @@ export default class Helper {
                     forbidden: 'Type: You have to specify a model type via ' +
                         `property "${typePropertyName}".`
                 }
-            if (!models.hasOwnProperty(newDocument[typePropertyName]))
+            if (!modelSpecifications.hasOwnProperty(newDocument[
+                typePropertyName
+            ]))
                 throw {
                     forbidden: 'Model: Given model "' +
                         `${newDocument[typePropertyName]}" is not specified.`
                 }
             // endregion
-            const specialPropertyName:string = newDocument[typePropertyName]
-            const modelSpecification:PlainObject = models[modelName]
+            const modelName:string = newDocument[typePropertyName]
+            const modelSpecification:PlainObject = modelSpecifications[
+                modelName]
             const checkPropertyContent:Function = (
                 newValue:any, name:string, specification:Object, oldValue:?any
             ):any => {
@@ -452,16 +455,16 @@ export default class Helper {
                         specification[type]
                     ) || (new Function(
                         'newDocument', 'oldDocument', 'userContext',
-                        'securitySettings', 'models', 'options', 'modelName',
-                        'modelSpecification', 'checkDocument',
+                        'securitySettings', 'modelSpecifications', 'options',
+                        'modelName', 'modelSpecification', 'checkDocument',
                         'checkPropertyContent', 'newValue', 'name',
                         'specification', 'oldValue', (type.endsWith(
                             'Evaluation'
                         ) ? 'return ' : '') + specification[type]
                     )(
                         newDocument, oldDocument, userContext,
-                        securitySettings, models, options, modelName,
-                        modelSpecification, checkDocument,
+                        securitySettings, modelSpecifications, options,
+                        modelName, modelSpecification, checkDocument,
                         checkPropertyContent, newValue, name, specification,
                         oldValue
                     ))))
@@ -490,18 +493,18 @@ export default class Helper {
                                 newDocument[propertyName] = (new Function(
                                     'newDocument', 'oldDocument',
                                     'userContext', 'securitySettings', 'name',
-                                    'models', 'options', 'modelName',
-                                    'modelSpecification', 'checkDocument',
-                                    'checkPropertyContent', 'specification',
-                                    (type.endsWith(
+                                    'modelSpecifications', 'options',
+                                    'modelName', 'modelSpecification',
+                                    'checkDocument', 'checkPropertyContent',
+                                    'specification', (type.endsWith(
                                         'Evaluation'
                                     ) ? 'return ' : '') + specification[type]
                                 )(
                                     newDocument, oldDocument, userContext,
-                                    securitySettings, propertyName, models,
-                                    options, modelName, modelSpecification,
-                                    checkDocument, checkPropertyContent,
-                                    specification
+                                    securitySettings, propertyName,
+                                    modelSpecifications, options, modelName,
+                                    modelSpecification, checkDocument,
+                                    checkPropertyContent, specification
                                 ))
                     for (const type:string of [
                         'onUpdateEvaluation', 'onUpdateExpression'
@@ -509,18 +512,19 @@ export default class Helper {
                         if (specification[type])
                             newDocument[propertyName] = (new Function(
                                 'newDocument', 'oldDocument', 'userContext',
-                                'securitySettings', 'name', 'models',
-                                'options', 'modelName', 'modelSpecification',
-                                'checkDocument', 'checkPropertyContent',
-                                'specification', (type.endsWith(
+                                'securitySettings', 'name',
+                                'modelSpecifications', 'options', 'modelName',
+                                'modelSpecification', 'checkDocument',
+                                'checkPropertyContent', 'specification',
+                                (type.endsWith(
                                     'Evaluation'
                                 ) ? 'return ' : '') + specification[type]
                             )(
                                 newDocument, oldDocument, userContext,
-                                securitySettings, propertyName, models,
-                                options, modelName, modelSpecification,
-                                checkDocument, checkPropertyContent,
-                                specification
+                                securitySettings, propertyName,
+                                modelSpecifications, options, modelName,
+                                modelSpecification, checkDocument,
+                                checkPropertyContent, specification
                             ))
                     if ([undefined, null].includes(specification.default)) {
                         if (!(specification.nullable || (
@@ -553,19 +557,23 @@ export default class Helper {
             // endregion
             // region check given data
             if (oldDocument && updateStrategy === 'incremental')
-                for (const key:string in newDocument)
+                for (const propertyName:string in newDocument)
                     if (
-                        newDocument.hasOwnProperty(key) && key !== '_id' &&
-                        oldDocument.hasOwnProperty(
-                            key
-                        ) && oldDocument[key] === newDocument[key] &&
-                        !reservedPropertyNames.includes(key)
+                        newDocument.hasOwnProperty(propertyName) &&
+                        propertyName !== '_id' &&
+                        oldDocument.hasOwnProperty(propertyName) &&
+                        oldDocument[propertyName] === newDocument[
+                            propertyName
+                        ] &&
+                        !reservedPropertyNames.includes(propertyName)
                     ) {
-                        delete newDocument[key]
+                        delete newDocument[propertyName]
                         continue
                     }
             for (const propertyName:string in newDocument)
-                if (newDocument.hasOwnProperty(propertyName)) {
+                if (newDocument.hasOwnProperty(
+                    propertyName
+                ) && !reservedPropertyNames.includes(propertyName)) {
                     if (!modelSpecification.hasOwnProperty(propertyName))
                         throw {
                             forbidden: 'Property: Given property "' +
@@ -573,8 +581,7 @@ export default class Helper {
                                 `${modelName}".`
                         }
                     const specification:PlainObject = modelSpecification[
-                        modelName
-                    ][propertyName]
+                        propertyName]
                     // region writable/mutable
                     if (!specification.writable)
                         if (oldDocument)
