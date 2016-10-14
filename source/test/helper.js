@@ -736,7 +736,11 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             Tools.extendObject(true, {}, defaultSpecification, test[1]))
         const options:PlainObject = Tools.copyLimitedRecursively(test[1])
         delete options.types
-        console.log('C', Helper.validateDocumentUpdate.apply(this, test[
+        console.log('C', test[
+            0
+        ].concat([null, {}, {}].slice(test[0].length - 1)).concat([
+            modelSpecifications, options
+        ]), Helper.validateDocumentUpdate.apply(this, test[
             0
         ].concat([null, {}, {}].slice(test[0].length - 1)).concat([
             modelSpecifications, options
