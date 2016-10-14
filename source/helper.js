@@ -322,7 +322,7 @@ export default class Helper {
             options.specialPropertyNames = {}
         if (!toJSON)
             if (JSON && JSON.hasOwnProperty('stringify'))
-                toJSON:Function = (object:Object):string => JSON.stringify(
+                toJSON = (object:Object):string => JSON.stringify(
                     object, null, '    ')
             else
                 throw new Error('Needed "toJSON" function is not available.')
@@ -363,9 +363,9 @@ export default class Helper {
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "DateTime" (given "` +
-                                `${newValue}").`
+                                `${toJSON(newValue)}").`
                         }
-                } else if (modelSpecification.hasOwnProperty(
+                } else if (modelSpecifications.hasOwnProperty(
                     specification.type
                 ))
                     if (typeof newValue === 'object' && Object.getPrototypeOf(
@@ -379,7 +379,7 @@ export default class Helper {
                         throw {
                             forbidden: 'NestedModel: Under key "${name}" ' +
                                 `isn't "${specification.type}" (given "` +
-                                `${newValue}").`
+                                `${toJSON(newValue)}").`
                         }
                 else if (['string', 'number', 'boolean'].includes(
                     specification.type
@@ -388,25 +388,25 @@ export default class Helper {
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "${specification.type}" ` +
-                                `(given "${newValue}").`
+                                `(given "${toJSON(newValue)}").`
                         }
                 } else if (newValue !== specification.type)
                     throw {
                         forbidden: `PropertyType: Property "${name}" isn't ` +
                             `value "${specification.type}" (given "` +
-                            `${newValue}").`
+                            `${toJSON(newValue)}").`
                     }
                 // endregion
                 // region range
                 if (![undefined, null].includes(specification.minimum))
-                    if (specification.type === 'string')
+                    if (specification.type === 'string') {
                         if (newValue.length < specification.minimum)
                             throw {
                                 forbidden: `MinimalLength: Property "${name}` +
                                 '" (type string) should have minimal length ' +
                                 `${specification.minimum}.`
                             }
-                    else if ([
+                    } else if ([
                         'number', 'integer', 'float', 'DateTime'
                     ].includes(specification.type) &&
                     newValue < specification.minimum)
@@ -416,14 +416,14 @@ export default class Helper {
                                 `minimum of ${specification.minimum}.`
                         }
                 if (![undefined, null].includes(specification.maximum))
-                    if (specification.type === 'string')
+                    if (specification.type === 'string') {
                         if (newValue.length > specification.maximum)
                             throw {
                                 forbidden: `MaximalLength: Property "${name}` +
                                     ' (type string) should have maximal ' +
                                     `length ${specification.maximum}.`
                             }
-                    else if ([
+                    } else if ([
                         'number', 'integer', 'float', 'DateTime'
                     ].includes(
                         specification.type
@@ -451,9 +451,7 @@ export default class Helper {
                 for (const type:string of [
                     'constraintEvaluation', 'constraintExpression'
                 ])
-                    if (!([undefined, null].includes(
-                        specification[type]
-                    ) || (new Function(
+                    if (specification[type] && !(new Function(
                         'newDocument', 'oldDocument', 'userContext',
                         'securitySettings', 'modelSpecifications', 'options',
                         'modelName', 'modelSpecification', 'checkDocument',
@@ -467,12 +465,13 @@ export default class Helper {
                         modelName, modelSpecification, checkDocument,
                         checkPropertyContent, newValue, name, specification,
                         oldValue
-                    ))))
+                    )))
                         throw {
                             forbidden: type.charAt(0).toUpperCase(
-                            ) + type.substring(1) + ` Property "${name}" ` +
+                            ) + type.substring(1) + `: Property "${name}" ` +
                             `should satisfy constraint "` +
-                            `${specification[type]}" (given "${newValue}").`
+                            `${specification[type]}" (given "` +
+                            `${toJSON(newValue)}").`
                         }
                 // endregion
                 return newValue
@@ -480,8 +479,8 @@ export default class Helper {
             // region run hooks and check for presence of needed data
             for (const propertyName:string in modelSpecification)
                 if (
-                    propertyName !== allowedRolesPropertyName
-                    && modelSpecification.hasOwnProperty(propertyName)
+                    propertyName !== allowedRolesPropertyName &&
+                    modelSpecification.hasOwnProperty(propertyName)
                 ) {
                     const specification:PlainObject = modelSpecification[
                         propertyName]
@@ -620,7 +619,7 @@ export default class Helper {
                             continue
                         } else
                             throw {
-                                forbidden: 'Readonly: Property "' +
+                                forbidden: 'Immutable: Property "' +
                                     `${propertyName}" is not writable (old ` +
                                     `document "${toJSON(oldDocument)}").`
                             }
@@ -640,17 +639,25 @@ export default class Helper {
                         typeof specification.type === 'string' &&
                         specification.type.endsWith('[]')
                     ) {
-                        specification.type = specification.type.substring(
-                            0, specification.type.length - '[]'.length)
                         if (!Array.isArray(newDocument[propertyName]))
                             throw {
                                 forbidden: 'PropertyType: Property "' +
                                     `${propertyName}" isn't of type "array ` +
                                     `-> ${specification.type}" (given "` +
-                                    `${newDocument[propertyName]}").`
+                                    `${toJSON(newDocument[propertyName])}").`
                             }
-                        specification.type = specification.type.substring(
-                            0, specification.type.length - '[]'.length)
+                        const nestedSpecification:PlainObject = {}
+                        for (const key:string in specification)
+                            if (specification.hasOwnProperty(key))
+                                if (key === 'type')
+                                    nestedSpecification[key] = specification[
+                                        key
+                                    ].substring(
+                                        0, specification.type.length -
+                                            '[]'.length)
+                                else
+                                    nestedSpecification[key] = specification[
+                                        key]
                         let index:number = 0
                         for (const value:any of newDocument[
                             propertyName
@@ -659,7 +666,7 @@ export default class Helper {
                                 checkPropertyContent(
                                     value,
                                     `${index + 1}. value in ${propertyName}`,
-                                    specification)
+                                    nestedSpecification)
                             if (newDocument[propertyName][index] === null)
                                 newDocument[propertyName].splice(index, 1)
                             index += 1
