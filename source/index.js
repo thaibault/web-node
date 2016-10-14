@@ -159,6 +159,7 @@ import Helper from './helper'
         let validationCode = Helper.validateDocumentUpdate.toString()
         const modelOptions:PlainObject = Tools.copyLimitedRecursively(
             configuration.model)
+        delete options.defaultPropertySpecification
         delete modelOptions.type
         validationCode = 'const models = ' +
             JSON.stringify(Helper.extendSpecification(

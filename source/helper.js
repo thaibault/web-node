@@ -559,12 +559,13 @@ export default class Helper {
                 for (const propertyName:string in newDocument)
                     if (
                         newDocument.hasOwnProperty(propertyName) &&
-                        propertyName !== '_id' &&
+                        propertyName !== typePropertyName &&
                         oldDocument.hasOwnProperty(propertyName) &&
                         oldDocument[propertyName] === newDocument[
                             propertyName
-                        ] &&
-                        !reservedPropertyNames.includes(propertyName)
+                        ] || toJSON(oldDocument[propertyName]) === toJSON(
+                            newDocument[propertyName]
+                        ) && !reservedPropertyNames.includes(propertyName)
                     ) {
                         delete newDocument[propertyName]
                         continue
@@ -607,13 +608,16 @@ export default class Helper {
                                 forbidden: 'Readonly: Property "' +
                                     `${propertyName}" is not writable.`
                             }
-                    if (!specification.mutable && oldDocument)
-                        if (oldDocument.hasOwnProperty(propertyName) && toJSON(
-                            newDocument[propertyName]
-                        ) === toJSON(oldDocument[propertyName])) {
+                    if (
+                        !specification.mutable && oldDocument &&
+                        oldDocument.hasOwnProperty(propertyName)
+                    )
+                        if (toJSON(newDocument[propertyName]) === toJSON(
+                            oldDocument[propertyName]
+                        )) {
                             if (
-                                propertyName !== '_id' &&
-                                updateStrategy === 'incremental'
+                                updateStrategy === 'incremental' &&
+                                !reservedPropertyNames.includes(propertyName)
                             )
                                 delete newDocument[propertyName]
                             continue

@@ -127,7 +127,7 @@
         "constraintEvaluation": null,
         "constraintExpression": null
       },
-      "reservedPropertyNames": ["_rev", "_revisions", "_deleted"],
+      "reservedPropertyNames": ["_id", "_rev", "_revisions", "_deleted"],
       "specialPropertyNames": {
         "allowedRoles": "webNodeAllowedRoles",
         "extend": "webNodeExtends",
