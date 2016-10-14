@@ -328,7 +328,7 @@ export default class Helper {
                 throw new Error('Needed "toJSON" function is not available.')
         const reservedPropertyNames:Array<string> =
             options.reservedPropertyNames || []
-        const updateStrategy:string = options.updateStrategy || 'fillUp'
+        const updateStrategy:string = options.updateStrategy || null
         const allowedRolesPropertyName:string =
             options.specialPropertyNames.allowedRoles || 'webNodeAllowedRoles'
         const typePropertyName:string = options.specialPropertyNames.type ||
