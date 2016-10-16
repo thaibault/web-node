@@ -10,7 +10,7 @@ import type {PlainObject} from 'weboptimizer/type'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {ForbiddenDatabaseError, ModelConfiguration} from '../type'
+import type {DatabaseForbiddenError, ModelConfiguration} from '../type'
 import Helper from '../helper'
 // endregion
 QUnit.module('helper')
@@ -44,21 +44,21 @@ QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
         [
             {
                 specialPropertyNames: {allowedRoles: 'roles'},
-                types: {Test: {}}
+                models: {Test: {}}
             },
             {}
         ],
         [
             {
                 specialPropertyNames: {allowedRoles: 'roles'},
-                types: {Test: {roles: []}}
+                models: {Test: {roles: []}}
             },
             {Test: []}
         ],
         [
             {
                 specialPropertyNames: {allowedRoles: 'roles'},
-                types: {Test: {roles: ['a']}}
+                models: {Test: {roles: ['a']}}
             },
             {Test: ['a']}
         ]
@@ -122,15 +122,15 @@ QUnit.test('extendModel', (assert:Object):void => {
 QUnit.test('extendModels', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, {}],
-        [{types: {}}, {}],
-        [{types: {Test: {}}}, {Test: {}}],
-        [{types: {Test: {}}}, {Test: {}}],
+        [{models: {}}, {}],
+        [{models: {Test: {}}}, {Test: {}}],
+        [{models: {Test: {}}}, {Test: {}}],
         [
-            {types: {Base: {b: {}}, Test: {a: {}, webNodeExtends: 'Base'}}},
+            {models: {Base: {b: {}}, Test: {a: {}, webNodeExtends: 'Base'}}},
             {Base: {b: {}}, Test: {a: {}, b: {}}}
         ],
         [
-            {types: {_base: {b: {}}, Test: {a: {}}}},
+            {models: {_base: {b: {}}, Test: {a: {}}}},
             {Test: {a: {}, b: {}}}
         ]
     ])
@@ -139,14 +139,14 @@ QUnit.test('extendModels', (assert:Object):void => {
         )), test[1])
     assert.throws(():{[key:string]:PlainObject} => Helper.extendModels({
         specialPropertyNames: {extend: 'webNodeExtends'},
-        types: {a: {}}
+        models: {a: {}}
     }))
     assert.deepEqual(Helper.extendModels({
         specialPropertyNames: {
             extend: 'webNodeExtends',
             typeNameRegularExpressionPattern: /a/
         },
-        types: {a: {}}
+        models: {a: {}}
     }), {a: {}})
 })
 QUnit.test('validateDocumentUpdate', (assert:Object):void => {
@@ -167,7 +167,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             constraintEvaluation: null,
             constraintExpression: null
         },
-        types: {_base: {webNodeType: {
+        models: {_base: {webNodeType: {
             regularExpressionPattern: '^[A-Z][a-z0-9]+$',
             nullable: false,
             minimum: 1,
@@ -184,73 +184,73 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [[{webNodeType: 'test'}], 'Model'],
             // endregion
             // region property existents
-            [[{webNodeType: 'Test', a: 2}], {types: {Test: {}}}, 'Property'],
+            [[{webNodeType: 'Test', a: 2}], {models: {Test: {}}}, 'Property'],
             [
                 [{webNodeType: 'Test', a: null}],
-                {types: {Test: {a: {nullable: false}}}}, 'NotNull'
+                {models: {Test: {a: {nullable: false}}}}, 'NotNull'
             ],
             [
-                [{webNodeType: 'Test'}], {types: {Test: {a: {nullable: false}}}},
+                [{webNodeType: 'Test'}], {models: {Test: {a: {nullable: false}}}},
                 'MissingProperty'
             ],
             // endregion
             // region property readonly
             [
                 [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {writable: false}}}}, 'Readonly'
+                {models: {Test: {a: {writable: false}}}}, 'Readonly'
             ],
             [
                 [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'a'}],
-                {types: {Test: {a: {writable: false}}}}, 'Readonly'
+                {models: {Test: {a: {writable: false}}}}, 'Readonly'
             ],
             // endregion
             // region property type
             [
-                [{webNodeType: 'Test', a: 2}], {types: {Test: {a: {}}}},
+                [{webNodeType: 'Test', a: 2}], {models: {Test: {a: {}}}},
                 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: 'b'}],
-                {types: {Test: {a: {type: 'number'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'number'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: 1}],
-                {types: {Test: {a: {type: 'boolean'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'boolean'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: 'a'}],
-                {types: {Test: {a: {type: 'DateTime'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'DateTime'}}}}, 'PropertyType'
             ],
             // / region array
             // // region type
             [
                 [{webNodeType: 'Test', a: 2}],
-                {types: {Test: {a: {type: 'string[]'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'string[]'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: [2]}],
-                {types: {Test: {a: {type: 'string[]'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'string[]'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: ['b']}],
-                {types: {Test: {a: {type: 'number[]'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'number[]'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: [1]}],
-                {types: {Test: {a: {type: 'boolean[]'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'boolean[]'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: [1]}],
-                {types: {Test: {a: {type: 'DateTime'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'DateTime'}}}}, 'PropertyType'
             ],
             [
                 [{webNodeType: 'Test', a: ['a']}],
-                {types: {Test: {a: {type: 'DateTime[]'}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'DateTime[]'}}}}, 'PropertyType'
             ],
             // // endregion
             [
                 [{webNodeType: 'Test', a: [{webNodeType: 'Test', b: 2}]}],
-                {types: {Test: {a: {type: 'Test[]'}}}}, 'Property'
+                {models: {Test: {a: {type: 'Test[]'}}}}, 'Property'
             ],
             [
                 [
@@ -259,21 +259,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         a: [{webNodeType: 'Test', b: null}],
                         b: 'a'
                     }
-                ], {types: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}},
+                ], {models: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}},
                 'NotNull'
             ],
             [
                 [
                     {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'a'}]},
                     {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'b'}]}
-                ], {types: {Test: {a: {type: 'Test[]', writable: false}, b: {}}}},
+                ], {models: {Test: {a: {type: 'Test[]', writable: false}, b: {}}}},
                 'Readonly'
             ],
             [
                 [{webNodeType: 'Test', a: [4], b: [{
                     webNodeType: 'Test', a: [2]
                 }]}],
-                {types: {Test: {
+                {models: {Test: {
                     a: {type: 'number[]', minimum: 3},
                     b: {type: 'Test[]'}
                 }}}, 'Minimum'
@@ -283,32 +283,32 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // region property type
             [
                 [{webNodeType: 'Test', a: 1}],
-                {types: {Test: {a: {type: 'Test'}}}}, 'NestedModel'
+                {models: {Test: {a: {type: 'Test'}}}}, 'NestedModel'
             ],
             [
                 [{webNodeType: 'Test', a: null}],
-                {types: {Test: {a: {type: 'Test', nullable: false}}}}, 'NotNull'
+                {models: {Test: {a: {type: 'Test', nullable: false}}}}, 'NotNull'
             ],
             [
                 [{webNodeType: 'Test', a: {}}],
-                {types: {Test: {a: {type: 'Test'}}}}, 'Type'
+                {models: {Test: {a: {type: 'Test'}}}}, 'Type'
             ],
             [
                 [{webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}, b: 'a'}],
-                {types: {Test: {a: {type: 'Test'}, b: {}}}}, 'PropertyType'
+                {models: {Test: {a: {type: 'Test'}, b: {}}}}, 'PropertyType'
             ],
             // // endregion
             // // region property existents
             [
                 [{webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}}],
-                {types: {Test: {a: {type: 'Test'}}}}, 'Property'
+                {models: {Test: {a: {type: 'Test'}}}}, 'Property'
             ],
             [
                 [{
                     webNodeType: 'Test',
                     a: {webNodeType: 'Test', b: null},
                     b: 'a'
-                }], {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+                }], {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
                 'NotNull'
             ],
             [
@@ -317,7 +317,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     a: {webNodeType: 'Test'},
                     b: 'a'
                 }],
-                {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+                {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
                 'MissingProperty'
             ],
             // // endregion
@@ -326,28 +326,28 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
-                ], {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+                ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 'Readonly'
             ],
             [
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}}
-                ], {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+                ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 'Readonly'
             ],
             [
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}, {}, {}
-                ], {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
+                ], {models: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
                 'Readonly'
             ],
             // // endregion
             // // region property range
             [
                 [{webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 2}}],
-                {types: {Test: {
+                {models: {Test: {
                     a: {type: 'number', minimum: 3},
                     b: {type: 'Test'}
                 }}}, 'Minimum'
@@ -357,14 +357,14 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     webNodeType: 'Test',
                     a: '1',
                     b: {webNodeType: 'Test', a: '12'}
-                }], {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
+                }], {models: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
                 'MaximalLength'
             ],
             // // endregion
             // // region property pattern
             [
                 [{webNodeType: 'Test', b: {webNodeType: 'Test', a: 'b'}}],
-                {types: {Test: {
+                {models: {Test: {
                     a: {regularExpressionPattern: 'a'},
                     b: {type: 'Test'}
                 }}}, 'PatternMatch'
@@ -376,7 +376,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     webNodeType: 'Test',
                     a: 'b',
                     b: {webNodeType: 'Test', a: 'a'}
-                }], {types: {Test: {
+                }], {models: {Test: {
                     a: {constraintEvaluation: 'newDocument.a === "b"'},
                     b: {type: 'Test'}
                 }}}, 'ConstraintEvaluation'
@@ -384,43 +384,43 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // endregion
             // / endregion
             [
-                [{webNodeType: 'Test', a: 1}], {types: {Test: {a: {type: 2}}}},
+                [{webNodeType: 'Test', a: 1}], {models: {Test: {a: {type: 2}}}},
                 'PropertyType'
             ],
             // endregion
             // region property range
             [
                 [{webNodeType: 'Test', a: 2}],
-                {types: {Test: {a: {type: 'number', minimum: 3}}}}, 'Minimum'
+                {models: {Test: {a: {type: 'number', minimum: 3}}}}, 'Minimum'
             ],
             [
                 [{webNodeType: 'Test', a: 2}],
-                {types: {Test: {a: {type: 'number', maximum: 1}}}}, 'Maximum'
+                {models: {Test: {a: {type: 'number', maximum: 1}}}}, 'Maximum'
             ],
             [
                 [{webNodeType: 'Test', a: '12'}],
-                {types: {Test: {a: {minimum: 3}}}}, 'MinimalLength'
+                {models: {Test: {a: {minimum: 3}}}}, 'MinimalLength'
             ],
             [
                 [{webNodeType: 'Test', a: '12'}],
-                {types: {Test: {a: {maximum: 1}}}}, 'MaximalLength'
+                {models: {Test: {a: {maximum: 1}}}}, 'MaximalLength'
             ],
             // endregion
             // region property pattern
             [
                 [{webNodeType: 'Test', a: 'b'}],
-                {types: {Test: {a: {regularExpressionPattern: 'a'}}}},
+                {models: {Test: {a: {regularExpressionPattern: 'a'}}}},
                 'PatternMatch'
             ],
             // endregion
             // region property constraint
             [
                 [{webNodeType: 'Test', a: 'b'}],
-                {types: {Test: {a: {constraintEvaluation: 'false'}}}},
+                {models: {Test: {a: {constraintEvaluation: 'false'}}}},
                 'ConstraintEvaluation'
             ],
             [
-                [{webNodeType: 'Test', a: 'b'}], {types: {Test: {a: {
+                [{webNodeType: 'Test', a: 'b'}], {models: {Test: {a: {
                     constraintEvaluation: 'newValue === "a"'
                 }}}}, 'ConstraintEvaluation'
             ]
@@ -436,13 +436,13 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 Tools.extendObject(true, {updateStrategy},
                 defaultModelConfiguration, test[1]))
             delete options.defaultPropertySpecification
-            delete options.types
+            delete options.models
             const parameter:Array<any> = test[0].concat([null, {}, {}].slice(
                 test[0].length - 1
             )).concat([modelConfiguration, options])
             assert.throws(():Object => Helper.validateDocumentUpdate.apply(
                 this, parameter
-            ), (error:ForbiddenDatabaseError):boolean => {
+            ), (error:DatabaseForbiddenError):boolean => {
                 if (error.hasOwnProperty('forbidden')) {
                     const result:boolean = error.forbidden.startsWith(
                         `${test[2]}:`)
@@ -462,14 +462,14 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         // region allowed write tests
         for (const test:Array<any> of [
             [
-                [{webNodeType: 'Test'}], {types: {Test: {}}}, {
+                [{webNodeType: 'Test'}], {models: {Test: {}}}, {
                     fillUp: {webNodeType: 'Test'},
                     incremental: {webNodeType: 'Test'},
                     null: {webNodeType: 'Test'}
                 }
             ],
             [
-                [{webNodeType: 'Test'}], {types: {Test: {class: {}}}}, {
+                [{webNodeType: 'Test'}], {models: {Test: {class: {}}}}, {
                     fillUp: {webNodeType: 'Test'},
                     incremental: {webNodeType: 'Test'},
                     null: {webNodeType: 'Test'}
@@ -477,7 +477,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test'}, {webNodeType: 'Test', a: '2'}],
-                {types: {Test: {a: {}}}}, {
+                {models: {Test: {a: {}}}}, {
                     fillUp: {webNodeType: 'Test', a: '2'},
                     incremental: {},
                     null: {webNodeType: 'Test'}
@@ -485,7 +485,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: '2'}, {webNodeType: 'Test', a: '2'}],
-                {types: {Test: {a: {}}}}, {
+                {models: {Test: {a: {}}}}, {
                     fillUp: {webNodeType: 'Test', a: '2'},
                     incremental: {},
                     null: {webNodeType: 'Test', a: '2'}
@@ -493,7 +493,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: '3'}, {webNodeType: 'Test', a: '2'}],
-                {types: {Test: {a: {}}}}, {
+                {models: {Test: {a: {}}}}, {
                     fillUp: {a: '3', webNodeType: 'Test'},
                     incremental: {a: '3'},
                     null: {webNodeType: 'Test', a: '3'}
@@ -502,14 +502,14 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region property existents
             [
                 [{webNodeType: 'Test', a: 2}],
-                {types: {Test: {a: {type: 'number'}}}}, {
+                {models: {Test: {a: {type: 'number'}}}}, {
                     fillUp: {webNodeType: 'Test', a: 2},
                     incremental: {webNodeType: 'Test', a: 2},
                     null: {webNodeType: 'Test', a: 2}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: null}], {types: {Test: {a: {}}}}, {
+                [{webNodeType: 'Test', a: null}], {models: {Test: {a: {}}}}, {
                     fillUp: {webNodeType: 'Test'},
                     incremental: {webNodeType: 'Test'},
                     null: {webNodeType: 'Test'}
@@ -517,7 +517,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: 'a'}],
-                {types: {Test: {a: {nullable: false}}}}, {
+                {models: {Test: {a: {nullable: false}}}}, {
                     fillUp: {webNodeType: 'Test', a: 'a'},
                     incremental: {webNodeType: 'Test', a: 'a'},
                     null: {webNodeType: 'Test', a: 'a'}
@@ -525,7 +525,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test'}, {webNodeType: 'Test', a: 'a'}],
-                {types: {Test: {a: {nullable: false}}}}, {
+                {models: {Test: {a: {nullable: false}}}}, {
                     fillUp: {webNodeType: 'Test', a: 'a'},
                     incremental: {},
                     null: {webNodeType: 'Test'}
@@ -535,7 +535,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region property readonly
             [
                 [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'b'}],
-                {types: {Test: {a: {writable: false}}}}, {
+                {models: {Test: {a: {writable: false}}}}, {
                     fillUp: {webNodeType: 'Test', a: 'b'},
                     incremental: {},
                     null: {webNodeType: 'Test', a: 'b'}
@@ -543,7 +543,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test'}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {writable: false}}}}, {
+                {models: {Test: {a: {writable: false}}}}, {
                     fillUp: {webNodeType: 'Test'},
                     incremental: {},
                     null: {webNodeType: 'Test'}
@@ -553,7 +553,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region property type
             [
                 [{webNodeType: 'Test', a: '2'}, {webNodeType: 'Test', a: '2'}],
-                {types: {Test: {a: {}}}}, {
+                {models: {Test: {a: {}}}}, {
                     fillUp: {webNodeType: 'Test', a: '2'},
                     incremental: {},
                     null: {webNodeType: 'Test', a: '2'}
@@ -561,7 +561,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: 2}, {webNodeType: 'Test', a: 2}],
-                {types: {Test: {a: {type: 'number'}}}}, {
+                {models: {Test: {a: {type: 'number'}}}}, {
                     fillUp: {webNodeType: 'Test', a: 2},
                     incremental: {},
                     null: {webNodeType: 'Test', a: 2}
@@ -572,7 +572,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     {webNodeType: 'Test', a: true},
                     {webNodeType: 'Test', a: true}
                 ],
-                {types: {Test: {a: {type: 'boolean'}}}}, {
+                {models: {Test: {a: {type: 'boolean'}}}}, {
                     fillUp: {webNodeType: 'Test', a: true},
                     incremental: {},
                     null: {webNodeType: 'Test', a: true}
@@ -580,7 +580,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: 1}, {webNodeType: 'Test', a: 1}],
-                {types: {Test: {a: {type: 'DateTime'}}}}, {
+                {models: {Test: {a: {type: 'DateTime'}}}}, {
                     fillUp: {webNodeType: 'Test', a: 1},
                     incremental: {},
                     null: {webNodeType: 'Test', a: 1}
@@ -592,7 +592,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     {webNodeType: 'Test', a: ['2']},
                     {webNodeType: 'Test', a: ['2']}
                 ],
-                {types: {Test: {a: {type: 'string[]'}}}}, {
+                {models: {Test: {a: {type: 'string[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: ['2']},
                     incremental: {},
                     null: {webNodeType: 'Test', a: ['2']}
@@ -600,7 +600,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: ['2']}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'string[]'}}}}, {
+                {models: {Test: {a: {type: 'string[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: ['2']},
                     incremental: {a: ['2']},
                     null: {webNodeType: 'Test', a: ['2']}
@@ -608,7 +608,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'string[]'}}}}, {
+                {models: {Test: {a: {type: 'string[]'}}}}, {
                     fillUp: {webNodeType: 'Test'},
                     incremental: {},
                     null: {webNodeType: 'Test'}
@@ -616,7 +616,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: [2]}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'number[]'}}}}, {
+                {models: {Test: {a: {type: 'number[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: [2]},
                     incremental: {a: [2]},
                     null: {webNodeType: 'Test', a: [2]}
@@ -624,7 +624,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: [true]}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'boolean[]'}}}}, {
+                {models: {Test: {a: {type: 'boolean[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: [true]},
                     incremental: {a: [true]},
                     null: {webNodeType: 'Test', a: [true]}
@@ -632,7 +632,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: [1]}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'DateTime[]'}}}}, {
+                {models: {Test: {a: {type: 'DateTime[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: [1]},
                     incremental: {a: [1]},
                     null: {webNodeType: 'Test', a: [1]}
@@ -640,7 +640,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: []}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'DateTime[]'}}}}, {
+                {models: {Test: {a: {type: 'DateTime[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: []},
                     incremental: {a: []},
                     null: {webNodeType: 'Test', a: []}
@@ -648,7 +648,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: [2]}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'DateTime[]', mutable: false}}}}, {
+                {models: {Test: {a: {type: 'DateTime[]', mutable: false}}}}, {
                     fillUp: {webNodeType: 'Test', a: [2]},
                     incremental: {a: [2]},
                     null: {webNodeType: 'Test', a: [2]}
@@ -659,7 +659,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     {webNodeType: 'Test', a: [2, 1]},
                     {webNodeType: 'Test', a: [2]}
                 ],
-                {types: {Test: {a: {type: 'number[]'}}}}, {
+                {models: {Test: {a: {type: 'number[]'}}}}, {
                     fillUp: {webNodeType: 'Test', a: [2, 1]},
                     incremental: {a: [2, 1]},
                     null: {webNodeType: 'Test', a: [2, 1]}
@@ -672,7 +672,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}}
-                ], {types: {Test: {a: {type: 'Test'}}}}, {
+                ], {models: {Test: {a: {type: 'Test'}}}}, {
                     fillUp: {webNodeType: 'Test', a: {webNodeType: 'Test'}},
                     incremental: {},
                     null: {webNodeType: 'Test', a: {webNodeType: 'Test'}}
@@ -680,7 +680,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'Test'}}}}, {
+                {models: {Test: {a: {type: 'Test'}}}}, {
                     fillUp: {webNodeType: 'Test'},
                     incremental: {},
                     null: {webNodeType: 'Test'}
@@ -690,7 +690,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: null}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}}
-                ], {types: {Test: {a: {type: 'Test'}, b: {}}}}, {
+                ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {webNodeType: 'Test', a: {webNodeType: 'Test'}},
                     incremental: {},
                     null: {webNodeType: 'Test', a: {webNodeType: 'Test'}}
@@ -700,7 +700,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}}
-                ], {types: {Test: {a: {type: 'Test'}, b: {}}}}, {
+                ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {webNodeType: 'Test', a: {
                         webNodeType: 'Test', b: '2'
                     }},
@@ -722,7 +722,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         a: {webNodeType: 'Test', b: 'a'},
                         b: '2'
                     }
-                ], {types: {Test: {a: {type: 'Test'}, b: {}}}}, {
+                ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {
                         webNodeType: 'Test',
                         a: {webNodeType: 'Test', b: 'a'},
@@ -742,7 +742,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}}
-                ], {types: {Test: {a: {type: 'Test'}}}}, {
+                ], {models: {Test: {a: {type: 'Test'}}}}, {
                     fillUp: {
                         webNodeType: 'Test',
                         a: {webNodeType: 'Test'}
@@ -762,7 +762,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         b: 'a'
                     },
                     {webNodeType: 'Test', a: {webNodeType: 'Test'}, b: 'a'}
-                ], {types: {Test: {a: {type: 'Test'}, b: {}}}}, {
+                ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {
                         webNodeType: 'Test',
                         a: {webNodeType: 'Test'},
@@ -788,7 +788,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         a: {webNodeType: 'Test', b: '2'},
                         b: 'a'
                     }
-                ], {types: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+                ], {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
                 {
                     fillUp: {
                         webNodeType: 'Test',
@@ -809,7 +809,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 [
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
-                ], {types: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
+                ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 {
                     fillUp: {
                         webNodeType: 'Test',
@@ -827,7 +827,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
                     {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}}
                 ],
-                {types: {Test: {a: {type: 'Test', writable: false}, b: {}}}}, {
+                {models: {Test: {a: {type: 'Test', writable: false}, b: {}}}}, {
                     fillUp: {
                         webNodeType: 'Test',
                         a: {webNodeType: 'Test', b: 'a'}
@@ -850,7 +850,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         b: {webNodeType: 'Test', a: 3}
                     },
                     {webNodeType: 'Test'}
-                ], {types: {Test: {
+                ], {models: {Test: {
                     a: {type: 'number', minimum: 3},
                     b: {type: 'Test'}
                 }}}, {
@@ -872,7 +872,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     webNodeType: 'Test',
                     a: '1',
                     b: {webNodeType: 'Test', a: '1'}
-                }], {types: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}}, {
+                }], {models: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}}, {
                     fillUp: {
                         webNodeType: 'Test',
                         a: '1',
@@ -894,7 +894,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // region property pattern
             [
                 [{webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}}],
-                {types: {Test: {
+                {models: {Test: {
                     a: {regularExpressionPattern: 'a'},
                     b: {type: 'Test'}
                 }}}, {
@@ -916,7 +916,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     webNodeType: 'Test',
                     a: 'b',
                     b: {webNodeType: 'Test', a: 'b'}
-                }], {types: {Test: {
+                }], {models: {Test: {
                     a: {constraintEvaluation: 'newValue === "b"'},
                     b: {type: 'Test'}
                 }}}, {
@@ -941,7 +941,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // / endregion
             [
                 [{webNodeType: 'Test', a: 2}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 2}}}}, {
+                {models: {Test: {a: {type: 2}}}}, {
                     fillUp: {webNodeType: 'Test', a: 2},
                     incremental: {a: 2},
                     null: {webNodeType: 'Test', a: 2}
@@ -951,7 +951,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region property range
             [
                 [{webNodeType: 'Test', a: 3}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'number', minimum: 3}}}}, {
+                {models: {Test: {a: {type: 'number', minimum: 3}}}}, {
                     fillUp: {webNodeType: 'Test', a: 3},
                     incremental: {a: 3},
                     null: {webNodeType: 'Test', a: 3}
@@ -959,7 +959,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: 1}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {type: 'number', maximum: 1}}}}, {
+                {models: {Test: {a: {type: 'number', maximum: 1}}}}, {
                     fillUp: {webNodeType: 'Test', a: 1},
                     incremental: {a: 1},
                     null: {webNodeType: 'Test', a: 1}
@@ -967,7 +967,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: '123'}, {webNodeType: 'Test'}],
-                {types: {Test: {a: {minimum: 3}}}}, {
+                {models: {Test: {a: {minimum: 3}}}}, {
                     fillUp: {webNodeType: 'Test', a: '123'},
                     incremental: {a: '123'},
                     null: {webNodeType: 'Test', a: '123'}
@@ -975,7 +975,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             [
                 [{webNodeType: 'Test', a: '1'}],
-                {types: {Test: {a: {maximum: 1}}}}, {
+                {models: {Test: {a: {maximum: 1}}}}, {
                     fillUp: {webNodeType: 'Test', a: '1'},
                     incremental: {webNodeType: 'Test', a: '1'},
                     null: {webNodeType: 'Test', a: '1'}
@@ -985,7 +985,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region property pattern
             [
                 [{webNodeType: 'Test', a: 'a'}],
-                {types: {Test: {a: {regularExpressionPattern: 'a'}}}}, {
+                {models: {Test: {a: {regularExpressionPattern: 'a'}}}}, {
                     fillUp: {webNodeType: 'Test', a: 'a'},
                     incremental: {webNodeType: 'Test', a: 'a'},
                     null: {webNodeType: 'Test', a: 'a'}
@@ -995,14 +995,14 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region property constraint
             [
                 [{webNodeType: 'Test', a: 'b'}],
-                {types: {Test: {a: {constraintEvaluation: 'true'}}}}, {
+                {models: {Test: {a: {constraintEvaluation: 'true'}}}}, {
                     fillUp: {webNodeType: 'Test', a: 'b'},
                     incremental: {webNodeType: 'Test', a: 'b'},
                     null: {webNodeType: 'Test', a: 'b'}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: 'a'}], {types: {Test: {
+                [{webNodeType: 'Test', a: 'a'}], {models: {Test: {
                     a: {constraintEvaluation: 'newValue === "a"'}
                 }}}, {
                     fillUp: {webNodeType: 'Test', a: 'a'},
@@ -1020,7 +1020,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     true, {updateStrategy}, defaultModelConfiguration, test[1])
             )
             delete options.defaultPropertySpecification
-            delete options.types
+            delete options.models
             assert.deepEqual(Helper.validateDocumentUpdate.apply(
                 this, test[0].concat([null, {}, {}].slice(
                     test[0].length - 1

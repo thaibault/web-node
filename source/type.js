@@ -13,6 +13,8 @@
     endregion
 */
 // region exports
+// / region model
+export type AllowedModelRolesMapping = {[key:string]:Array<string>}
 export type PropertySpecification = {
     type:string;
     default:any;
@@ -29,24 +31,37 @@ export type PropertySpecification = {
     constraintEvaluation:?string;
     constraintExpression:?string;
 }
-export type Model = {[key:string]:PropertySpecification}
-export type Models = {[key:string]:Model}
-export type ModelConfiguration = {
-    specialPropertyNames:{
-        allowedRoles:string;
-        extend:string;
-        type:string;
-        typeNameRegularExpressionPattern:string;
-    };
-    defaultPropertySpecification:PropertySpecification;
-    types:Models;
+export type Model = {
+    webNodeExtends:Array<string>;
+    [key:string]:PropertySpecification;
 }
+export type Models = {[key:string]:Model}
+export type SpecialPropertyNames = {
+    allowedRoles:string;
+    extend:string;
+    type:string;
+    typeNameRegularExpressionPattern:string;
+}
+export type ModelConfiguration = {
+    reservedPropertyNames:Array<string>;
+    specialPropertyNames:SpecialPropertyNames;
+    defaultPropertySpecification:PropertySpecification;
+    models:Models;
+}
+export type SimpleModelConfiguration = {
+    reservedPropertyNames:Array<string>;
+    specialPropertyNames:SpecialPropertyNames;
+}
+// / endregion
+// / region configuration
 export type Configuration = {
     debug:boolean;
     encoding:string;
     name:string;
     model:ModelConfiguration;
 }
+// / endregion
+// / region database error
 export type DatabaseAuthorisationError = {
     unauthorized:string;
     toString:() => string;
@@ -56,6 +71,7 @@ export type DatabaseForbiddenError = {
     toString:() => string;
 }
 export type DatabaseError = DatabaseAuthorisationError|DatabaseForbiddenError
+// / endregion
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

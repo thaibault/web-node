@@ -18,7 +18,10 @@ import Tools from 'clientnode'
 import fileSystem from 'fs'
 import fetch from 'node-fetch'
 import path from 'path'
-import type {Configuration, Model, ModelSpecification} from 'type'
+import type {
+    AllowedModelRolesMapping, Configuration, Model, SimpleModelConfiguration,
+    Models, PropertySpecification
+} from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
@@ -47,7 +50,7 @@ export default class Helper {
     static authenticate(
         newDocument:Object, oldDocument:?Object, userContext:?Object,
         securitySettings:?Object,
-        allowedModelRolesMapping:{[key:string]:Array<string>},
+        allowedModelRolesMapping:AllowedModelRolesMapping,
         typePropertyName:string
     ):?true {
         let allowedRoles:Array<string> = ['_admin']
@@ -142,14 +145,14 @@ export default class Helper {
      * @returns The mapping object.
      */
     static determineAllowedModelRolesMapping(
-        ModelConfiguration:ModelConfiguration
+        modelConfiguration:ModelConfiguration
     ):{[key:string]:Array<string>} {
         const allowedModelRolesMapping:{[key:string]:Array<string>} = {}
         const models:Models = Helper.extendModels(modelConfiguration)
         for (const modelName:string in models)
-            if (models.hasOwnProperty(
+            if (models.hasOwnProperty(modelName) && models[
                 modelName
-            ) && models[modelName].hasOwnProperty(
+            ].hasOwnProperty(
                 modelConfiguration.specialPropertyNames.allowedRoles
             ))
                 allowedModelRolesMapping[modelName] = models[modelName][
@@ -220,11 +223,14 @@ export default class Helper {
             return models[modelName]
         if (models.hasOwnProperty('_base'))
             if (models[modelName].hasOwnProperty(extendPropertyName))
+                // IgnoreTypeCheck
                 models[modelName][extendPropertyName] = ['_base'].concat(
                     models[modelName][extendPropertyName])
             else
+                // IgnoreTypeCheck
                 models[modelName][extendPropertyName] = '_base'
         if (models[modelName].hasOwnProperty(extendPropertyName)) {
+            // IgnoreTypeCheck
             for (const modelNameToExtend:string of [].concat(models[
                 modelName
             ][extendPropertyName]))
@@ -247,9 +253,9 @@ export default class Helper {
         }}, modelConfiguration)
         const models:Models = {}
         for (const modelName:string in Tools.copyLimitedRecursively(
-            modelConfiguration.types
+            modelConfiguration.models
         ))
-            if (modelConfiguration.types.hasOwnProperty(
+            if (modelConfiguration.models.hasOwnProperty(
                 modelName
             ) && !modelName.startsWith('_')) {
                 if (!modelName.match(new RegExp(
@@ -262,7 +268,7 @@ export default class Helper {
                             .typeNameRegularExpressionPattern +
                         `" (given name: "${modelName}").`)
                 models[modelName] = Helper.extendModel(
-                    modelName, modelConfiguration.types,
+                    modelName, modelConfiguration.models,
                     modelConfiguration.specialPropertyNames.extend)
             }
         for (const modelName:string in models)
@@ -284,13 +290,14 @@ export default class Helper {
      * @param userContext - Contains meta information about currently acting
      * user.
      * @param securitySettings - Database security settings.
+     * @param models - Models specfication object.
      * @param modelConfiguration - Model configuration object.
      * @returns Modified given new document.
      */
     static validateDocumentUpdate(
         newDocument:Object, oldDocument:?Object, userContext:Object = {},
-        securitySettings:Object = {}, models:Models, options:ModelOptions,
-        toJSON:Function
+        securitySettings:Object = {}, models:Models,
+        modelConfiguration:SimpleModelConfiguration, toJSON:Function
     ):Object {
         // TODO clear securitySettings on startup.
         // region ensure needed environment
@@ -314,10 +321,10 @@ export default class Helper {
                 throw {
                     forbidden: 'Revision: No old document to update available.'
                 }
-        if (!options)
-            options = {}
-        if (!options.hasOwnProperty('specialPropertyNames'))
-            options.specialPropertyNames = {}
+        if (!modelConfiguration)
+            modelConfiguration = {}
+        if (!modelConfiguration.hasOwnProperty('specialPropertyNames'))
+            modelConfiguration.specialPropertyNames = {}
         if (!toJSON)
             if (JSON && JSON.hasOwnProperty('stringify'))
                 toJSON = (object:Object):string => JSON.stringify(
@@ -325,12 +332,13 @@ export default class Helper {
             else
                 throw new Error('Needed "toJSON" function is not available.')
         const reservedPropertyNames:Array<string> =
-            options.reservedPropertyNames || []
-        const updateStrategy:string = options.updateStrategy || null
+            modelConfiguration.reservedPropertyNames || []
+        const updateStrategy:string = modelConfiguration.updateStrategy || null
         const allowedRolesPropertyName:string =
-            options.specialPropertyNames.allowedRoles || 'webNodeAllowedRoles'
-        const typePropertyName:string = options.specialPropertyNames.type ||
-            'webNodeType'
+            modelConfiguration.specialPropertyNames.allowedRoles ||
+            'webNodeAllowedRoles'
+        const typePropertyName:string =
+            modelConfiguration.specialPropertyNames.type || 'webNodeType'
         // endregion
         const checkDocument:Function = (
             newDocument:Object, oldDocument:?Object
@@ -417,7 +425,7 @@ export default class Helper {
                             throw {
                                 forbidden: `MaximalLength: Property "${name}` +
                                     ' (type string) should have maximal ' +
-                                    `length ${üpropertySpecification.maximum}.`
+                                    `length ${propertySpecification.maximum}.`
                             }
                     } else if ([
                         'number', 'integer', 'float', 'DateTime'
@@ -449,7 +457,7 @@ export default class Helper {
                 ])
                     if (propertySpecification[type] && !(new Function(
                         'newDocument', 'oldDocument', 'userContext',
-                        'securitySettings', 'models', 'options', 'modelName',
+                        'securitySettings', 'models', 'modelConfiguration', 'modelName',
                         'model', 'checkDocument', 'checkPropertyContent',
                         'newValue', 'name', 'propertySpecification',
                         'oldValue', (type.endsWith(
@@ -457,7 +465,7 @@ export default class Helper {
                         ) ? 'return ' : '') + propertySpecification[type]
                     )(
                         newDocument, oldDocument, userContext,
-                        securitySettings, models, options, modelName, model,
+                        securitySettings, models, modelConfiguration, modelName, model,
                         checkDocument, checkPropertyContent, newValue, name,
                         propertySpecification, oldValue
                     )))
@@ -487,7 +495,7 @@ export default class Helper {
                                 newDocument[propertyName] = (new Function(
                                     'newDocument', 'oldDocument',
                                     'userContext', 'securitySettings', 'name',
-                                    'models', 'options', 'modelName', 'model',
+                                    'models', 'modelConfiguration', 'modelName', 'model',
                                     'checkDocument', 'checkPropertyContent',
                                     'propertySpecification', (type.endsWith(
                                         'Evaluation'
@@ -496,7 +504,7 @@ export default class Helper {
                                 )(
                                     newDocument, oldDocument, userContext,
                                     securitySettings, propertyName, models,
-                                    options, modelName, model, checkDocument,
+                                    modelConfiguration, modelName, model, checkDocument,
                                     checkPropertyContent, propertySpecification
                                 ))
                     for (const type:string of [
@@ -506,7 +514,7 @@ export default class Helper {
                             newDocument[propertyName] = (new Function(
                                 'newDocument', 'oldDocument', 'userContext',
                                 'securitySettings', 'name', 'models',
-                                'options', 'modelName', 'model',
+                                'modelConfiguration', 'modelName', 'model',
                                 'checkDocument', 'checkPropertyContent',
                                 'propertySpecification', (type.endsWith(
                                     'Evaluation'
@@ -515,7 +523,7 @@ export default class Helper {
                             )(
                                 newDocument, oldDocument, userContext,
                                 securitySettings, propertyName, models,
-                                options, modelName, model, checkDocument,
+                                modelConfiguration, modelName, model, checkDocument,
                                 checkPropertyContent, propertySpecification
                             ))
                     if ([undefined, null].includes(
@@ -702,17 +710,18 @@ export default class Helper {
      * @param name - Name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
      * @param configuration - Plugin specific configurations.
-     * @param optionsPropertyNames - Property names to search for to use as
+     * @param configurationPropertyNames - Property names to search for to use
+     * as
      * entry in plugin configuration file.
      * @param pluginPath - Path to given plugin.
      * @return An object of plugin specific meta informations.
      */
     static loadPlugin(
         name:string, plugins:{[key:string]:Object},
-        configuration:Configuration, optionsPropertyNames:Array<string>,
+        configuration:Configuration, configurationPropertyNames:Array<string>,
         pluginPath:string
     ):Object {
-        for (const name:string of optionsPropertyNames)
+        for (const name:string of configurationPropertyNames)
             if (configuration.hasOwnProperty(name)) {
                 let indexFilePath:string = 'index.js'
                 if (configuration.hasOwnProperty('main'))
@@ -818,7 +827,8 @@ export default class Helper {
             }
         throw new Error(
             `Plugin "${name}" hasn't working configuration object under one ` +
-            `of the following keys: "${optionsPropertyNames.join(", ")}".`)
+            `of the following keys: "` +
+            `${configurationPropertyNames.join(", ")}".`)
     }
     /**
      * Extends given configuration object with all plugin specific ones and
@@ -860,14 +870,14 @@ export default class Helper {
                                     encoding: configuration.encoding}))
                         } catch (error) {
                             console.warn(
-                                'Failed to load options for plugin ' +
+                                'Failed to load configuration for plugin ' +
                                 `"${pluginName}": ` +
                                 Helper.representObject(error))
                             return
                         }
                         plugins[pluginName] = Helper.loadPlugin(
                             pluginName, plugins, pluginConfiguration,
-                            configuration.plugin.optionsPropertyNames,
+                            configuration.plugin.configurationPropertyNames,
                             currentPluginPath)
                     }
                 })

@@ -110,7 +110,7 @@
         }
       }
     },
-    "model": {
+    "modelConfiguration": {
       "defaultPropertySpecification": {
         "type": "string",
         "default": null,
@@ -135,7 +135,7 @@
         "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$"
       },
       "updateStrategy": "fillUp",
-      "types": {
+      "models": {
         "_base": {
           "_id": {},
           "creationDateTime": {
