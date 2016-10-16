@@ -20,7 +20,7 @@ import fetch from 'node-fetch'
 import path from 'path'
 import type {
     AllowedModelRolesMapping, Configuration, Model, ModelConfiguration,
-    Models, PropertySpecification, SimpleModelConfiguration
+    Models, Plugin, PropertySpecification, SimpleModelConfiguration
 } from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
@@ -499,7 +499,7 @@ export default class Helper {
                         ])
                             if (propertySpecification[type])
                                 newDocument[propertyName] = (new Function(
-                                    'newDocument', 'oldDocument', 
+                                    'newDocument', 'oldDocument',
                                     'userContext', 'securitySettings', 'name',
                                     'models', 'modelConfiguration',
                                     'modelName', 'model', 'checkDocument',
@@ -582,7 +582,8 @@ export default class Helper {
                             propertyName
                         ] || toJSON(oldDocument[propertyName]) === toJSON(
                             newDocument[propertyName]
-                        ) && !reservedPropertyNames.includes(propertyName)
+                        ) && !modelConfiguration.reservedPropertyNames
+                            .includes(propertyName)
                     ) {
                         delete newDocument[propertyName]
                         continue
@@ -590,7 +591,9 @@ export default class Helper {
             for (const propertyName:string in newDocument)
                 if (newDocument.hasOwnProperty(
                     propertyName
-                ) && !reservedPropertyNames.includes(propertyName)) {
+                ) && !modelConfiguration.reservedPropertyNames.includes(
+                    propertyName
+                )) {
                     if (!model.hasOwnProperty(propertyName))
                         throw {
                             forbidden: 'Property: Given property "' +
@@ -636,7 +639,8 @@ export default class Helper {
                             if (
                                 modelConfiguration.updateStrategy ===
                                     'incremental' &&
-                                !reservedPropertyNames.includes(propertyName)
+                                !modelConfiguration.reservedPropertyNames
+                                    .includes(propertyName)
                             )
                                 delete newDocument[propertyName]
                             continue
@@ -670,6 +674,7 @@ export default class Helper {
                                     `given "` +
                                     `${toJSON(newDocument[propertyName])}").`
                             }
+                        // IgnoreTypeCheck
                         const nestedPropertySpecification:PropertySpecification
                             = {}
                         for (const key:string in propertySpecification)
@@ -724,23 +729,22 @@ export default class Helper {
      * returns a plugin specific meta information object.
      * @param name - Name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
-     * @param configuration - Plugin specific configurations.
+     * @param packageConfiguration - Plugin specific configurations.
      * @param configurationPropertyNames - Property names to search for to use
-     * as
-     * entry in plugin configuration file.
+     * as entry in plugin configuration file.
      * @param pluginPath - Path to given plugin.
      * @return An object of plugin specific meta informations.
      */
     static loadPlugin(
         name:string, plugins:{[key:string]:Object},
-        configuration:Configuration, configurationPropertyNames:Array<string>,
-        pluginPath:string
-    ):Object {
+        packageConfiguration:PlainObject,
+        configurationPropertyNames:Array<string>, pluginPath:string
+    ):Plugin {
         for (const name:string of configurationPropertyNames)
-            if (configuration.hasOwnProperty(name)) {
+            if (packageConfiguration.hasOwnProperty(name)) {
                 let indexFilePath:string = 'index.js'
-                if (configuration.hasOwnProperty('main'))
-                    indexFilePath = configuration.main
+                if (packageConfiguration.hasOwnProperty('main'))
+                    indexFilePath = packageConfiguration.main
                 indexFilePath = path.resolve(pluginPath, indexFilePath)
                 if (!WebOptimizerHelper.isFileSync(indexFilePath))
                     fileSystem.readdirSync(pluginPath).forEach((
@@ -830,7 +834,7 @@ export default class Helper {
                 }
                 return {
                     api,
-                    configuration: configuration[name],
+                    configuration: packageConfiguration[name],
                     indexFilePath,
                     name,
                     path: pluginPath,
@@ -854,7 +858,7 @@ export default class Helper {
      */
     static loadPlugins(configuration:Configuration):{
         configuration:Configuration;
-        plugins:Array<Object>
+        plugins:Array<Plugin>
     } {
         const plugins:{[key:string]:Object} = {}
         for (const type:string in configuration.plugin.directories)
@@ -878,7 +882,7 @@ export default class Helper {
                     ) && WebOptimizerHelper.isFileSync(
                         `${currentPluginPath}/package.json`
                     )) {
-                        let pluginConfiguration:Object
+                        let pluginConfiguration:PlainObject
                         try {
                             pluginConfiguration = JSON.parse(
                                 fileSystem.readFileSync(currentPluginPath, {
@@ -896,7 +900,7 @@ export default class Helper {
                             currentPluginPath)
                     }
                 })
-        const sortedPlugins:Array<Object> = []
+        const sortedPlugins:Array<Plugin> = []
         const temporaryPlugins:{[key:string]:Array<string>} = {}
         for (const pluginName:string in plugins)
             if (plugins.hasOwnProperty(pluginName))
@@ -910,7 +914,7 @@ export default class Helper {
             temporaryPlugins
         ))
             sortedPlugins.push(plugins[pluginName])
-        for (const plugin:Object of sortedPlugins)
+        for (const plugin:Plugin of sortedPlugins)
             configuration = Tools.extendObject(true, Tools.modifyObject(
                 configuration, plugin.configuration
             ), plugin.configuration)

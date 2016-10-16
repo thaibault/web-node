@@ -15,10 +15,10 @@
 // region  imports
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
-import type {PlainObject} from 'clientnode'
 import http from 'http'
 import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
+import type (SimpleModelConfiguration) from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 // NOTE: Only needed for debugging this file.
 try {
@@ -40,7 +40,7 @@ import Helper from './helper'
     // region start database server
     const databaseServerProcess:ChildProcess = spawnChildProcess(
         'pouchdb-server', [
-            '--port', configuration.database.port,
+            '--port', `${configuration.database.port}`,
             '--dir', configuration.database.path,
             '--config', configuration.database.configFilePath
         ], {
@@ -157,13 +157,13 @@ import Helper from './helper'
     try {
         // region generate/update authentication/validation code
         let validationCode = Helper.validateDocumentUpdate.toString()
-        const modelOptions:PlainObject = Tools.copyLimitedRecursively(
-            configuration.model)
-        delete modelOptions.defaultPropertySpecification
-        delete modelOptions.type
+        const simpleModelConfiguration:SimpleModelConfiguration =
+            Tools.copyLimitedRecursively(configuration.modelConfigfuration)
+        delete simpleModelConfiguration.defaultPropertySpecification
+        delete simpleModelConfiguration.type
         validationCode = 'const models = ' +
             JSON.stringify(Helper.extendSpecification(
-                configuration.model
+                configuration.modelConfigfuration
             )) + '\n' +
             `const options = ${modelOptions}\n` +
             validationCode.substring(
@@ -173,19 +173,19 @@ import Helper from './helper'
         if (configuration.debug)
             console.info(
                 'Specification \n\n"' +
-                `${JSON.stringify(configuration.model, null, '    ')}" has ` +
-                `generated validation code: \n\n"${validationCode}".`)
+                Helper.representObject(configuration.modelConfigfuration) +
+                `" has generated validation code: \n\n"${validationCode}".`)
         await Helper.ensureValidationDocumentPresence(
             databaseConnection, 'validation', validationCode,
             'Model specification')
         let authenticationCode = Helper.authenticate.toString()
         authenticationCode = 'const allowedModelRolesMapping = ' +
             JSON.stringify(Helper.determineAllowedModelRolesMapping(
-                configuration.model
+                configuration.modelConfigfuration
             )) + '\n' +
             "const typePropertyName = '" +
-            `${configuration.model.specialPropertyNames.type}'\n` +
-            authenticationCode.substring(
+            `${configuration.modelConfigfuration.specialPropertyNames.type}'` +
+            `\n` + authenticationCode.substring(
                 authenticationCode.indexOf('{') + 1,
                 authenticationCode.lastIndexOf('}')
             ).trim().replace(/^ {12}/gm, '')

@@ -43,22 +43,64 @@ export type SpecialPropertyNames = {
     typeNameRegularExpressionPattern:string;
 }
 export type ModelConfiguration = {
-    reservedPropertyNames:Array<string>;
-    specialPropertyNames:SpecialPropertyNames;
     defaultPropertySpecification:PropertySpecification;
     models:Models;
+    reservedPropertyNames:Array<string>;
+    specialPropertyNames:SpecialPropertyNames;
+    updateStrategy:?string;
 }
 export type SimpleModelConfiguration = {
     reservedPropertyNames:Array<string>;
     specialPropertyNames:SpecialPropertyNames;
+    updateStrategy:?string;
 }
 // / endregion
 // / region configuration
 export type Configuration = {
+    database:{
+        url:string;
+        path:string;
+        configFilePath:string;
+        port:number;
+        user:{
+            name:string;
+            password:string;
+        };
+        'log/file':string;
+        'log/level':string;
+        'httpd/host':string;
+    };
     debug:boolean;
     encoding:string;
+    modelConfiguration:ModelConfiguration;
     name:string;
-    model:ModelConfiguration;
+    plugin:{
+        configurationPropertyNames:Array<string>;
+        directories:{
+            internal:{
+                path:string;
+                nameRegularExpressionPattern:string;
+            };
+            external:{
+                path:string;
+                nameRegularExpressionPattern:string;
+            };
+        };
+    };
+    server:{
+        application:{
+            rootPath:string;
+            options:PlainObject;
+            port:number;
+            hostName:string;
+        };
+        proxy:{
+            logFilePath:{
+                access:string;
+                error:string;
+            };
+        };
+    };
 }
 // / endregion
 // / region database error
@@ -72,6 +114,15 @@ export type DatabaseForbiddenError = {
 }
 export type DatabaseError = DatabaseAuthorisationError|DatabaseForbiddenError
 // / endregion
+export type Plugin = {
+    api:Function;
+    configuration:PlainObject;
+    indexFilePath:string;
+    name:string;
+    path:string;
+    lastLoadTimestamp:number;
+    scope:Object;
+}
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

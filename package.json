@@ -54,27 +54,6 @@
     "watchDLL": "webOptimizer buildDLL --watch"
   },
   "webNode": {
-    "debug": false,
-    "encoding": "utf8",
-    "plugin": {
-      "directories": {
-        "internal": {
-          "path": {
-            "__evaluate__": "`${currentPath}/plugins/`"
-          },
-          "nameRegularExpressionPattern": "^[a-z].*$"
-        },
-        "external": {
-          "path": {
-            "__evaluate__": "`${currentPath}/node_modules/`"
-          },
-          "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
-        }
-      },
-      "optionsPropertyNames": [
-        "webNode"
-      ]
-    },
     "database": {
       "url": {
         "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database.port}`"
@@ -83,7 +62,7 @@
       "configFilePath": {
         "__evaluate__": "`./${self.database.path}/database.json`"
       },
-      "port": "5984",
+      "port": 5984,
       "user": {
         "name": "admin",
         "password": "admin"
@@ -94,22 +73,8 @@
         "__evaluate__": "self.server.application.hostName"
       }
     },
-    "server": {
-      "application": {
-        "rootPath": {
-          "__evaluate__": "currentPath"
-        },
-        "options": {},
-        "port": 8080,
-        "hostName": "127.0.0.1"
-      },
-      "proxy": {
-        "logFilePath": {
-          "access": "/dev/stdout",
-          "error": "/dev/stderr"
-        }
-      }
-    },
+    "debug": false,
+    "encoding": "utf8",
     "modelConfiguration": {
       "defaultPropertySpecification": {
         "type": "string",
@@ -172,6 +137,41 @@
           "webNodeAllowedRoles": [
             "users"
           ]
+        }
+      }
+    },
+    "plugin": {
+      "configurationPropertyNames": [
+        "webNode"
+      ],
+      "directories": {
+        "internal": {
+          "path": {
+            "__evaluate__": "`${currentPath}/plugins/`"
+          },
+          "nameRegularExpressionPattern": "^[a-z].*$"
+        },
+        "external": {
+          "path": {
+            "__evaluate__": "`${currentPath}/node_modules/`"
+          },
+          "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
+        }
+      }
+    },
+    "server": {
+      "application": {
+        "rootPath": {
+          "__evaluate__": "currentPath"
+        },
+        "options": {},
+        "port": 8080,
+        "hostName": "127.0.0.1"
+      },
+      "proxy": {
+        "logFilePath": {
+          "access": "/dev/stdout",
+          "error": "/dev/stderr"
         }
       }
     }
