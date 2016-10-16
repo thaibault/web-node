@@ -217,7 +217,7 @@ export default class Helper {
      */
     static extendModel(
         modelName:string, models:Models,
-        extendPropertyName:string = 'webNodeExtends'
+        extendPropertyName:string = '_extends'
     ):Model {
         if (modelName === '_base')
             return models[modelName]
@@ -249,7 +249,7 @@ export default class Helper {
     static extendModels(modelConfiguration:PlainObject):Models {
         modelConfiguration = Tools.extendObject(true, {specialPropertyNames: {
             defaultPropertySpecification: {},
-            specialPropertyNames: {extend: 'webNodeExtends'},
+            specialPropertyNames: {extend: '_extends'},
             typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
         }}, modelConfiguration)
         const models:Models = {}

@@ -35,7 +35,7 @@ export type PropertySpecification = {
     constraintExpression:?string;
 }
 export type Model = {
-    webNodeExtends:Array<string>;
+    _extends:Array<string>;
     [key:string]:PropertySpecification;
 }
 export type Models = {[key:string]:Model}

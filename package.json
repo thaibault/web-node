@@ -111,7 +111,10 @@
           "_rev": {
             "nullable": false,
             "writable": false
-          }
+          },
+          "_revisions": {
+            "writable": false
+          },
           "creationDateTime": {
             "type": "DateTime",
             "onCreateEvaluation": "new Date().getTime()",
