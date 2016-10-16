@@ -326,7 +326,9 @@ export default class Helper {
             modelConfiguration = {
                 specialPropertyNames: {
                     allowedRoles: 'webNodeAllowedRoles',
-                    type: 'webNodeType'
+                    extend: 'webNodeExtends',
+                    type: 'webNodeType',
+                    typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
                 },
                 reservedPropertyNames: [],
                 updateStrategy: null
