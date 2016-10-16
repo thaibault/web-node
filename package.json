@@ -111,7 +111,7 @@
             "minimum": {
               "__evaluate__": "new Date().getTime()"
             },
-            "writable": false,
+            "mutable": false,
             "nullable": false
           },
           "updateDateType": {
@@ -124,7 +124,6 @@
           },
           "lastUser": {
             "onUpdateEvaluation": "userContext._id",
-            "writable": false,
             "nullable": false
           },
           "webNodeType": {

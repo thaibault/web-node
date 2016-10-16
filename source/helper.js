@@ -360,7 +360,7 @@ export default class Helper {
                 oldValue:?any
             ):any => {
                 // region type
-                if (['DateTime'].includes(propertySpecification.type)) {
+                if ('DateTime' === propertySpecification.type) {
                     if (typeof newValue !== 'number')
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
@@ -457,7 +457,7 @@ export default class Helper {
                     if (propertySpecification[type] && !(new Function(
                         'newDocument', 'oldDocument', 'userContext',
                         'securitySettings', 'models', 'modelConfiguration',
-                        'modelName', 'model', 'checkDocument',
+                        'serialize', 'modelName', 'model', 'checkDocument',
                         'checkPropertyContent', 'newValue', 'name',
                         'propertySpecification', 'oldValue', (type.endsWith(
                             'Evaluation'
@@ -465,8 +465,9 @@ export default class Helper {
                     )(
                         newDocument, oldDocument, userContext,
                         securitySettings, models, modelConfiguration,
-                        modelName, model, checkDocument, checkPropertyContent,
-                        newValue, name, propertySpecification, oldValue
+                        serialize, modelName, model, checkDocument,
+                        checkPropertyContent, newValue, name,
+                        propertySpecification, oldValue
                     )))
                         throw {
                             forbidden: type.charAt(0).toUpperCase(
@@ -496,8 +497,8 @@ export default class Helper {
                                     'newDocument', 'oldDocument',
                                     'userContext', 'securitySettings', 'name',
                                     'models', 'modelConfiguration',
-                                    'modelName', 'model', 'checkDocument',
-                                    'checkPropertyContent',
+                                    'serialize', 'modelName', 'model',
+                                    'checkDocument', 'checkPropertyContent',
                                     'propertySpecification', (type.endsWith(
                                         'Evaluation'
                                     ) ? 'return ' : '') +
@@ -505,8 +506,8 @@ export default class Helper {
                                 )(
                                     newDocument, oldDocument, userContext,
                                     securitySettings, propertyName, models,
-                                    modelConfiguration, modelName, model,
-                                    checkDocument, checkPropertyContent,
+                                    modelConfiguration, serialize, modelName,
+                                    model, checkDocument, checkPropertyContent,
                                     propertySpecification
                                 ))
                     for (const type:string of [
@@ -516,8 +517,9 @@ export default class Helper {
                             newDocument[propertyName] = (new Function(
                                 'newDocument', 'oldDocument', 'userContext',
                                 'securitySettings', 'name', 'models',
-                                'modelConfiguration', 'modelName', 'model',
-                                'checkDocument', 'checkPropertyContent',
+                                'modelConfiguration', 'serialize', 'modelName',
+                                'model', 'checkDocument',
+                                'checkPropertyContent',
                                 'propertySpecification', (type.endsWith(
                                     'Evaluation'
                                 ) ? 'return ' : '') +
@@ -525,8 +527,8 @@ export default class Helper {
                             )(
                                 newDocument, oldDocument, userContext,
                                 securitySettings, propertyName, models,
-                                modelConfiguration, modelName, model,
-                                checkDocument, checkPropertyContent,
+                                modelConfiguration, serialize, modelName,
+                                model, checkDocument, checkPropertyContent,
                                 propertySpecification
                             ))
                     if ([undefined, null].includes(
