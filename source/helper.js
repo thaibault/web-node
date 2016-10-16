@@ -19,8 +19,8 @@ import fileSystem from 'fs'
 import fetch from 'node-fetch'
 import path from 'path'
 import type {
-    AllowedModelRolesMapping, Configuration, Model, SimpleModelConfiguration,
-    Models, PropertySpecification
+    AllowedModelRolesMapping, Configuration, Model, ModelConfiguration,
+    Models, PropertySpecification, SimpleModelConfiguration
 } from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
@@ -322,40 +322,44 @@ export default class Helper {
                     forbidden: 'Revision: No old document to update available.'
                 }
         if (!modelConfiguration)
-            modelConfiguration = {}
-        if (!modelConfiguration.hasOwnProperty('specialPropertyNames'))
-            modelConfiguration.specialPropertyNames = {}
+            modelConfiguration = {
+                specialPropertyNames: {
+                    allowedRoles: 'webNodeAllowedRoles',
+                    type: 'webNodeType'
+                },
+                reservedPropertyNames: [],
+                updateStrategy: null
+            }
         if (!toJSON)
             if (JSON && JSON.hasOwnProperty('stringify'))
                 toJSON = (object:Object):string => JSON.stringify(
                     object, null, '    ')
             else
                 throw new Error('Needed "toJSON" function is not available.')
-        const reservedPropertyNames:Array<string> =
-            modelConfiguration.reservedPropertyNames || []
-        const updateStrategy:string = modelConfiguration.updateStrategy || null
-        const allowedRolesPropertyName:string =
-            modelConfiguration.specialPropertyNames.allowedRoles ||
-            'webNodeAllowedRoles'
-        const typePropertyName:string =
-            modelConfiguration.specialPropertyNames.type || 'webNodeType'
         // endregion
         const checkDocument:Function = (
             newDocument:Object, oldDocument:?Object
         ):Object => {
             // region check for model type
-            if (!newDocument.hasOwnProperty(typePropertyName))
+            if (!newDocument.hasOwnProperty(
+                modelConfiguration.specialPropertyNames.type
+            ))
                 throw {
                     forbidden: 'Type: You have to specify a model type via ' +
-                        `property "${typePropertyName}".`
+                        `property "` +
+                        `${modelConfiguration.specialPropertyNames.type}".`
                 }
-            if (!models.hasOwnProperty(newDocument[typePropertyName]))
+            if (!models.hasOwnProperty(
+                newDocument[modelConfiguration.specialPropertyNames.type]
+            ))
                 throw {
-                    forbidden: 'Model: Given model "' +
-                        `${newDocument[typePropertyName]}" is not specified.`
+                    forbidden: 'Model: Given model "' + newDocument[
+                        modelConfiguration.specialPropertyNames.type
+                    ] + ' is not specified.'
                 }
             // endregion
-            const modelName:string = newDocument[typePropertyName]
+            const modelName:string = newDocument[
+                modelConfiguration.specialPropertyNames.type]
             const model:Model = models[modelName]
             const checkPropertyContent:Function = (
                 newValue:any, name:string, propertySpecification:Object,
@@ -434,8 +438,9 @@ export default class Helper {
                     ) && newValue > propertySpecification.maximum)
                         throw {
                             forbidden: `Maximum: Property "${name}" (type ` +
-                                `${propertySpecification.type}) should satisfy a ` +
-                                `maximum of ${propertySpecification.maximum}.`
+                                `${propertySpecification.type}) should ` +
+                                `satisfy a maximum of ` +
+                                `${propertySpecification.maximum}.`
                         }
                 // endregion
                 // region pattern
@@ -457,17 +462,17 @@ export default class Helper {
                 ])
                     if (propertySpecification[type] && !(new Function(
                         'newDocument', 'oldDocument', 'userContext',
-                        'securitySettings', 'models', 'modelConfiguration', 'modelName',
-                        'model', 'checkDocument', 'checkPropertyContent',
-                        'newValue', 'name', 'propertySpecification',
-                        'oldValue', (type.endsWith(
+                        'securitySettings', 'models', 'modelConfiguration',
+                        'modelName', 'model', 'checkDocument',
+                        'checkPropertyContent', 'newValue', 'name',
+                        'propertySpecification', 'oldValue', (type.endsWith(
                             'Evaluation'
                         ) ? 'return ' : '') + propertySpecification[type]
                     )(
                         newDocument, oldDocument, userContext,
-                        securitySettings, models, modelConfiguration, modelName, model,
-                        checkDocument, checkPropertyContent, newValue, name,
-                        propertySpecification, oldValue
+                        securitySettings, models, modelConfiguration,
+                        modelName, model, checkDocument, checkPropertyContent,
+                        newValue, name, propertySpecification, oldValue
                     )))
                         throw {
                             forbidden: type.charAt(0).toUpperCase(
@@ -482,7 +487,8 @@ export default class Helper {
             // region run hooks and check for presence of needed data
             for (const propertyName:string in model)
                 if (
-                    propertyName !== allowedRolesPropertyName &&
+                    propertyName !== modelConfiguration.specialPropertyNames
+                        .allowedRoles &&
                     model.hasOwnProperty(propertyName)
                 ) {
                     const propertySpecification:PropertySpecification =
@@ -493,10 +499,11 @@ export default class Helper {
                         ])
                             if (propertySpecification[type])
                                 newDocument[propertyName] = (new Function(
-                                    'newDocument', 'oldDocument',
+                                    'newDocument', 'oldDocument', 
                                     'userContext', 'securitySettings', 'name',
-                                    'models', 'modelConfiguration', 'modelName', 'model',
-                                    'checkDocument', 'checkPropertyContent',
+                                    'models', 'modelConfiguration',
+                                    'modelName', 'model', 'checkDocument',
+                                    'checkPropertyContent',
                                     'propertySpecification', (type.endsWith(
                                         'Evaluation'
                                     ) ? 'return ' : '') +
@@ -504,8 +511,9 @@ export default class Helper {
                                 )(
                                     newDocument, oldDocument, userContext,
                                     securitySettings, propertyName, models,
-                                    modelConfiguration, modelName, model, checkDocument,
-                                    checkPropertyContent, propertySpecification
+                                    modelConfiguration, modelName, model,
+                                    checkDocument, checkPropertyContent,
+                                    propertySpecification
                                 ))
                     for (const type:string of [
                         'onUpdateEvaluation', 'onUpdateExpression'
@@ -523,8 +531,9 @@ export default class Helper {
                             )(
                                 newDocument, oldDocument, userContext,
                                 securitySettings, propertyName, models,
-                                modelConfiguration, modelName, model, checkDocument,
-                                checkPropertyContent, propertySpecification
+                                modelConfiguration, modelName, model,
+                                checkDocument, checkPropertyContent,
+                                propertySpecification
                             ))
                     if ([undefined, null].includes(
                         propertySpecification.default
@@ -542,11 +551,11 @@ export default class Helper {
                             propertyName
                         ) && oldDocument && oldDocument.hasOwnProperty(
                             propertyName
-                        ) && updateStrategy === 'fillUp')
+                        ) && modelConfiguration.updateStrategy === 'fillUp')
                             newDocument[propertyName] = oldDocument[
                                 propertyName]
                     } else if (!newDocument.hasOwnProperty(propertyName))
-                        if (updateStrategy === 'fillUp')
+                        if (modelConfiguration.updateStrategy === 'fillUp')
                             if (oldDocument)
                                 newDocument[propertyName] = oldDocument[
                                     propertyName]
@@ -559,11 +568,15 @@ export default class Helper {
                 }
             // endregion
             // region check given data
-            if (oldDocument && updateStrategy === 'incremental')
+            if (
+                oldDocument &&
+                modelConfiguration.updateStrategy === 'incremental'
+            )
                 for (const propertyName:string in newDocument)
                     if (
                         newDocument.hasOwnProperty(propertyName) &&
-                        propertyName !== typePropertyName &&
+                        propertyName !== modelConfiguration
+                            .specialPropertyNames.type &&
                         oldDocument.hasOwnProperty(propertyName) &&
                         oldDocument[propertyName] === newDocument[
                             propertyName
@@ -596,7 +609,8 @@ export default class Helper {
                             )) {
                                 if (
                                     propertyName !== '_id' &&
-                                    updateStrategy === 'incremental'
+                                    modelConfiguration.updateStrategy ===
+                                        'incremental'
                                 )
                                     delete newDocument[propertyName]
                                 continue
@@ -620,7 +634,8 @@ export default class Helper {
                             oldDocument[propertyName]
                         )) {
                             if (
-                                updateStrategy === 'incremental' &&
+                                modelConfiguration.updateStrategy ===
+                                    'incremental' &&
                                 !reservedPropertyNames.includes(propertyName)
                             )
                                 delete newDocument[propertyName]
