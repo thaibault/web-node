@@ -18,6 +18,7 @@ import Tools from 'clientnode'
 import fileSystem from 'fs'
 import fetch from 'node-fetch'
 import path from 'path'
+import type {Configuration, Model, ModelSpecification} from 'type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
@@ -137,23 +138,22 @@ export default class Helper {
     /**
      * Determines a mapping of all models to roles who are allowed to edit
      * corresponding model instances.
-     * @param modelSpecification - Model specification object.
+     * @param ModelConfiguration - Model specification object.
      * @returns The mapping object.
      */
     static determineAllowedModelRolesMapping(
-        modelSpecification:PlainObject
+        ModelConfiguration:ModelConfiguration
     ):{[key:string]:Array<string>} {
         const allowedModelRolesMapping:{[key:string]:Array<string>} = {}
-        const models:{[key:string]:PlainObject} = Helper.extendSpecification(
-            modelSpecification)
+        const models:Models = Helper.extendModels(modelConfiguration)
         for (const modelName:string in models)
             if (models.hasOwnProperty(
                 modelName
             ) && models[modelName].hasOwnProperty(
-                modelSpecification.specialPropertyNames.allowedRoles
+                modelConfiguration.specialPropertyNames.allowedRoles
             ))
                 allowedModelRolesMapping[modelName] = models[modelName][
-                    modelSpecification.specialPropertyNames.allowedRoles]
+                    modelConfiguration.specialPropertyNames.allowedRoles]
         return allowedModelRolesMapping
     }
     /**
@@ -213,9 +213,9 @@ export default class Helper {
      * @returns Given model in extended version.
      */
     static extendModel(
-        modelName:string, models:{[key:string]:PlainObject},
+        modelName:string, models:Models,
         extendPropertyName:string = 'webNodeExtends'
-    ):PlainObject {
+    ):Model {
         if (modelName === '_base')
             return models[modelName]
         if (models.hasOwnProperty('_base'))
@@ -237,35 +237,33 @@ export default class Helper {
     }
     /**
      * Extend default specification with specific one.
-     * @param modelSpecification - Model specification object.
+     * @param modelConfiguration - Model specification object.
      * @returns Models with extended specific specifications.
      */
-    static extendSpecification(
-        modelSpecification:PlainObject
-    ):{[key:string]:PlainObject} {
-        modelSpecification = Tools.extendObject(true, {specialPropertyNames: {
+    static extendModels(modelConfiguration:ModelConfiguration):Models {
+        modelConfiguration = Tools.extendObject(true, {specialPropertyNames: {
             defaultPropertySpecification: {},
             typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
-        }}, modelSpecification)
-        const models:{[key:string]:PlainObject} = {}
+        }}, modelConfiguration)
+        const models:Models = {}
         for (const modelName:string in Tools.copyLimitedRecursively(
-            modelSpecification.types
+            modelConfiguration.types
         ))
-            if (modelSpecification.types.hasOwnProperty(
+            if (modelConfiguration.types.hasOwnProperty(
                 modelName
             ) && !modelName.startsWith('_')) {
                 if (!modelName.match(new RegExp(
-                    modelSpecification.specialPropertyNames
+                    modelConfiguration.specialPropertyNames
                         .typeNameRegularExpressionPattern
                 )))
                     throw new Error(
                         'Model names have to match "' +
-                        modelSpecification.specialPropertyNames
+                        modelConfiguration.specialPropertyNames
                             .typeNameRegularExpressionPattern +
                         `" (given name: "${modelName}").`)
                 models[modelName] = Helper.extendModel(
-                    modelName, modelSpecification.types,
-                    modelSpecification.specialPropertyNames.extend)
+                    modelName, modelConfiguration.types,
+                    modelConfiguration.specialPropertyNames.extend)
             }
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName))
@@ -273,7 +271,7 @@ export default class Helper {
                     if (models[modelName].hasOwnProperty(propertyName))
                         models[modelName][propertyName] = Tools.extendObject(
                             true, {},
-                            modelSpecification.defaultPropertySpecification,
+                            modelConfiguration.defaultPropertySpecification,
                             models[modelName][propertyName])
         return models
     }
@@ -286,13 +284,13 @@ export default class Helper {
      * @param userContext - Contains meta information about currently acting
      * user.
      * @param securitySettings - Database security settings.
-     * @param modelSpecification - Model specification object.
+     * @param modelConfiguration - Model configuration object.
      * @returns Modified given new document.
      */
     static validateDocumentUpdate(
         newDocument:Object, oldDocument:?Object, userContext:Object = {},
-        securitySettings:Object = {}, modelSpecifications:PlainObject,
-        options:PlainObject, toJSON:Function
+        securitySettings:Object = {}, models:Models, options:ModelOptions,
+        toJSON:Function
     ):Object {
         // TODO clear securitySettings on startup.
         // region ensure needed environment
@@ -343,31 +341,27 @@ export default class Helper {
                     forbidden: 'Type: You have to specify a model type via ' +
                         `property "${typePropertyName}".`
                 }
-            if (!modelSpecifications.hasOwnProperty(newDocument[
-                typePropertyName
-            ]))
+            if (!models.hasOwnProperty(newDocument[typePropertyName]))
                 throw {
                     forbidden: 'Model: Given model "' +
                         `${newDocument[typePropertyName]}" is not specified.`
                 }
             // endregion
             const modelName:string = newDocument[typePropertyName]
-            const modelSpecification:PlainObject = modelSpecifications[
-                modelName]
+            const model:Model = models[modelName]
             const checkPropertyContent:Function = (
-                newValue:any, name:string, specification:Object, oldValue:?any
+                newValue:any, name:string, propertySpecification:Object,
+                oldValue:?any
             ):any => {
                 // region type
-                if (['DateTime'].includes(specification.type)) {
+                if (['DateTime'].includes(propertySpecification.type)) {
                     if (typeof newValue !== 'number')
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "DateTime" (given "` +
                                 `${toJSON(newValue)}").`
                         }
-                } else if (modelSpecifications.hasOwnProperty(
-                    specification.type
-                ))
+                } else if (models.hasOwnProperty(propertySpecification.type))
                     if (typeof newValue === 'object' && Object.getPrototypeOf(
                         newValue
                     // IgnoreTypeCheck
@@ -378,155 +372,156 @@ export default class Helper {
                     } else
                         throw {
                             forbidden: 'NestedModel: Under key "${name}" ' +
-                                `isn't "${specification.type}" (given "` +
-                                `${toJSON(newValue)}").`
-                        }
-                else if (['string', 'number', 'boolean'].includes(
-                    specification.type
-                )) {
-                    if (typeof newValue !== specification.type)
-                        throw {
-                            forbidden: `PropertyType: Property "${name}" ` +
-                                `isn't of type "${specification.type}" ` +
+                                `isn't "${propertySpecification.type}" ` +
                                 `(given "${toJSON(newValue)}").`
                         }
-                } else if (newValue !== specification.type)
+                else if (['string', 'number', 'boolean'].includes(
+                    propertySpecification.type
+                )) {
+                    if (typeof newValue !== propertySpecification.type)
+                        throw {
+                            forbidden: `PropertyType: Property "${name}" ` +
+                                `isn't of type "` +
+                                `${propertySpecification.type}" (given "` +
+                                `${toJSON(newValue)}").`
+                        }
+                } else if (newValue !== propertySpecification.type)
                     throw {
                         forbidden: `PropertyType: Property "${name}" isn't ` +
-                            `value "${specification.type}" (given "` +
+                            `value "${propertySpecification.type}" (given "` +
                             `${toJSON(newValue)}").`
                     }
                 // endregion
                 // region range
-                if (![undefined, null].includes(specification.minimum))
-                    if (specification.type === 'string') {
-                        if (newValue.length < specification.minimum)
+                if (![undefined, null].includes(propertySpecification.minimum))
+                    if (propertySpecification.type === 'string') {
+                        if (newValue.length < propertySpecification.minimum)
                             throw {
                                 forbidden: `MinimalLength: Property "${name}` +
                                 '" (type string) should have minimal length ' +
-                                `${specification.minimum}.`
+                                `${propertySpecification.minimum}.`
                             }
                     } else if ([
                         'number', 'integer', 'float', 'DateTime'
-                    ].includes(specification.type) &&
-                    newValue < specification.minimum)
+                    ].includes(propertySpecification.type) &&
+                    newValue < propertySpecification.minimum)
                         throw {
                             forbidden: `Minimum: Property "${name}" (type ` +
-                                `${specification.type}) should satisfy a ` +
-                                `minimum of ${specification.minimum}.`
+                                `${propertySpecification.type}) should ` +
+                                `satisfy a minimum of ` +
+                                `${propertySpecification.minimum}.`
                         }
-                if (![undefined, null].includes(specification.maximum))
-                    if (specification.type === 'string') {
-                        if (newValue.length > specification.maximum)
+                if (![undefined, null].includes(propertySpecification.maximum))
+                    if (propertySpecification.type === 'string') {
+                        if (newValue.length > propertySpecification.maximum)
                             throw {
                                 forbidden: `MaximalLength: Property "${name}` +
                                     ' (type string) should have maximal ' +
-                                    `length ${specification.maximum}.`
+                                    `length ${üpropertySpecification.maximum}.`
                             }
                     } else if ([
                         'number', 'integer', 'float', 'DateTime'
                     ].includes(
-                        specification.type
-                    ) && newValue > specification.maximum)
+                        propertySpecification.type
+                    ) && newValue > propertySpecification.maximum)
                         throw {
                             forbidden: `Maximum: Property "${name}" (type ` +
-                                `${specification.type}) should satisfy a ` +
-                                `maximum of ${specification.maximum}.`
+                                `${propertySpecification.type}) should satisfy a ` +
+                                `maximum of ${propertySpecification.maximum}.`
                         }
                 // endregion
                 // region pattern
                 if (!([undefined, null].includes(
-                    specification.regularExpressionPattern
-                ) || (new RegExp(specification.regularExpressionPattern)).test(
-                    newValue
-                )))
+                    propertySpecification.regularExpressionPattern
+                ) || (new RegExp(
+                    propertySpecification.regularExpressionPattern
+                )).test(newValue)))
                     throw {
                         forbidden: `PatternMatch: Property "${name}" should ` +
                             'match regular expression pattern ' +
-                            `${specification.regularExpressionPattern} ` +
-                            `(given "${newValue}").`
+                            propertySpecification.regularExpressionPattern +
+                            ` (given "${newValue}").`
                     }
                 // endregion
                 // region generic constraint
                 for (const type:string of [
                     'constraintEvaluation', 'constraintExpression'
                 ])
-                    if (specification[type] && !(new Function(
+                    if (propertySpecification[type] && !(new Function(
                         'newDocument', 'oldDocument', 'userContext',
-                        'securitySettings', 'modelSpecifications', 'options',
-                        'modelName', 'modelSpecification', 'checkDocument',
-                        'checkPropertyContent', 'newValue', 'name',
-                        'specification', 'oldValue', (type.endsWith(
+                        'securitySettings', 'models', 'options', 'modelName',
+                        'model', 'checkDocument', 'checkPropertyContent',
+                        'newValue', 'name', 'propertySpecification',
+                        'oldValue', (type.endsWith(
                             'Evaluation'
-                        ) ? 'return ' : '') + specification[type]
+                        ) ? 'return ' : '') + propertySpecification[type]
                     )(
                         newDocument, oldDocument, userContext,
-                        securitySettings, modelSpecifications, options,
-                        modelName, modelSpecification, checkDocument,
-                        checkPropertyContent, newValue, name, specification,
-                        oldValue
+                        securitySettings, models, options, modelName, model,
+                        checkDocument, checkPropertyContent, newValue, name,
+                        propertySpecification, oldValue
                     )))
                         throw {
                             forbidden: type.charAt(0).toUpperCase(
                             ) + type.substring(1) + `: Property "${name}" ` +
                             `should satisfy constraint "` +
-                            `${specification[type]}" (given "` +
+                            `${propertySpecification[type]}" (given "` +
                             `${toJSON(newValue)}").`
                         }
                 // endregion
                 return newValue
             }
             // region run hooks and check for presence of needed data
-            for (const propertyName:string in modelSpecification)
+            for (const propertyName:string in model)
                 if (
                     propertyName !== allowedRolesPropertyName &&
-                    modelSpecification.hasOwnProperty(propertyName)
+                    model.hasOwnProperty(propertyName)
                 ) {
-                    const specification:PlainObject = modelSpecification[
-                        propertyName]
+                    const propertySpecification:PropertySpecification =
+                        model[propertyName]
                     if (!oldDocument)
                         for (const type:string of [
                             'onCreateEvaluation', 'onCreateExpression'
                         ])
-                            if (specification[type])
+                            if (propertySpecification[type])
                                 newDocument[propertyName] = (new Function(
                                     'newDocument', 'oldDocument',
                                     'userContext', 'securitySettings', 'name',
-                                    'modelSpecifications', 'options',
-                                    'modelName', 'modelSpecification',
+                                    'models', 'options', 'modelName', 'model',
                                     'checkDocument', 'checkPropertyContent',
-                                    'specification', (type.endsWith(
+                                    'propertySpecification', (type.endsWith(
                                         'Evaluation'
-                                    ) ? 'return ' : '') + specification[type]
+                                    ) ? 'return ' : '') +
+                                    propertySpecification[type]
                                 )(
                                     newDocument, oldDocument, userContext,
-                                    securitySettings, propertyName,
-                                    modelSpecifications, options, modelName,
-                                    modelSpecification, checkDocument,
-                                    checkPropertyContent, specification
+                                    securitySettings, propertyName, models,
+                                    options, modelName, model, checkDocument,
+                                    checkPropertyContent, propertySpecification
                                 ))
                     for (const type:string of [
                         'onUpdateEvaluation', 'onUpdateExpression'
                     ])
-                        if (specification[type])
+                        if (propertySpecification[type])
                             newDocument[propertyName] = (new Function(
                                 'newDocument', 'oldDocument', 'userContext',
-                                'securitySettings', 'name',
-                                'modelSpecifications', 'options', 'modelName',
-                                'modelSpecification', 'checkDocument',
-                                'checkPropertyContent', 'specification',
-                                (type.endsWith(
+                                'securitySettings', 'name', 'models',
+                                'options', 'modelName', 'model',
+                                'checkDocument', 'checkPropertyContent',
+                                'propertySpecification', (type.endsWith(
                                     'Evaluation'
-                                ) ? 'return ' : '') + specification[type]
+                                ) ? 'return ' : '') +
+                                propertySpecification[type]
                             )(
                                 newDocument, oldDocument, userContext,
-                                securitySettings, propertyName,
-                                modelSpecifications, options, modelName,
-                                modelSpecification, checkDocument,
-                                checkPropertyContent, specification
+                                securitySettings, propertyName, models,
+                                options, modelName, model, checkDocument,
+                                checkPropertyContent, propertySpecification
                             ))
-                    if ([undefined, null].includes(specification.default)) {
-                        if (!(specification.nullable || (
+                    if ([undefined, null].includes(
+                        propertySpecification.default
+                    )) {
+                        if (!(propertySpecification.nullable || (
                             newDocument.hasOwnProperty(propertyName) ||
                             oldDocument && oldDocument.hasOwnProperty(
                                 propertyName)
@@ -549,9 +544,10 @@ export default class Helper {
                                     propertyName]
                             else
                                 newDocument[propertyName] =
-                                    specification.default
+                                    propertySpecification.default
                         else if (!oldDocument)
-                            newDocument[propertyName] = specification.default
+                            newDocument[propertyName] =
+                                propertySpecification.default
                 }
             // endregion
             // region check given data
@@ -574,16 +570,16 @@ export default class Helper {
                 if (newDocument.hasOwnProperty(
                     propertyName
                 ) && !reservedPropertyNames.includes(propertyName)) {
-                    if (!modelSpecification.hasOwnProperty(propertyName))
+                    if (!model.hasOwnProperty(propertyName))
                         throw {
                             forbidden: 'Property: Given property "' +
                                 `${propertyName}" isn't specified in model "` +
                                 `${modelName}".`
                         }
-                    const specification:PlainObject = modelSpecification[
-                        propertyName]
+                    const propertySpecification:PropertySpecification =
+                        model[propertyName]
                     // region writable/mutable
-                    if (!specification.writable)
+                    if (!propertySpecification.writable)
                         if (oldDocument)
                             if (oldDocument.hasOwnProperty(
                                 propertyName
@@ -609,7 +605,7 @@ export default class Helper {
                                     `${propertyName}" is not writable.`
                             }
                     if (
-                        !specification.mutable && oldDocument &&
+                        !propertySpecification.mutable && oldDocument &&
                         oldDocument.hasOwnProperty(propertyName)
                     )
                         if (toJSON(newDocument[propertyName]) === toJSON(
@@ -630,7 +626,7 @@ export default class Helper {
                     // endregion
                     // region nullable
                     if (newDocument[propertyName] === null)
-                        if (specification.nullable) {
+                        if (propertySpecification.nullable) {
                             delete newDocument[propertyName]
                             continue
                         } else
@@ -640,28 +636,30 @@ export default class Helper {
                             }
                     // endregion
                     if (
-                        typeof specification.type === 'string' &&
-                        specification.type.endsWith('[]')
+                        typeof propertySpecification.type === 'string' &&
+                        propertySpecification.type.endsWith('[]')
                     ) {
                         if (!Array.isArray(newDocument[propertyName]))
                             throw {
                                 forbidden: 'PropertyType: Property "' +
                                     `${propertyName}" isn't of type "array ` +
-                                    `-> ${specification.type}" (given "` +
+                                    `-> ${propertySpecification.type}" (` +
+                                    `given "` +
                                     `${toJSON(newDocument[propertyName])}").`
                             }
-                        const nestedSpecification:PlainObject = {}
-                        for (const key:string in specification)
-                            if (specification.hasOwnProperty(key))
+                        const nestedPropertySpecification:PropertySpecification
+                            = {}
+                        for (const key:string in propertySpecification)
+                            if (propertySpecification.hasOwnProperty(key))
                                 if (key === 'type')
-                                    nestedSpecification[key] = specification[
-                                        key
-                                    ].substring(
-                                        0, specification.type.length -
-                                            '[]'.length)
+                                    nestedPropertySpecification[key] =
+                                        propertySpecification[key].substring(
+                                            0,
+                                            propertySpecification.type.length -
+                                                '[]'.length)
                                 else
-                                    nestedSpecification[key] = specification[
-                                        key]
+                                    nestedPropertySpecification[key] =
+                                        propertySpecification[key]
                         let index:number = 0
                         for (const value:any of newDocument[
                             propertyName
@@ -670,7 +668,7 @@ export default class Helper {
                                 checkPropertyContent(
                                     value,
                                     `${index + 1}. value in ${propertyName}`,
-                                    nestedSpecification)
+                                    nestedPropertySpecification)
                             if (newDocument[propertyName][index] === null)
                                 newDocument[propertyName].splice(index, 1)
                             index += 1
@@ -678,7 +676,7 @@ export default class Helper {
                     } else {
                         newDocument[propertyName] = checkPropertyContent(
                             newDocument[propertyName], propertyName,
-                            specification,
+                            propertySpecification,
                             oldDocument && oldDocument.hasOwnProperty(
                                 propertyName
                             ) && oldDocument[propertyName] || undefined)
@@ -711,7 +709,7 @@ export default class Helper {
      */
     static loadPlugin(
         name:string, plugins:{[key:string]:Object},
-        configuration:PlainObject, optionsPropertyNames:Array<string>,
+        configuration:Configuration, optionsPropertyNames:Array<string>,
         pluginPath:string
     ):Object {
         for (const name:string of optionsPropertyNames)
@@ -829,8 +827,8 @@ export default class Helper {
      * @param configuration - Configuration object to extend and use.
      * @returns A topological sorted list of plugins objects.
      */
-    static loadPlugins(configuration:PlainObject):{
-        configuration:PlainObject;
+    static loadPlugins(configuration:Configuration):{
+        configuration:Configuration;
         plugins:Array<Object>
     } {
         const plugins:{[key:string]:Object} = {}

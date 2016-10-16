@@ -10,7 +10,7 @@ import type {PlainObject} from 'weboptimizer/type'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {DatabaseError} from '../type'
+import type {ForbiddenDatabaseError, ModelConfiguration} from '../type'
 import Helper from '../helper'
 // endregion
 QUnit.module('helper')
@@ -119,7 +119,7 @@ QUnit.test('extendModel', (assert:Object):void => {
     ])
         assert.deepEqual(Helper.extendModel(test[0], test[1]), test[2])
 })
-QUnit.test('extendSpecification', (assert:Object):void => {
+QUnit.test('extendModels', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, {}],
         [{types: {}}, {}],
@@ -134,14 +134,14 @@ QUnit.test('extendSpecification', (assert:Object):void => {
             {Test: {a: {}, b: {}}}
         ]
     ])
-        assert.deepEqual(Helper.extendSpecification(Tools.extendObject(
+        assert.deepEqual(Helper.extendModels(Tools.extendObject(
             {specialPropertyNames: {extend: 'webNodeExtends'}}, test[0]
         )), test[1])
-    assert.throws(():{[key:string]:PlainObject} => Helper.extendSpecification({
+    assert.throws(():{[key:string]:PlainObject} => Helper.extendModels({
         specialPropertyNames: {extend: 'webNodeExtends'},
         types: {a: {}}
     }))
-    assert.deepEqual(Helper.extendSpecification({
+    assert.deepEqual(Helper.extendModels({
         specialPropertyNames: {
             extend: 'webNodeExtends',
             typeNameRegularExpressionPattern: /a/
@@ -150,7 +150,7 @@ QUnit.test('extendSpecification', (assert:Object):void => {
     }), {a: {}})
 })
 QUnit.test('validateDocumentUpdate', (assert:Object):void => {
-    const defaultSpecification:PlainObject = {
+    const defaultModelConfiguration:PlainObject = {
         defaultPropertySpecification: {
             type: 'string',
             default: null,
@@ -175,8 +175,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             mutable: false
         }}}
     }
-    // TODO add null
-    for (const updateStrategy:string of ['fillUp', 'incremental', null]) {
+    for (const updateStrategy:string|null of ['fillUp', 'incremental', null]) {
         // region forbidden write tests
         for (const test:Array<any> of [
             /*
@@ -430,20 +429,20 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         ]) {
             if (test.length < 3)
                 test.splice(1, 0, {})
-            const modelSpecifications:PlainObject = Helper.extendSpecification(
+            const modelConfiguration:ModelConfiguration = Helper.extendModels(
                 Tools.extendObject(
-                    true, {}, defaultSpecification, test[1]))
+                    true, {}, defaultModelConfiguration, test[1]))
             const options:PlainObject = Tools.copyLimitedRecursively(
                 Tools.extendObject(true, {updateStrategy},
-                defaultSpecification, test[1]))
+                defaultModelConfiguration, test[1]))
             delete options.defaultPropertySpecification
             delete options.types
             const parameter:Array<any> = test[0].concat([null, {}, {}].slice(
                 test[0].length - 1
-            )).concat([modelSpecifications, options])
+            )).concat([modelConfiguration, options])
             assert.throws(():Object => Helper.validateDocumentUpdate.apply(
                 this, parameter
-            ), (error:DatabaseError):boolean => {
+            ), (error:ForbiddenDatabaseError):boolean => {
                 if (error.hasOwnProperty('forbidden')) {
                     const result:boolean = error.forbidden.startsWith(
                         `${test[2]}:`)
@@ -1013,25 +1012,20 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ]
             // endregion
         ]) {
-            const modelSpecifications:PlainObject = Helper.extendSpecification(
-                Tools.extendObject(
-                    true, {}, defaultSpecification, test[1]))
+            const modelConfiguration:ModelConfiguration =
+                Helper.extendModels(Tools.extendObject(
+                    true, {}, defaultModelConfiguration, test[1]))
             const options:PlainObject = Tools.copyLimitedRecursively(
-                Tools.extendObject(true, {updateStrategy}, defaultSpecification, test[1]))
+                Tools.extendObject(
+                    true, {updateStrategy}, defaultModelConfiguration, test[1])
+            )
             delete options.defaultPropertySpecification
             delete options.types
-            // TODO
-            var p = test[0].concat([null, {}, {}].slice(
-                test[0].length - 1
-            )).concat([modelSpecifications, options])
-            var r = Helper.validateDocumentUpdate.apply(this, p)
-            console.log()
-            console.log(updateStrategy)
-            console.log(r)
-            console.log(test[2][updateStrategy])
-            console.log()
-            assert.deepEqual(r,
-                test[2][updateStrategy])
+            assert.deepEqual(Helper.validateDocumentUpdate.apply(
+                this, test[0].concat([null, {}, {}].slice(
+                    test[0].length - 1
+                )).concat([modelConfiguration, options])
+            ), test[2][updateStrategy])
         }
         // endregion
     }

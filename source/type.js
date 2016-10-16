@@ -16,15 +16,21 @@
 export type PropertySpecification = {
     type:string;
     default:any;
-    onCreate:?string;
-    onUpdate:?string;
+    onCreateEvaluation:?string;
+    onCreateExpression:?string;
+    onUpdateEvaluation:?string;
+    onUpdateExpression:?string;
     nullable:boolean;
     writable:boolean;
+    mutable:boolean;
     minimum:number;
     maximum:number;
     regularExpressionPattern:?string;
-    validator:string;
+    constraintEvaluation:?string;
+    constraintExpression:?string;
 }
+export type Model = {[key:string]:PropertySpecification}
+export type Models = {[key:string]:Model}
 export type ModelConfiguration = {
     specialPropertyNames:{
         allowedRoles:string;
@@ -33,7 +39,7 @@ export type ModelConfiguration = {
         typeNameRegularExpressionPattern:string;
     };
     defaultPropertySpecification:PropertySpecification;
-    type:{[key:string]:{[key:string]:PropertySpecification}};
+    types:Models;
 }
 export type Configuration = {
     debug:boolean;
@@ -41,10 +47,15 @@ export type Configuration = {
     name:string;
     model:ModelConfiguration;
 }
-export type DatabaseError = {
+export type DatabaseAuthorisationError = {
+    unauthorized:string;
+    toString:() => string;
+}
+export type DatabaseForbiddenError = {
     forbidden:string;
     toString:() => string;
 }
+export type DatabaseError = DatabaseAuthorisationError|DatabaseForbiddenError
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
