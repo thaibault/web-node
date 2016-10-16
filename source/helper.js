@@ -298,7 +298,7 @@ export default class Helper {
     static validateDocumentUpdate(
         newDocument:Object, oldDocument:?Object, userContext:Object = {},
         securitySettings:Object = {}, models:Models,
-        modelConfiguration:SimpleModelConfiguration, toJSON:Function
+        modelConfiguration:SimpleModelConfiguration, toJSON:?Function
     ):Object {
         // TODO clear securitySettings on startup.
         // region ensure needed environment
@@ -322,23 +322,14 @@ export default class Helper {
                 throw {
                     forbidden: 'Revision: No old document to update available.'
                 }
-        if (!modelConfiguration)
-            modelConfiguration = {
-                specialPropertyNames: {
-                    allowedRoles: 'webNodeAllowedRoles',
-                    extend: 'webNodeExtends',
-                    type: 'webNodeType',
-                    typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
-                },
-                reservedPropertyNames: [],
-                updateStrategy: null
-            }
-        if (!toJSON)
-            if (JSON && JSON.hasOwnProperty('stringify'))
-                toJSON = (object:Object):string => JSON.stringify(
-                    object, null, '    ')
-            else
-                throw new Error('Needed "toJSON" function is not available.')
+        let serialize:(value:any) => string
+        if (toJSON)
+            serialize = toJSON
+        else if (JSON && JSON.hasOwnProperty('stringify'))
+            serialize = (object:Object):string => JSON.stringify(
+                object, null, '    ')
+        else
+            throw new Error('Needed "serialize" function is not available.')
         // endregion
         const checkDocument:Function = (
             newDocument:Object, oldDocument:?Object
@@ -374,7 +365,7 @@ export default class Helper {
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "DateTime" (given "` +
-                                `${toJSON(newValue)}").`
+                                `${serialize(newValue)}").`
                         }
                 } else if (models.hasOwnProperty(propertySpecification.type))
                     if (typeof newValue === 'object' && Object.getPrototypeOf(
@@ -382,13 +373,13 @@ export default class Helper {
                     // IgnoreTypeCheck
                     ) === Object.prototype) {
                         newValue = checkDocument(newValue, oldValue)
-                        if (toJSON(newValue) === toJSON({}))
+                        if (serialize(newValue) === serialize({}))
                             return null
                     } else
                         throw {
                             forbidden: 'NestedModel: Under key "${name}" ' +
                                 `isn't "${propertySpecification.type}" ` +
-                                `(given "${toJSON(newValue)}").`
+                                `(given "${serialize(newValue)}").`
                         }
                 else if (['string', 'number', 'boolean'].includes(
                     propertySpecification.type
@@ -398,13 +389,13 @@ export default class Helper {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "` +
                                 `${propertySpecification.type}" (given "` +
-                                `${toJSON(newValue)}").`
+                                `${serialize(newValue)}").`
                         }
                 } else if (newValue !== propertySpecification.type)
                     throw {
                         forbidden: `PropertyType: Property "${name}" isn't ` +
                             `value "${propertySpecification.type}" (given "` +
-                            `${toJSON(newValue)}").`
+                            `${serialize(newValue)}").`
                     }
                 // endregion
                 // region range
@@ -482,7 +473,7 @@ export default class Helper {
                             ) + type.substring(1) + `: Property "${name}" ` +
                             `should satisfy constraint "` +
                             `${propertySpecification[type]}" (given "` +
-                            `${toJSON(newValue)}").`
+                            `${serialize(newValue)}").`
                         }
                 // endregion
                 return newValue
@@ -583,7 +574,9 @@ export default class Helper {
                         oldDocument.hasOwnProperty(propertyName) &&
                         oldDocument[propertyName] === newDocument[
                             propertyName
-                        ] || toJSON(oldDocument[propertyName]) === toJSON(
+                        ] || serialize(
+                            oldDocument[propertyName]
+                        ) === serialize(
                             newDocument[propertyName]
                         ) && !modelConfiguration.reservedPropertyNames
                             .includes(propertyName)
@@ -610,9 +603,9 @@ export default class Helper {
                         if (oldDocument)
                             if (oldDocument.hasOwnProperty(
                                 propertyName
-                            ) && toJSON(newDocument[propertyName]) === toJSON(
-                                oldDocument[propertyName]
-                            )) {
+                            ) && serialize(
+                                newDocument[propertyName]
+                            ) === serialize(oldDocument[propertyName])) {
                                 if (
                                     propertyName !== '_id' &&
                                     modelConfiguration.updateStrategy ===
@@ -625,7 +618,7 @@ export default class Helper {
                                     forbidden: 'Readonly: Property "' +
                                         `${propertyName}" is not writable ` +
                                         `(old document "` +
-                                        `${toJSON(oldDocument)}").`
+                                        `${serialize(oldDocument)}").`
                                 }
                         else
                             throw {
@@ -636,7 +629,7 @@ export default class Helper {
                         !propertySpecification.mutable && oldDocument &&
                         oldDocument.hasOwnProperty(propertyName)
                     )
-                        if (toJSON(newDocument[propertyName]) === toJSON(
+                        if (serialize(newDocument[propertyName]) === serialize(
                             oldDocument[propertyName]
                         )) {
                             if (
@@ -651,7 +644,7 @@ export default class Helper {
                             throw {
                                 forbidden: 'Immutable: Property "' +
                                     `${propertyName}" is not writable (old ` +
-                                    `document "${toJSON(oldDocument)}").`
+                                    `document "${serialize(oldDocument)}").`
                             }
                     // endregion
                     // region nullable
@@ -675,7 +668,8 @@ export default class Helper {
                                     `${propertyName}" isn't of type "array ` +
                                     `-> ${propertySpecification.type}" (` +
                                     `given "` +
-                                    `${toJSON(newDocument[propertyName])}").`
+                                    `${serialize(newDocument[propertyName])}` +
+                                    '").'
                             }
                         // IgnoreTypeCheck
                         const nestedPropertySpecification:PropertySpecification

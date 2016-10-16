@@ -11,6 +11,7 @@ try {
     module.require('source-map-support/register')
 } catch (error) {}
 import type {DatabaseForbiddenError, ModelConfiguration, Models} from '../type'
+import configuration from '../configurator'
 import Helper from '../helper'
 // endregion
 QUnit.module('helper')
@@ -144,31 +145,6 @@ QUnit.test('extendModels', (assert:Object):void => {
     }), {a: {}})
 })
 QUnit.test('validateDocumentUpdate', (assert:Object):void => {
-    const defaultModelConfiguration:PlainObject = {
-        defaultPropertySpecification: {
-            type: 'string',
-            default: null,
-            onCreateEvaluation: null,
-            onCreateExpression: null,
-            onUpdateEvaluation: null,
-            onUpdateExpression: null,
-            nullable: true,
-            writable: true,
-            mutable: true,
-            minimum: -999999999999999999999,
-            maximum: 999999999999999999999,
-            regularExpressionPattern: null,
-            constraintEvaluation: null,
-            constraintExpression: null
-        },
-        models: {_base: {webNodeType: {
-            regularExpressionPattern: '^[A-Z][a-z0-9]+$',
-            nullable: false,
-            minimum: 1,
-            maximum: 999,
-            mutable: false
-        }}}
-    }
     for (const updateStrategy:string|null of ['fillUp', 'incremental', null]) {
         // region forbidden write tests
         for (const test:Array<any> of [
@@ -425,10 +401,10 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 test.splice(1, 0, {})
             const modelConfiguration:ModelConfiguration = Helper.extendModels(
                 Tools.extendObject(
-                    true, {}, defaultModelConfiguration, test[1]))
+                    true, {}, configuration.modelConfiguration, test[1]))
             const options:PlainObject = Tools.copyLimitedRecursively(
                 Tools.extendObject(true, {updateStrategy},
-                defaultModelConfiguration, test[1]))
+                configuration.modelConfiguration, test[1]))
             delete options.defaultPropertySpecification
             delete options.models
             const parameter:Array<any> = test[0].concat([null, {}, {}].slice(
@@ -1008,11 +984,11 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         ]) {
             const modelConfiguration:ModelConfiguration =
                 Helper.extendModels(Tools.extendObject(
-                    true, {}, defaultModelConfiguration, test[1]))
+                    true, {}, configuration.modelConfiguration, test[1]))
             const options:PlainObject = Tools.copyLimitedRecursively(
                 Tools.extendObject(
-                    true, {updateStrategy}, defaultModelConfiguration, test[1])
-            )
+                    true, {updateStrategy}, configuration.modelConfiguration,
+                    test[1]))
             delete options.defaultPropertySpecification
             delete options.models
             assert.deepEqual(Helper.validateDocumentUpdate.apply(
