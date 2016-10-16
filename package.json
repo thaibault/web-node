@@ -96,15 +96,22 @@
       },
       "reservedPropertyNames": ["_id", "_rev", "_revisions", "_deleted"],
       "specialPropertyNames": {
-        "allowedRoles": "webNodeAllowedRoles",
-        "extend": "webNodeExtends",
-        "type": "webNodeType",
+        "allowedRoles": "_allowedRoles",
+        "extend": "_extends",
+        "type": "_type",
         "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$"
       },
       "updateStrategy": "fillUp",
       "models": {
         "_base": {
-          "_id": {},
+          "_id": {
+            "nullable": false,
+            "mutable": false
+          },
+          "_rev": {
+            "nullable": false,
+            "writable": false
+          }
           "creationDateTime": {
             "type": "DateTime",
             "onCreateEvaluation": "new Date().getTime()",
@@ -126,7 +133,7 @@
             "onUpdateEvaluation": "userContext._id",
             "nullable": false
           },
-          "webNodeType": {
+          "_type": {
             "regularExpressionPattern": {
               "__evaluate__": "self.modelConfiguration.specialPropertyNames.typeNameRegularExpressionPattern"
             },
@@ -135,7 +142,7 @@
             "maximum": 999,
             "mutable": false
           },
-          "webNodeAllowedRoles": [
+          "_allowedRoles": [
             "users"
           ]
         }

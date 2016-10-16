@@ -46,8 +46,7 @@ QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
             {
                 specialPropertyNames: {allowedRoles: 'roles'},
                 models: {Test: {}}
-            },
-            {}
+            }, {}
         ],
         [
             {
@@ -86,25 +85,17 @@ QUnit.test('extendModel', (assert:Object):void => {
         ['A', {A: {}}, {}],
         [
             'Test',
-            {_baseTest: {b: {}}, Test: {a: {}, webNodeExtends: '_baseTest'}},
+            {_baseTest: {b: {}}, Test: {a: {}, _extends: '_baseTest'}},
             {a: {}, b: {}}
         ],
         [
             'C',
-            {
-                A: {a: {}},
-                B: {b: {}},
-                C: {c: {}, webNodeExtends: ['A', 'B']}
-            },
+            {A: {a: {}}, B: {b: {}}, C: {c: {}, _extends: ['A', 'B']}},
             {a: {}, b: {}, c: {}}
         ],
         [
             'C',
-            {
-                A: {a: {}},
-                B: {b: {}, webNodeExtends: 'A'},
-                C: {c: {}, webNodeExtends: 'B'}
-            },
+            {A: {a: {}}, B: {b: {}, _extends: 'A'}, C: {c: {}, _extends: 'B'}},
             {a: {}, b: {}, c: {}}
         ],
         [
@@ -112,8 +103,8 @@ QUnit.test('extendModel', (assert:Object):void => {
             {
                 _base: {d: {type: 'number'}},
                 A: {a: {}},
-                B: {b: {}, webNodeExtends: 'A'},
-                C: {c: {}, webNodeExtends: 'B'}
+                B: {b: {}, _extends: 'A'},
+                C: {c: {}, _extends: 'B'}
             },
             {a: {}, b: {}, c: {}, d: {type: 'number'}}
         ]
@@ -127,7 +118,7 @@ QUnit.test('extendModels', (assert:Object):void => {
         [{models: {Test: {}}}, {Test: {}}],
         [{models: {Test: {}}}, {Test: {}}],
         [
-            {models: {Base: {b: {}}, Test: {a: {}, webNodeExtends: 'Base'}}},
+            {models: {Base: {b: {}}, Test: {a: {}, _extends: 'Base'}}},
             {Base: {b: {}}, Test: {a: {}, b: {}}}
         ],
         [
@@ -163,98 +154,93 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         for (const test:Array<any> of [
             // region model
             [[{}, {}], 'Type'],
-            [[{webNodeType: 'test'}], 'Model'],
+            [[{_type: 'test'}], 'Model'],
             // endregion
             // region property existents
-            [[{webNodeType: 'Test', a: 2}], {models: {Test: {}}}, 'Property'],
+            [[{_type: 'Test', a: 2}], {models: {Test: {}}}, 'Property'],
             [
-                [{webNodeType: 'Test', a: null}],
+                [{_type: 'Test', a: null}],
                 {models: {Test: {a: {nullable: false}}}}, 'NotNull'
             ],
             [
-                [{webNodeType: 'Test'}], {models: {Test: {a: {nullable: false}}}},
+                [{_type: 'Test'}], {models: {Test: {a: {nullable: false}}}},
                 'MissingProperty'
             ],
             // endregion
             // region property readonly
             [
-                [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: 'b'}, {_type: 'Test'}],
                 {models: {Test: {a: {writable: false}}}}, 'Readonly'
             ],
             [
-                [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'a'}],
+                [{_type: 'Test', a: 'b'}, {_type: 'Test', a: 'a'}],
                 {models: {Test: {a: {writable: false}}}}, 'Readonly'
             ],
             // endregion
             // region property type
             [
-                [{webNodeType: 'Test', a: 2}], {models: {Test: {a: {}}}},
+                [{_type: 'Test', a: 2}], {models: {Test: {a: {}}}},
                 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: 'b'}],
+                [{_type: 'Test', a: 'b'}],
                 {models: {Test: {a: {type: 'number'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: 1}],
+                [{_type: 'Test', a: 1}],
                 {models: {Test: {a: {type: 'boolean'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: 'a'}],
+                [{_type: 'Test', a: 'a'}],
                 {models: {Test: {a: {type: 'DateTime'}}}}, 'PropertyType'
             ],
             // / region array
             // // region type
             [
-                [{webNodeType: 'Test', a: 2}],
+                [{_type: 'Test', a: 2}],
                 {models: {Test: {a: {type: 'string[]'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: [2]}],
+                [{_type: 'Test', a: [2]}],
                 {models: {Test: {a: {type: 'string[]'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: ['b']}],
+                [{_type: 'Test', a: ['b']}],
                 {models: {Test: {a: {type: 'number[]'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: [1]}],
+                [{_type: 'Test', a: [1]}],
                 {models: {Test: {a: {type: 'boolean[]'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: [1]}],
+                [{_type: 'Test', a: [1]}],
                 {models: {Test: {a: {type: 'DateTime'}}}}, 'PropertyType'
             ],
             [
-                [{webNodeType: 'Test', a: ['a']}],
+                [{_type: 'Test', a: ['a']}],
                 {models: {Test: {a: {type: 'DateTime[]'}}}}, 'PropertyType'
             ],
             // // endregion
             [
-                [{webNodeType: 'Test', a: [{webNodeType: 'Test', b: 2}]}],
+                [{_type: 'Test', a: [{_type: 'Test', b: 2}]}],
                 {models: {Test: {a: {type: 'Test[]'}}}}, 'Property'
             ],
             [
-                [
-                    {
-                        webNodeType: 'Test',
-                        a: [{webNodeType: 'Test', b: null}],
-                        b: 'a'
-                    }
-                ], {models: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}},
+                [{_type: 'Test', a: [{_type: 'Test', b: null}], b: 'a'}],
+                {models: {Test: {a: {type: 'Test[]'}, b: {nullable: false}}}},
                 'NotNull'
             ],
             [
                 [
-                    {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'a'}]},
-                    {webNodeType: 'Test', a: [{webNodeType: 'Test', b: 'b'}]}
-                ], {models: {Test: {a: {type: 'Test[]', writable: false}, b: {}}}},
-                'Readonly'
+                    {_type: 'Test', a: [{_type: 'Test', b: 'a'}]},
+                    {_type: 'Test', a: [{_type: 'Test', b: 'b'}]}
+                ], {models: {
+                    Test: {a: {type: 'Test[]', writable: false},
+                    b: {}}
+                }}, 'Readonly'
             ],
             [
-                [{webNodeType: 'Test', a: [4], b: [{
-                    webNodeType: 'Test', a: [2]
-                }]}],
+                [{_type: 'Test', a: [4], b: [{_type: 'Test', a: [2]}]}],
                 {models: {Test: {
                     a: {type: 'number[]', minimum: 3},
                     b: {type: 'Test[]'}
@@ -264,41 +250,35 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // / region nested property
             // // region property type
             [
-                [{webNodeType: 'Test', a: 1}],
+                [{_type: 'Test', a: 1}],
                 {models: {Test: {a: {type: 'Test'}}}}, 'NestedModel'
             ],
             [
-                [{webNodeType: 'Test', a: null}],
-                {models: {Test: {a: {type: 'Test', nullable: false}}}}, 'NotNull'
+                [{_type: 'Test', a: null}],
+                {models: {Test: {a: {type: 'Test', nullable: false}}}},
+                'NotNull'
             ],
             [
-                [{webNodeType: 'Test', a: {}}],
+                [{_type: 'Test', a: {}}],
                 {models: {Test: {a: {type: 'Test'}}}}, 'Type'
             ],
             [
-                [{webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}, b: 'a'}],
+                [{_type: 'Test', a: {_type: 'Test', b: 2}, b: 'a'}],
                 {models: {Test: {a: {type: 'Test'}, b: {}}}}, 'PropertyType'
             ],
             // // endregion
             // // region property existents
             [
-                [{webNodeType: 'Test', a: {webNodeType: 'Test', b: 2}}],
+                [{_type: 'Test', a: {_type: 'Test', b: 2}}],
                 {models: {Test: {a: {type: 'Test'}}}}, 'Property'
             ],
             [
-                [{
-                    webNodeType: 'Test',
-                    a: {webNodeType: 'Test', b: null},
-                    b: 'a'
-                }], {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
+                [{_type: 'Test', a: {_type: 'Test', b: null}, b: 'a'}],
+                {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
                 'NotNull'
             ],
             [
-                [{
-                    webNodeType: 'Test',
-                    a: {webNodeType: 'Test'},
-                    b: 'a'
-                }],
+                [{_type: 'Test', a: {_type: 'Test'}, b: 'a'}],
                 {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
                 'MissingProperty'
             ],
@@ -306,46 +286,43 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // region property readonly
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
+                    {_type: 'Test', a: {_type: 'Test', b: 'a'}},
+                    {_type: 'Test', a: {_type: 'Test', b: 'b'}}
                 ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 'Readonly'
             ],
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+                    {_type: 'Test', a: {_type: 'Test', b: 'a'}},
+                    {_type: 'Test', a: {_type: 'Test'}}
                 ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 'Readonly'
             ],
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}, {}, {}
-                ], {models: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
+                    {_type: 'Test', a: {_type: 'Test', b: 'a'}},
+                    {_type: 'Test', a: {_type: 'Test', b: 'b'}}, {}, {}
+                ],
+                {models: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
                 'Readonly'
             ],
             // // endregion
             // // region property range
             [
-                [{webNodeType: 'Test', a: 4, b: {webNodeType: 'Test', a: 2}}],
+                [{_type: 'Test', a: 4, b: {_type: 'Test', a: 2}}],
                 {models: {Test: {
-                    a: {type: 'number', minimum: 3},
-                    b: {type: 'Test'}
+                    a: {type: 'number', minimum: 3}, b: {type: 'Test'}
                 }}}, 'Minimum'
             ],
             [
-                [{
-                    webNodeType: 'Test',
-                    a: '1',
-                    b: {webNodeType: 'Test', a: '12'}
-                }], {models: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
+                [{_type: 'Test', a: '1', b: {_type: 'Test', a: '12'}}],
+                {models: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}},
                 'MaximalLength'
             ],
             // // endregion
             // // region property pattern
             [
-                [{webNodeType: 'Test', b: {webNodeType: 'Test', a: 'b'}}],
+                [{_type: 'Test', b: {_type: 'Test', a: 'b'}}],
                 {models: {Test: {
                     a: {regularExpressionPattern: 'a'},
                     b: {type: 'Test'}
@@ -354,11 +331,8 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // endregion
             // // region property constraint
             [
-                [{
-                    webNodeType: 'Test',
-                    a: 'b',
-                    b: {webNodeType: 'Test', a: 'a'}
-                }], {models: {Test: {
+                [{_type: 'Test', a: 'b', b: {_type: 'Test', a: 'a'}}],
+                {models: {Test: {
                     a: {constraintEvaluation: 'newDocument.a === "b"'},
                     b: {type: 'Test'}
                 }}}, 'ConstraintEvaluation'
@@ -366,46 +340,44 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // endregion
             // / endregion
             [
-                [{webNodeType: 'Test', a: 1}], {models: {Test: {a: {type: 2}}}},
+                [{_type: 'Test', a: 1}], {models: {Test: {a: {type: 2}}}},
                 'PropertyType'
             ],
             // endregion
             // region property range
             [
-                [{webNodeType: 'Test', a: 2}],
+                [{_type: 'Test', a: 2}],
                 {models: {Test: {a: {type: 'number', minimum: 3}}}}, 'Minimum'
             ],
             [
-                [{webNodeType: 'Test', a: 2}],
+                [{_type: 'Test', a: 2}],
                 {models: {Test: {a: {type: 'number', maximum: 1}}}}, 'Maximum'
             ],
             [
-                [{webNodeType: 'Test', a: '12'}],
+                [{_type: 'Test', a: '12'}],
                 {models: {Test: {a: {minimum: 3}}}}, 'MinimalLength'
             ],
             [
-                [{webNodeType: 'Test', a: '12'}],
+                [{_type: 'Test', a: '12'}],
                 {models: {Test: {a: {maximum: 1}}}}, 'MaximalLength'
             ],
             // endregion
             // region property pattern
             [
-                [{webNodeType: 'Test', a: 'b'}],
+                [{_type: 'Test', a: 'b'}],
                 {models: {Test: {a: {regularExpressionPattern: 'a'}}}},
                 'PatternMatch'
             ],
             // endregion
             // region property constraint
             [
-                [{webNodeType: 'Test', a: 'b'}],
+                [{_type: 'Test', a: 'b'}],
                 {models: {Test: {a: {constraintEvaluation: 'false'}}}},
                 'ConstraintEvaluation'
             ],
-            [
-                [{webNodeType: 'Test', a: 'b'}], {models: {Test: {a: {
-                    constraintEvaluation: 'newValue === "a"'
-                }}}}, 'ConstraintEvaluation'
-            ]
+            [[{_type: 'Test', a: 'b'}], {models: {Test: {a: {
+                constraintEvaluation: 'newValue === "a"'
+            }}}}, 'ConstraintEvaluation']
             // endregion
         ]) {
             if (test.length < 3)
@@ -441,208 +413,194 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         // endregion
         // region allowed write tests
         for (const test:Array<any> of [
-            [
-                [{webNodeType: 'Test'}], {models: {Test: {}}}, {
-                    fillUp: {webNodeType: 'Test'},
-                    incremental: {webNodeType: 'Test'},
-                    null: {webNodeType: 'Test'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test'}], {models: {Test: {class: {}}}}, {
-                    fillUp: {webNodeType: 'Test'},
-                    incremental: {webNodeType: 'Test'},
-                    null: {webNodeType: 'Test'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test'}, {webNodeType: 'Test', a: '2'}],
-                {models: {Test: {a: {}}}}, {
-                    fillUp: {webNodeType: 'Test', a: '2'},
-                    incremental: {},
-                    null: {webNodeType: 'Test'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test', a: '2'}, {webNodeType: 'Test', a: '2'}],
-                {models: {Test: {a: {}}}}, {
-                    fillUp: {webNodeType: 'Test', a: '2'},
-                    incremental: {},
-                    null: {webNodeType: 'Test', a: '2'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test', a: '3'}, {webNodeType: 'Test', a: '2'}],
-                {models: {Test: {a: {}}}}, {
-                    fillUp: {a: '3', webNodeType: 'Test'},
+            [[{_type: 'Test'}], {models: {Test: {}}}, {
+                fillUp: {_type: 'Test'},
+                incremental: {_type: 'Test'},
+                null: {_type: 'Test'}
+            }],
+            [[{_type: 'Test'}], {models: {Test: {class: {}}}}, {
+                fillUp: {_type: 'Test'},
+                incremental: {_type: 'Test'},
+                null: {_type: 'Test'}
+            }],
+            [[{_type: 'Test'}, {_type: 'Test', a: '2'}], {
+                models: {Test: {a: {}}}
+            }, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {},
+                null: {_type: 'Test'}
+            }],
+            [[{_type: 'Test', a: '2'}, {_type: 'Test', a: '2'}], {
+                models: {Test: {a: {}}}
+            }, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {},
+                null: {_type: 'Test', a: '2'}
+            }],
+            [[{_type: 'Test', a: '3'}, {_type: 'Test', a: '2'}], {
+                models: {Test: {a: {}}}}, {
+                    fillUp: {a: '3', _type: 'Test'},
                     incremental: {a: '3'},
-                    null: {webNodeType: 'Test', a: '3'}
+                    null: {_type: 'Test', a: '3'}
                 }
             ],
             // region property existents
-            [
-                [{webNodeType: 'Test', a: 2}],
-                {models: {Test: {a: {type: 'number'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 2},
-                    incremental: {webNodeType: 'Test', a: 2},
-                    null: {webNodeType: 'Test', a: 2}
-                }
-            ],
-            [
-                [{webNodeType: 'Test', a: null}], {models: {Test: {a: {}}}}, {
-                    fillUp: {webNodeType: 'Test'},
-                    incremental: {webNodeType: 'Test'},
-                    null: {webNodeType: 'Test'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test', a: 'a'}],
-                {models: {Test: {a: {nullable: false}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 'a'},
-                    incremental: {webNodeType: 'Test', a: 'a'},
-                    null: {webNodeType: 'Test', a: 'a'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test'}, {webNodeType: 'Test', a: 'a'}],
-                {models: {Test: {a: {nullable: false}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 'a'},
+            [[{_type: 'Test', a: 2}], {models: {Test: {a: {
+                type: 'number'
+            }}}}, {
+                fillUp: {_type: 'Test', a: 2},
+                incremental: {_type: 'Test', a: 2},
+                null: {_type: 'Test', a: 2}
+            }],
+            [[{_type: 'Test', a: null}], {models: {Test: {a: {}}}}, {
+                fillUp: {_type: 'Test'},
+                incremental: {_type: 'Test'},
+                null: {_type: 'Test'}
+            }],
+            [[{_type: 'Test', a: 'a'}], {models: {Test: {a: {
+                nullable: false
+            }}}}, {
+                fillUp: {_type: 'Test', a: 'a'},
+                incremental: {_type: 'Test', a: 'a'},
+                null: {_type: 'Test', a: 'a'}
+            }],
+            [[{_type: 'Test'}, {_type: 'Test', a: 'a'}], {
+                models: {Test: {a: {nullable: false}}}}, {
+                    fillUp: {_type: 'Test', a: 'a'},
                     incremental: {},
-                    null: {webNodeType: 'Test'}
+                    null: {_type: 'Test'}
                 }
             ],
             // endregion
             // region property readonly
-            [
-                [{webNodeType: 'Test', a: 'b'}, {webNodeType: 'Test', a: 'b'}],
-                {models: {Test: {a: {writable: false}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 'b'},
-                    incremental: {},
-                    null: {webNodeType: 'Test', a: 'b'}
-                }
-            ],
-            [
-                [{webNodeType: 'Test'}, {webNodeType: 'Test'}],
-                {models: {Test: {a: {writable: false}}}}, {
-                    fillUp: {webNodeType: 'Test'},
-                    incremental: {},
-                    null: {webNodeType: 'Test'}
-                }
-            ],
+            [[{_type: 'Test', a: 'b'}, {_type: 'Test', a: 'b'}], {
+                models: {Test: {a: {writable: false}}}
+            }, {
+                fillUp: {_type: 'Test', a: 'b'},
+                incremental: {},
+                null: {_type: 'Test', a: 'b'}
+            }],
+            [[{_type: 'Test'}, {_type: 'Test'}], {
+                models: {Test: {a: {writable: false}}}
+            }, {
+                fillUp: {_type: 'Test'},
+                incremental: {},
+                null: {_type: 'Test'}
+            }],
             // endregion
             // region property type
             [
-                [{webNodeType: 'Test', a: '2'}, {webNodeType: 'Test', a: '2'}],
+                [{_type: 'Test', a: '2'}, {_type: 'Test', a: '2'}],
                 {models: {Test: {a: {}}}}, {
-                    fillUp: {webNodeType: 'Test', a: '2'},
+                    fillUp: {_type: 'Test', a: '2'},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: '2'}
+                    null: {_type: 'Test', a: '2'}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: 2}, {webNodeType: 'Test', a: 2}],
+                [{_type: 'Test', a: 2}, {_type: 'Test', a: 2}],
                 {models: {Test: {a: {type: 'number'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 2},
+                    fillUp: {_type: 'Test', a: 2},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: 2}
+                    null: {_type: 'Test', a: 2}
                 }
             ],
             [
                 [
-                    {webNodeType: 'Test', a: true},
-                    {webNodeType: 'Test', a: true}
+                    {_type: 'Test', a: true},
+                    {_type: 'Test', a: true}
                 ],
                 {models: {Test: {a: {type: 'boolean'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: true},
+                    fillUp: {_type: 'Test', a: true},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: true}
+                    null: {_type: 'Test', a: true}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: 1}, {webNodeType: 'Test', a: 1}],
+                [{_type: 'Test', a: 1}, {_type: 'Test', a: 1}],
                 {models: {Test: {a: {type: 'DateTime'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 1},
+                    fillUp: {_type: 'Test', a: 1},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: 1}
+                    null: {_type: 'Test', a: 1}
                 }
             ],
             // / region array
             [
                 [
-                    {webNodeType: 'Test', a: ['2']},
-                    {webNodeType: 'Test', a: ['2']}
+                    {_type: 'Test', a: ['2']},
+                    {_type: 'Test', a: ['2']}
                 ],
                 {models: {Test: {a: {type: 'string[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: ['2']},
+                    fillUp: {_type: 'Test', a: ['2']},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: ['2']}
+                    null: {_type: 'Test', a: ['2']}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: ['2']}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: ['2']}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'string[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: ['2']},
+                    fillUp: {_type: 'Test', a: ['2']},
                     incremental: {a: ['2']},
-                    null: {webNodeType: 'Test', a: ['2']}
+                    null: {_type: 'Test', a: ['2']}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: null}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'string[]'}}}}, {
-                    fillUp: {webNodeType: 'Test'},
+                    fillUp: {_type: 'Test'},
                     incremental: {},
-                    null: {webNodeType: 'Test'}
+                    null: {_type: 'Test'}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: [2]}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: [2]}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'number[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: [2]},
+                    fillUp: {_type: 'Test', a: [2]},
                     incremental: {a: [2]},
-                    null: {webNodeType: 'Test', a: [2]}
+                    null: {_type: 'Test', a: [2]}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: [true]}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: [true]}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'boolean[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: [true]},
+                    fillUp: {_type: 'Test', a: [true]},
                     incremental: {a: [true]},
-                    null: {webNodeType: 'Test', a: [true]}
+                    null: {_type: 'Test', a: [true]}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: [1]}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: [1]}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'DateTime[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: [1]},
+                    fillUp: {_type: 'Test', a: [1]},
                     incremental: {a: [1]},
-                    null: {webNodeType: 'Test', a: [1]}
+                    null: {_type: 'Test', a: [1]}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: []}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: []}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'DateTime[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: []},
+                    fillUp: {_type: 'Test', a: []},
                     incremental: {a: []},
-                    null: {webNodeType: 'Test', a: []}
+                    null: {_type: 'Test', a: []}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: [2]}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: [2]}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'DateTime[]', mutable: false}}}}, {
-                    fillUp: {webNodeType: 'Test', a: [2]},
+                    fillUp: {_type: 'Test', a: [2]},
                     incremental: {a: [2]},
-                    null: {webNodeType: 'Test', a: [2]}
+                    null: {_type: 'Test', a: [2]}
                 }
             ],
             [
                 [
-                    {webNodeType: 'Test', a: [2, 1]},
-                    {webNodeType: 'Test', a: [2]}
+                    {_type: 'Test', a: [2, 1]},
+                    {_type: 'Test', a: [2]}
                 ],
                 {models: {Test: {a: {type: 'number[]'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: [2, 1]},
+                    fillUp: {_type: 'Test', a: [2, 1]},
                     incremental: {a: [2, 1]},
-                    null: {webNodeType: 'Test', a: [2, 1]}
+                    null: {_type: 'Test', a: [2, 1]}
                 }
             ],
             // / endregion
@@ -650,68 +608,68 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // region property type
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+                    {_type: 'Test', a: {_type: 'Test'}},
+                    {_type: 'Test', a: {_type: 'Test'}}
                 ], {models: {Test: {a: {type: 'Test'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+                    fillUp: {_type: 'Test', a: {_type: 'Test'}},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+                    null: {_type: 'Test', a: {_type: 'Test'}}
                 }
             ],
             [
-                [{webNodeType: 'Test', a: null}, {webNodeType: 'Test'}],
+                [{_type: 'Test', a: null}, {_type: 'Test'}],
                 {models: {Test: {a: {type: 'Test'}}}}, {
-                    fillUp: {webNodeType: 'Test'},
+                    fillUp: {_type: 'Test'},
                     incremental: {},
-                    null: {webNodeType: 'Test'}
+                    null: {_type: 'Test'}
                 }
             ],
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: null}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+                    {_type: 'Test', a: {_type: 'Test', b: null}},
+                    {_type: 'Test', a: {_type: 'Test'}}
                 ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
-                    fillUp: {webNodeType: 'Test', a: {webNodeType: 'Test'}},
+                    fillUp: {_type: 'Test', a: {_type: 'Test'}},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+                    null: {_type: 'Test', a: {_type: 'Test'}}
                 }
             ],
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: '2'}}
+                    {_type: 'Test', a: {_type: 'Test', b: '2'}},
+                    {_type: 'Test', a: {_type: 'Test', b: '2'}}
                 ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
-                    fillUp: {webNodeType: 'Test', a: {
-                        webNodeType: 'Test', b: '2'
+                    fillUp: {_type: 'Test', a: {
+                        _type: 'Test', b: '2'
                     }},
                     incremental: {},
-                    null: {webNodeType: 'Test', a: {
-                        webNodeType: 'Test', b: '2'
+                    null: {_type: 'Test', a: {
+                        _type: 'Test', b: '2'
                     }}
                 }
             ],
             [
                 [
                     {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'a'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: 'a'},
                         b: '2'
                     },
                     {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'a'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: 'a'},
                         b: '2'
                     }
                 ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'a'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: 'a'},
                         b: '2'
                     },
                     incremental: {},
                     null: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'a'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: 'a'},
                         b: '2'
                     }
                 }
@@ -720,38 +678,38 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // region property existents
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}}
+                    {_type: 'Test', a: {_type: 'Test'}},
+                    {_type: 'Test', a: {_type: 'Test'}}
                 ], {models: {Test: {a: {type: 'Test'}}}}, {
                     fillUp: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test'}
+                        _type: 'Test',
+                        a: {_type: 'Test'}
                     },
                     incremental: {},
                     null: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test'}
+                        _type: 'Test',
+                        a: {_type: 'Test'}
                     }
                 }
             ],
             [
                 [
                     {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: null},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: null},
                         b: 'a'
                     },
-                    {webNodeType: 'Test', a: {webNodeType: 'Test'}, b: 'a'}
+                    {_type: 'Test', a: {_type: 'Test'}, b: 'a'}
                 ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test'},
+                        _type: 'Test',
+                        a: {_type: 'Test'},
                         b: 'a'
                     },
                     incremental: {},
                     null: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test'},
+                        _type: 'Test',
+                        a: {_type: 'Test'},
                         b: 'a'
                     }
                 }
@@ -759,26 +717,26 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [
                 [
                     {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: '2'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: '2'},
                         b: 'a'
                     },
                     {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: '2'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: '2'},
                         b: 'a'
                     }
                 ], {models: {Test: {a: {type: 'Test'}, b: {nullable: false}}}},
                 {
                     fillUp: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: '2'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: '2'},
                         b: 'a'
                     },
                     incremental: {},
                     null: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: '2'},
+                        _type: 'Test',
+                        a: {_type: 'Test', b: '2'},
                         b: 'a'
                     }
                 }
@@ -787,36 +745,31 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // // region property readonly
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'b'}}
+                    {_type: 'Test', a: {_type: 'Test', b: 'b'}},
+                    {_type: 'Test', a: {_type: 'Test', b: 'b'}}
                 ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 {
                     fillUp: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'b'}
+                        _type: 'Test',
+                        a: {_type: 'Test', b: 'b'}
                     },
                     incremental: {},
                     null: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'b'}
+                        _type: 'Test',
+                        a: {_type: 'Test', b: 'b'}
                     }
                 }
             ],
             [
                 [
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}},
-                    {webNodeType: 'Test', a: {webNodeType: 'Test', b: 'a'}}
+                    {_type: 'Test', a: {_type: 'Test', b: 'a'}},
+                    {_type: 'Test', a: {_type: 'Test', b: 'a'}}
                 ],
-                {models: {Test: {a: {type: 'Test', writable: false}, b: {}}}}, {
-                    fillUp: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'a'}
-                    },
+                {models: {Test: {a: {type: 'Test', writable: false}, b: {}}}},
+                {
+                    fillUp: {_type: 'Test', a: {_type: 'Test', b: 'a'}},
                     incremental: {},
-                    null: {
-                        webNodeType: 'Test',
-                        a: {webNodeType: 'Test', b: 'a'}
-                    }
+                    null: {_type: 'Test', a: {_type: 'Test', b: 'a'}}
                 }
             ],
             // // endregion
@@ -824,172 +777,135 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [
 
                 [
-                    {
-                        webNodeType: 'Test',
-                        a: 4,
-                        b: {webNodeType: 'Test', a: 3}
-                    },
-                    {webNodeType: 'Test'}
+                    {_type: 'Test', a: 4, b: {_type: 'Test', a: 3}},
+                    {_type: 'Test'}
                 ], {models: {Test: {
                     a: {type: 'number', minimum: 3},
                     b: {type: 'Test'}
                 }}}, {
-                    fillUp: {
-                        webNodeType: 'Test',
-                        a: 4,
-                        b: {webNodeType: 'Test', a: 3}
-                    },
-                    incremental: {a: 4, b: {webNodeType: 'Test', a: 3}},
-                    null: {
-                        webNodeType: 'Test',
-                        a: 4,
-                        b: {webNodeType: 'Test', a: 3}
-                    }
+                    fillUp: {_type: 'Test', a: 4, b: {_type: 'Test', a: 3}},
+                    incremental: {a: 4, b: {_type: 'Test', a: 3}},
+                    null: {_type: 'Test', a: 4, b: {_type: 'Test', a: 3}}
                 }
             ],
             [
-                [{
-                    webNodeType: 'Test',
-                    a: '1',
-                    b: {webNodeType: 'Test', a: '1'}
-                }], {models: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}}, {
+                [{_type: 'Test', a: '1', b: {_type: 'Test', a: '1'}}],
+                {models: {Test: {a: {maximum: 1}, b: {type: 'Test'}}}}, {
                     fillUp: {
-                        webNodeType: 'Test',
+                        _type: 'Test',
                         a: '1',
-                        b: {webNodeType: 'Test', a: '1'}
+                        b: {_type: 'Test', a: '1'}
                     },
                     incremental: {
-                        webNodeType: 'Test',
+                        _type: 'Test',
                         a: '1',
-                        b: {webNodeType: 'Test', a: '1'}
+                        b: {_type: 'Test', a: '1'}
                     },
                     null: {
-                        webNodeType: 'Test',
+                        _type: 'Test',
                         a: '1',
-                        b: {webNodeType: 'Test', a: '1'}
+                        b: {_type: 'Test', a: '1'}
                     }
                 }
             ],
             // // endregion
             // // region property pattern
             [
-                [{webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}}],
+                [{_type: 'Test', b: {_type: 'Test', a: 'a'}}],
                 {models: {Test: {
                     a: {regularExpressionPattern: 'a'},
                     b: {type: 'Test'}
                 }}}, {
-                    fillUp: {
-                        webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}
-                    },
-                    incremental: {
-                        webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}
-                    },
-                    null: {
-                        webNodeType: 'Test', b: {webNodeType: 'Test', a: 'a'}
-                    }
+                    fillUp: {_type: 'Test', b: {_type: 'Test', a: 'a'}},
+                    incremental: {_type: 'Test', b: {_type: 'Test', a: 'a'}},
+                    null: {_type: 'Test', b: {_type: 'Test', a: 'a'}}
                 }
             ],
             // // endregion
             // // region property constraint
-            [
-                [{
-                    webNodeType: 'Test',
-                    a: 'b',
-                    b: {webNodeType: 'Test', a: 'b'}
-                }], {models: {Test: {
+            [[{_type: 'Test', a: 'b', b: {_type: 'Test', a: 'b'}}], {
+                models: {Test: {
                     a: {constraintEvaluation: 'newValue === "b"'},
                     b: {type: 'Test'}
-                }}}, {
-                    fillUp: {
-                        webNodeType: 'Test',
-                        a: 'b',
-                        b: {webNodeType: 'Test', a: 'b'}
-                    },
-                    incremental: {
-                        webNodeType: 'Test',
-                        a: 'b',
-                        b: {webNodeType: 'Test', a: 'b'}
-                    },
-                    null: {
-                        webNodeType: 'Test',
-                        a: 'b',
-                        b: {webNodeType: 'Test', a: 'b'}
-                    }
                 }
+            }}, {
+                fillUp: {_type: 'Test', a: 'b', b: {_type: 'Test', a: 'b'}},
+                incremental: {
+                    _type: 'Test',
+                    a: 'b',
+                    b: {_type: 'Test', a: 'b'}
+                },
+                null: {
+                    _type: 'Test',
+                    a: 'b',
+                    b: {_type: 'Test', a: 'b'}
+                }
+            }
             ],
             // // endregion
             // / endregion
-            [
-                [{webNodeType: 'Test', a: 2}, {webNodeType: 'Test'}],
-                {models: {Test: {a: {type: 2}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 2},
+            [[{_type: 'Test', a: 2}, {_type: 'Test'}], {
+                models: {Test: {a: {type: 2}}}}, {
+                    fillUp: {_type: 'Test', a: 2},
                     incremental: {a: 2},
-                    null: {webNodeType: 'Test', a: 2}
+                    null: {_type: 'Test', a: 2}
                 }
             ],
             // endregion
             // region property range
-            [
-                [{webNodeType: 'Test', a: 3}, {webNodeType: 'Test'}],
-                {models: {Test: {a: {type: 'number', minimum: 3}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 3},
+            [[{_type: 'Test', a: 3}, {_type: 'Test'}], {
+                models: {Test: {a: {type: 'number', minimum: 3}}}}, {
+                    fillUp: {_type: 'Test', a: 3},
                     incremental: {a: 3},
-                    null: {webNodeType: 'Test', a: 3}
+                    null: {_type: 'Test', a: 3}
                 }
             ],
-            [
-                [{webNodeType: 'Test', a: 1}, {webNodeType: 'Test'}],
-                {models: {Test: {a: {type: 'number', maximum: 1}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 1},
+            [[{_type: 'Test', a: 1}, {_type: 'Test'}], {
+                models: {Test: {a: {type: 'number', maximum: 1}}}}, {
+                    fillUp: {_type: 'Test', a: 1},
                     incremental: {a: 1},
-                    null: {webNodeType: 'Test', a: 1}
+                    null: {_type: 'Test', a: 1}
                 }
             ],
-            [
-                [{webNodeType: 'Test', a: '123'}, {webNodeType: 'Test'}],
-                {models: {Test: {a: {minimum: 3}}}}, {
-                    fillUp: {webNodeType: 'Test', a: '123'},
+            [[{_type: 'Test', a: '123'}, {_type: 'Test'}], {
+                models: {Test: {a: {minimum: 3}}}}, {
+                    fillUp: {_type: 'Test', a: '123'},
                     incremental: {a: '123'},
-                    null: {webNodeType: 'Test', a: '123'}
+                    null: {_type: 'Test', a: '123'}
                 }
             ],
-            [
-                [{webNodeType: 'Test', a: '1'}],
-                {models: {Test: {a: {maximum: 1}}}}, {
-                    fillUp: {webNodeType: 'Test', a: '1'},
-                    incremental: {webNodeType: 'Test', a: '1'},
-                    null: {webNodeType: 'Test', a: '1'}
+            [[{_type: 'Test', a: '1'}], {
+                models: {Test: {a: {maximum: 1}}}}, {
+                    fillUp: {_type: 'Test', a: '1'},
+                    incremental: {_type: 'Test', a: '1'},
+                    null: {_type: 'Test', a: '1'}
                 }
             ],
             // endregion
             // region property pattern
-            [
-                [{webNodeType: 'Test', a: 'a'}],
-                {models: {Test: {a: {regularExpressionPattern: 'a'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 'a'},
-                    incremental: {webNodeType: 'Test', a: 'a'},
-                    null: {webNodeType: 'Test', a: 'a'}
+            [[{_type: 'Test', a: 'a'}], {
+                models: {Test: {a: {regularExpressionPattern: 'a'}}}}, {
+                    fillUp: {_type: 'Test', a: 'a'},
+                    incremental: {_type: 'Test', a: 'a'},
+                    null: {_type: 'Test', a: 'a'}
                 }
             ],
             // endregion
             // region property constraint
-            [
-                [{webNodeType: 'Test', a: 'b'}],
-                {models: {Test: {a: {constraintEvaluation: 'true'}}}}, {
-                    fillUp: {webNodeType: 'Test', a: 'b'},
-                    incremental: {webNodeType: 'Test', a: 'b'},
-                    null: {webNodeType: 'Test', a: 'b'}
+            [[{_type: 'Test', a: 'b'}], {
+                models: {Test: {a: {constraintEvaluation: 'true'}}}}, {
+                    fillUp: {_type: 'Test', a: 'b'},
+                    incremental: {_type: 'Test', a: 'b'},
+                    null: {_type: 'Test', a: 'b'}
                 }
             ],
-            [
-                [{webNodeType: 'Test', a: 'a'}], {models: {Test: {
-                    a: {constraintEvaluation: 'newValue === "a"'}
-                }}}, {
-                    fillUp: {webNodeType: 'Test', a: 'a'},
-                    incremental: {webNodeType: 'Test', a: 'a'},
-                    null: {webNodeType: 'Test', a: 'a'}
-                }
-            ]
+            [[{_type: 'Test', a: 'a'}], {models: {Test: {
+                a: {constraintEvaluation: 'newValue === "a"'}
+            }}}, {
+                fillUp: {_type: 'Test', a: 'a'},
+                incremental: {_type: 'Test', a: 'a'},
+                null: {_type: 'Test', a: 'a'}
+            }]
             // endregion
         ]) {
             const modelConfiguration:ModelConfiguration = Helper.extendModels(
