@@ -77,20 +77,22 @@
     "encoding": "utf8",
     "modelConfiguration": {
       "defaultPropertySpecification": {
-        "type": "string",
+        "conflictingConstraintEvaluation": null,
+        "conflictingConstraintExpression": null,
+        "constraintEvaluation": null,
+        "constraintExpression": null,
         "default": null,
+        "maximum": 1e+21,
+        "minimum": -1e+21,
+        "mutable": true,
+        "nullable": true,
         "onCreateEvaluation": null,
         "onCreateExpression": null,
         "onUpdateEvaluation": null,
         "onUpdateExpression": null,
-        "nullable": true,
-        "writable": true,
-        "mutable": true,
-        "minimum": -1e+21,
-        "maximum": 1e+21,
         "regularExpressionPattern": null,
-        "constraintEvaluation": null,
-        "constraintExpression": null
+        "type": "string",
+        "writable": true
       },
       "reservedPropertyNames": ["_id", "_rev", "_revisions", "_deleted"],
       "specialPropertyNames": {
@@ -127,7 +129,7 @@
           },
           "webNodeType": {
             "regularExpressionPattern": {
-              "__evaluate__": "self.model.specialPropertyNames.typeNameRegularExpressionPattern"
+              "__evaluate__": "self.modelConfiguration.specialPropertyNames.typeNameRegularExpressionPattern"
             },
             "nullable": false,
             "minimum": 1,
