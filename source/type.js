@@ -12,6 +12,9 @@
     3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
+// region imports
+import type {PlainObject} from 'weboptimizer/type'
+// endregion
 // region exports
 // / region model
 export type AllowedModelRolesMapping = {[key:string]:Array<string>}

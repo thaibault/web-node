@@ -147,7 +147,7 @@ export default class Helper {
     static determineAllowedModelRolesMapping(
         modelConfiguration:ModelConfiguration
     ):{[key:string]:Array<string>} {
-        const allowedModelRolesMapping:{[key:string]:Array<string>} = {}
+        const allowedModelRolesMapping:AllowedModelRolesMapping = {}
         const models:Models = Helper.extendModels(modelConfiguration)
         for (const modelName:string in models)
             if (models.hasOwnProperty(modelName) && models[
@@ -246,9 +246,10 @@ export default class Helper {
      * @param modelConfiguration - Model specification object.
      * @returns Models with extended specific specifications.
      */
-    static extendModels(modelConfiguration:ModelConfiguration):Models {
+    static extendModels(modelConfiguration:PlainObject):Models {
         modelConfiguration = Tools.extendObject(true, {specialPropertyNames: {
             defaultPropertySpecification: {},
+            specialPropertyNames: {extend: 'webNodeExtends'},
             typeNameRegularExpressionPattern: '^[A-Z][a-z0-9]+$'
         }}, modelConfiguration)
         const models:Models = {}

@@ -10,7 +10,7 @@ import type {PlainObject} from 'weboptimizer/type'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {DatabaseForbiddenError, ModelConfiguration} from '../type'
+import type {DatabaseForbiddenError, ModelConfiguration, Models} from '../type'
 import Helper from '../helper'
 // endregion
 QUnit.module('helper')
@@ -134,16 +134,10 @@ QUnit.test('extendModels', (assert:Object):void => {
             {Test: {a: {}, b: {}}}
         ]
     ])
-        assert.deepEqual(Helper.extendModels(Tools.extendObject(
-            {specialPropertyNames: {extend: 'webNodeExtends'}}, test[0]
-        )), test[1])
-    assert.throws(():{[key:string]:PlainObject} => Helper.extendModels({
-        specialPropertyNames: {extend: 'webNodeExtends'},
-        models: {a: {}}
-    }))
+        assert.deepEqual(Helper.extendModels(test[0]), test[1])
+    assert.throws(():Models => Helper.extendModels({models: {a: {}}}))
     assert.deepEqual(Helper.extendModels({
         specialPropertyNames: {
-            extend: 'webNodeExtends',
             typeNameRegularExpressionPattern: /a/
         },
         models: {a: {}}

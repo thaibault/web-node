@@ -18,7 +18,7 @@ import Tools from 'clientnode'
 import http from 'http'
 import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
-import type (SimpleModelConfiguration) from './type'
+import type {ModelConfiguration} from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 // NOTE: Only needed for debugging this file.
 try {
@@ -157,15 +157,15 @@ import Helper from './helper'
     try {
         // region generate/update authentication/validation code
         let validationCode = Helper.validateDocumentUpdate.toString()
-        const simpleModelConfiguration:SimpleModelConfiguration =
-            Tools.copyLimitedRecursively(configuration.modelConfigfuration)
-        delete simpleModelConfiguration.defaultPropertySpecification
-        delete simpleModelConfiguration.type
+        const modelConfiguration:modelConfiguration =
+            Tools.copyLimitedRecursively(configuration.modelConfiguration)
+        delete modelConfiguration.defaultPropertySpecification
+        delete modelConfiguration.type
         validationCode = 'const models = ' +
-            JSON.stringify(Helper.extendSpecification(
-                configuration.modelConfigfuration
+            JSON.stringify(Helper.extendModels(
+                configuration.modelConfiguration
             )) + '\n' +
-            `const options = ${modelOptions}\n` +
+            `const options = ${modelConfiguration}\n` +
             validationCode.substring(
                 validationCode.indexOf('{') + 1,
                 validationCode.lastIndexOf('}')
@@ -173,7 +173,7 @@ import Helper from './helper'
         if (configuration.debug)
             console.info(
                 'Specification \n\n"' +
-                Helper.representObject(configuration.modelConfigfuration) +
+                Helper.representObject(configuration.modelConfiguration) +
                 `" has generated validation code: \n\n"${validationCode}".`)
         await Helper.ensureValidationDocumentPresence(
             databaseConnection, 'validation', validationCode,
@@ -181,10 +181,10 @@ import Helper from './helper'
         let authenticationCode = Helper.authenticate.toString()
         authenticationCode = 'const allowedModelRolesMapping = ' +
             JSON.stringify(Helper.determineAllowedModelRolesMapping(
-                configuration.modelConfigfuration
+                configuration.modelConfiguration
             )) + '\n' +
             "const typePropertyName = '" +
-            `${configuration.modelConfigfuration.specialPropertyNames.type}'` +
+            `${configuration.modelConfiguration.specialPropertyNames.type}'` +
             `\n` + authenticationCode.substring(
                 authenticationCode.indexOf('{') + 1,
                 authenticationCode.lastIndexOf('}')
