@@ -1086,9 +1086,16 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
 })
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
-        ['dummy', {}, require('./dummyPlugin/package'), ['webNode'], __dirname]
-    ])
-        assert.deepEqual(Helper.loadPlugin.apply(Helper, test[0]), test[1])
+        ['dummy', {}, {}, ['webNode'], ], {
+            configuration: {}
+        }
+    ]) {
+        console.log('A', test)
+        const plugin:Plugin = Helper.loadPlugin.apply(Helper, test[0])
+        delete plugin.api
+        console.log('B', plugin)
+        assert.deepEqual(plugin, test[1])
+    }
 })
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [

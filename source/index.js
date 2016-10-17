@@ -30,7 +30,6 @@ import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
     // TODO clear securitySettings.webNodeValidatedDocuments on startup.
-    // TODO provide reload API
     // region load plugins
     const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
     if (plugins.length)
