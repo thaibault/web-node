@@ -77,17 +77,14 @@ export default class Helper {
      * Calls all plugin methods for given trigger description.
      * @param type - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
-     * @param parameter - List of parameter to forward to found callbacks.
      * @returns A promise which resolves when all callbacks have resolved their
      * promise.
      */
     static async callPluginStack(
-        type:string, plugins:Array<Object>, ...parameter:Array<any>
+        type:string, plugins:Array<Object>, data:any = null
     ):Promise<any> {
-        let data:any = null
         for (const plugin:Object of plugins)
-            data = await plugin.api.apply(Helper, [type, data].concat(
-                parameter))
+            data = await plugin.api.apply(Helper, arguments)
         return data
     }
     /**
@@ -809,8 +806,8 @@ export default class Helper {
         packageConfiguration:PlainObject,
         configurationPropertyNames:Array<string>, pluginPath:string
     ):Plugin {
-        for (const name:string of configurationPropertyNames)
-            if (packageConfiguration.hasOwnProperty(name)) {
+        for (const propertyName:string of configurationPropertyNames)
+            if (packageConfiguration.hasOwnProperty(propertyName)) {
                 let indexFilePath:string = 'index.js'
                 if (packageConfiguration.hasOwnProperty('main'))
                     indexFilePath = packageConfiguration.main
@@ -896,14 +893,14 @@ export default class Helper {
                     scope = eval('require')(indexFilePath)
                     /* eslint-enable no-eval */
                 } catch (error) {
+                    throw error
                     throw new Error(
                         `Couln't load plugin file "${indexFilePath}" for ` +
-                        `plugin "${name}": ` +
-                        Helper.representObject(error))
+                        `plugin "${name}": ${Helper.representObject(error)}`)
                 }
                 return {
                     api,
-                    configuration: packageConfiguration[name],
+                    configuration: packageConfiguration[propertyName],
                     indexFilePath,
                     name,
                     path: pluginPath,

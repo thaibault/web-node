@@ -33,11 +33,17 @@ QUnit.test('authenticate', (assert:Object):void => {
     ])
         assert.ok(Helper.authenticate.apply(Helper, test))
 })
-QUnit.test('callPluginStack', (assert:Object):void => {
+QUnit.test('callPluginStack', async (assert:Object):void => {
+    const done:Function = assert.async()
     for (const test:Array<any> of [
-        // TODO
+        [['test', []], null],
+        [['test', [], null], null],
+        [['test', [], {}], {}]
+        // TODO add more tests
     ])
-        assert.deepEqual(Helper.callPluginStack((test[0]), test[1]))
+        assert.deepEqual(
+            await Helper.callPluginStack.apply(Helper, test[0]), test[1])
+    done()
 })
 QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -1086,20 +1092,45 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
 })
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
-        ['dummy', {}, {}, ['webNode'], ], {
-            configuration: {}
-        }
+        ['dummy', {}, {}, ['webNode'], './'],
+        ['dummy', {}, {a: {}}, ['a'], './'],
+        ['dummy', {}, {a: {}}, ['a'], path.resolve(
+            configuration.context.path,
+            configuration.package.webOptimizer.path.source.base, 'test'
+        )]
+    ])
+        assert.throws(():void => Helper.loadPlugin.apply(Helper, test))
+    for (const test:Array<any> of [
+        ['dummy', {}, {a: {}}, ['a'], path.resolve(
+            configuration.context.path,
+            configuration.package.webOptimizer.path.source.base,
+            'test/dummyPlugin'
+        ), {
+            configuration: {},
+            indexFilePath: path.resolve(
+                configuration.context.path,
+                configuration.package.webOptimizer.path.source.base,
+                'test/dummyPlugin/index.js'),
+            name: 'dummy',
+            path: path.resolve(
+                configuration.context.path,
+                configuration.package.webOptimizer.path.source.base,
+                'test/dummyPlugin'),
+            scope: {}
+        }]
+        // TODO add more tests
     ]) {
-        console.log('A', test)
-        const plugin:Plugin = Helper.loadPlugin.apply(Helper, test[0])
+        const plugin:Plugin = Helper.loadPlugin(
+            test[0], test[1], test[2], test[3], test[4])
         delete plugin.api
-        console.log('B', plugin)
-        assert.deepEqual(plugin, test[1])
+        delete plugin.lastLoadTimestamp
+        assert.deepEqual(plugin, test[5])
     }
 })
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [
-        // TODO
+        [configuration, {}, {plugins: [], configuration}]
+        // TODO add more tests
     ])
         assert.deepEqual(Helper.loadPlugins(test[0], test[1]), test[2])
 })

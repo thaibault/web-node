@@ -60,6 +60,10 @@ export type SimpleModelConfiguration = {
 // / endregion
 // / region configuration
 export type Configuration = {
+    context:{
+        path:string;
+        type:string;
+    };
     database:{
         url:string;
         path:string;
@@ -77,6 +81,7 @@ export type Configuration = {
     encoding:string;
     modelConfiguration:ModelConfiguration;
     name:string;
+    package:PlainObject;
     plugin:{
         configurationPropertyNames:Array<string>;
         directories:{
