@@ -300,17 +300,19 @@ export default class Helper {
         securitySettings:Object = {}, models:Models,
         modelConfiguration:SimpleModelConfiguration, toJSON:?Function
     ):Object {
-        // TODO clear securitySettings on startup.
         // region ensure needed environment
         if (newDocument.hasOwnProperty('_deleted') && newDocument._deleted)
             return newDocument
         if (securitySettings.hasOwnProperty(
-            'validatedDocuments'
-        ) && securitySettings.validatedDocuments.has(
+            modelConfiguration.specialPropertyNames.validatedDocumentsCache
+        ) && securitySettings[
+            modelConfiguration.specialPropertyNames.validatedDocumentsCache
+        ].has(
             `${newDocument._id}-${newDocument._rev}`
         )) {
-            securitySettings.validatedDocuments.delete(
-                `${newDocument._id}-${newDocument._rev}`)
+            securitySettings[
+                modelConfiguration.specialPropertyNames.validatedDocumentsCache
+            ].delete(`${newDocument._id}-${newDocument._rev}`)
             return newDocument
         }
         if (newDocument.hasOwnProperty(
@@ -454,28 +456,52 @@ export default class Helper {
                 for (const type:string of [
                     'constraintEvaluation', 'constraintExpression'
                 ])
-                    if (propertySpecification[type] && !(new Function(
-                        'newDocument', 'oldDocument', 'userContext',
-                        'securitySettings', 'models', 'modelConfiguration',
-                        'serialize', 'modelName', 'model', 'checkDocument',
-                        'checkPropertyContent', 'newValue', 'name',
-                        'propertySpecification', 'oldValue', (type.endsWith(
-                            'Evaluation'
-                        ) ? 'return ' : '') + propertySpecification[type]
-                    )(
-                        newDocument, oldDocument, userContext,
-                        securitySettings, models, modelConfiguration,
-                        serialize, modelName, model, checkDocument,
-                        checkPropertyContent, newValue, name,
-                        propertySpecification, oldValue
-                    )))
-                        throw {
-                            forbidden: type.charAt(0).toUpperCase(
-                            ) + type.substring(1) + `: Property "${name}" ` +
-                            `should satisfy constraint "` +
-                            `${propertySpecification[type]}" (given "` +
-                            `${serialize(newValue)}").`
+                    if (propertySpecification[type]) {
+                        let hook:Function
+                        try {
+                            hook = new Function(
+                                'newDocument', 'oldDocument', 'userContext',
+                                'securitySettings', 'models',
+                                'modelConfiguration', 'serialize', 'modelName',
+                                'model', 'checkDocument',
+                                'checkPropertyContent', 'newValue', 'name',
+                                'propertySpecification', 'oldValue', (
+                                    type.endsWith('Evaluation') ? 'return ' :
+                                    ''
+                                ) + propertySpecification[type])
+                        } catch (error) {
+                            throw {
+                                forbidden: `Compilation: Hook "${type}" has ` +
+                                    `invalid code "` +
+                                    `${propertySpecification[type]}": ` +
+                                    serialize(error)
+                            }
                         }
+                        let satisfied:boolean = false
+                        try {
+                            satisfied = hook(
+                                newDocument, oldDocument, userContext,
+                                securitySettings, models, modelConfiguration,
+                                serialize, modelName, model, checkDocument,
+                                checkPropertyContent, newValue, name,
+                                propertySpecification, oldValue)
+                        } catch (error) {
+                            throw {
+                                forbidden: `Runtime: Hook "${type}" has ` +
+                                    'throw an error with code "' +
+                                    `${propertySpecification[type]}": ` +
+                                    serialize(error)
+                            }
+                        }
+                        if (!satisfied)
+                            throw {
+                                forbidden: type.charAt(0).toUpperCase(
+                                ) + type.substring(1) + `: Property "${name}` +
+                                `" should satisfy constraint "` +
+                                `${propertySpecification[type]}" (given "` +
+                                `${serialize(newValue)}").`
+                            }
+                    }
                 // endregion
                 return newValue
             }
@@ -492,8 +518,54 @@ export default class Helper {
                         for (const type:string of [
                             'onCreateEvaluation', 'onCreateExpression'
                         ])
-                            if (propertySpecification[type])
-                                newDocument[propertyName] = (new Function(
+                            if (propertySpecification[type]) {
+                                let hook:Function
+                                try {
+                                    hook = newDocument[
+                                        propertyName
+                                    ] = new Function(
+                                        'newDocument', 'oldDocument',
+                                        'userContext', 'securitySettings',
+                                        'name', 'models', 'modelConfiguration',
+                                        'serialize', 'modelName', 'model',
+                                        'checkDocument',
+                                        'checkPropertyContent',
+                                        'propertySpecification', (
+                                            type.endsWith('Evaluation') ?
+                                            'return ' : ''
+                                        ) + propertySpecification[type])
+                                } catch (error) {
+                                    throw {
+                                        forbidden: 'Compilation: Hook "' +
+                                            `${type}" has invalid code "` +
+                                            `${propertySpecification[type]}"` +
+                                            `: ${serialize(error)}`
+                                    }
+                                }
+                                try {
+                                    newDocument[propertyName] = hook(
+                                        newDocument, oldDocument, userContext,
+                                        securitySettings, propertyName, models,
+                                        modelConfiguration, serialize,
+                                        modelName, model, checkDocument,
+                                        checkPropertyContent,
+                                        propertySpecification)
+                                } catch (error) {
+                                    throw {
+                                        forbidden: `Runtime: Hook "${type}" ` +
+                                            'has throw an error with code "' +
+                                            `${propertySpecification[type]}"` +
+                                            `: ${serialize(error)}`
+                                    }
+                                }
+                            }
+                    for (const type:string of [
+                        'onUpdateEvaluation', 'onUpdateExpression'
+                    ])
+                        if (propertySpecification[type]) {
+                            let hook:Function
+                            try {
+                                hook = new Function(
                                     'newDocument', 'oldDocument',
                                     'userContext', 'securitySettings', 'name',
                                     'models', 'modelConfiguration',
@@ -502,35 +574,31 @@ export default class Helper {
                                     'propertySpecification', (type.endsWith(
                                         'Evaluation'
                                     ) ? 'return ' : '') +
-                                    propertySpecification[type]
-                                )(
+                                    propertySpecification[type])
+                            } catch (error) {
+                                throw {
+                                    forbidden: `Compilation: Hook "${type}" ` +
+                                        `has invalid code "` +
+                                        `${propertySpecification[type]}": ` +
+                                        serialize(error)
+                                }
+                            }
+                            try {
+                                newDocument[propertyName] = hook(
                                     newDocument, oldDocument, userContext,
                                     securitySettings, propertyName, models,
                                     modelConfiguration, serialize, modelName,
                                     model, checkDocument, checkPropertyContent,
-                                    propertySpecification
-                                ))
-                    for (const type:string of [
-                        'onUpdateEvaluation', 'onUpdateExpression'
-                    ])
-                        if (propertySpecification[type])
-                            newDocument[propertyName] = (new Function(
-                                'newDocument', 'oldDocument', 'userContext',
-                                'securitySettings', 'name', 'models',
-                                'modelConfiguration', 'serialize', 'modelName',
-                                'model', 'checkDocument',
-                                'checkPropertyContent',
-                                'propertySpecification', (type.endsWith(
-                                    'Evaluation'
-                                ) ? 'return ' : '') +
-                                propertySpecification[type]
-                            )(
-                                newDocument, oldDocument, userContext,
-                                securitySettings, propertyName, models,
-                                modelConfiguration, serialize, modelName,
-                                model, checkDocument, checkPropertyContent,
-                                propertySpecification
-                            ))
+                                    propertySpecification)
+                            } catch (error) {
+                                throw {
+                                    forbidden: `Runtime: Hook "${type}" ` +
+                                        'has throw an error with code "' +
+                                        `${propertySpecification[type]}": ` +
+                                        serialize(error)
+                                }
+                            }
+                        }
                     if ([undefined, null].includes(
                         propertySpecification.default
                     )) {
@@ -716,11 +784,13 @@ export default class Helper {
         }
         newDocument = checkDocument(newDocument, oldDocument)
         if (securitySettings.hasOwnProperty('checkedDocuments'))
-            securitySettings.validatedDocuments.add(
-                `${newDocument._id}-${newDocument._rev}`)
+            securitySettings[
+                modelConfiguration.specialPropertyNames.validatedDocumentsCache
+            ].add(`${newDocument._id}-${newDocument._rev}`)
         else
-            securitySettings.validatedDocuments = new Set([
-                `${newDocument._id}-${newDocument._rev}`])
+            securitySettings[
+                modelConfiguration.specialPropertyNames.validatedDocumentsCache
+            ] = new Set([`${newDocument._id}-${newDocument._rev}`])
         return newDocument
     }
     /**

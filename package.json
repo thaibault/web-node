@@ -99,7 +99,8 @@
         "allowedRoles": "_allowedRoles",
         "extend": "_extends",
         "type": "_type",
-        "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$"
+        "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$",
+        "validatedDocumentsCache": "_validatedDocuments"
       },
       "updateStrategy": "fillUp",
       "models": {

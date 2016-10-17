@@ -152,9 +152,54 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 delete defaultModelSpecification.models._base[propertyName]
         // region forbidden write tests
         for (const test:Array<any> of [
+            // region general environment
+            [[{_type: 'Test', _rev: 'latest'}, null], 'Revision'],
+            [[{_type: 'Test', _rev: 'latest'}, {}], 'Revision'],
+            [[{_type: 'Test', _rev: 'latest'}, {_type: 'Test'}], 'Revision'],
+            // endregion
             // region model
             [[{}, {}], 'Type'],
             [[{_type: 'test'}], 'Model'],
+            // endregion
+            // region hooks
+            // / region on create
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onCreateEvaluation: '+'
+            }}}}, 'Compilation'],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onCreateExpression: 'return +'
+            }}}}, 'Compilation'],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onCreateEvaluation: 'undefinedVariableName'
+            }}}}, 'Runtime'],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onCreateExpression: 'return undefinedVariableName'
+            }}}}, 'Runtime'],
+            // / endregion
+            // / region on update
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onUpdateEvaluation: '+'
+            }}}}, 'Compilation'],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onUpdateExpression: 'return +'
+            }}}}, 'Compilation'],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onUpdateEvaluation: 'undefinedVariableName'
+            }}}}, 'Runtime'],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onUpdateExpression: 'return undefinedVariableName'
+            }}}}, 'Runtime'],
+            // / endregion
+            // endregion
+            // region property writable/mutable
+            [
+                [{_type: 'Test', a: 'b'}, {_type: 'Test'}],
+                {models: {Test: {a: {writable: false}}}}, 'Readonly'
+            ],
+            [
+                [{_type: 'Test', a: 'b'}, {_type: 'Test', a: 'a'}],
+                {models: {Test: {a: {writable: false}}}}, 'Readonly'
+            ],
             // endregion
             // region property existents
             [[{_type: 'Test', a: 2}], {models: {Test: {}}}, 'Property'],
@@ -165,16 +210,6 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [
                 [{_type: 'Test'}], {models: {Test: {a: {nullable: false}}}},
                 'MissingProperty'
-            ],
-            // endregion
-            // region property readonly
-            [
-                [{_type: 'Test', a: 'b'}, {_type: 'Test'}],
-                {models: {Test: {a: {writable: false}}}}, 'Readonly'
-            ],
-            [
-                [{_type: 'Test', a: 'b'}, {_type: 'Test', a: 'a'}],
-                {models: {Test: {a: {writable: false}}}}, 'Readonly'
             ],
             // endregion
             // region property type
@@ -294,6 +329,13 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [
                 [
                     {_type: 'Test', a: {_type: 'Test', b: 'a'}},
+                    {_type: 'Test', a: {_type: 'Test', b: 'b'}}
+                ], {models: {Test: {a: {type: 'Test'}, b: {mutable: false}}}},
+                'Immutable'
+            ],
+            [
+                [
+                    {_type: 'Test', a: {_type: 'Test', b: 'a'}},
                     {_type: 'Test', a: {_type: 'Test'}}
                 ], {models: {Test: {a: {type: 'Test'}, b: {writable: false}}}},
                 'Readonly'
@@ -333,7 +375,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [
                 [{_type: 'Test', a: 'b', b: {_type: 'Test', a: 'a'}}],
                 {models: {Test: {
-                    a: {constraintEvaluation: 'newDocument.a === "b"'},
+                    a: {constraintEvaluation: 'newValue === "b"'},
                     b: {type: 'Test'}
                 }}}, 'ConstraintEvaluation'
             ],
@@ -375,6 +417,26 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {constraintEvaluation: 'false'}}}},
                 'ConstraintEvaluation'
             ],
+            [
+                [{_type: 'Test', a: 'b'}],
+                {models: {Test: {a: {constraintExpression: 'false'}}}},
+                'ConstraintExpression'
+            ],
+            [
+                [{_type: 'Test', a: 'b'}],
+                {models: {Test: {a: {constraintEvaluation: '+'}}}},
+                'Compilation'
+            ],
+            [
+                [{_type: 'Test', a: 'b'}], {models: {Test: {a: {
+                    constraintEvaluation: 'undefinedVariableName'
+                }}}}, 'Runtime'
+            ],
+            [
+                [{_type: 'Test', a: 'b'}], {models: {Test: {a: {
+                    constraintExpression: 'return undefinedVariableName'
+                }}}}, 'Runtime'
+            ],
             [[{_type: 'Test', a: 'b'}], {models: {Test: {a: {
                 constraintEvaluation: 'newValue === "a"'
             }}}}, 'ConstraintEvaluation']
@@ -413,6 +475,33 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         // endregion
         // region allowed write tests
         for (const test:Array<any> of [
+            // region general environment
+            [[{_deleted: true}], {}, {
+                fillUp: {_deleted: true},
+                incremental: {_deleted: true},
+                null: {_deleted: true}
+            }],
+            [[{_id: 1, _rev: 1}, null, {}, {_validatedDocuments: new Set(
+                ['1-1']
+            )}], {}, {
+                fillUp: {_id: 1, _rev: 1},
+                incremental: {_id: 1, _rev: 1},
+                null: {_id: 1, _rev: 1}
+            }],
+            [[{_type: 'Test', _rev: 'latest'}, {_type: 'Test', _rev: 1}], {
+                models: {Test: {}}
+            }, {
+                fillUp: {_type: 'Test', _rev: 1},
+                incremental: {},
+                null: {_type: 'Test', _rev: 1}
+            }],
+            // endregion
+            // region model
+            [[{_type: 'Test'}], {models: {Test: {}}}, {
+                fillUp: {_type: 'Test'},
+                incremental: {_type: 'Test'},
+                null: {_type: 'Test'}
+            }],
             [[{_type: 'Test'}], {models: {Test: {}}}, {
                 fillUp: {_type: 'Test'},
                 incremental: {_type: 'Test'},
@@ -444,6 +533,78 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     null: {_type: 'Test', a: '3'}
                 }
             ],
+            // endregion
+            // region hooks
+            // / region on create
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onCreateEvaluation: "'2'"
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {_type: 'Test', a: '2'},
+                null: {_type: 'Test', a: '2'}
+            }],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onCreateExpression: "return '2'"
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {_type: 'Test', a: '2'},
+                null: {_type: 'Test', a: '2'}
+            }],
+            [[{_type: 'Test', a: ''}, {_type: 'Test', a: ''}], {models: {
+                Test: {a: {onCreateExpression: "return '2'"}}
+            }}, {
+                fillUp: {_type: 'Test', a: ''},
+                incremental: {},
+                null: {_type: 'Test', a: ''}
+            }],
+            // / endregion
+            // / region on update
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onUpdateEvaluation: "'2'"
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {_type: 'Test', a: '2'},
+                null: {_type: 'Test', a: '2'}
+            }],
+            [[{_type: 'Test', a: ''}], {models: {Test: {a: {
+                onUpdateExpression: "return '2'"
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {_type: 'Test', a: '2'},
+                null: {_type: 'Test', a: '2'}
+            }],
+            [[{_type: 'Test', a: '1'}, {_type: 'Test', a: '2'}], {models: {
+                Test: {a: {onUpdateEvaluation: "'2'"
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {},
+                null: {_type: 'Test', a: '2'}
+            }],
+            // / endregion
+            // endregion
+            // region property writable/mutable
+            [[{_type: 'Test', a: 'b'}, {_type: 'Test', a: 'b'}], {models: {
+                Test: {a: {writable: false}}
+            }}, {
+                fillUp: {_type: 'Test', a: 'b'},
+                incremental: {},
+                null: {_type: 'Test', a: 'b'}
+            }],
+            [[{_type: 'Test'}, {_type: 'Test'}], {models: {Test: {a: {
+                writable: false
+            }}}}, {
+                fillUp: {_type: 'Test'},
+                incremental: {},
+                null: {_type: 'Test'}
+            }],
+            [[{_type: 'Test', a: '2'}, {_type: 'Test'}], {models: {Test: {a: {
+                mutable: false
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {a: '2'},
+                null: {_type: 'Test', a: '2'}
+            }],
+            // endregion
             // region property existents
             [[{_type: 'Test', a: 2}], {models: {Test: {a: {
                 type: 'number'
@@ -464,28 +625,20 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 incremental: {_type: 'Test', a: 'a'},
                 null: {_type: 'Test', a: 'a'}
             }],
-            [[{_type: 'Test'}, {_type: 'Test', a: 'a'}], {
-                models: {Test: {a: {nullable: false}}}}, {
-                    fillUp: {_type: 'Test', a: 'a'},
-                    incremental: {},
-                    null: {_type: 'Test'}
-                }
-            ],
-            // endregion
-            // region property readonly
-            [[{_type: 'Test', a: 'b'}, {_type: 'Test', a: 'b'}], {
-                models: {Test: {a: {writable: false}}}
-            }, {
-                fillUp: {_type: 'Test', a: 'b'},
-                incremental: {},
-                null: {_type: 'Test', a: 'b'}
-            }],
-            [[{_type: 'Test'}, {_type: 'Test'}], {
-                models: {Test: {a: {writable: false}}}
-            }, {
-                fillUp: {_type: 'Test'},
+            [[{_type: 'Test'}, {_type: 'Test', a: 'a'}], {models: {Test: {a: {
+                nullable: false
+            }}}}, {
+                fillUp: {_type: 'Test', a: 'a'},
                 incremental: {},
                 null: {_type: 'Test'}
+            }],
+            [[{_type: 'Test'}], {models: {Test: {a: {
+                default: '2',
+                nullable: false
+            }}}}, {
+                fillUp: {_type: 'Test', a: '2'},
+                incremental: {_type: 'Test', a: '2'},
+                null: {_type: 'Test', a: '2'}
             }],
             // endregion
             // region property type
@@ -892,16 +1045,23 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ],
             // endregion
             // region property constraint
-            [[{_type: 'Test', a: 'b'}], {
-                models: {Test: {a: {constraintEvaluation: 'true'}}}}, {
-                    fillUp: {_type: 'Test', a: 'b'},
-                    incremental: {_type: 'Test', a: 'b'},
-                    null: {_type: 'Test', a: 'b'}
-                }
-            ],
-            [[{_type: 'Test', a: 'a'}], {models: {Test: {
-                a: {constraintEvaluation: 'newValue === "a"'}
-            }}}, {
+            [[{_type: 'Test', a: 'b'}], {models: {Test: {a: {
+                constraintEvaluation: 'true'
+            }}}}, {
+                fillUp: {_type: 'Test', a: 'b'},
+                incremental: {_type: 'Test', a: 'b'},
+                null: {_type: 'Test', a: 'b'}
+            }],
+            [[{_type: 'Test', a: 'a'}], {models: {Test: {a: {
+                constraintEvaluation: 'newValue === "a"'
+            }}}}, {
+                fillUp: {_type: 'Test', a: 'a'},
+                incremental: {_type: 'Test', a: 'a'},
+                null: {_type: 'Test', a: 'a'}
+            }],
+            [[{_type: 'Test', a: 'a'}], {models: {Test: {a: {
+                constraintExpression: 'return newValue === "a"'
+            }}}}, {
                 fillUp: {_type: 'Test', a: 'a'},
                 incremental: {_type: 'Test', a: 'a'},
                 null: {_type: 'Test', a: 'a'}
