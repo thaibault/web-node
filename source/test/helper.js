@@ -1086,7 +1086,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
 })
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
-        // TODO
+        ['dummy', {}, require('./dummyPlugin/package'), ['webNode'], __dirname]
     ])
         assert.deepEqual(Helper.loadPlugin.apply(Helper, test[0]), test[1])
 })

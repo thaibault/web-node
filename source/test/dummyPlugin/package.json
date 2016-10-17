@@ -1,0 +1,33 @@
+{
+  "name": "dummy",
+  "version": "1.0.0",
+  "description": "A dummy web node plugin.",
+  "license": "CC-BY-3.0",
+  "main": "index.js",
+  "keywords": [
+    "dummy",
+    "example",
+    "webNode",
+    "plugin"
+  ],
+  "devDependencies": {
+    "source-map-support": "latest"
+  },
+  "scripts": {
+    "start": "index.js"
+  },
+  "webNode": {
+    "modelConfiguration": {
+      "models": {
+        "Dummy": {
+          "name": {
+            "nullable": false
+          },
+          "content": {
+            "nullable": false
+          }
+        }
+      }
+    }
+  }
+}
