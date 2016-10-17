@@ -29,7 +29,6 @@ import baseConfiguration from './configurator'
 import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
-    // TODO clear securitySettings.webNodeValidatedDocuments on startup.
     // region load plugins
     const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
     if (plugins.length)
@@ -196,6 +195,15 @@ import Helper from './helper'
         await Helper.ensureValidationDocumentPresence(
             databaseConnection, 'authentication', authenticationCode,
             'Authentication logic')
+        // endregion
+        // region apply runtime security settings
+        // TODO set
+        // securitySettings[configuration.modelConfiguration.specialPropertyNames.validatedDocumentsCache]
+        // to and empty set (new Set()) on startup.
+        // endregion
+        // region check all constraints
+        // TODO check normal constraints and throw exception
+        // TODO check conflicting constraints and mark if necessary
         // endregion
         // region start application server
         const server = http.createServer(async (

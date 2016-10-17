@@ -55,22 +55,22 @@
   },
   "webNode": {
     "database": {
-      "url": {
-        "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database.port}`"
-      },
-      "path": "database",
       "configFilePath": {
         "__evaluate__": "`./${self.database.path}/database.json`"
       },
+      "httpd/host": {
+        "__evaluate__": "self.server.application.hostName"
+      }
+      "log/file": "/dev/stdout",
+      "log/level": "info",
+      "path": "database",
       "port": 5984,
+      "url": {
+        "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database.port}`"
+      },
       "user": {
         "name": "admin",
         "password": "admin"
-      },
-      "log/file": "/dev/stdout",
-      "log/level": "info",
-      "httpd/host": {
-        "__evaluate__": "self.server.application.hostName"
       }
     },
     "debug": false,
