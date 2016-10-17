@@ -77,6 +77,8 @@ export default class Helper {
      * Calls all plugin methods for given trigger description.
      * @param type - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param data - Data to pipe throw all plugins and resolve after all
+     * plugins have been resolved.
      * @returns A promise which resolves when all callbacks have resolved their
      * promise.
      */
@@ -95,6 +97,8 @@ export default class Helper {
      * @param expectedStatusCode - Status code to check for.
      * @param pollIntervallInSeconds - Seconds between two tries to reach given
      * url.
+     * @param timeoutInSeconds - Delay after assuming given resource isn't
+     * available if no response is coming.
      * @returns A promise which will be resolved if a request to given url has
      * finished and resulting status code matches given expectedstatus code.
      * Otherwise returned promise will be rejected.
@@ -102,7 +106,7 @@ export default class Helper {
      */
     static async checkReachability(
         url:string, wait:boolean = false, expectedStatusCode:number = 200,
-        pollIntervallInSeconds:number = 0.1
+        pollIntervallInSeconds:number = 0.1, timeoutInSeconds:number = 10
     ):Promise<?Object> {
         const check:Function = (response:?Object):?Object => {
             if (
@@ -116,22 +120,32 @@ export default class Helper {
         }
         if (wait)
             return new Promise((resolve:Function, reject:Function):void => {
+                let timedOut:boolean = false
                 const wrapper:Function = async ():Promise<?Object> => {
                     let response:Object
                     try {
                         response = await fetch(url)
                     } catch (error) {
-                        setTimeout(wrapper, pollIntervallInSeconds * 1000)
+                        if (!timedOut)
+                            currentlyRunningTimeout = setTimeout(
+                                wrapper, pollIntervallInSeconds * 1000)
                         return response
                     }
                     try {
                         resolve(check(response))
                     } catch (error) {
                         reject(error)
+                    } finally {
+                        clearTimeout(timeoutID)
                     }
                     return response
                 }
-                setTimeout(wrapper, 0)
+                let currentlyRunningTimeout = setTimeout(wrapper, 0)
+                const timeoutID:number = setTimeout(():void => {
+                    timedOut = true
+                    clearTimeout(currentlyRunningTimeout)
+                    reject('timeout')
+                }, timeoutInSeconds * 1000)
             })
         return check(await fetch(url))
     }

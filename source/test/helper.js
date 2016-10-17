@@ -45,6 +45,21 @@ QUnit.test('callPluginStack', async (assert:Object):void => {
             await Helper.callPluginStack.apply(Helper, test[0]), test[1])
     done()
 })
+QUnit.test('checkRechability', async (assert:Object):void => {
+    const done:Function = assert.async()
+    for (const test:Array<any> of [
+        ['http://unknownHostName'],
+        ['http://unknownHostName', false, 301],
+        ['http://unknownHostName', true, 200, 0.01, 0.025]
+    ])
+        try {
+            await Helper.checkReachability.apply(Helper, test)
+            assert.ok(false)
+        } catch (error) {
+            assert.ok(true)
+        }
+    done()
+})
 QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, {}],
