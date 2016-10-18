@@ -50,8 +50,8 @@ QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
 QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
     const done:Function = assert.async()
     for (const test:Array<any> of [
-        ['http://unknownHostName'],
-        ['http://unknownHostName', false, 301],
+        ['unknownURL', false],
+        ['unknownURL', false, 301],
         ['http://unknownHostName', true, 200, 0.01, 0.025]
     ])
         try {
@@ -96,7 +96,7 @@ QUnit.test('ensureValidationDocumentPresence', async (
     for (const test:Array<any> of [
         [{put: ():Promise<void> =>
             new Promise((resolve:Function):number => setTimeout(resolve, 0))
-        }, 'test', '', 'Description']
+        }, 'test', '', 'Description', false]
     ])
         assert.strictEqual(await Helper.ensureValidationDocumentPresence.apply(
             Helper, test))
@@ -1109,12 +1109,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
 })
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
-        ['dummy', {}, ['a'], './'],
-        ['dummy', {}, ['webNode'], './'],
-        ['dummy', {}, ['a'], path.resolve(
-            configuration.context.path,
-            configuration.package.webOptimizer.path.source.base, 'test'
-        )]
+        ['dummy', {}, ['a'], './']
     ])
         assert.throws(():Plugin => Helper.loadPlugin.apply(Helper, test))
     for (const test:Array<any> of [
@@ -1123,11 +1118,11 @@ QUnit.test('loadPlugin', (assert:Object):void => {
             configuration.package.webOptimizer.path.source.base,
             'test/dummyPlugin'
         ), {
-            configuration: {},
-            indexFilePath: path.resolve(
+            apiFilePath: path.resolve(
                 configuration.context.path,
                 configuration.package.webOptimizer.path.source.base,
                 'test/dummyPlugin/index.js'),
+            configuration: require('./dummyPlugin/package'),
             name: 'dummy',
             path: path.resolve(
                 configuration.context.path,
@@ -1135,7 +1130,6 @@ QUnit.test('loadPlugin', (assert:Object):void => {
                 'test/dummyPlugin'),
             scope: {}
         }]
-        // TODO add more tests
     ]) {
         const plugin:Plugin = Helper.loadPlugin(
             test[0], test[1], test[2], test[3])
@@ -1148,30 +1142,49 @@ QUnit.test('loadPlugin', (assert:Object):void => {
 })
 QUnit.test('loadPluginAPI', (assert:Object):void => {
     for (const test:Array<any> of [
-        // TODO add more tests
+        ['index.js', path.resolve(
+            configuration.context.path,
+            configuration.package.webOptimizer.path.source.base,
+            'test/dummyPlugin/'
+        ), 'dummy', {}, {a: 2}, {
+            apiFilePath: path.resolve(
+                configuration.context.path,
+                configuration.package.webOptimizer.path.source.base,
+                'test/dummyPlugin/index.js'),
+            configuration: {a: 2},
+            name: 'dummy',
+            path: path.resolve(
+                configuration.context.path,
+                configuration.package.webOptimizer.path.source.base,
+                'test/dummyPlugin'),
+            scope: {}
+        }]
     ]) {
         const plugin:Plugin = Helper.loadPluginAPI(
-            test[0], test[1], test[2], test[3])
+            test[0], test[1], test[2], test[3], test[4])
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
         delete plugin.configurationFilePath
         delete plugin.configurationFileLoadTimestamp
-        assert.deepEqual(plugin, test[4])
+        assert.deepEqual(plugin, test[5])
     }
 })
 QUnit.test('loadPluginFile', (assert:Object):void => {
     for (const test:Array<any> of [
-        // TODO add more tests
+        [path.resolve(
+            configuration.context.path,
+            configuration.package.webOptimizer.path.source.base,
+            'test/dummyPlugin/package.json'
+        ), 'dummy', null, false, require('./dummyPlugin/package')],
+        ['unknown', 'dummy', {a: 2}, false, {a: 2}]
     ]) {
-        const plugin:Plugin = Helper.loadPluginFile(
-            test[0], test[1], test[2])
-        assert.deepEqual(plugin, test[3])
+        assert.deepEqual(
+            Helper.loadPluginFile(test[0], test[1], test[2], test[3]), test[4])
     }
 })
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [
         [configuration, {}, {plugins: [], configuration}]
-        // TODO add more tests
     ])
         assert.deepEqual(Helper.loadPlugins(test[0], test[1]), test[2])
 })

@@ -179,10 +179,13 @@ export default class Helper {
      * @param documentName - Design document name.
      * @param validationCode - Code of validation function.
      * @param description - Used to produce semantic logging messages.
+     * @param log - Enables logging.
+     * @returns Promise which will be resolved after given document has updated
+     * successfully.
      */
     static async ensureValidationDocumentPresence(
         databaseConnection:Object, documentName:string, validationCode:string,
-        description:string
+        description:string, log:boolean = true
     ):Promise<void> {
         try {
             const document:Object = await databaseConnection.get(
@@ -195,14 +198,17 @@ export default class Helper {
                 validate_doc_update: validationCode
                 /* eslint-enable camelcase */
             })
-            console.info(`${description} updated.`)
+            if (log)
+                console.info(`${description} updated.`)
         } catch (error) {
-            if (error.error === 'not_found')
-                console.info(`${description} not available: create new one.`)
-            else
-                console.info(
-                    `${description} couldn't be updated: "` +
-                    `${Helper.representObject(error)}" create new one.`)
+            if (log)
+                if (error.error === 'not_found')
+                    console.info(
+                        `${description} not available: create new one.`)
+                else
+                    console.info(
+                        `${description} couldn't be updated: "` +
+                        `${Helper.representObject(error)}" create new one.`)
             try {
                 await databaseConnection.put({
                     _id: `_design/${documentName}`,
@@ -211,7 +217,8 @@ export default class Helper {
                     validate_doc_update: validationCode
                     /* eslint-enable camelcase */
                 })
-                console.info(`${description} installed/updated.`)
+                if (log)
+                    console.info(`${description} installed/updated.`)
             } catch (error) {
                 throw new Error(
                     `${description} couldn't be installed/updated: "` +
@@ -948,10 +955,12 @@ export default class Helper {
      * @param name - Plugin name to use for proper error messages.
      * @param fallbackScope - Scope to return if an error occurs during
      * loading. If a "null" is given an error will be thrown.
+     * @param log - Enables logging.
      * @returns Exported api file scope.
      */
     static loadPluginFile(
-        filePath:string, name:string, fallbackScope:?Object = null
+        filePath:string, name:string, fallbackScope:?Object = null,
+        log:boolean = true
     ):Object {
         let scope:Object
         try {
@@ -961,10 +970,11 @@ export default class Helper {
         } catch (error) {
             if (fallbackScope) {
                 scope = fallbackScope
-                console.warn(
-                    `Couln't load new api plugin file "${filePath}" for ` +
-                    `plugin "${name}": ${Helper.representObject(error)}. ` +
-                    `Using fallback one.`)
+                if (log)
+                    console.warn(
+                        `Couln't load new api plugin file "${filePath}" for ` +
+                        `plugin "${name}": ${Helper.representObject(error)}.` +
+                        ` Using fallback one.`)
             } else
                 throw new Error(
                     `Couln't load plugin file "${filePath}" for plugin "` +
