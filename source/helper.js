@@ -87,6 +87,7 @@ export default class Helper {
     ):Promise<any> {
         for (const plugin:Object of plugins)
             data = await plugin.api.apply(Helper, arguments)
+        // TODO reload global configuration if any has changed!
         return data
     }
     /**
@@ -490,6 +491,7 @@ export default class Helper {
                         }
                         let satisfied:boolean = false
                         try {
+                            // IgnoreTypeCheck
                             satisfied = hook(
                                 newDocument, oldDocument, userContext,
                                 securitySettings, models, modelConfiguration,
@@ -809,125 +811,157 @@ export default class Helper {
      * returns a plugin specific meta information object.
      * @param name - Name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
-     * @param packageConfiguration - Plugin specific configurations.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
      * @param pluginPath - Path to given plugin.
      * @return An object of plugin specific meta informations.
      */
     static loadPlugin(
-        name:string, plugins:{[key:string]:Object},
-        packageConfiguration:PlainObject,
+        name:string, plugins:{[key:string]:Plugin},
         configurationPropertyNames:Array<string>, pluginPath:string
     ):Plugin {
-        for (const propertyName:string of configurationPropertyNames)
-            if (packageConfiguration.hasOwnProperty(propertyName)) {
-                let indexFilePath:string = 'index.js'
-                if (packageConfiguration.hasOwnProperty('main'))
-                    indexFilePath = packageConfiguration.main
-                indexFilePath = path.resolve(pluginPath, indexFilePath)
-                if (!WebOptimizerHelper.isFileSync(indexFilePath))
-                    fileSystem.readdirSync(pluginPath).forEach((
-                        fileName:string
-                    ):void => {
-                        if (
-                            fileName !== 'package.json' &&
-                            WebOptimizerHelper.isFileSync(path.resolve(
-                                pluginPath, fileName))
-                        )
-                            if (!(WebOptimizerHelper.isFileSync(
-                                indexFilePath
-                            ) && ['index', 'main'].includes(path.basename(
-                                indexFilePath, path.extname(fileName)
-                            ))))
-                                indexFilePath = path.resolve(
-                                    pluginPath, indexFilePath)
-                    })
-                if (!WebOptimizerHelper.isFileSync(indexFilePath))
-                    throw new Error(
-                        `Can't find an entry file in "${pluginPath}" for ` +
-                        `plugin "${name}".`)
-                let api:Function
-                if (indexFilePath.endsWith('.js'))
-                    api = async (type:string, ...parameter:Array<any>):any => {
-                        const currentTimestamp:number = fileSystem.statSync(
-                            pluginPath
-                        ).mtime.getTime()
-                        if (plugins[
-                            name
-                        ].lastLoadTimestamp < currentTimestamp) {
-                            // Enforce to reload new module version.
-                            /* eslint-disable no-eval */
-                            delete eval('require').cache[eval(
-                                'require'
-                            ).resolve(indexFilePath)]
-                            /* eslint-enable no-eval */
-                            try {
-                                /* eslint-disable no-eval */
-                                plugins[name].scope = eval('require')(
-                                    indexFilePath)
-                                /* eslint-enable no-eval */
-                            } catch (error) {
-                                throw new Error(
-                                    `Couln't load plugin file "` +
-                                    `${indexFilePath}" for plugin "${name}":` +
-                                    ` ${Helper.representObject(error)}.`)
-                            }
-                        }
-                        plugins[name].lastLoadTimestamp = currentTimestamp
-                        if (type in plugins[name].scope)
-                            return await plugins[name].scope[type].apply(
-                                plugins[name].scope, parameter)
+        let configurationFilePath:?string = path.resolve(
+            pluginPath, 'package.json')
+        let pluginConfiguration:?PlainObject = null
+        if (configurationFilePath && WebOptimizerHelper.isDirectorySync(
+            pluginPath
+        ) && WebOptimizerHelper.isFileSync(configurationFilePath))
+            pluginConfiguration = Helper.loadPluginFile(
+                configurationFilePath, name)
+        else
+            configurationFilePath = null
+        if (pluginConfiguration) {
+            for (const propertyName:string of configurationPropertyNames)
+                if (pluginConfiguration.hasOwnProperty(propertyName)) {
+                    let apiFilePath:string = 'index.js'
+                    if (pluginConfiguration.hasOwnProperty('main'))
+                        apiFilePath = pluginConfiguration.main
+                    return Helper.loadPluginAPI(
+                        apiFilePath, pluginPath, name, plugins,
+                        pluginConfiguration)
+                }
+            throw new Error(
+                `Plugin "${name}" hasn't working configuration object under ` +
+                `one of the following keys: "` +
+                `${configurationPropertyNames.join(", ")}".`)
+        }
+        return Helper.loadPluginAPI('index.js', pluginPath, name, plugins)
+    }
+    // TODO
+    static loadPluginAPI(
+        relativeFilePath:string, pluginPath:string, name:string,
+        plugins:{[key:string]:Object}, configuration:?PlainObject = null
+    ):Plugin {
+        let filePath:string = path.resolve(pluginPath, relativeFilePath)
+        if (!WebOptimizerHelper.isFileSync(filePath))
+            for (const fileName:string of fileSystem.readdirSync(pluginPath))
+                if (
+                    fileName !== 'package.json' &&
+                    WebOptimizerHelper.isFileSync(path.resolve(
+                        pluginPath, fileName
+                    ))
+                ) {
+                    filePath = path.resolve(pluginPath, filePath)
+                    if (['index', 'main'].includes(path.basename(
+                        filePath, path.extname(fileName)
+                    )))
+                        break
+                }
+        let api:?Function = null
+        if (WebOptimizerHelper.isFileSync(filePath)) {
+            if (filePath.endsWith('.js'))
+                api = async (type:string, ...parameter:Array<any>):any => {
+                    if (filePath)
+                        plugins[name].configuration = Helper.loadPluginFile(
+                            filePath, name, plugins[name].configuration)
+                    const currentAPIFileTimestamp:number =
+                        fileSystem.statSync(filePath).mtime.getTime()
+                    if (plugins[
+                        name
+                    ].apiFileLoadTimestamp < currentAPIFileTimestamp) {
+                        // Enforce to reload new module version.
+                        /* eslint-disable no-eval */
+                        delete eval('require').cache[eval('require').resolve(
+                            filePath)]
+                        plugins[name].scope = Helper.loadPluginFile(
+                            filePath, name, plugins[name].scope)
                     }
-                else
-                    api = ():Promise<any> => new Promise((
-                        resolve:Function, reject:Function
-                    ):void => {
-                        const childProcess:ChildProcess =
-                            spawnChildProcess(
-                                indexFilePath, Tools.arrayMake(arguments),
-                                {
-                                    cwd: process.cwd(),
-                                    env: process.env,
-                                    shell: true,
-                                    stdio: 'inherit'
-                                })
-                        for (const closeEventName:string of [
-                            'exit', 'close', 'uncaughtException', 'SIGINT',
-                            'SIGTERM', 'SIGQUIT'
-                        ])
-                            childProcess.on(
-                                closeEventName,
-                                WebOptimizerHelper.getProcessCloseHandler(
-                                    resolve, reject, closeEventName))
-                    })
-                let scope:Object
-                try {
-                    /* eslint-disable no-eval */
-                    scope = eval('require')(indexFilePath)
-                    /* eslint-enable no-eval */
-                } catch (error) {
-                    throw error
-                    throw new Error(
-                        `Couln't load plugin file "${indexFilePath}" for ` +
-                        `plugin "${name}": ${Helper.representObject(error)}`)
+                    plugins[name].apiFileLoadTimestamp =
+                        currentAPIFileTimestamp
+                    if (type in plugins[name].scope)
+                        return await plugins[name].scope[type].apply(
+                            plugins[name].scope, parameter)
                 }
-                return {
-                    api,
-                    configuration: packageConfiguration[propertyName],
-                    indexFilePath,
-                    name,
-                    path: pluginPath,
-                    lastLoadTimestamp: fileSystem.statSync(
-                        pluginPath
-                    ).mtime.getTime(),
-                    scope
-                }
-            }
-        throw new Error(
-            `Plugin "${name}" hasn't working configuration object under one ` +
-            `of the following keys: "` +
-            `${configurationPropertyNames.join(", ")}".`)
+            else
+                api = ():Promise<any> => new Promise((
+                    resolve:Function, reject:Function
+                ):void => {
+                    if (filePath)
+                        plugins[name].configuration = Helper.loadPluginFile(
+                            filePath, name, plugins[name].configuration)
+                    const childProcess:ChildProcess = spawnChildProcess(
+                        filePath, Tools.arrayMake(arguments), {
+                            cwd: process.cwd(),
+                            env: process.env,
+                            shell: true,
+                            stdio: 'inherit'
+                        })
+                    for (const closeEventName:string of [
+                        'exit', 'close', 'uncaughtException', 'SIGINT',
+                        'SIGTERM', 'SIGQUIT'
+                    ])
+                        childProcess.on(
+                            closeEventName,
+                            WebOptimizerHelper.getProcessCloseHandler(
+                                resolve, reject, closeEventName))
+                })
+        }
+        return {
+            api,
+            apiFilePath: api && filePath || null,
+            apiFileLoadTimestamp: filePath && fileSystem.statSync(
+                filePath
+            ).mtime.getTime() || null,
+            configuration,
+            configurationFilePath: filePath,
+            configurationFileLoadTimestamp: filePath && fileSystem.statSync(
+                filePath
+            ).mtime.getTime() || null,
+            name,
+            path: pluginPath,
+            scope: Helper.loadPluginFile(filePath, name)
+        }
+    }
+    // TODO test
+    /**
+     * Load given api file path and returns exported scope.
+     * @param filePath - Path to file to load.
+     * @param name - Plugin name to use for proper error messages.
+     * @param fallbackScope - Scope to return if an error occurs during
+     * loading. If a "null" is given an error will be thrown.
+     * @returns Exported api file scope.
+     */
+    static loadPluginFile(
+        filePath:string, name:string, fallbackScope:?Object = null
+    ):Object {
+        let scope:Object
+        try {
+            /* eslint-disable no-eval */
+            scope = eval('require')(filePath)
+            /* eslint-enable no-eval */
+        } catch (error) {
+            if (fallbackScope) {
+                scope = fallbackScope
+                console.warn(
+                    `Couln't load new api plugin file "${filePath}" for ` +
+                    `plugin "${name}": ${Helper.representObject(error)}. ` +
+                    `Using fallback one.`)
+            } else
+                throw new Error(
+                    `Couln't load plugin file "${filePath}" for plugin "` +
+                    `${name}": ${Helper.representObject(error)}`)
+        }
+        return scope
     }
     /**
      * Extends given configuration object with all plugin specific ones and
@@ -957,28 +991,10 @@ export default class Helper {
                     const currentPluginPath:string = path.resolve(
                         configuration.plugin.directories[type].path, pluginName
                     )
-                    if (WebOptimizerHelper.isDirectorySync(
-                        currentPluginPath
-                    ) && WebOptimizerHelper.isFileSync(
-                        `${currentPluginPath}/package.json`
-                    )) {
-                        let pluginConfiguration:PlainObject
-                        try {
-                            pluginConfiguration = JSON.parse(
-                                fileSystem.readFileSync(currentPluginPath, {
-                                    encoding: configuration.encoding}))
-                        } catch (error) {
-                            console.warn(
-                                'Failed to load configuration for plugin ' +
-                                `"${pluginName}": ` +
-                                Helper.representObject(error))
-                            return
-                        }
-                        plugins[pluginName] = Helper.loadPlugin(
-                            pluginName, plugins, pluginConfiguration,
-                            configuration.plugin.configurationPropertyNames,
-                            currentPluginPath)
-                    }
+                    plugins[pluginName] = Helper.loadPlugin(
+                        pluginName, plugins,
+                        configuration.plugin.configurationPropertyNames,
+                        currentPluginPath)
                 })
         const sortedPlugins:Array<Plugin> = []
         const temporaryPlugins:{[key:string]:Array<string>} = {}
@@ -995,18 +1011,19 @@ export default class Helper {
         ))
             sortedPlugins.push(plugins[pluginName])
         for (const plugin:Plugin of sortedPlugins)
-            configuration = Tools.extendObject(true, Tools.modifyObject(
-                configuration, plugin.configuration
-            ), plugin.configuration)
+            if (plugin.configuration)
+                configuration = Tools.extendObject(true, Tools.modifyObject(
+                    configuration, plugin.configuration
+                ), plugin.configuration)
         const parameterDescription:Array<string> = [
             'self', 'webOptimizerPath', 'currentPath', 'path', 'helper',
             'tools', 'plugins']
         const parameter:Array<any> = [
             configuration, __dirname, process.cwd(), path, Helper, Tools,
             sortedPlugins]
-        configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
-            configuration, parameterDescription, parameter))
-        return {plugins: sortedPlugins, configuration}
+        return {plugins: sortedPlugins, configuration: Tools.unwrapProxy(
+            Tools.resolveDynamicDataStructure(
+                configuration, parameterDescription, parameter))}
     }
     /**
      * Represents given object as formatted string.

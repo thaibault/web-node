@@ -60,7 +60,7 @@
       },
       "httpd/host": {
         "__evaluate__": "self.server.application.hostName"
-      }
+      },
       "log/file": "/dev/stdout",
       "log/level": "info",
       "path": "database",

@@ -44,6 +44,7 @@ export type SpecialPropertyNames = {
     extend:string;
     type:string;
     typeNameRegularExpressionPattern:string;
+    validatedDocumentsCache:string;
 }
 export type ModelConfiguration = {
     defaultPropertySpecification:PropertySpecification;
@@ -123,12 +124,14 @@ export type DatabaseForbiddenError = {
 export type DatabaseError = DatabaseAuthorisationError|DatabaseForbiddenError
 // / endregion
 export type Plugin = {
-    api:Function;
-    configuration:PlainObject;
-    indexFilePath:string;
+    api:?Function;
+    apiFilePath:?string;
+    apiFileLoadTimestamp:?number;
+    configuration:?PlainObject;
+    configurationFilePath:?string;
+    configurationFileLoadTimestamp:?number;
     name:string;
     path:string;
-    lastLoadTimestamp:number;
     scope:Object;
 }
 // endregion

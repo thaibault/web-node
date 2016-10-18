@@ -10,7 +10,9 @@ import type {PlainObject} from 'weboptimizer/type'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {DatabaseForbiddenError, ModelConfiguration, Models} from '../type'
+import type {
+    DatabaseForbiddenError, ModelConfiguration, Models, Plugin
+} from '../type'
 import configuration from '../configurator'
 import Helper from '../helper'
 // endregion
@@ -33,7 +35,7 @@ QUnit.test('authenticate', (assert:Object):void => {
     ])
         assert.ok(Helper.authenticate.apply(Helper, test))
 })
-QUnit.test('callPluginStack', async (assert:Object):void => {
+QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
     const done:Function = assert.async()
     for (const test:Array<any> of [
         [['test', []], null],
@@ -45,7 +47,7 @@ QUnit.test('callPluginStack', async (assert:Object):void => {
             await Helper.callPluginStack.apply(Helper, test[0]), test[1])
     done()
 })
-QUnit.test('checkRechability', async (assert:Object):void => {
+QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
     const done:Function = assert.async()
     for (const test:Array<any> of [
         ['http://unknownHostName'],
@@ -1114,7 +1116,7 @@ QUnit.test('loadPlugin', (assert:Object):void => {
             configuration.package.webOptimizer.path.source.base, 'test'
         )]
     ])
-        assert.throws(():void => Helper.loadPlugin.apply(Helper, test))
+        assert.throws(():Plugin => Helper.loadPlugin.apply(Helper, test))
     for (const test:Array<any> of [
         ['dummy', {}, {a: {}}, ['a'], path.resolve(
             configuration.context.path,
@@ -1138,7 +1140,9 @@ QUnit.test('loadPlugin', (assert:Object):void => {
         const plugin:Plugin = Helper.loadPlugin(
             test[0], test[1], test[2], test[3], test[4])
         delete plugin.api
-        delete plugin.lastLoadTimestamp
+        delete plugin.apiFileLoadTimestamp
+        delete plugin.configurationFilePath
+        delete plugin.configurationFileLoadTimestamp
         assert.deepEqual(plugin, test[5])
     }
 })
