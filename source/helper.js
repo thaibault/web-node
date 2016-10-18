@@ -73,23 +73,7 @@ export default class Helper {
             `perform requested action: "${allowedRoles.join('", "')}".`}
         /* eslint-enable no-throw-literal */
     }
-    /**
-     * Calls all plugin methods for given trigger description.
-     * @param type - Type of trigger.
-     * @param plugins - List of plugins to search for trigger callbacks in.
-     * @param data - Data to pipe throw all plugins and resolve after all
-     * plugins have been resolved.
-     * @returns A promise which resolves when all callbacks have resolved their
-     * promise.
-     */
-    static async callPluginStack(
-        type:string, plugins:Array<Object>, data:any = null
-    ):Promise<any> {
-        for (const plugin:Object of plugins)
-            data = await plugin.api.apply(Helper, arguments)
-        // TODO reload global configuration if any has changed!
-        return data
-    }
+    // region tools
     /**
      * Checks if given url response with given status code.
      * @param url - Url to check reachability.
@@ -151,27 +135,6 @@ export default class Helper {
         return check(await fetch(url))
     }
     /**
-     * Determines a mapping of all models to roles who are allowed to edit
-     * corresponding model instances.
-     * @param ModelConfiguration - Model specification object.
-     * @returns The mapping object.
-     */
-    static determineAllowedModelRolesMapping(
-        modelConfiguration:ModelConfiguration
-    ):{[key:string]:Array<string>} {
-        const allowedModelRolesMapping:AllowedModelRolesMapping = {}
-        const models:Models = Helper.extendModels(modelConfiguration)
-        for (const modelName:string in models)
-            if (models.hasOwnProperty(modelName) && models[
-                modelName
-            ].hasOwnProperty(
-                modelConfiguration.specialPropertyNames.allowedRoles
-            ))
-                allowedModelRolesMapping[modelName] = models[modelName][
-                    modelConfiguration.specialPropertyNames.allowedRoles]
-        return allowedModelRolesMapping
-    }
-    /**
      * Updates/creates a design document in database with a validation function
      * set to given code.
      * @param databaseConnection - Database connection to use for document
@@ -225,6 +188,37 @@ export default class Helper {
                     `${Helper.representObject(error)}".`)
             }
         }
+    }
+    /**
+     * Represents given object as formatted string.
+     * @param object - Object to Represents.
+     * @returns Representation string.
+     */
+    static representObject(object:any):string {
+        return JSON.stringify(object, null, 4)
+    }
+    // endregion
+    // region model
+    /**
+     * Determines a mapping of all models to roles who are allowed to edit
+     * corresponding model instances.
+     * @param ModelConfiguration - Model specification object.
+     * @returns The mapping object.
+     */
+    static determineAllowedModelRolesMapping(
+        modelConfiguration:ModelConfiguration
+    ):{[key:string]:Array<string>} {
+        const allowedModelRolesMapping:AllowedModelRolesMapping = {}
+        const models:Models = Helper.extendModels(modelConfiguration)
+        for (const modelName:string in models)
+            if (models.hasOwnProperty(modelName) && models[
+                modelName
+            ].hasOwnProperty(
+                modelConfiguration.specialPropertyNames.allowedRoles
+            ))
+                allowedModelRolesMapping[modelName] = models[modelName][
+                    modelConfiguration.specialPropertyNames.allowedRoles]
+        return allowedModelRolesMapping
     }
     /**
      * Extend given model with all specified one.
@@ -348,7 +342,7 @@ export default class Helper {
             serialize = toJSON
         else if (JSON && JSON.hasOwnProperty('stringify'))
             serialize = (object:Object):string => JSON.stringify(
-                object, null, '    ')
+                object, null, 4)
         else
             throw new Error('Needed "serialize" function is not available.')
         // endregion
@@ -813,6 +807,25 @@ export default class Helper {
             ] = new Set([`${newDocument._id}-${newDocument._rev}`])
         return newDocument
     }
+    // endregion
+    // region plugin
+    /**
+     * Calls all plugin methods for given trigger description.
+     * @param type - Type of trigger.
+     * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param data - Data to pipe throw all plugins and resolve after all
+     * plugins have been resolved.
+     * @returns A promise which resolves when all callbacks have resolved their
+     * promise.
+     */
+    static async callPluginStack(
+        type:string, plugins:Array<Object>, data:any = null
+    ):Promise<any> {
+        for (const plugin:Object of plugins)
+            data = await plugin.api.apply(Helper, arguments)
+        // TODO reload global configuration if any has changed!
+        return data
+    }
     /**
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
@@ -1044,14 +1057,7 @@ export default class Helper {
             Tools.resolveDynamicDataStructure(
                 configuration, parameterDescription, parameter))}
     }
-    /**
-     * Represents given object as formatted string.
-     * @param object - Object to Represents.
-     * @returns Representation string.
-     */
-    static representObject(object:any):string {
-        return JSON.stringify(object, null, '    ')
-    }
+    // endregion
 }
 // endregion
 // region vim modline

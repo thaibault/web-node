@@ -65,6 +65,16 @@
       "log/level": "info",
       "path": "database",
       "port": 5984,
+      "security": {
+        "admins": {
+          "names": [],
+          "roles": []
+        },
+        "members": {
+          "names": [],
+          "roles": ["users"]
+        }
+      },
       "url": {
         "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database.port}`"
       },

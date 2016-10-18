@@ -35,18 +35,7 @@ QUnit.test('authenticate', (assert:Object):void => {
     ])
         assert.ok(Helper.authenticate.apply(Helper, test))
 })
-QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
-    const done:Function = assert.async()
-    for (const test:Array<any> of [
-        [['test', []], null],
-        [['test', [], null], null],
-        [['test', [], {}], {}]
-        // TODO add more tests
-    ])
-        assert.deepEqual(
-            await Helper.callPluginStack.apply(Helper, test[0]), test[1])
-    done()
-})
+// / region tools
 QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
     const done:Function = assert.async()
     for (const test:Array<any> of [
@@ -62,6 +51,30 @@ QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
         }
     done()
 })
+QUnit.test('ensureValidationDocumentPresence', async (
+    assert:Object
+):Promise<void> => {
+    const done:Function = assert.async()
+    for (const test:Array<any> of [
+        [{put: ():Promise<void> =>
+            new Promise((resolve:Function):number => setTimeout(resolve, 0))
+        }, 'test', '', 'Description', false]
+    ])
+        assert.strictEqual(await Helper.ensureValidationDocumentPresence.apply(
+            Helper, test))
+    done()
+})
+QUnit.test('representObject', (assert:Object):void => {
+    for (const test:Array<any> of [
+        [{}, '{}'],
+        [5, '5'],
+        [[], '[]'],
+        [{a: 2, b: 3}, '{\n    "a": 2,\n    "b": 3\n}']
+    ])
+        assert.strictEqual(Helper.representObject(test[0]), test[1])
+})
+// / endregion
+// / region model
 QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, {}],
@@ -88,19 +101,6 @@ QUnit.test('determineAllowedModelRolesMapping', (assert:Object):void => {
     ])
         assert.deepEqual(
             Helper.determineAllowedModelRolesMapping(test[0]), test[1])
-})
-QUnit.test('ensureValidationDocumentPresence', async (
-    assert:Object
-):Promise<void> => {
-    const done:Function = assert.async()
-    for (const test:Array<any> of [
-        [{put: ():Promise<void> =>
-            new Promise((resolve:Function):number => setTimeout(resolve, 0))
-        }, 'test', '', 'Description', false]
-    ])
-        assert.strictEqual(await Helper.ensureValidationDocumentPresence.apply(
-            Helper, test))
-    done()
 })
 QUnit.test('extendModel', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -1107,6 +1107,20 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         // endregion
     }
 })
+// / endregion
+// region plugin
+QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
+    const done:Function = assert.async()
+    for (const test:Array<any> of [
+        [['test', []], null],
+        [['test', [], null], null],
+        [['test', [], {}], {}]
+        // TODO add more tests
+    ])
+        assert.deepEqual(
+            await Helper.callPluginStack.apply(Helper, test[0]), test[1])
+    done()
+})
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
         ['dummy', {}, ['a'], './']
@@ -1188,15 +1202,7 @@ QUnit.test('loadPlugins', (assert:Object):void => {
     ])
         assert.deepEqual(Helper.loadPlugins(test[0], test[1]), test[2])
 })
-QUnit.test('representObject', (assert:Object):void => {
-    for (const test:Array<any> of [
-        [{}, '{}'],
-        [5, '5'],
-        [[], '[]'],
-        [{a: 2, b: 3}, '{\n    "a": 2,\n    "b": 3\n}']
-    ])
-        assert.strictEqual(Helper.representObject(test[0]), test[1])
-})
+// / endregion
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
