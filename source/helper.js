@@ -847,7 +847,17 @@ export default class Helper {
         }
         return Helper.loadPluginAPI('index.js', pluginPath, name, plugins)
     }
-    // TODO
+    /**
+     * Load given plugin api file in given plugin path generates a plugin
+     * specific data structure with useful meta informations.
+     * @param relativeFilePath - Path to file to load relatively from given
+     * plugin path.
+     * @param pluginPath - Path to plugin directory.
+     * @param name - Plugin name to use for proper error messages.
+     * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param configuration - Plugin specific configurations.
+     * @returns Plugin meta informations object.
+     */
     static loadPluginAPI(
         relativeFilePath:string, pluginPath:string, name:string,
         plugins:{[key:string]:Object}, configuration:?PlainObject = null
@@ -932,7 +942,6 @@ export default class Helper {
             scope: Helper.loadPluginFile(filePath, name)
         }
     }
-    // TODO test
     /**
      * Load given api file path and returns exported scope.
      * @param filePath - Path to file to load.
