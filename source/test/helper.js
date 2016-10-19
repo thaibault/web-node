@@ -25,14 +25,14 @@ QUnit.test('authenticate', (assert:Object):void => {
         [{type: 'Test'}, {}, {roles: []}, {}, {Test: ['users']}, 'type'],
         [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: []}, 'type']
     ])
-        assert.throws(():?true => Helper.authenticate.apply(Helper, test))
+        assert.throws(():?true => Helper.authenticate(...test))
     for (const test:Array<any> of [
         [{}, null, {roles: ['_admin']}],
         [{}, {}, {roles: ['_admin']}, {}, {}, 'type'],
         [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: 'users'}, 'type'],
         [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: ['users']}, 'type']
     ])
-        assert.ok(Helper.authenticate.apply(Helper, test))
+        assert.ok(Helper.authenticate(...test))
 })
 // / region tools
 QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
@@ -43,7 +43,7 @@ QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
         ['http://unknownHostName', true, 200, 0.01, 0.025]
     ])
         try {
-            await Helper.checkReachability.apply(Helper, test)
+            await Helper.checkReachability(...test)
             assert.ok(false)
         } catch (error) {
             assert.ok(true)
@@ -59,8 +59,8 @@ QUnit.test('ensureValidationDocumentPresence', async (
             new Promise((resolve:Function):number => setTimeout(resolve, 0))
         }, 'test', '', 'Description', false]
     ])
-        assert.strictEqual(await Helper.ensureValidationDocumentPresence.apply(
-            Helper, test))
+        assert.strictEqual(await Helper.ensureValidationDocumentPresence(
+            ...test))
     done()
 })
 QUnit.test('representObject', (assert:Object):void => {
@@ -477,8 +477,8 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             const parameter:Array<any> = test[0].concat([null, {}, {}].slice(
                 test[0].length - 1
             )).concat([models, modelConfiguration])
-            assert.throws(():Object => Helper.validateDocumentUpdate.apply(
-                Helper, parameter
+            assert.throws(():Object => Helper.validateDocumentUpdate(
+                ...parameter
             ), (error:DatabaseForbiddenError):boolean => {
                 if (error.hasOwnProperty('forbidden')) {
                     const result:boolean = error.forbidden.startsWith(
@@ -562,21 +562,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // region hooks
             // / region on create
             [[{_type: 'Test', a: ''}], {models: {Test: {a: {
-                onCreateEvaluation: "'2'"
+                onCreateEvaluation: `'2'`
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
                 '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: ''}], {models: {Test: {a: {
-                onCreateExpression: "return '2'"
+                onCreateExpression: `return '2'`
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
                 '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: ''}, {_type: 'Test', a: ''}], {models: {
-                Test: {a: {onCreateExpression: "return '2'"}}
+                Test: {a: {onCreateExpression: `return '2'`}}
             }}, {
                 fillUp: {_type: 'Test', a: ''},
                 incremental: {},
@@ -585,21 +585,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             // / endregion
             // / region on update
             [[{_type: 'Test', a: ''}], {models: {Test: {a: {
-                onUpdateEvaluation: "'2'"
+                onUpdateEvaluation: `'2'`
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
                 '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: ''}], {models: {Test: {a: {
-                onUpdateExpression: "return '2'"
+                onUpdateExpression: `return '2'`
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
                 '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: '1'}, {_type: 'Test', a: '2'}], {models: {
-                Test: {a: {onUpdateEvaluation: "'2'"
+                Test: {a: {onUpdateEvaluation: `'2'`
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {},
@@ -1099,10 +1099,9 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 true, {}, defaultModelSpecification, test[1])
             delete modelConfiguration.defaultPropertySpecification
             delete modelConfiguration.models
-            assert.deepEqual(Helper.validateDocumentUpdate.apply(
-                Helper, test[0].concat([null, {}, {}].slice(
-                    test[0].length - 1
-                )).concat([models, modelConfiguration])
+            assert.deepEqual(Helper.validateDocumentUpdate(...test[0].concat([
+                null, {}, {}
+            ].slice(test[0].length - 1)).concat([models, modelConfiguration])
             ), test[2][updateStrategy])
         }
         // endregion
@@ -1152,10 +1151,9 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             true, {}, defaultModelSpecification, test[1])
         delete modelConfiguration.defaultPropertySpecification
         delete modelConfiguration.models
-        assert.deepEqual(Helper.validateDocumentUpdate.apply(
-            Helper, test[0].concat([null, {}, {}].slice(
-                test[0].length - 1
-            )).concat([models, modelConfiguration])
+        assert.deepEqual(Helper.validateDocumentUpdate(...test[0].concat([
+            null, {}, {}
+        ].slice(test[0].length - 1)).concat([models, modelConfiguration])
         ), test[2])
     }
     // endregion
@@ -1170,8 +1168,7 @@ QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
         [['test', [], {}], {}]
         // TODO add more tests
     ])
-        assert.deepEqual(
-            await Helper.callPluginStack.apply(Helper, test[0]), test[1])
+        assert.deepEqual(await Helper.callPluginStack(...test[0]), test[1])
     done()
 })
 QUnit.test('hotReloadPluginFile', async (assert:Object):Promise<any> => {
@@ -1186,7 +1183,7 @@ QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
         ['dummy', {}, ['a'], './']
     ])
-        assert.throws(():Plugin => Helper.loadPlugin.apply(Helper, test))
+        assert.throws(():Plugin => Helper.loadPlugin(...test))
     for (const test:Array<any> of [
         ['dummy', {}, ['webNode'], path.resolve(
             configuration.context.path,

@@ -18,8 +18,11 @@ import Tools from 'clientnode'
 /* eslint-disable no-duplicate-imports */
 import type {PlainObject} from 'clientnode'
 /* eslint-enable no-duplicate-imports */
+import fileSystem from 'fs'
+import handlebars from 'handlebars'
 import {createServer, Server} from 'http'
 import fetch from 'node-fetch'
+import path from 'path'
 import PouchDB from 'pouchdb'
 import type {ModelConfiguration, Models} from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
@@ -42,6 +45,47 @@ import Helper from './helper'
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
                 plugin.name
             ).join('", "') + '".')
+    // endregion
+    // region render static templates
+    const templateRenderingPromises:Array<Promise<string>> = []
+    WebOptimizerHelper.walkDirectoryRecursivelySync(
+        configuration.context.path, (filePath:string):?false => {
+            // TODO return "false" if in plugin location and corresponding
+            // regexp doesn't match to stop deeper iterations.
+            if (filePath.endsWith('node_modules'))
+                return false
+            //
+            const fileExtension:string = path.extname(filePath)
+            if (configuration.template.extensions.includes(fileExtension))
+                templateRenderingPromises.push(new Promise((
+                    resolve:Function, reject:Function
+                ):void => fileSystem.readFile(filePath, {
+                    encoding: configuration.encoding
+                }, (error:?Error, content:string):void => {
+                    if (error)
+                        reject(error)
+                    else {
+                        const newFilePath:string = filePath.substring(
+                            0, filePath.length - fileExtension.length)
+                        try {
+                            fileSystem.writeFile(
+                                newFilePath, handlebars.compile(
+                                    content, configuration.template.options
+                                )(configuration), {
+                                    encoding: configuration.encoding
+                                }, (error:?Error):void => {
+                                    if (error)
+                                        reject(error)
+                                    else
+                                        resolve()
+                                })
+                        } catch (error) {
+                            reject(error)
+                        }
+                    }
+                })))
+        })
+    await Promise.all(templateRenderingPromises)
     // endregion
     // region start database server
     const databaseServerProcess:ChildProcess = spawnChildProcess(
@@ -189,7 +233,7 @@ import Helper from './helper'
             JSON.stringify(Helper.determineAllowedModelRolesMapping(
                 configuration.modelConfiguration
             )) + '\n' +
-            "const typePropertyName = '" +
+            `const typePropertyName = '` +
             `${configuration.modelConfiguration.specialPropertyNames.type}'` +
             `\n` + authenticationCode.substring(
                 authenticationCode.indexOf('{') + 1,
@@ -226,7 +270,7 @@ import Helper from './helper'
                 } catch (error) {
                     throw new Error(
                         `Document "${Helper.representObject(document)}" ` +
-                        "doesn't satisfy its schema: " +
+                        `doesn't satisfy its schema: ` +
                         Helper.representObject(error))
                 }
                 /*

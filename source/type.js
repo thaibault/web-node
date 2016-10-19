@@ -122,6 +122,10 @@ export type Configuration = {
             };
         };
     };
+    template:{
+        extensions:Array<string>;
+        options:PlainObject;
+    }
 }
 // / endregion
 // / region database error

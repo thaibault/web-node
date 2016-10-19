@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "clientnode": "latest",
+    "handlebars": "latest",
     "node-fetch": "latest",
     "pouchdb": "latest",
     "pouchdb-server": "latest",
@@ -197,6 +198,10 @@
           "error": "/dev/stderr"
         }
       }
+    },
+    "template": {
+        "extensions": [".tpl"],
+        "options": {}
     }
   },
   "webOptimizer": {

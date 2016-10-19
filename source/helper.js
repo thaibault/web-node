@@ -991,7 +991,7 @@ export default class Helper {
             throw new Error(
                 `Plugin "${name}" hasn't working configuration object under ` +
                 `one of the following keys: "` +
-                `${configurationPropertyNames.join(", ")}".`)
+                `${configurationPropertyNames.join('", "')}".`)
         }
         return Helper.loadPluginAPI('index.js', pluginPath, name, plugins)
     }
@@ -1032,15 +1032,14 @@ export default class Helper {
             if (filePath.endsWith('.js'))
                 api = async (type:string, ...parameter:Array<any>):any => {
                     if (type in plugins[name].scope)
-                        return await plugins[name].scope[type].apply(
-                            plugins[name].scope, parameter)
+                        return await plugins[name].scope[type](...parameter)
                 }
             else
-                api = ():Promise<any> => new Promise((
+                api = (...parameter:Array<any>):Promise<any> => new Promise((
                     resolve:Function, reject:Function
                 ):void => {
                     const childProcess:ChildProcess = spawnChildProcess(
-                        filePath, Tools.arrayMake(arguments), {
+                        filePath, Tools.arrayMake(parameter), {
                             cwd: process.cwd(),
                             env: process.env,
                             shell: true,
