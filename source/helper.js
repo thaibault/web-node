@@ -490,12 +490,14 @@ export default class Helper {
                 if (!([undefined, null].includes(
                     propertySpecification.regularExpressionPattern
                 ) || (new RegExp(
+                    // IgnoreTypeCheck
                     propertySpecification.regularExpressionPattern
                 )).test(newValue)))
                     /* eslint-enable no-throw-literal */
                     throw {
                         forbidden: `PatternMatch: Property "${name}" should ` +
                             'match regular expression pattern ' +
+                            // IgnoreTypeCheck
                             propertySpecification.regularExpressionPattern +
                             ` (given "${newValue}").`
                     }
