@@ -179,7 +179,8 @@
           },
           "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
         }
-      }
+      },
+      "hotReloading": true
     },
     "server": {
       "application": {

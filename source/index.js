@@ -29,8 +29,13 @@ import baseConfiguration from './configurator'
 import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
+    const closeEventNames = [
+        'exit', 'close', 'uncaughtException', 'SIGINT', 'SIGTERM', 'SIGQUIT']
     // region load plugins
-    const {plugins, configuration} = Helper.loadPlugins(baseConfiguration)
+    const {plugins, configuration} = Helper.loadPlugins(
+        Tools.copyLimitedRecursively(baseConfiguration))
+    await Helper.callPluginStack(
+        'preInitialize', plugins, baseConfiguration, configuration)
     if (plugins.length)
         console.info(
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
@@ -49,10 +54,7 @@ import Helper from './helper'
             shell: true,
             stdio: 'inherit'
         })
-    for (const closeEventName:string of [
-        'exit', 'close', 'uncaughtException', 'SIGINT', 'SIGTERM',
-        'SIGQUIT'
-    ])
+    for (const closeEventName:string of Helper.closeEventNames)
         databaseServerProcess.on(
             closeEventName, WebOptimizerHelper.getProcessCloseHandler(
                 Tools.noop, Tools.noop, closeEventName))
@@ -231,22 +233,32 @@ import Helper from './helper'
         const server = http.createServer(async (
             request:Object, response:Object
         ):any => {
-            await Helper.callPluginStack('request', plugins, request, response)
+            request = await Helper.callPluginStack(
+                'request', plugins, baseConfiguration, configuration, request,
+                response)
             response.end()
-        }).listen(
+        })
+        server = await Helper.callPluginStack(
+            'initialize', plugins, baseConfiguration, configuration, server,
+            databaseConnection, databaseServerProcess)
+        server.listen(
             configuration.server.application.port,
             configuration.server.application.hostName)
-        await Helper.callPluginStack(
-            'initialize', plugins, server, databaseConnection, configuration)
         // endregion
     } catch (error) {
         if (configuration.debug)
             throw error
         else
             console.error(error)
-    } finally {
-        databaseConnection.close()
     }
+    let finished:boolean = false
+    const closeHandler = function():void {
+        if (!finished)
+            databaseConnection.close()
+        finished = true
+    }
+    for (const closeEventName:string of Helper.closeEventNames)
+        process.on(closeEventName, closeHandler)
 })()
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
