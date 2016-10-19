@@ -679,11 +679,15 @@ export default class Helper {
                     propertyName
                 )) {
                     if (!model.hasOwnProperty(propertyName))
-                        throw {
-                            forbidden: 'Property: Given property "' +
-                                `${propertyName}" isn't specified in model "` +
-                                `${modelName}".`
-                        }
+                        if (modelConfiguration.updateStrategy === 'migrate') {
+                            delete newDocument[propertyName]
+                            continue
+                        } else
+                            throw {
+                                forbidden: 'Property: Given property "' +
+                                    `${propertyName}" isn't specified in model "` +
+                                    `${modelName}".`
+                            }
                     const propertySpecification:PropertySpecification =
                         model[propertyName]
                     // region writable/mutable

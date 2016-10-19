@@ -11,7 +11,7 @@ try {
     module.require('source-map-support/register')
 } catch (error) {}
 import type {
-    DatabaseForbiddenError, ModelConfiguration, Models, Plugin
+    DatabaseForbiddenError, ModelConfiguration, Models, Plugin, UpdateStrategy
 } from '../type'
 import configuration from '../configurator'
 import Helper from '../helper'
@@ -159,7 +159,9 @@ QUnit.test('extendModels', (assert:Object):void => {
     }), {a: {}})
 })
 QUnit.test('validateDocumentUpdate', (assert:Object):void => {
-    for (const updateStrategy:string|null of ['fillUp', 'incremental', null]) {
+    for (const updateStrategy:UpdateStrategy of [
+        'fillUp', 'incremental', ''
+    ]) {
         const defaultModelSpecification:ModelConfiguration =
             Tools.extendObject(
                 true, {}, configuration.modelConfiguration, {updateStrategy})
@@ -1123,11 +1125,11 @@ QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
 })
 QUnit.test('hotReloadPluginFile', async (assert:Object):Promise<any> => {
     for (const test:Array<any> of [
-        [['test', []], null]
+        [['apiFile', 'scope', []], null]
         // TODO add more tests
     ])
-        assert.deepEqual(
-            await Helper.hotReloadPluginFile(test[0], test[1]), test[2])
+        assert.deepEqual(await Helper.hotReloadPluginFile(
+            test[0], test[1], test[2]), test[3])
 })
 QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [

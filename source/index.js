@@ -15,10 +15,11 @@
 // region  imports
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
-import http from 'http'
+import type {PlainObject} from 'clientnode'
+import {createServer, Server} from 'http'
 import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
-import type {ModelConfiguration} from './type'
+import type {ModelConfiguration, Models} from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 // NOTE: Only needed for debugging this file.
 try {
@@ -153,21 +154,20 @@ import Helper from './helper'
             Helper.representObject(error))
     }
     // endregion
+    const modelConfiguration:ModelConfiguration = Tools.copyLimitedRecursively(
+        configuration.modelConfiguration)
+    delete modelConfiguration.defaultPropertySpecification
+    delete modelConfiguration.models
+    const models:Models = Helper.extendModels(configuration.modelConfiguration)
     try {
         // region generate/update authentication/validation code
         let validationCode = Helper.validateDocumentUpdate.toString()
-        const modelConfiguration:modelConfiguration =
-            Tools.copyLimitedRecursively(configuration.modelConfiguration)
-        delete modelConfiguration.defaultPropertySpecification
-        delete modelConfiguration.type
         validationCode = 'function(\n' +
             '    newDocument, oldDocument, userContext, securitySettings\n' +
             ')\n {\n' +
-            'const models = ' +
-            JSON.stringify(Helper.extendModels(
-                configuration.modelConfiguration
-            )) + '\n' +
-            `const options = ${modelConfiguration}\n` +
+            `const models = ${JSON.stringify(models)}\n` +
+            `const modelConfiguration = ` +
+            `${JSON.stringify(modelConfiguration)}\n` +
             validationCode.substring(
                 validationCode.indexOf('{') + 1,
                 validationCode.lastIndexOf('}')
@@ -210,27 +210,35 @@ import Helper from './helper'
         })).rows)
             if (!(typeof document.id === 'string' && document.id.startsWith(
                 '_design/'
-            )))
+            ))) {
+                let newDocument:?PlainObject = null
                 try {
                     newDocument = Helper.validateDocumentUpdate(
                         document, null, {}, Tools.copyLimitedRecursively(
-                            configuration.database.security))
-                    /*
-                        NOTE: If a property is missing and a default one could
-                        be applied we have an auto migration for that case.
-                    */
-                    if (newDocument !== document)
-                        databaseConnection.put(newDocument)
+                            configuration.database.security
+                        ), models, modelConfiguration)
                 } catch (error) {
                     console.error(
                         `Document "${Helper.representObject(document)}" ` +
                         "doesn't satisfy its schema: " +
                         Helper.representObject(error))
+                    // TODO mark document "databaseConnection.put(newDocument)"
+                    // as invalid?
                 }
-        // TODO check conflicting constraints and mark if necessary
+                /*
+                    NOTE: If a property is missing and a default one could be
+                    applied we have an auto migration for that case.
+                */
+                // TODO remove properties which aren't allowed
+                // TODO maybe detect property renaming
+                if (newDocument !== document)
+                    databaseConnection.put(newDocument)
+            }
+        // TODO check conflicting constraints and mark if necessary (check how
+        // couchdb deals with "id" conflicts)
         // endregion
         // region start application server
-        const server = http.createServer(async (
+        let server:Server = createServer(async (
             request:Object, response:Object
         ):any => {
             request = await Helper.callPluginStack(

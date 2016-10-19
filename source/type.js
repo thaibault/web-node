@@ -46,17 +46,18 @@ export type SpecialPropertyNames = {
     typeNameRegularExpressionPattern:string;
     validatedDocumentsCache:string;
 }
+export type UpdateStrategy = ''|'fillUp'|'incremental'|'migrate'
 export type ModelConfiguration = {
     defaultPropertySpecification:PropertySpecification;
     models:Models;
     reservedPropertyNames:Array<string>;
     specialPropertyNames:SpecialPropertyNames;
-    updateStrategy:?string;
+    updateStrategy:UpdateStrategy;
 }
 export type SimpleModelConfiguration = {
     reservedPropertyNames:Array<string>;
     specialPropertyNames:SpecialPropertyNames;
-    updateStrategy:?string;
+    updateStrategy:UpdateStrategy;
 }
 // / endregion
 // / region configuration
