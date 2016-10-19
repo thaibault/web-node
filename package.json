@@ -83,7 +83,7 @@
         "password": "admin"
       }
     },
-    "debug": true,
+    "debug": false,
     "encoding": "utf8",
     "modelConfiguration": {
       "defaultPropertySpecification": {
