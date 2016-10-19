@@ -15,7 +15,9 @@
 // region  imports
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
+/* eslint-disable no-duplicate-imports */
 import type {PlainObject} from 'clientnode'
+/* eslint-enable no-duplicate-imports */
 import {createServer, Server} from 'http'
 import fetch from 'node-fetch'
 import PouchDB from 'pouchdb'
@@ -30,8 +32,6 @@ import baseConfiguration from './configurator'
 import Helper from './helper'
 // endregion
 (async ():Promise<any> => {
-    const closeEventNames = [
-        'exit', 'close', 'uncaughtException', 'SIGINT', 'SIGTERM', 'SIGQUIT']
     // region load plugins
     const {plugins, configuration} = Helper.loadPlugins(
         Tools.copyLimitedRecursively(baseConfiguration))
@@ -206,7 +206,9 @@ import Helper from './helper'
         // region ensure all constraints to have a consistent initial state
         // TODO run migrations scripts if there exists some.
         for (const document:PlainObject of (await databaseConnection.allDocs({
+            /* eslint-disable camelcase */
             include_docs: true
+            /* eslint-enable camelcase */
         })).rows)
             if (!(typeof document.id === 'string' && document.id.startsWith(
                 '_design/'

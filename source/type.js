@@ -37,7 +37,8 @@ export type PropertySpecification = {
     writable:boolean;
 }
 export type Model = {
-    _extends:Array<string>;
+    _allowedRoles:?Array<string>;
+    _extends:?Array<string>;
     [key:string]:PropertySpecification;
 }
 export type Models = {[key:string]:Model}

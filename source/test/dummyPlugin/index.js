@@ -12,7 +12,21 @@
     3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
+// region imports
+import {ChildProcess} from 'child_process'
+import {IncomingMessage, Server, ServerResponse} from 'http'
+import PouchDB from 'pouchdb'
+// NOTE: Only needed for debugging this file.
+try {
+    module.require('source-map-support/register')
+} catch (error) {}
+import type {Configuration, Plugin} from '../../type'
+// endregion
+/**
+ * Dummy plugin interface implementing all available hooks.
+ */
 exports = class Dummy {
+    /* eslint-disable no-unused-vars */
     /**
      * Application started configuration loaded and all available plugins are
      * determined and sorted in there dependency specific typological order.
@@ -22,7 +36,10 @@ exports = class Dummy {
      * @param configuration - Mutable by plugins extended configuration object.
      * @returns List of plugins in with needed order to run their hooks.
      */
-    static preInitialize(plugins, baseConfiguration, configuration) {
+    static preInitialize(
+        plugins:Array<Plugin>, baseConfiguration:Configuration,
+        configuration:Configuration
+    ):Array<Plugin> {
         return plugins
     }
     /**
@@ -34,7 +51,10 @@ exports = class Dummy {
      * @param databaseServerProcess - Node child process of database server.
      * @returns Applications server instance to listen on configured port.
      */
-    static initialize(server, databaseConnection, databaseServerProcess) {
+    static initialize(
+        server:Server, databaseConnection:PouchDB,
+        databaseServerProcess:ChildProcess
+    ):Server {
         return server
     }
     /**
@@ -45,7 +65,9 @@ exports = class Dummy {
      * client.
      * @returns Request object to finishe.
      */
-    static request(request, response) {
+    static request(
+        request:IncomingMessage, response:ServerResponse
+    ):IncomingMessage {
         return request
     }
     /**
@@ -57,8 +79,9 @@ exports = class Dummy {
      * @returns New configuration object to use.
      */
     static configurationReloaded(
-        configuration, pluginsWithChangedConfiguration
-    ) {
+        configuration:Configuration,
+        pluginsWithChangedConfiguration:Array<Plugin>
+    ):Configuration {
         return configuration
     }
     /**
@@ -68,7 +91,10 @@ exports = class Dummy {
      * plugin api file.
      * @returns Will be ignored.
      */
-    static apiFileReloaded(pluginsWithChangedAPIFiles) {}
+    static apiFileReloaded(pluginsWithChangedAPIFiles:Array<Plugin>):any {
+        return pluginsWithChangedAPIFiles
+    }
+    /* eslint-enable no-unused-vars */
 }
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

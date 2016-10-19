@@ -5,7 +5,6 @@
 import Tools from 'clientnode'
 import path from 'path'
 import * as QUnit from 'qunit-cli'
-import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
 try {
     module.require('source-map-support/register')
@@ -160,7 +159,7 @@ QUnit.test('extendModels', (assert:Object):void => {
 })
 QUnit.test('validateDocumentUpdate', (assert:Object):void => {
     for (const updateStrategy:UpdateStrategy of [
-        'fillUp', 'incremental', ''
+        '', 'fillUp', 'incremental'
     ]) {
         const defaultModelSpecification:ModelConfiguration =
             Tools.extendObject(
@@ -175,7 +174,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 configuration.modelConfiguration.specialPropertyNames.type
             )
                 delete defaultModelSpecification.models._base[propertyName]
-        // region forbidden write tests
+        // region forbidden writes
         for (const test:Array<any> of [
             // region general environment
             [[{_type: 'Test', _rev: 'latest'}, null], 'Revision'],
@@ -469,18 +468,17 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
         ]) {
             if (test.length < 3)
                 test.splice(1, 0, {})
-            const modelConfiguration:ModelConfiguration = Helper.extendModels(
-                Tools.extendObject(
-                    true, {}, defaultModelSpecification, test[1]))
-            const options:PlainObject = Tools.extendObject(
+            const models:Models = Helper.extendModels(Tools.extendObject(
+                true, {}, defaultModelSpecification, test[1]))
+            const modelConfiguration:ModelConfiguration = Tools.extendObject(
                 true, {}, defaultModelSpecification, test[1])
-            delete options.defaultPropertySpecification
-            delete options.models
+            delete modelConfiguration.defaultPropertySpecification
+            delete modelConfiguration.models
             const parameter:Array<any> = test[0].concat([null, {}, {}].slice(
                 test[0].length - 1
-            )).concat([modelConfiguration, options])
+            )).concat([models, modelConfiguration])
             assert.throws(():Object => Helper.validateDocumentUpdate.apply(
-                this, parameter
+                Helper, parameter
             ), (error:DatabaseForbiddenError):boolean => {
                 if (error.hasOwnProperty('forbidden')) {
                     const result:boolean = error.forbidden.startsWith(
@@ -489,7 +487,9 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         console.log(
                             `Error "${error.forbidden}" doesn't start with "` +
                             `${test[2]}:". Given arguments: "` +
-                            `${parameter.map(JSON.stringify).join('", "')}".`)
+                            parameter.map(Helper.representObject).join(
+                                '", "'
+                            ) + '".')
                     return result
                 }
                 // IgnoreTypeCheck
@@ -498,7 +498,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             })
         }
         // endregion
-        // region allowed write tests
+        // region allowed writes
         for (const test:Array<any> of [
             // region general environment
             [[{_deleted: true}], {}, {
@@ -1093,19 +1093,32 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }]
             // endregion
         ]) {
-            const modelConfiguration:ModelConfiguration = Helper.extendModels(
-                Tools.extendObject(
-                    true, {}, defaultModelSpecification, test[1]))
-            const options:PlainObject = Tools.extendObject(
+            const models:Models = Helper.extendModels(Tools.extendObject(
+                true, {}, defaultModelSpecification, test[1]))
+            const modelConfiguration:ModelConfiguration = Tools.extendObject(
                 true, {}, defaultModelSpecification, test[1])
-            delete options.defaultPropertySpecification
-            delete options.models
+            delete modelConfiguration.defaultPropertySpecification
+            delete modelConfiguration.models
             assert.deepEqual(Helper.validateDocumentUpdate.apply(
-                this, test[0].concat([null, {}, {}].slice(
+                Helper, test[0].concat([null, {}, {}].slice(
                     test[0].length - 1
-                )).concat([modelConfiguration, options])
+                )).concat([models, modelConfiguration])
             ), test[2][updateStrategy])
         }
+        // endregion
+        // region migration writes
+        const modelConfiguration:ModelConfiguration = Tools.extendObject(
+            true, {updateStrategy: 'migrate'}, defaultModelSpecification)
+        delete modelConfiguration.defaultPropertySpecification
+        delete modelConfiguration.models
+        for (const test:Array<any> of [
+            [{_type: 'Test', a: 2}, {_type: 'Test'}]
+        ])
+            assert.deepEqual(Helper.validateDocumentUpdate(
+                test[0], null, {}, {}, {Test: {
+                    _extends: null, _allowedRoles: null
+                }}, modelConfiguration
+            ), test[1])
         // endregion
     }
 })
@@ -1204,10 +1217,9 @@ QUnit.test('loadPluginConfigurations', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, []]
         // TODO add more tests
-    ]) {
+    ])
         assert.deepEqual(
             Helper.loadPluginConfigurations(test[0], test[1]), test[3])
-    }
 })
 QUnit.test('loadPluginFile', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -1217,10 +1229,9 @@ QUnit.test('loadPluginFile', (assert:Object):void => {
             'test/dummyPlugin/package.json'
         ), 'dummy', null, false, require('./dummyPlugin/package')],
         ['unknown', 'dummy', {a: 2}, false, {a: 2}]
-    ]) {
+    ])
         assert.deepEqual(
             Helper.loadPluginFile(test[0], test[1], test[2], test[3]), test[4])
-    }
 })
 QUnit.test('loadPlugins', (assert:Object):void => {
     for (const test:Array<any> of [

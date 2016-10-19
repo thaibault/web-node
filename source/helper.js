@@ -116,8 +116,10 @@ export default class Helper {
                         response = await fetch(url)
                     } catch (error) {
                         if (!timedOut)
+                            /* eslint-disable no-use-before-define */
                             currentlyRunningTimeout = setTimeout(
                                 wrapper, pollIntervallInSeconds * 1000)
+                            /* eslint-enable no-use-before-define */
                         return response
                     }
                     try {
@@ -125,7 +127,9 @@ export default class Helper {
                     } catch (error) {
                         reject(error)
                     } finally {
+                        /* eslint-disable no-use-before-define */
                         clearTimeout(timeoutID)
+                        /* eslint-enable no-use-before-define */
                     }
                     return response
                 }
@@ -206,12 +210,12 @@ export default class Helper {
     /**
      * Determines a mapping of all models to roles who are allowed to edit
      * corresponding model instances.
-     * @param ModelConfiguration - Model specification object.
+     * @param modelConfiguration - Model specification object.
      * @returns The mapping object.
      */
     static determineAllowedModelRolesMapping(
         modelConfiguration:ModelConfiguration
-    ):{[key:string]:Array<string>} {
+    ):AllowedModelRolesMapping {
         const allowedModelRolesMapping:AllowedModelRolesMapping = {}
         const models:Models = Helper.extendModels(modelConfiguration)
         for (const modelName:string in models)
@@ -219,9 +223,12 @@ export default class Helper {
                 modelName
             ].hasOwnProperty(
                 modelConfiguration.specialPropertyNames.allowedRoles
-            ))
-                allowedModelRolesMapping[modelName] = models[modelName][
+            )) {
+                // IgnoreTypeCheck
+                const allowedRoles:Array<string> = models[modelName][
                     modelConfiguration.specialPropertyNames.allowedRoles]
+                allowedModelRolesMapping[modelName] = allowedRoles
+            }
         return allowedModelRolesMapping
     }
     /**
@@ -310,12 +317,13 @@ export default class Helper {
      * @param securitySettings - Database security settings.
      * @param models - Models specfication object.
      * @param modelConfiguration - Model configuration object.
+     * @param toJSON - JSON stringifier.
      * @returns Modified given new document.
      */
     static validateDocumentUpdate(
         newDocument:Object, oldDocument:?Object, userContext:Object = {},
         securitySettings:Object = {}, models:Models,
-        modelConfiguration:SimpleModelConfiguration, toJSON:?Function
+        modelConfiguration:SimpleModelConfiguration, toJSON:?Function = null
     ):Object {
         // region ensure needed environment
         if (newDocument.hasOwnProperty('_deleted') && newDocument._deleted)
@@ -338,9 +346,11 @@ export default class Helper {
             if (oldDocument && oldDocument.hasOwnProperty('_rev'))
                 newDocument._rev = oldDocument._rev
             else
+                /* eslint-disable no-throw-literal */
                 throw {
                     forbidden: 'Revision: No old document to update available.'
                 }
+                /* eslint-enable no-throw-literal */
         let serialize:(value:any) => string
         if (toJSON)
             serialize = toJSON
@@ -357,19 +367,23 @@ export default class Helper {
             if (!newDocument.hasOwnProperty(
                 modelConfiguration.specialPropertyNames.type
             ))
+                /* eslint-disable no-throw-literal */
                 throw {
                     forbidden: 'Type: You have to specify a model type via ' +
                         `property "` +
                         `${modelConfiguration.specialPropertyNames.type}".`
                 }
+                /* eslint-enable no-throw-literal */
             if (!models.hasOwnProperty(
                 newDocument[modelConfiguration.specialPropertyNames.type]
             ))
+                /* eslint-disable no-throw-literal */
                 throw {
                     forbidden: 'Model: Given model "' + newDocument[
                         modelConfiguration.specialPropertyNames.type
                     ] + ' is not specified.'
                 }
+                /* eslint-enable no-throw-literal */
             // endregion
             const modelName:string = newDocument[
                 modelConfiguration.specialPropertyNames.type]
@@ -379,13 +393,15 @@ export default class Helper {
                 oldValue:?any
             ):any => {
                 // region type
-                if ('DateTime' === propertySpecification.type) {
+                if (propertySpecification.type === 'DateTime') {
                     if (typeof newValue !== 'number')
+                        /* eslint-disable no-throw-literal */
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "DateTime" (given "` +
                                 `${serialize(newValue)}").`
                         }
+                        /* eslint-enable no-throw-literal */
                 } else if (models.hasOwnProperty(propertySpecification.type))
                     if (typeof newValue === 'object' && Object.getPrototypeOf(
                         newValue
@@ -395,66 +411,80 @@ export default class Helper {
                         if (serialize(newValue) === serialize({}))
                             return null
                     } else
+                        /* eslint-disable no-throw-literal */
                         throw {
                             forbidden: 'NestedModel: Under key "${name}" ' +
                                 `isn't "${propertySpecification.type}" ` +
                                 `(given "${serialize(newValue)}").`
                         }
+                        /* eslint-enable no-throw-literal */
                 else if (['string', 'number', 'boolean'].includes(
                     propertySpecification.type
                 )) {
                     if (typeof newValue !== propertySpecification.type)
+                        /* eslint-disable no-throw-literal */
                         throw {
                             forbidden: `PropertyType: Property "${name}" ` +
                                 `isn't of type "` +
                                 `${propertySpecification.type}" (given "` +
                                 `${serialize(newValue)}").`
                         }
+                        /* eslint-enable no-throw-literal */
                 } else if (newValue !== propertySpecification.type)
+                    /* eslint-disable no-throw-literal */
                     throw {
                         forbidden: `PropertyType: Property "${name}" isn't ` +
                             `value "${propertySpecification.type}" (given "` +
                             `${serialize(newValue)}").`
                     }
+                    /* eslint-disable no-throw-literal */
                 // endregion
                 // region range
                 if (![undefined, null].includes(propertySpecification.minimum))
                     if (propertySpecification.type === 'string') {
                         if (newValue.length < propertySpecification.minimum)
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: `MinimalLength: Property "${name}` +
-                                '" (type string) should have minimal length ' +
-                                `${propertySpecification.minimum}.`
+                                    '" (type string) should have minimal ' +
+                                    `length ${propertySpecification.minimum}.`
                             }
+                            /* eslint-enable no-throw-literal */
                     } else if ([
                         'number', 'integer', 'float', 'DateTime'
                     ].includes(propertySpecification.type) &&
                     newValue < propertySpecification.minimum)
+                        /* eslint-disable no-throw-literal */
                         throw {
                             forbidden: `Minimum: Property "${name}" (type ` +
                                 `${propertySpecification.type}) should ` +
                                 `satisfy a minimum of ` +
                                 `${propertySpecification.minimum}.`
                         }
+                        /* eslint-disable no-throw-literal */
                 if (![undefined, null].includes(propertySpecification.maximum))
                     if (propertySpecification.type === 'string') {
                         if (newValue.length > propertySpecification.maximum)
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: `MaximalLength: Property "${name}` +
                                     ' (type string) should have maximal ' +
                                     `length ${propertySpecification.maximum}.`
                             }
+                            /* eslint-enable no-throw-literal */
                     } else if ([
                         'number', 'integer', 'float', 'DateTime'
                     ].includes(
                         propertySpecification.type
                     ) && newValue > propertySpecification.maximum)
+                        /* eslint-enable no-throw-literal */
                         throw {
                             forbidden: `Maximum: Property "${name}" (type ` +
                                 `${propertySpecification.type}) should ` +
                                 `satisfy a maximum of ` +
                                 `${propertySpecification.maximum}.`
                         }
+                        /* eslint-disable no-throw-literal */
                 // endregion
                 // region pattern
                 if (!([undefined, null].includes(
@@ -462,12 +492,14 @@ export default class Helper {
                 ) || (new RegExp(
                     propertySpecification.regularExpressionPattern
                 )).test(newValue)))
+                    /* eslint-enable no-throw-literal */
                     throw {
                         forbidden: `PatternMatch: Property "${name}" should ` +
                             'match regular expression pattern ' +
                             propertySpecification.regularExpressionPattern +
                             ` (given "${newValue}").`
                     }
+                    /* eslint-disable no-throw-literal */
                 // endregion
                 // region generic constraint
                 for (const type:string of [
@@ -487,12 +519,14 @@ export default class Helper {
                                     ''
                                 ) + propertySpecification[type])
                         } catch (error) {
+                            /* eslint-enable no-throw-literal */
                             throw {
                                 forbidden: `Compilation: Hook "${type}" has ` +
                                     `invalid code "` +
                                     `${propertySpecification[type]}": ` +
                                     serialize(error)
                             }
+                            /* eslint-disable no-throw-literal */
                         }
                         let satisfied:boolean = false
                         try {
@@ -504,14 +538,17 @@ export default class Helper {
                                 checkPropertyContent, newValue, name,
                                 propertySpecification, oldValue)
                         } catch (error) {
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: `Runtime: Hook "${type}" has ` +
                                     'throw an error with code "' +
                                     `${propertySpecification[type]}": ` +
                                     serialize(error)
                             }
+                            /* eslint-enable no-throw-literal */
                         }
                         if (!satisfied)
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: type.charAt(0).toUpperCase(
                                 ) + type.substring(1) + `: Property "${name}` +
@@ -519,6 +556,7 @@ export default class Helper {
                                 `${propertySpecification[type]}" (given "` +
                                 `${serialize(newValue)}").`
                             }
+                            /* eslint-enable no-throw-literal */
                     }
                 // endregion
                 return newValue
@@ -553,12 +591,14 @@ export default class Helper {
                                             'return ' : ''
                                         ) + propertySpecification[type])
                                 } catch (error) {
+                                    /* eslint-disable no-throw-literal */
                                     throw {
                                         forbidden: 'Compilation: Hook "' +
                                             `${type}" has invalid code "` +
                                             `${propertySpecification[type]}"` +
                                             `: ${serialize(error)}`
                                     }
+                                    /* eslint-enable no-throw-literal */
                                 }
                                 try {
                                     newDocument[propertyName] = hook(
@@ -569,12 +609,14 @@ export default class Helper {
                                         checkPropertyContent,
                                         propertySpecification)
                                 } catch (error) {
+                                    /* eslint-disable no-throw-literal */
                                     throw {
                                         forbidden: `Runtime: Hook "${type}" ` +
                                             'has throw an error with code "' +
                                             `${propertySpecification[type]}"` +
                                             `: ${serialize(error)}`
                                     }
+                                    /* eslint-enable no-throw-literal */
                                 }
                             }
                     for (const type:string of [
@@ -594,12 +636,14 @@ export default class Helper {
                                     ) ? 'return ' : '') +
                                     propertySpecification[type])
                             } catch (error) {
+                                /* eslint-disable no-throw-literal */
                                 throw {
                                     forbidden: `Compilation: Hook "${type}" ` +
                                         `has invalid code "` +
                                         `${propertySpecification[type]}": ` +
                                         serialize(error)
                                 }
+                                /* eslint-enable no-throw-literal */
                             }
                             try {
                                 newDocument[propertyName] = hook(
@@ -609,12 +653,14 @@ export default class Helper {
                                     model, checkDocument, checkPropertyContent,
                                     propertySpecification)
                             } catch (error) {
+                                /* eslint-disable no-throw-literal */
                                 throw {
                                     forbidden: `Runtime: Hook "${type}" ` +
                                         'has throw an error with code "' +
                                         `${propertySpecification[type]}": ` +
                                         serialize(error)
                                 }
+                                /* eslint-enable no-throw-literal */
                             }
                         }
                     if ([undefined, null].includes(
@@ -625,10 +671,12 @@ export default class Helper {
                             oldDocument && oldDocument.hasOwnProperty(
                                 propertyName)
                         )))
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: 'MissingProperty: Missing ' +
                                     `property "${propertyName}".`
                             }
+                            /* eslint-enable no-throw-literal */
                         if (!newDocument.hasOwnProperty(
                             propertyName
                         ) && oldDocument && oldDocument.hasOwnProperty(
@@ -683,11 +731,13 @@ export default class Helper {
                             delete newDocument[propertyName]
                             continue
                         } else
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: 'Property: Given property "' +
-                                    `${propertyName}" isn't specified in model "` +
-                                    `${modelName}".`
+                                    `${propertyName}" isn't specified in ` +
+                                    `model "${modelName}".`
                             }
+                            /* eslint-enable no-throw-literal */
                     const propertySpecification:PropertySpecification =
                         model[propertyName]
                     // region writable/mutable
@@ -706,17 +756,21 @@ export default class Helper {
                                     delete newDocument[propertyName]
                                 continue
                             } else
+                                /* eslint-disable no-throw-literal */
                                 throw {
                                     forbidden: 'Readonly: Property "' +
                                         `${propertyName}" is not writable ` +
                                         `(old document "` +
                                         `${serialize(oldDocument)}").`
                                 }
+                                /* eslint-enable no-throw-literal */
                         else
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: 'Readonly: Property "' +
                                     `${propertyName}" is not writable.`
                             }
+                            /* eslint-enable no-throw-literal */
                     if (
                         !propertySpecification.mutable && oldDocument &&
                         oldDocument.hasOwnProperty(propertyName)
@@ -733,11 +787,13 @@ export default class Helper {
                                 delete newDocument[propertyName]
                             continue
                         } else
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: 'Immutable: Property "' +
                                     `${propertyName}" is not writable (old ` +
                                     `document "${serialize(oldDocument)}").`
                             }
+                            /* eslint-enable no-throw-literal */
                     // endregion
                     // region nullable
                     if (newDocument[propertyName] === null)
@@ -745,16 +801,19 @@ export default class Helper {
                             delete newDocument[propertyName]
                             continue
                         } else
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: 'NotNull: Property "' +
                                     `${propertyName}" should not by "null".`
                             }
+                            /* eslint-enable no-throw-literal */
                     // endregion
                     if (
                         typeof propertySpecification.type === 'string' &&
                         propertySpecification.type.endsWith('[]')
                     ) {
                         if (!Array.isArray(newDocument[propertyName]))
+                            /* eslint-disable no-throw-literal */
                             throw {
                                 forbidden: 'PropertyType: Property "' +
                                     `${propertyName}" isn't of type "array ` +
@@ -763,19 +822,20 @@ export default class Helper {
                                     `${serialize(newDocument[propertyName])}` +
                                     '").'
                             }
+                            /* eslint-enable no-throw-literal */
                         // IgnoreTypeCheck
-                        const nestedPropertySpecification:PropertySpecification
-                            = {}
+                        const propertySpecificationCopy:PropertySpecification =
+                            {}
                         for (const key:string in propertySpecification)
                             if (propertySpecification.hasOwnProperty(key))
                                 if (key === 'type')
-                                    nestedPropertySpecification[key] =
+                                    propertySpecificationCopy[key] =
                                         propertySpecification[key].substring(
                                             0,
                                             propertySpecification.type.length -
                                                 '[]'.length)
                                 else
-                                    nestedPropertySpecification[key] =
+                                    propertySpecificationCopy[key] =
                                         propertySpecification[key]
                         let index:number = 0
                         for (const value:any of newDocument[
@@ -785,7 +845,7 @@ export default class Helper {
                                 checkPropertyContent(
                                     value,
                                     `${index + 1}. value in ${propertyName}`,
-                                    nestedPropertySpecification)
+                                    propertySpecificationCopy)
                             if (newDocument[propertyName][index] === null)
                                 newDocument[propertyName].splice(index, 1)
                             index += 1
@@ -821,14 +881,17 @@ export default class Helper {
      * Calls all plugin methods for given trigger description.
      * @param type - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param baseConfiguration - Immutable base configuration.
+     * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
      * plugins have been resolved.
+     * @param parameter - Additional parameter to forward into plugin api.
      * @returns A promise which resolves when all callbacks have resolved their
      * promise.
      */
     static async callPluginStack(
-        type:string, plugins:Array<Object>, baseConfiguration, configuration,
-        data:any = null, ...parameter:Array<any>
+        type:string, plugins:Array<Object>, baseConfiguration:Configuration,
+        configuration:Configuration, data:any = null, ...parameter:Array<any>
     ):Promise<any> {
         if (configuration.plugin.hotReloading) {
             const pluginsWithChangedConfiguration = Helper.hotReloadPluginFile(
@@ -894,7 +957,7 @@ export default class Helper {
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
      * @param pluginPath - Path to given plugin.
-     * @return An object of plugin specific meta informations.
+     * @returns An object of plugin specific meta informations.
      */
     static loadPlugin(
         name:string, plugins:{[key:string]:Plugin},
@@ -999,10 +1062,10 @@ export default class Helper {
         }
     }
     /**
-     * (Re-)Loads given plugin configurations into global configuration.
+     * Re-/Loads given plugin configurations into global configuration.
      * @param configuration - Global configuration to extend.
      * @param plugins - Topological sorted list of plugins to check for
-     * configurations
+     * configurations.
      * @returns Updated given configuration object.
      */
     static loadPluginConfigurations(
