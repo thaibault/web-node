@@ -828,7 +828,7 @@ export default class Helper {
     ):Promise<any> {
         if (configuration.plugin.hotReloading) {
             const pluginsWithChangedConfiguration = Helper.hotReloadPluginFile(
-                'configurationFile', 'configuration')
+                'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
                 Helper.loadPluginConfigurations(configuration, plugins)
                 Helper.callPluginStack(
@@ -837,7 +837,7 @@ export default class Helper {
                     pluginsWithChangedConfiguration)
             }
             const pluginsWithChangedAPIFiles = Helper.hotReloadPluginFile(
-                'apiFile', 'scope')
+                'apiFile', 'scope', plugins)
             if (pluginsWithChangedAPIFiles.length)
                 Helper.callPluginStack(
                     'apiFileReloaded', plugins, baseConfiguration,
@@ -850,10 +850,17 @@ export default class Helper {
         return data
     }
     /**
-     * TODO
+     * Checks for changed plugin file type in given plugins and reloads them
+     * if necessary (new timestamp).
+     * @param fileType - Plugin file type to search for updates.
+     * @param targetType - Property name to in plugin meta informations to
+     * update.
+     * @param plugins - List of plugins to search for updates in.
+     * @returns A list with plugins which have a changed plugin file of given
+     * type.
      */
     static hotReloadPluginFile(
-        fileType:string, targetType:string
+        fileType:string, targetType:string, plugins:Array<Plugin>
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         for (const plugin:Plugin of plugins)
@@ -985,7 +992,6 @@ export default class Helper {
             scope: api && Helper.loadPluginFile(filePath, name)
         }
     }
-    // TODO TEST
     /**
      * (Re-)Loads given plugin configurations into global configuration.
      * @param configuration - Global configuration to extend.
