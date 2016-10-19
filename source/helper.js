@@ -389,8 +389,8 @@ export default class Helper {
                 modelConfiguration.specialPropertyNames.type]
             const model:Model = models[modelName]
             const checkPropertyContent:Function = (
-                newValue:any, name:string, propertySpecification:Object,
-                oldValue:?any
+                newValue:any, name:string,
+                propertySpecification:PropertySpecification, oldValue:?any
             ):any => {
                 // region type
                 if (propertySpecification.type === 'DateTime') {
@@ -684,7 +684,9 @@ export default class Helper {
                         ) && modelConfiguration.updateStrategy === 'fillUp')
                             newDocument[propertyName] = oldDocument[
                                 propertyName]
-                    } else if (!newDocument.hasOwnProperty(propertyName))
+                    } else if (!newDocument.hasOwnProperty(
+                        propertyName
+                    ) || newDocument[propertyName] === null)
                         if (modelConfiguration.updateStrategy === 'fillUp')
                             if (oldDocument)
                                 newDocument[propertyName] = oldDocument[
@@ -692,7 +694,10 @@ export default class Helper {
                             else
                                 newDocument[propertyName] =
                                     propertySpecification.default
-                        else if (!oldDocument)
+                        else if (
+                            modelConfiguration.updateStrategy === 'migrate' ||
+                            !oldDocument
+                        )
                             newDocument[propertyName] =
                                 propertySpecification.default
                 }

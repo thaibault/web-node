@@ -504,58 +504,58 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             [[{_deleted: true}], {}, {
                 fillUp: {_deleted: true},
                 incremental: {_deleted: true},
-                null: {_deleted: true}
+                '': {_deleted: true}
             }],
             [[{_id: 1, _rev: 1}, null, {}, {_validatedDocuments: new Set(
                 ['1-1']
             )}], {}, {
                 fillUp: {_id: 1, _rev: 1},
                 incremental: {_id: 1, _rev: 1},
-                null: {_id: 1, _rev: 1}
+                '': {_id: 1, _rev: 1}
             }],
             [[{_type: 'Test', _rev: 'latest'}, {_type: 'Test', _rev: 1}], {
                 models: {Test: {}}
             }, {
                 fillUp: {_type: 'Test', _rev: 1},
                 incremental: {},
-                null: {_type: 'Test', _rev: 1}
+                '': {_type: 'Test', _rev: 1}
             }],
             // endregion
             // region model
             [[{_type: 'Test'}], {models: {Test: {}}}, {
                 fillUp: {_type: 'Test'},
                 incremental: {_type: 'Test'},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test'}], {models: {Test: {}}}, {
                 fillUp: {_type: 'Test'},
                 incremental: {_type: 'Test'},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test'}], {models: {Test: {class: {}}}}, {
                 fillUp: {_type: 'Test'},
                 incremental: {_type: 'Test'},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test'}, {_type: 'Test', a: '2'}], {
                 models: {Test: {a: {}}}
             }, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test', a: '2'}, {_type: 'Test', a: '2'}], {
                 models: {Test: {a: {}}}
             }, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: '3'}, {_type: 'Test', a: '2'}], {
                 models: {Test: {a: {}}}}, {
                     fillUp: {a: '3', _type: 'Test'},
                     incremental: {a: '3'},
-                    null: {_type: 'Test', a: '3'}
+                    '': {_type: 'Test', a: '3'}
                 }
             ],
             // endregion
@@ -566,21 +566,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: ''}], {models: {Test: {a: {
                 onCreateExpression: "return '2'"
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: ''}, {_type: 'Test', a: ''}], {models: {
                 Test: {a: {onCreateExpression: "return '2'"}}
             }}, {
                 fillUp: {_type: 'Test', a: ''},
                 incremental: {},
-                null: {_type: 'Test', a: ''}
+                '': {_type: 'Test', a: ''}
             }],
             // / endregion
             // / region on update
@@ -589,21 +589,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: ''}], {models: {Test: {a: {
                 onUpdateExpression: "return '2'"
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             [[{_type: 'Test', a: '1'}, {_type: 'Test', a: '2'}], {models: {
                 Test: {a: {onUpdateEvaluation: "'2'"
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             // / endregion
             // endregion
@@ -613,21 +613,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }}, {
                 fillUp: {_type: 'Test', a: 'b'},
                 incremental: {},
-                null: {_type: 'Test', a: 'b'}
+                '': {_type: 'Test', a: 'b'}
             }],
             [[{_type: 'Test'}, {_type: 'Test'}], {models: {Test: {a: {
                 writable: false
             }}}}, {
                 fillUp: {_type: 'Test'},
                 incremental: {},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test', a: '2'}, {_type: 'Test'}], {models: {Test: {a: {
                 mutable: false
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {a: '2'},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             // endregion
             // region property existents
@@ -636,26 +636,26 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }}}}, {
                 fillUp: {_type: 'Test', a: 2},
                 incremental: {_type: 'Test', a: 2},
-                null: {_type: 'Test', a: 2}
+                '': {_type: 'Test', a: 2}
             }],
             [[{_type: 'Test', a: null}], {models: {Test: {a: {}}}}, {
                 fillUp: {_type: 'Test'},
                 incremental: {_type: 'Test'},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test', a: 'a'}], {models: {Test: {a: {
                 nullable: false
             }}}}, {
                 fillUp: {_type: 'Test', a: 'a'},
                 incremental: {_type: 'Test', a: 'a'},
-                null: {_type: 'Test', a: 'a'}
+                '': {_type: 'Test', a: 'a'}
             }],
             [[{_type: 'Test'}, {_type: 'Test', a: 'a'}], {models: {Test: {a: {
                 nullable: false
             }}}}, {
                 fillUp: {_type: 'Test', a: 'a'},
                 incremental: {},
-                null: {_type: 'Test'}
+                '': {_type: 'Test'}
             }],
             [[{_type: 'Test'}], {models: {Test: {a: {
                 default: '2',
@@ -663,7 +663,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }}}}, {
                 fillUp: {_type: 'Test', a: '2'},
                 incremental: {_type: 'Test', a: '2'},
-                null: {_type: 'Test', a: '2'}
+                '': {_type: 'Test', a: '2'}
             }],
             // endregion
             // region property type
@@ -672,7 +672,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {}}}}, {
                     fillUp: {_type: 'Test', a: '2'},
                     incremental: {},
-                    null: {_type: 'Test', a: '2'}
+                    '': {_type: 'Test', a: '2'}
                 }
             ],
             [
@@ -680,7 +680,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'number'}}}}, {
                     fillUp: {_type: 'Test', a: 2},
                     incremental: {},
-                    null: {_type: 'Test', a: 2}
+                    '': {_type: 'Test', a: 2}
                 }
             ],
             [
@@ -691,7 +691,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'boolean'}}}}, {
                     fillUp: {_type: 'Test', a: true},
                     incremental: {},
-                    null: {_type: 'Test', a: true}
+                    '': {_type: 'Test', a: true}
                 }
             ],
             [
@@ -699,7 +699,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'DateTime'}}}}, {
                     fillUp: {_type: 'Test', a: 1},
                     incremental: {},
-                    null: {_type: 'Test', a: 1}
+                    '': {_type: 'Test', a: 1}
                 }
             ],
             // / region array
@@ -711,7 +711,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'string[]'}}}}, {
                     fillUp: {_type: 'Test', a: ['2']},
                     incremental: {},
-                    null: {_type: 'Test', a: ['2']}
+                    '': {_type: 'Test', a: ['2']}
                 }
             ],
             [
@@ -719,7 +719,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'string[]'}}}}, {
                     fillUp: {_type: 'Test', a: ['2']},
                     incremental: {a: ['2']},
-                    null: {_type: 'Test', a: ['2']}
+                    '': {_type: 'Test', a: ['2']}
                 }
             ],
             [
@@ -727,7 +727,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'string[]'}}}}, {
                     fillUp: {_type: 'Test'},
                     incremental: {},
-                    null: {_type: 'Test'}
+                    '': {_type: 'Test'}
                 }
             ],
             [
@@ -735,7 +735,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'number[]'}}}}, {
                     fillUp: {_type: 'Test', a: [2]},
                     incremental: {a: [2]},
-                    null: {_type: 'Test', a: [2]}
+                    '': {_type: 'Test', a: [2]}
                 }
             ],
             [
@@ -743,7 +743,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'boolean[]'}}}}, {
                     fillUp: {_type: 'Test', a: [true]},
                     incremental: {a: [true]},
-                    null: {_type: 'Test', a: [true]}
+                    '': {_type: 'Test', a: [true]}
                 }
             ],
             [
@@ -751,7 +751,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'DateTime[]'}}}}, {
                     fillUp: {_type: 'Test', a: [1]},
                     incremental: {a: [1]},
-                    null: {_type: 'Test', a: [1]}
+                    '': {_type: 'Test', a: [1]}
                 }
             ],
             [
@@ -759,7 +759,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'DateTime[]'}}}}, {
                     fillUp: {_type: 'Test', a: []},
                     incremental: {a: []},
-                    null: {_type: 'Test', a: []}
+                    '': {_type: 'Test', a: []}
                 }
             ],
             [
@@ -767,7 +767,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'DateTime[]', mutable: false}}}}, {
                     fillUp: {_type: 'Test', a: [2]},
                     incremental: {a: [2]},
-                    null: {_type: 'Test', a: [2]}
+                    '': {_type: 'Test', a: [2]}
                 }
             ],
             [
@@ -778,7 +778,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'number[]'}}}}, {
                     fillUp: {_type: 'Test', a: [2, 1]},
                     incremental: {a: [2, 1]},
-                    null: {_type: 'Test', a: [2, 1]}
+                    '': {_type: 'Test', a: [2, 1]}
                 }
             ],
             // / endregion
@@ -791,7 +791,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 ], {models: {Test: {a: {type: 'Test'}}}}, {
                     fillUp: {_type: 'Test', a: {_type: 'Test'}},
                     incremental: {},
-                    null: {_type: 'Test', a: {_type: 'Test'}}
+                    '': {_type: 'Test', a: {_type: 'Test'}}
                 }
             ],
             [
@@ -799,7 +799,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {models: {Test: {a: {type: 'Test'}}}}, {
                     fillUp: {_type: 'Test'},
                     incremental: {},
-                    null: {_type: 'Test'}
+                    '': {_type: 'Test'}
                 }
             ],
             [
@@ -809,7 +809,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 ], {models: {Test: {a: {type: 'Test'}, b: {}}}}, {
                     fillUp: {_type: 'Test', a: {_type: 'Test'}},
                     incremental: {},
-                    null: {_type: 'Test', a: {_type: 'Test'}}
+                    '': {_type: 'Test', a: {_type: 'Test'}}
                 }
             ],
             [
@@ -821,7 +821,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         _type: 'Test', b: '2'
                     }},
                     incremental: {},
-                    null: {_type: 'Test', a: {
+                    '': {_type: 'Test', a: {
                         _type: 'Test', b: '2'
                     }}
                 }
@@ -845,7 +845,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         b: '2'
                     },
                     incremental: {},
-                    null: {
+                    '': {
                         _type: 'Test',
                         a: {_type: 'Test', b: 'a'},
                         b: '2'
@@ -864,7 +864,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         a: {_type: 'Test'}
                     },
                     incremental: {},
-                    null: {
+                    '': {
                         _type: 'Test',
                         a: {_type: 'Test'}
                     }
@@ -885,7 +885,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         b: 'a'
                     },
                     incremental: {},
-                    null: {
+                    '': {
                         _type: 'Test',
                         a: {_type: 'Test'},
                         b: 'a'
@@ -912,7 +912,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         b: 'a'
                     },
                     incremental: {},
-                    null: {
+                    '': {
                         _type: 'Test',
                         a: {_type: 'Test', b: '2'},
                         b: 'a'
@@ -932,7 +932,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         a: {_type: 'Test', b: 'b'}
                     },
                     incremental: {},
-                    null: {
+                    '': {
                         _type: 'Test',
                         a: {_type: 'Test', b: 'b'}
                     }
@@ -947,7 +947,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 {
                     fillUp: {_type: 'Test', a: {_type: 'Test', b: 'a'}},
                     incremental: {},
-                    null: {_type: 'Test', a: {_type: 'Test', b: 'a'}}
+                    '': {_type: 'Test', a: {_type: 'Test', b: 'a'}}
                 }
             ],
             // // endregion
@@ -963,7 +963,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 }}}, {
                     fillUp: {_type: 'Test', a: 4, b: {_type: 'Test', a: 3}},
                     incremental: {a: 4, b: {_type: 'Test', a: 3}},
-                    null: {_type: 'Test', a: 4, b: {_type: 'Test', a: 3}}
+                    '': {_type: 'Test', a: 4, b: {_type: 'Test', a: 3}}
                 }
             ],
             [
@@ -979,7 +979,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                         a: '1',
                         b: {_type: 'Test', a: '1'}
                     },
-                    null: {
+                    '': {
                         _type: 'Test',
                         a: '1',
                         b: {_type: 'Test', a: '1'}
@@ -996,7 +996,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 }}}, {
                     fillUp: {_type: 'Test', b: {_type: 'Test', a: 'a'}},
                     incremental: {_type: 'Test', b: {_type: 'Test', a: 'a'}},
-                    null: {_type: 'Test', b: {_type: 'Test', a: 'a'}}
+                    '': {_type: 'Test', b: {_type: 'Test', a: 'a'}}
                 }
             ],
             // // endregion
@@ -1013,7 +1013,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                     a: 'b',
                     b: {_type: 'Test', a: 'b'}
                 },
-                null: {
+                '': {
                     _type: 'Test',
                     a: 'b',
                     b: {_type: 'Test', a: 'b'}
@@ -1026,7 +1026,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 models: {Test: {a: {type: 2}}}}, {
                     fillUp: {_type: 'Test', a: 2},
                     incremental: {a: 2},
-                    null: {_type: 'Test', a: 2}
+                    '': {_type: 'Test', a: 2}
                 }
             ],
             // endregion
@@ -1035,28 +1035,28 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 models: {Test: {a: {type: 'number', minimum: 3}}}}, {
                     fillUp: {_type: 'Test', a: 3},
                     incremental: {a: 3},
-                    null: {_type: 'Test', a: 3}
+                    '': {_type: 'Test', a: 3}
                 }
             ],
             [[{_type: 'Test', a: 1}, {_type: 'Test'}], {
                 models: {Test: {a: {type: 'number', maximum: 1}}}}, {
                     fillUp: {_type: 'Test', a: 1},
                     incremental: {a: 1},
-                    null: {_type: 'Test', a: 1}
+                    '': {_type: 'Test', a: 1}
                 }
             ],
             [[{_type: 'Test', a: '123'}, {_type: 'Test'}], {
                 models: {Test: {a: {minimum: 3}}}}, {
                     fillUp: {_type: 'Test', a: '123'},
                     incremental: {a: '123'},
-                    null: {_type: 'Test', a: '123'}
+                    '': {_type: 'Test', a: '123'}
                 }
             ],
             [[{_type: 'Test', a: '1'}], {
                 models: {Test: {a: {maximum: 1}}}}, {
                     fillUp: {_type: 'Test', a: '1'},
                     incremental: {_type: 'Test', a: '1'},
-                    null: {_type: 'Test', a: '1'}
+                    '': {_type: 'Test', a: '1'}
                 }
             ],
             // endregion
@@ -1065,7 +1065,7 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
                 models: {Test: {a: {regularExpressionPattern: 'a'}}}}, {
                     fillUp: {_type: 'Test', a: 'a'},
                     incremental: {_type: 'Test', a: 'a'},
-                    null: {_type: 'Test', a: 'a'}
+                    '': {_type: 'Test', a: 'a'}
                 }
             ],
             // endregion
@@ -1075,21 +1075,21 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             }}}}, {
                 fillUp: {_type: 'Test', a: 'b'},
                 incremental: {_type: 'Test', a: 'b'},
-                null: {_type: 'Test', a: 'b'}
+                '': {_type: 'Test', a: 'b'}
             }],
             [[{_type: 'Test', a: 'a'}], {models: {Test: {a: {
                 constraintEvaluation: 'newValue === "a"'
             }}}}, {
                 fillUp: {_type: 'Test', a: 'a'},
                 incremental: {_type: 'Test', a: 'a'},
-                null: {_type: 'Test', a: 'a'}
+                '': {_type: 'Test', a: 'a'}
             }],
             [[{_type: 'Test', a: 'a'}], {models: {Test: {a: {
                 constraintExpression: 'return newValue === "a"'
             }}}}, {
                 fillUp: {_type: 'Test', a: 'a'},
                 incremental: {_type: 'Test', a: 'a'},
-                null: {_type: 'Test', a: 'a'}
+                '': {_type: 'Test', a: 'a'}
             }]
             // endregion
         ]) {
@@ -1106,21 +1106,59 @@ QUnit.test('validateDocumentUpdate', (assert:Object):void => {
             ), test[2][updateStrategy])
         }
         // endregion
-        // region migration writes
+    }
+    // region migration writes
+    const defaultModelSpecification:ModelConfiguration = Tools.extendObject(
+        true, {}, configuration.modelConfiguration, {updateStrategy: 'migrate'}
+    )
+    for (const propertyName:string in defaultModelSpecification.models._base)
+        if (
+            defaultModelSpecification.models._base.hasOwnProperty(
+                propertyName
+            ) && propertyName !==
+            configuration.modelConfiguration.specialPropertyNames.type
+        )
+            delete defaultModelSpecification.models._base[propertyName]
+    for (const test:Array<any> of [
+        [[{_type: 'Test', a: 2}], {models: {Test: {}}}, {_type: 'Test'}],
+        [
+            [{_type: 'Test', a: '2'}], {models: {Test: {a: {}}}},
+            {_type: 'Test', a: '2'}
+        ],
+        [
+            [{_type: 'Test'}, {_type: 'Test', a: 1}],
+            {models: {Test: {a: {}}}}, {_type: 'Test'}
+        ],
+        [
+            [{_type: 'Test', a: null}],
+            {models: {Test: {a: {default: '2'}}}}, {_type: 'Test', a: '2'}
+        ],
+        [
+            [{_type: 'Test', a: null}, {_type: 'Test', a: '1'}],
+            {models: {Test: {a: {default: '2'}}}}, {_type: 'Test', a: '2'}
+        ],
+        [
+            [{_type: 'Test'}, {_type: 'Test', a: '1'}],
+            {models: {Test: {a: {default: '2'}}}}, {_type: 'Test', a: '2'}
+        ],
+        [
+            [{_type: 'Test', b: '3'}, {_type: 'Test', a: '1'}],
+            {models: {Test: {a: {default: '2'}}}}, {_type: 'Test', a: '2'}
+        ]
+    ]) {
+        const models:Models = Helper.extendModels(Tools.extendObject(
+            true, {}, defaultModelSpecification, test[1]))
         const modelConfiguration:ModelConfiguration = Tools.extendObject(
-            true, {updateStrategy: 'migrate'}, defaultModelSpecification)
+            true, {}, defaultModelSpecification, test[1])
         delete modelConfiguration.defaultPropertySpecification
         delete modelConfiguration.models
-        for (const test:Array<any> of [
-            [{_type: 'Test', a: 2}, {_type: 'Test'}]
-        ])
-            assert.deepEqual(Helper.validateDocumentUpdate(
-                test[0], null, {}, {}, {Test: {
-                    _extends: null, _allowedRoles: null
-                }}, modelConfiguration
-            ), test[1])
-        // endregion
+        assert.deepEqual(Helper.validateDocumentUpdate.apply(
+            Helper, test[0].concat([null, {}, {}].slice(
+                test[0].length - 1
+            )).concat([models, modelConfiguration])
+        ), test[2])
     }
+    // endregion
 })
 // / endregion
 // region plugin
