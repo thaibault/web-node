@@ -852,7 +852,7 @@ export default class Helper {
     /**
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (new timestamp).
-     * @param fileType - Plugin file type to search for updates.
+     * @param type - Plugin file type to search for updates.
      * @param targetType - Property name to in plugin meta informations to
      * update.
      * @param plugins - List of plugins to search for updates in.
@@ -860,13 +860,14 @@ export default class Helper {
      * type.
      */
     static hotReloadPluginFile(
-        fileType:string, targetType:string, plugins:Array<Plugin>
+        type:string, targetType:string, plugins:Array<Plugin>
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         for (const plugin:Plugin of plugins)
             if (plugin[type]) {
-                const timestamp:number =
-                    fileSystem.statSync(plugin.apiFilePath).mtime.getTime()
+                const timestamp:number = fileSystem.statSync(
+                    plugin[`${type}Path`]
+                ).mtime.getTime()
                 if (plugin[`${type}LoadTimestamp`] < timestamp) {
                     // Enforce to reload new file version.
                     /* eslint-disable no-eval */
@@ -874,8 +875,8 @@ export default class Helper {
                         plugin[type])]
                     /* eslint-enable no-eval */
                     plugin[targetType] = Helper.loadPluginFile(
-                        plugin[type], name, plugin[targetType])
-                    pluginsWithChangedAPIFiles.push(plugin)
+                        plugin[type], plugin.name, plugin[targetType])
+                    pluginsWithChangedFiles.push(plugin)
                 }
                 plugin[`${type}LoadTimestamp`] = timestamp
             }
@@ -986,7 +987,8 @@ export default class Helper {
             configuration,
             configurationFilePath,
             configurationFileLoadTimestamp: configurationFilePath &&
-                fileSystem.statSync(configurationFilePath).mtime.getTime(),
+                fileSystem.statSync(configurationFilePath).mtime.getTime() ||
+                null,
             name,
             path: pluginPath,
             scope: api && Helper.loadPluginFile(filePath, name)

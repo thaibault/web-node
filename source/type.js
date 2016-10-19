@@ -60,23 +60,31 @@ export type SimpleModelConfiguration = {
 }
 // / endregion
 // / region configuration
+export type DatabaseUserConfiguration = {
+    names:Array<string>;
+    roles:Array<string>;
+}
 export type Configuration = {
     context:{
         path:string;
         type:string;
     };
     database:{
-        url:string;
-        path:string;
         configFilePath:string;
+        'httpd/host':string;
+        'log/file':string;
+        'log/level':string;
+        path:string;
         port:number;
+        security:{
+            admins:DatabaseUserConfiguration;
+            members:DatabaseUserConfiguration;
+        };
+        url:string;
         user:{
             name:string;
             password:string;
         };
-        'log/file':string;
-        'log/level':string;
-        'httpd/host':string;
     };
     debug:boolean;
     encoding:string;
@@ -132,7 +140,7 @@ export type Plugin = {
     configurationFileLoadTimestamp:?number;
     name:string;
     path:string;
-    scope:Object;
+    scope:?Object;
 }
 // endregion
 // region vim modline

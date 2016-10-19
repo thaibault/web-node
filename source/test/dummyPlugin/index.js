@@ -12,7 +12,7 @@
     3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-exports default Class {
+exports = class Dummy {
     /**
      * Application started configuration loaded and all available plugins are
      * determined and sorted in there dependency specific typological order.
