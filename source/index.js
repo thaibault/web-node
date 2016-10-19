@@ -212,25 +212,25 @@ import Helper from './helper'
                 '_design/'
             ))) {
                 let newDocument:?PlainObject = null
+                const migrationModelConfiguration:ModelConfiguration =
+                    Tools.copyLimitedRecursively(modelConfiguration)
+                // NOTE: Will remove not specified properties.
+                migrationModelConfiguration.updateStrategy = 'migrate'
                 try {
                     newDocument = Helper.validateDocumentUpdate(
                         document, null, {}, Tools.copyLimitedRecursively(
                             configuration.database.security
-                        ), models, modelConfiguration)
+                        ), models, migrationModelConfiguration)
                 } catch (error) {
-                    console.error(
+                    throw new Error(
                         `Document "${Helper.representObject(document)}" ` +
                         "doesn't satisfy its schema: " +
                         Helper.representObject(error))
-                    // TODO mark document "databaseConnection.put(newDocument)"
-                    // as invalid?
                 }
                 /*
                     NOTE: If a property is missing and a default one could be
                     applied we have an auto migration for that case.
                 */
-                // TODO remove properties which aren't allowed
-                // TODO maybe detect property renaming
                 if (newDocument !== document)
                     databaseConnection.put(newDocument)
             }
