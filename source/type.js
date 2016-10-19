@@ -19,20 +19,22 @@ import type {PlainObject} from 'weboptimizer/type'
 // / region model
 export type AllowedModelRolesMapping = {[key:string]:Array<string>}
 export type PropertySpecification = {
-    type:string;
+    conflictingConstraintEvaluation:?string;
+    conflictingConstraintExpression:?string;
+    constraintEvaluation:?string;
+    constraintExpression:?string;
     default:any;
+    maximum:number;
+    minimum:number;
+    mutable:boolean;
+    nullable:boolean;
     onCreateEvaluation:?string;
     onCreateExpression:?string;
     onUpdateEvaluation:?string;
     onUpdateExpression:?string;
-    nullable:boolean;
-    writable:boolean;
-    mutable:boolean;
-    minimum:number;
-    maximum:number;
     regularExpressionPattern:?string;
-    constraintEvaluation:?string;
-    constraintExpression:?string;
+    type:string;
+    writable:boolean;
 }
 export type Model = {
     _extends:Array<string>;
