@@ -14,7 +14,9 @@
 */
 // region imports
 import Tools from 'clientnode'
+/* eslint-disable no-duplicate-imports */
 import type {PlainObject} from 'clientnode'
+/* eslint-enable no-duplicate-imports */
 import fileSystem from 'fs'
 import path from 'path'
 // NOTE: Only needed for debugging this file.
@@ -23,37 +25,34 @@ try {
 } catch (error) {}
 import Helper from './helper'
 import WebOptimizerHelper from 'weboptimizer/helper'
-import packageConfiguration from '../package'
+import packageConfiguration from './package'
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
     projects where current working directory isn't the projects directory and
     this library is located as a nested dependency.
 */
-packageConfiguration.context = {
-    path: __dirname, type: 'main'
-}
+packageConfiguration.webNode.context = {path: __dirname}
 while (true) {
-    packageConfiguration.context.path = path.resolve(
-        packageConfiguration.context.path, '../../')
+    packageConfiguration.webNode.context.path = path.resolve(
+        packageConfiguration.webNode.context.path, '../../')
     if (path.basename(path.dirname(
-        packageConfiguration.context.path
+        packageConfiguration.webNode.context.path
     )) !== 'node_modules')
         break
 }
 if (
-    packageConfiguration.context.path === '/' ||
+    packageConfiguration.webNode.context.path === '/' ||
     path.basename(path.dirname(process.cwd())) === 'node_modules' ||
     path.basename(path.dirname(process.cwd())) === '.staging' &&
     path.basename(path.dirname(path.dirname(process.cwd()))) === 'node_modules'
-) {
+)
     /*
         NOTE: If we are dealing was a dependency project use current directory
         as context.
     */
-    packageConfiguration.context.path = process.cwd()
-    packageConfiguration.context.type = 'dependency'
-} else
+    packageConfiguration.webNode.context.path = process.cwd()
+else
     /*
         NOTE: If the current working directory references this file via a
         linked "node_modules" folder using current working directory as context
@@ -62,16 +61,16 @@ if (
     try {
         if (fileSystem.lstatSync(path.join(process.cwd(
         ), 'node_modules')).isSymbolicLink())
-            packageConfiguration.context.path = process.cwd()
+            packageConfiguration.webNode.context.path = process.cwd()
     } catch (error) {}
 let specificConfiguration:PlainObject = {}
 try {
     /* eslint-disable no-eval */
     specificConfiguration = eval('require')(path.join(
-        packageConfiguration.context.path, 'package'))
+        packageConfiguration.webNode.context.path, 'package'))
     /* eslint-enable no-eval */
 } catch (error) {
-    packageConfiguration.context.path = process.cwd()
+    packageConfiguration.webNode.context.path = process.cwd()
 }
 const name:string = specificConfiguration.hasOwnProperty(
     'documentationWebsite'
@@ -84,12 +83,14 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'self', 'webOptimizerPath', 'currentPath', 'path', 'helper', 'tools']
+    'self', 'webNodePath', 'currentPath', 'path', 'helper', 'tools']
 const parameter:Array<any> = [
     packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
 ]
 const configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
     packageConfiguration.webNode, parameterDescription, parameter))
+delete packageConfiguration.webNode
+configuration.package = packageConfiguration
 Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
 ), specificConfiguration)

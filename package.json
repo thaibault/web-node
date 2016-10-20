@@ -1,7 +1,7 @@
 {
   "name": "web-node",
   "version": "1.0.20",
-  "description": "A generic web backend.",
+  "description": "A generic web backend configuration and plugin management.",
   "documentationWebsite": {
     "name": "webNode",
     "trackingCode": "TODO"
@@ -9,14 +9,15 @@
   "homepage": "http://torben.website/webNode",
   "license": "CC-BY-3.0",
   "bin": {
-    "webNode": "build/index.js"
+    "webNode": "index.compiled.js"
   },
-  "main": "build/index.js",
+  "main": "index.compiled.js",
   "keywords": [
     "web",
     "backend",
-    "rest",
-    "api"
+    "api",
+    "plugin",
+    "management"
   ],
   "repository": {
     "type": "git",
@@ -24,9 +25,6 @@
   },
   "dependencies": {
     "clientnode": "latest",
-    "node-fetch": "latest",
-    "pouchdb": "latest",
-    "pouchdb-server": "latest",
     "weboptimizer": "latest"
   },
   "devDependencies": {
@@ -35,8 +33,11 @@
     "source-map-support": "latest"
   },
   "files": [
-    "source",
-    "build"
+    "configurator.js",
+    "configurator.compiled.js",
+    "helper.js",
+    "helper.compiled.js",
+    "type.js"
   ],
   "scripts": {
     "build": "webOptimizer build",
@@ -45,7 +46,7 @@
     "document": "webOptimizer document",
     "lint": "webOptimizer typeCheck && webOptimizer lint",
     "prepublish": "npm run build",
-    "serve": "webOptimizer build && build/index.js",
+    "serve": "webOptimizer build && index.js",
     "start": "npm run serve",
     "test": "webOptimizer test",
     "update": "npm version patch && npm publish",
@@ -57,6 +58,9 @@
     "debug": false,
     "encoding": "utf8",
     "plugin": {
+      "configurationPropertyNames": [
+        "webNode"
+      ],
       "directories": {
         "internal": {
           "path": {
@@ -71,104 +75,7 @@
           "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
         }
       },
-      "optionsPropertyNames": [
-        "webNode"
-      ]
-    },
-    "database": {
-      "url": {
-        "__evaluate__": "`http://{1}${self.server.application.hostName}:${self.database.port}`"
-      },
-      "path": "database",
-      "configFilePath": {
-        "__evaluate__": "`./${self.database.path}/database.json`"
-      },
-      "port": "5984",
-      "user": {
-        "name": "admin",
-        "password": "admin"
-      },
-      "log/file": "/dev/stdout",
-      "log/level": "info",
-      "httpd/host": {
-        "__evaluate__": "self.server.application.hostName"
-      }
-    },
-    "server": {
-      "application": {
-        "rootPath": {
-          "__evaluate__": "currentPath"
-        },
-        "options": {},
-        "port": 8080,
-        "hostName": "127.0.0.1"
-      },
-      "proxy": {
-        "logFilePath": {
-          "access": "/dev/stdout",
-          "error": "/dev/stderr"
-        }
-      }
-    },
-    "model": {
-      "defaultPropertySpecification": {
-        "type": "string",
-        "default": null,
-        "onCreate": null,
-        "onUpdate": null,
-        "nullable": true,
-        "writable": true,
-        "minimum": -1e+21,
-        "maximum": 1e+21,
-        "regularExpressionPattern": null,
-        "constraint": null
-      },
-      "specialPropertyNames": {
-        "allowedRoles": "webNodeAllowedRoles",
-        "extend": "webNodeExtends",
-        "type": "webNodeType",
-        "typeNameRegularExpressionPattern": "^[A-Z][a-z0-9]+$"
-      },
-      "updateStrategy": "fillUp",
-      "types": {
-        "_base": {
-          "_id": {},
-          "creationDateTime": {
-            "type": "DateTime",
-            "onCreate": "new Date().getTime()",
-            "minimum": {
-              "__evaluate__": "new Date().getTime()"
-            },
-            "writable": false,
-            "nullable": false
-          },
-          "updateDateType": {
-            "type": "DateTime",
-            "onUpdate": "new Date().getTime()",
-            "minimum": {
-              "__evaluate__": "new Date().getTime()"
-            },
-            "nullable": false
-          },
-          "lastUser": {
-            "onUpdate": "userContext._id",
-            "writable": false,
-            "nullable": false
-          },
-          "webNodeType": {
-            "regularExpressionPattern": {
-              "__evaluate__": "self.model.specialPropertyNames.typeNameRegularExpressionPattern"
-            },
-            "nullable": false,
-            "minimum": 1,
-            "maximum": 999,
-            "writable": false
-          },
-          "webNodeAllowedRoles": [
-            "users"
-          ]
-        }
-      }
+      "hotReloading": true
     }
   },
   "webOptimizer": {
@@ -183,14 +90,6 @@
     },
     "inPlace": {
       "externalLibrary": false
-    },
-    "path": {
-      "source": {
-        "base": "source"
-      },
-      "target": {
-        "base": "build"
-      }
     },
     "targetTechnology": "node"
   }
