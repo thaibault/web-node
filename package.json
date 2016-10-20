@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "clientnode": "latest",
+    "node-fetch": "latest",
     "weboptimizer": "latest"
   },
   "devDependencies": {
