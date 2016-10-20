@@ -27,6 +27,25 @@ import type {Configuration, Plugin} from '../../type'
 exports default class Dummy {
     /* eslint-disable no-unused-vars */
     /**
+     * Application will be closed soon.
+     * @param error - An object with stored informations why an error occurs.
+     * @param services - An object with stored service instances.
+     * @returns Given and maybe changed object of services.
+     */
+    static error(
+        error:Object, services:{[key:string]:Object}
+    ):{[key:string]:Object} {
+        return services
+    }
+    /**
+     * Application will be closed soon.
+     * @param services - An object with stored service instances.
+     * @returns Given and maybe changed object of services.
+     */
+    static exit(services:{[key:string]:Object}):{[key:string]:Object} {
+        return services
+    }
+    /**
      * Application started, static configuration loaded and all available
      * plugins are determined and sorted in there dependency specific
      * typological order.

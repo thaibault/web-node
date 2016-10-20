@@ -46,8 +46,7 @@ import Helper from './helper'
         for (const type:string of ['pre', 'post'])
             services = await Helper.callPluginStack(
                 `${type}LoadService`, plugins, baseConfiguration,
-                configuration, services, databaseConnection,
-                databaseServerProcess)
+                configuration, services)
         for (const serviceName:string in services)
             if (services.hasOwnProperty(serviceName))
                 console.info(`Service ${serviceName} loaded.`)
@@ -57,8 +56,8 @@ import Helper from './helper'
         const closeHandler:Function = async ():Promise<void> => {
             if (!finished)
                 await Helper.callPluginStack(
-                    'exit', plugins, baseConfiguration, configuration)
-                databaseConnection.close()
+                    'exit', plugins, baseConfiguration, configuration,
+                    services)
             finished = true
         }
         for (const closeEventName:string of Helper.closeEventNames)
@@ -66,7 +65,8 @@ import Helper from './helper'
         // endregion
     } catch (error) {
         await Helper.callPluginStack(
-            'error', plugins, baseConfiguration, configuration, error)
+            'error', plugins, baseConfiguration, configuration, error, services
+        )
         if (configuration.debug)
             throw error
         else
