@@ -69,19 +69,18 @@ QUnit.test('loadPlugin', (assert:Object):void => {
     for (const test:Array<any> of [
         ['dummy', {}, ['webNode'], path.resolve(
             configuration.context.path,
-            configuration.package.webOptimizer.path.source.base,
-            'test/dummyPlugin'
+            configuration.package.webOptimizer.path.source.base, 'dummyPlugin'
         ), {
             apiFilePath: path.resolve(
                 configuration.context.path,
                 configuration.package.webOptimizer.path.source.base,
-                'test/dummyPlugin/index.js'),
-            configuration: require('./dummyPlugin/package'),
+                'dummyPlugin/index.js'),
+            configuration: require('../dummyPlugin/package'),
             name: 'dummy',
             path: path.resolve(
                 configuration.context.path,
                 configuration.package.webOptimizer.path.source.base,
-                'test/dummyPlugin'),
+                'dummyPlugin'),
             scope: {}
         }]
     ]) {
@@ -98,27 +97,26 @@ QUnit.test('loadPluginAPI', (assert:Object):void => {
     for (const test:Array<any> of [
         ['index.js', path.resolve(
             configuration.context.path,
-            configuration.package.webOptimizer.path.source.base,
-            'test/dummyPlugin/'
+            configuration.package.webOptimizer.path.source.base, 'dummyPlugin'
         ), 'dummy', {}, {a: 2}, path.resolve(
             configuration.context.path,
             configuration.package.webOptimizer.path.source.base,
-            'test/dummyPlugin/package.json'
+            'dummyPlugin/package.json'
         ), {
             apiFilePath: path.resolve(
                 configuration.context.path,
                 configuration.package.webOptimizer.path.source.base,
-                'test/dummyPlugin/index.js'),
+                'dummyPlugin/index.js'),
             configuration: {a: 2},
             configurationFilePath: path.resolve(
                 configuration.context.path,
                 configuration.package.webOptimizer.path.source.base,
-                'test/dummyPlugin/package.json'),
+                'dummyPlugin/package.json'),
             name: 'dummy',
             path: path.resolve(
                 configuration.context.path,
                 configuration.package.webOptimizer.path.source.base,
-                'test/dummyPlugin'),
+                'dummyPlugin'),
             scope: {}
         }]
     ]) {
@@ -143,8 +141,8 @@ QUnit.test('loadPluginFile', (assert:Object):void => {
         [path.resolve(
             configuration.context.path,
             configuration.package.webOptimizer.path.source.base,
-            'test/dummyPlugin/package.json'
-        ), 'dummy', null, false, require('./dummyPlugin/package')],
+            'dummyPlugin/package.json'
+        ), 'dummy', null, false, require('../dummyPlugin/package')],
         ['unknown', 'dummy', {a: 2}, false, {a: 2}]
     ])
         assert.deepEqual(

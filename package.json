@@ -46,7 +46,7 @@
     "document": "webOptimizer document",
     "lint": "webOptimizer typeCheck && webOptimizer lint",
     "prepublish": "npm run build",
-    "serve": "webOptimizer build && build/index.js",
+    "serve": "webOptimizer build && index.js",
     "start": "npm run serve",
     "test": "webOptimizer test",
     "update": "npm version patch && npm publish",
@@ -90,14 +90,6 @@
     },
     "inPlace": {
       "externalLibrary": false
-    },
-    "path": {
-      "source": {
-        "base": "source"
-      },
-      "target": {
-        "base": "build"
-      }
     },
     "targetTechnology": "node"
   }

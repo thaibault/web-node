@@ -51,6 +51,7 @@ export type Plugin = {
     path:string;
     scope:?Object;
 }
+export type Services = {[key:string]:Object}
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

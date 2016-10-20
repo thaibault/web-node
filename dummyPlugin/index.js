@@ -13,18 +13,16 @@
     endregion
 */
 // region imports
-import {ChildProcess} from 'child_process'
-import PouchDB from 'pouchdb'
 // NOTE: Only needed for debugging this file.
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {Configuration, Plugin} from '../../type'
+import type {Configuration, Plugin, Services} from '../type'
 // endregion
 /**
  * Dummy plugin interface implementing all available hooks.
  */
-exports default class Dummy {
+export default class Dummy {
     /* eslint-disable no-unused-vars */
     /**
      * Application will be closed soon.
@@ -32,9 +30,7 @@ exports default class Dummy {
      * @param services - An object with stored service instances.
      * @returns Given and maybe changed object of services.
      */
-    static error(
-        error:Object, services:{[key:string]:Object}
-    ):{[key:string]:Object} {
+    static error(error:Object, services:Services):Services {
         return services
     }
     /**
@@ -42,7 +38,7 @@ exports default class Dummy {
      * @param services - An object with stored service instances.
      * @returns Given and maybe changed object of services.
      */
-    static exit(services:{[key:string]:Object}):{[key:string]:Object} {
+    static exit(services:Services):Services {
         return services
     }
     /**
@@ -67,9 +63,7 @@ exports default class Dummy {
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */
-    static preLoadService(services:{[key:string]:Object}):{
-        [key:string]:Object
-    } {
+    static preLoadService(services:Services):Services {
         return services
     }
     /**
@@ -77,9 +71,7 @@ exports default class Dummy {
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */
-    static postLoadService(services:{[key:string]:Object}):{
-        [key:string]:Object
-    } {
+    static postLoadService(services:Services):Services {
         return services
     }
     /**

@@ -21,28 +21,31 @@ try {
 
 import baseConfiguration from './configurator'
 import Helper from './helper'
+import type {Configuration, Plugin, Services} from './type'
 // endregion
 (async ():Promise<any> => {
-    try {
-        // region load plugins
-        const {plugins, configuration} = Helper.loadPlugins(
-            Tools.copyLimitedRecursively(baseConfiguration))
+    // region load plugins
+    const {plugins, configuration}:{
+        plugins:Array<Plugin>;
+        configuration:Configuration;
+    } = Helper.loadPlugins(Tools.copyLimitedRecursively(baseConfiguration))
+    await Helper.callPluginStack(
+        'initialize', plugins, baseConfiguration, configuration)
+    if (plugins.length)
+        console.info(
+            'Loaded plugins: "' + plugins.map((plugin:Object):string =>
+                plugin.name
+            ).join('", "') + '".')
+    for (const type:string of ['pre', 'post'])
         await Helper.callPluginStack(
-            'initialize', plugins, baseConfiguration, configuration)
-        if (plugins.length)
-            console.info(
-                'Loaded plugins: "' + plugins.map((plugin:Object):string =>
-                    plugin.name
-                ).join('", "') + '".')
-        for (const type:string of ['pre', 'post'])
-            await Helper.callPluginStack(
-                `${type}ConfigurationLoaded`, plugins, baseConfiguration,
-                configuration, configuration,
-                plugins.filter(plugin:Plugin):boolean =>
-                    Boolean(plugin.configurionFilePath))
-        // endregion
+            `${type}ConfigurationLoaded`, plugins, baseConfiguration,
+            configuration, configuration,
+            plugins.filter((plugin:Plugin):boolean =>
+                Boolean(plugin.configurationFilePath)))
+    // endregion
+    let services:Services = {}
+    try {
         // region start services
-        let services:{[key:string]:Object} = {}
         for (const type:string of ['pre', 'post'])
             services = await Helper.callPluginStack(
                 `${type}LoadService`, plugins, baseConfiguration,
