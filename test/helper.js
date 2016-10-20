@@ -2,38 +2,19 @@
 // -*- coding: utf-8 -*-
 'use strict'
 // region imports
-import Tools from 'clientnode'
 import path from 'path'
 import * as QUnit from 'qunit-cli'
 // NOTE: Only needed for debugging this file.
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {
-    DatabaseForbiddenError, ModelConfiguration, Models, Plugin, UpdateStrategy
-} from '../type'
+import type {Plugin} from '../type'
 import configuration from '../configurator'
 import Helper from '../helper'
 // endregion
 QUnit.module('helper')
 QUnit.load()
 // region tests
-QUnit.test('authenticate', (assert:Object):void => {
-    for (const test:Array<any> of [
-        [{}],
-        [{}, null, {roles: []}],
-        [{type: 'Test'}, {}, {roles: []}, {}, {Test: ['users']}, 'type'],
-        [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: []}, 'type']
-    ])
-        assert.throws(():?true => Helper.authenticate(...test))
-    for (const test:Array<any> of [
-        [{}, null, {roles: ['_admin']}],
-        [{}, {}, {roles: ['_admin']}, {}, {}, 'type'],
-        [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: 'users'}, 'type'],
-        [{type: 'Test'}, {}, {roles: ['users']}, {}, {Test: ['users']}, 'type']
-    ])
-        assert.ok(Helper.authenticate(...test))
-})
 // / region tools
 QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
     const done:Function = assert.async()
@@ -48,19 +29,6 @@ QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
         } catch (error) {
             assert.ok(true)
         }
-    done()
-})
-QUnit.test('ensureValidationDocumentPresence', async (
-    assert:Object
-):Promise<void> => {
-    const done:Function = assert.async()
-    for (const test:Array<any> of [
-        [{put: ():Promise<void> =>
-            new Promise((resolve:Function):number => setTimeout(resolve, 0))
-        }, 'test', '', 'Description', false]
-    ])
-        assert.strictEqual(await Helper.ensureValidationDocumentPresence(
-            ...test))
     done()
 })
 QUnit.test('representObject', (assert:Object):void => {

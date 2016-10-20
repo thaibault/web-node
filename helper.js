@@ -18,10 +18,7 @@ import Tools from 'clientnode'
 import fileSystem from 'fs'
 import fetch from 'node-fetch'
 import path from 'path'
-import type {
-    AllowedModelRolesMapping, Configuration, Model, ModelConfiguration,
-    Models, Plugin, PropertySpecification, SimpleModelConfiguration
-} from './type'
+import type {Configuration, Plugin} from './type'
 import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.

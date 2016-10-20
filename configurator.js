@@ -25,7 +25,7 @@ try {
 } catch (error) {}
 import Helper from './helper'
 import WebOptimizerHelper from 'weboptimizer/helper'
-import packageConfiguration from '../package'
+import packageConfiguration from './package'
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -86,7 +86,7 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'self', 'webOptimizerPath', 'currentPath', 'path', 'helper', 'tools']
+    'self', 'webNodePath', 'currentPath', 'path', 'helper', 'tools']
 const parameter:Array<any> = [
     packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
 ]

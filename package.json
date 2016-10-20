@@ -1,7 +1,7 @@
 {
   "name": "web-node",
   "version": "1.0.20",
-  "description": "A generic web backend.",
+  "description": "A generic web backend configuration and plugin management.",
   "documentationWebsite": {
     "name": "webNode",
     "trackingCode": "TODO"
@@ -9,14 +9,15 @@
   "homepage": "http://torben.website/webNode",
   "license": "CC-BY-3.0",
   "bin": {
-    "webNode": "build/index.js"
+    "webNode": "index.compiled.js"
   },
-  "main": "build/index.js",
+  "main": "index.compiled.js",
   "keywords": [
     "web",
     "backend",
-    "rest",
-    "api"
+    "api",
+    "plugin",
+    "management"
   ],
   "repository": {
     "type": "git",
@@ -32,8 +33,11 @@
     "source-map-support": "latest"
   },
   "files": [
-    "source",
-    "build"
+    "configurator.js",
+    "configurator.compiled.js",
+    "helper.js",
+    "helper.compiled.js",
+    "type.js"
   ],
   "scripts": {
     "build": "webOptimizer build",
