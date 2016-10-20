@@ -10,9 +10,6 @@
     "webNode",
     "plugin"
   ],
-  "devDependencies": {
-    "source-map-support": "latest"
-  },
   "scripts": {
     "start": "index.js"
   },

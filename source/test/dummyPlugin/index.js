@@ -31,29 +31,36 @@ exports default class Dummy {
      * plugins are determined and sorted in there dependency specific
      * typological order.
      * @param plugins - Topological sorted list of plugins.
+     * @param configuration - Mutable by plugins extended configuration object.
      * @param baseConfiguration - Immutable base configuration which will be
      * extended by each plugin configuration.
-     * @param configuration - Mutable by plugins extended configuration object.
      * @returns Will be ignored.
      */
-    static preInitialize(
-        plugins:Array<Plugin>, baseConfiguration:Configuration,
-        configuration:Configuration
+    static initialize(
+        plugins:Array<Plugin>, configuration:Configuration,
+        baseConfiguration:Configuration
     ):Array<Plugin> {
         return plugins
     }
     /**
-     * Database server launched and configured. Active database connection
-     * given.
+     * Plugins initialized and plugins should start to initialize their
+     * services.
      * @param services - An object with stored service instances.
-     * @param databaseConnection - Active database connection.
-     * @param databaseServerProcess - Node child process of database server.
      * @returns Given and maybe extended object of services.
      */
-    static postInitialize(
-        services:Object, databaseConnection:PouchDB,
-        databaseServerProcess:ChildProcess,
-    ):Object {
+    static preLoadService(services:{[key:string]:Object}):{
+        [key:string]:Object
+    } {
+        return services
+    }
+    /**
+     * Plugins initialized and plugins have start to initialize their services.
+     * @param services - An object with stored service instances.
+     * @returns Given and maybe extended object of services.
+     */
+    static postLoadService(services:{[key:string]:Object}):{
+        [key:string]:Object
+    } {
         return services
     }
     /**
