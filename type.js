@@ -39,6 +39,7 @@ export type Configuration = {
         };
         hotReloading:boolean;
     };
+    [key:string]:any;
 }
 export type Plugin = {
     api:?Function;
