@@ -295,11 +295,11 @@ export default class Helper {
         }
     }
     /**
-     * Re-/Loads given plugin configurations into global configuration.
+     * Loads given plugin configurations into global configuration.
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
      * @param configuration - Global configuration to extend with.
-     * @param baseConfiguration - Global configuration to use as source
+     * @param baseConfiguration - Global configuration to use as source.
      * @returns Updated given configuration object.
      */
     static loadPluginConfigurations(

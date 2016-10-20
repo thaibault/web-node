@@ -9,14 +9,13 @@ import * as QUnit from 'qunit-cli'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {Plugin} from '../type'
+import type {Configuration, Plugin} from '../type'
 import configuration from '../configurator'
 import Helper from '../helper'
 // endregion
 QUnit.module('helper')
 QUnit.load()
-// region tests
-// / region tools
+// region tools
 QUnit.test('checkRechability', async (assert:Object):Promise<?Object> => {
     const done:Function = assert.async()
     for (const test:Array<any> of [
@@ -41,7 +40,7 @@ QUnit.test('representObject', (assert:Object):void => {
     ])
         assert.strictEqual(Helper.representObject(test[0]), test[1])
 })
-// / endregion
+// endregion
 // region plugin
 QUnit.test('callPluginStack', async (assert:Object):Promise<any> => {
     const done:Function = assert.async()
@@ -147,7 +146,6 @@ QUnit.test('loadPlugins', (assert:Object):void => {
     ])
         assert.deepEqual(Helper.loadPlugins(test[0], test[1]), test[2])
 })
-// / endregion
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
