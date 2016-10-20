@@ -145,9 +145,9 @@ export default class Helper {
                     baseConfiguration, pluginsWithChangedConfiguration)
         }
         for (const plugin:Object of plugins)
-            data = await plugin.api.apply(Helper, [type, data].concat(
-                parameter
-            ).concat([plugins, baseConfiguration, configuration]))
+            data = await plugin.api.call(
+                Helper, type, data, ...parameter.concat([
+                    plugins, configuration, baseConfiguration]))
         return data
     }
     /**
