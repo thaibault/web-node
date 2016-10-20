@@ -32,9 +32,7 @@ import packageConfiguration from './package'
     projects where current working directory isn't the projects directory and
     this library is located as a nested dependency.
 */
-packageConfiguration.webNode.context = {
-    path: __dirname, type: 'main'
-}
+packageConfiguration.webNode.context = {path: __dirname}
 while (true) {
     packageConfiguration.webNode.context.path = path.resolve(
         packageConfiguration.webNode.context.path, '../../')
@@ -48,14 +46,13 @@ if (
     path.basename(path.dirname(process.cwd())) === 'node_modules' ||
     path.basename(path.dirname(process.cwd())) === '.staging' &&
     path.basename(path.dirname(path.dirname(process.cwd()))) === 'node_modules'
-) {
+)
     /*
         NOTE: If we are dealing was a dependency project use current directory
         as context.
     */
     packageConfiguration.webNode.context.path = process.cwd()
-    packageConfiguration.webNode.context.type = 'dependency'
-} else
+else
     /*
         NOTE: If the current working directory references this file via a
         linked "node_modules" folder using current working directory as context

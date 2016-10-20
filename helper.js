@@ -130,7 +130,8 @@ export default class Helper {
             const pluginsWithChangedConfiguration = Helper.hotReloadPluginFile(
                 'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
-                Helper.loadPluginConfigurations(configuration, plugins)
+                Helper.loadPluginConfigurations(
+                    plugins, configuration, baseConfiguration)
                 Helper.callPluginStack(
                     'configurationLoaded', plugins, configuration,
                     baseConfiguration, configuration,
@@ -295,17 +296,25 @@ export default class Helper {
     }
     /**
      * Re-/Loads given plugin configurations into global configuration.
-     * @param configuration - Global configuration to extend.
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
+     * @param configuration - Global configuration to extend with.
+     * @param baseConfiguration - Global configuration to use as source
      * @returns Updated given configuration object.
      */
     static loadPluginConfigurations(
-        configuration:Configuration, plugins:Array<Plugin>
+        plugins:Array<Plugin>, configuration:Configuration,
+        baseConfiguration:?Configuration
     ):Configuration {
+        if (baseConfiguration) {
+            for (const key:string in configuration)
+                if (configuration.hasOwnProperty(key))
+                    delete configuration[key]
+            Tools.extendObject(configuration, baseConfiguration)
+        }
         for (const plugin:Plugin of plugins)
             if (plugin.configuration)
-                configuration = Tools.extendObject(true, Tools.modifyObject(
+                Tools.extendObject(true, Tools.modifyObject(
                     configuration, plugin.configuration
                 ), plugin.configuration)
         const parameterDescription:Array<string> = [
@@ -400,7 +409,7 @@ export default class Helper {
         return {
             plugins: sortedPlugins,
             configuration: Helper.loadPluginConfigurations(
-                configuration, sortedPlugins)
+                sortedPlugins, configuration)
         }
     }
     // endregion
