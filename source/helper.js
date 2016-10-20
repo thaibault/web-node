@@ -906,7 +906,7 @@ export default class Helper {
             if (pluginsWithChangedConfiguration.length) {
                 Helper.loadPluginConfigurations(configuration, plugins)
                 Helper.callPluginStack(
-                    'configurationReloaded', plugins, baseConfiguration,
+                    'configurationLoaded', plugins, baseConfiguration,
                     configuration, configuration,
                     pluginsWithChangedConfiguration)
             }

@@ -45,47 +45,12 @@ import Helper from './helper'
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
                 plugin.name
             ).join('", "') + '".')
-    // endregion
-    // region render static templates
-    const templateRenderingPromises:Array<Promise<string>> = []
-    WebOptimizerHelper.walkDirectoryRecursivelySync(
-        configuration.context.path, (filePath:string):?false => {
-            // TODO return "false" if in plugin location and corresponding
-            // regexp doesn't match to stop deeper iterations.
-            if (filePath.endsWith('node_modules'))
-                return false
-            //
-            const fileExtension:string = path.extname(filePath)
-            if (configuration.template.extensions.includes(fileExtension))
-                templateRenderingPromises.push(new Promise((
-                    resolve:Function, reject:Function
-                ):void => fileSystem.readFile(filePath, {
-                    encoding: configuration.encoding
-                }, (error:?Error, content:string):void => {
-                    if (error)
-                        reject(error)
-                    else {
-                        const newFilePath:string = filePath.substring(
-                            0, filePath.length - fileExtension.length)
-                        try {
-                            fileSystem.writeFile(
-                                newFilePath, handlebars.compile(
-                                    content, configuration.template.options
-                                )(configuration), {
-                                    encoding: configuration.encoding
-                                }, (error:?Error):void => {
-                                    if (error)
-                                        reject(error)
-                                    else
-                                        resolve()
-                                })
-                        } catch (error) {
-                            reject(error)
-                        }
-                    }
-                })))
-        })
-    await Promise.all(templateRenderingPromises)
+    for (const type:string of ['pre', 'post'])
+        await Helper.callPluginStack(
+            `${type}ConfigurationLoaded`, plugins, baseConfiguration,
+            configuration, configuration,
+            plugins.filter(plugin:Plugin):boolean =>
+                Boolean(plugin.configurionFilePath))
     // endregion
     // region start database server
     const databaseServerProcess:ChildProcess = spawnChildProcess(
@@ -283,21 +248,13 @@ import Helper from './helper'
         // TODO check conflicting constraints and mark if necessary (check how
         // couchdb deals with "id" conflicts)
         // endregion
-        // region start application server
-        let server:Server = createServer(async (
-            request:Object, response:Object
-        ):any => {
-            request = await Helper.callPluginStack(
-                'request', plugins, baseConfiguration, configuration, request,
-                response)
-            response.end()
-        })
-        server = await Helper.callPluginStack(
-            'initialize', plugins, baseConfiguration, configuration, server,
+        // region start services
+        const services:{[key:string]:Object} = await Helper.callPluginStack(
+            'postInitialize', plugins, baseConfiguration, configuration, {},
             databaseConnection, databaseServerProcess)
-        server.listen(
-            configuration.server.application.port,
-            configuration.server.application.hostName)
+        for (const serviceName:string in services)
+            if (services.hasOwnProperty(serviceName))
+                console.info(`Service ${serviceName} loaded.`)
         // endregion
     } catch (error) {
         if (configuration.debug)

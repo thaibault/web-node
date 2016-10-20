@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "clientnode": "latest",
-    "handlebars": "latest",
     "node-fetch": "latest",
     "pouchdb": "latest",
     "pouchdb-server": "latest",
@@ -182,26 +181,6 @@
         }
       },
       "hotReloading": true
-    },
-    "server": {
-      "application": {
-        "rootPath": {
-          "__evaluate__": "currentPath"
-        },
-        "options": {},
-        "port": 8080,
-        "hostName": "127.0.0.1"
-      },
-      "proxy": {
-        "logFilePath": {
-          "access": "/dev/stdout",
-          "error": "/dev/stderr"
-        }
-      }
-    },
-    "template": {
-        "extensions": [".tpl"],
-        "options": {}
     }
   },
   "webOptimizer": {
