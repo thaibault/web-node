@@ -49,7 +49,7 @@
     "prepublish": "npm run build",
     "serve": "webOptimizer build && index.js",
     "start": "npm run serve",
-    "test": "webOptimizer test",
+    "test": "pushd dummyPlugin && npm run build && popd && webOptimizer test",
     "update": "npm version patch && npm publish",
     "updateDocumentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch",
