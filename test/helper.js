@@ -84,19 +84,20 @@ QUnit.test('loadPlugin', (assert:Object):void => {
         ), {
             apiFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/index.compiled.js'),
-            configuration: require('../dummyPlugin/package'),
+            configuration: require('../dummyPlugin/package').webNode,
             name: 'dummy',
-            path: path.resolve(configuration.context.path, 'dummyPlugin'),
-            scope: {}
+            path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
         const plugin:Plugin = Helper.loadPlugin(
             test[0], test[1], test[2], test[3])
-        console.log('A', plugin)
+        assert.ok(plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
+        delete plugin.configuration.package
         delete plugin.configurationFilePath
         delete plugin.configurationFileLoadTimestamp
+        delete plugin.scope
         assert.deepEqual(plugin, test[4])
     }
 })
@@ -113,25 +114,27 @@ QUnit.test('loadPluginAPI', (assert:Object):void => {
             configurationFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'),
             name: 'dummy',
-            path: path.resolve(configuration.context.path, 'dummyPlugin'),
-            scope: {}
+            path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
         const plugin:Plugin = Helper.loadPluginAPI(
-            test[0], test[1], test[2], test[3], test[4])
+            test[0], test[1], test[2], test[3], test[4], test[5])
+        assert.ok(plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
         delete plugin.configurationFileLoadTimestamp
-        assert.deepEqual(plugin, test[5])
+        delete plugin.scope
+        assert.deepEqual(plugin, test[6])
     }
 })
 QUnit.test('loadPluginConfigurations', (assert:Object):void => {
     for (const test:Array<any> of [
-        [{}, []]
+        [[], {}, {}],
+        [[], {a: 2}, {a: 2}]
         // TODO add more tests
     ])
         assert.deepEqual(
-            Helper.loadPluginConfigurations(test[0], test[1]), test[3])
+            Helper.loadPluginConfigurations(test[0], test[1]), test[2])
 })
 QUnit.test('loadPluginFile', (assert:Object):void => {
     for (const test:Array<any> of [

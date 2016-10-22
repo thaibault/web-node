@@ -199,18 +199,23 @@ export default class Helper {
     ):Plugin {
         let configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
-        let pluginConfiguration:?PlainObject = null
+        let packageConfiguration:?PlainObject = null
         if (configurationFilePath && WebOptimizerHelper.isDirectorySync(
             pluginPath
         ) && WebOptimizerHelper.isFileSync(configurationFilePath))
-            pluginConfiguration = Helper.loadPluginFile(
+            packageConfiguration = Helper.loadPluginFile(
                 configurationFilePath, name)
-        if (pluginConfiguration) {
+        if (packageConfiguration) {
             for (const propertyName:string of configurationPropertyNames)
-                if (pluginConfiguration.hasOwnProperty(propertyName)) {
+                if (packageConfiguration.hasOwnProperty(propertyName)) {
                     let apiFilePath:string = 'index.js'
-                    if (pluginConfiguration.hasOwnProperty('main'))
-                        apiFilePath = pluginConfiguration.main
+                    if (packageConfiguration.hasOwnProperty('main'))
+                        apiFilePath = packageConfiguration.main
+                    const pluginConfiguration:PlainObject =
+                        packageConfiguration[propertyName]
+                    pluginConfiguration.package = Tools.copyLimitedRecursively(
+                        packageConfiguration)
+                    delete pluginConfiguration.package[propertyName]
                     return Helper.loadPluginAPI(
                         apiFilePath, pluginPath, name, plugins,
                         pluginConfiguration, configurationFilePath)
@@ -313,10 +318,14 @@ export default class Helper {
             Tools.extendObject(configuration, baseConfiguration)
         }
         for (const plugin:Plugin of plugins)
-            if (plugin.configuration)
+            if (plugin.configuration) {
+                const pluginConfiguration:PlainObject =
+                    Tools.copyLimitedRecursively(plugin.configuration)
+                delete pluginConfiguration.package
                 Tools.extendObject(true, Tools.modifyObject(
-                    configuration, plugin.configuration
-                ), plugin.configuration)
+                    configuration, pluginConfiguration
+                ), pluginConfiguration)
+            }
         const parameterDescription:Array<string> = [
             'self', 'webNodePath', 'currentPath', 'path', 'helper', 'tools',
             'plugins']
@@ -357,6 +366,8 @@ export default class Helper {
                     `Couln't load plugin file "${filePath}" for plugin "` +
                     `${name}": ${Helper.representObject(error)}`)
         }
+        if (scope.hasOwnProperty('default'))
+            return scope.default
         return scope
     }
     /**
