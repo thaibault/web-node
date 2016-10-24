@@ -13,7 +13,6 @@
     endregion
 */
 // region  imports
-import 'babel-polyfill'
 import Tools from 'clientnode'
 import type {ProcedureFunction} from 'clientnode'
 // NOTE: Only needed for debugging this file.
