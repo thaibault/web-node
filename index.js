@@ -13,7 +13,9 @@
     endregion
 */
 // region  imports
+import 'babel-polyfill'
 import Tools from 'clientnode'
+import type {ProcedureFunction} from 'clientnode'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
@@ -23,7 +25,7 @@ import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import type {Configuration, Plugin, Services} from './type'
 // endregion
-(async ():Promise<any> => {
+const main = async ():Promise<any> => {
     // region load plugins
     const {plugins, configuration}:{
         plugins:Array<Plugin>;
@@ -75,7 +77,10 @@ import type {Configuration, Plugin, Services} from './type'
         else
             console.error(error)
     }
-})()
+}
+if (require.main === module)
+    main()
+export default main
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:
