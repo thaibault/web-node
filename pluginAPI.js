@@ -16,10 +16,8 @@
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
 import fileSystem from 'fs'
-import fetch from 'node-fetch'
 import path from 'path'
 import type {Configuration, Plugin} from './type'
-import WebOptimizerHelper from 'weboptimizer/helper'
 import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
 try {
@@ -29,86 +27,8 @@ try {
 // region methods
 /**
  * A dumm plugin interface with all available hooks.
- * @property static:closeEventNames - Process event names which indicates that
- * a process has finished.
  */
-export default class Helper {
-    static closeEventNames:Array<string> = [
-        'exit', 'close', 'uncaughtException', 'SIGINT', 'SIGTERM', 'SIGQUIT']
-    // region tools
-    /**
-     * Checks if given url response with given status code.
-     * @param url - Url to check reachability.
-     * @param wait - Boolean indicating if we should retry until a status code
-     * will be given.
-     * @param expectedStatusCode - Status code to check for.
-     * @param pollIntervallInSeconds - Seconds between two tries to reach given
-     * url.
-     * @param timeoutInSeconds - Delay after assuming given resource isn't
-     * available if no response is coming.
-     * @returns A promise which will be resolved if a request to given url has
-     * finished and resulting status code matches given expectedstatus code.
-     * Otherwise returned promise will be rejected.
-     *
-     */
-    static async checkReachability(
-        url:string, wait:boolean = false, expectedStatusCode:number = 200,
-        pollIntervallInSeconds:number = 0.1, timeoutInSeconds:number = 10
-    ):Promise<?Object> {
-        const check:Function = (response:?Object):?Object => {
-            if (
-                response && 'status' in response &&
-                response.status !== expectedStatusCode
-            )
-                throw new Error(
-                    `Given status code ${response.status} differs from ` +
-                    `${expectedStatusCode}.`)
-            return response
-        }
-        if (wait)
-            return new Promise((resolve:Function, reject:Function):void => {
-                let timedOut:boolean = false
-                const wrapper:Function = async ():Promise<?Object> => {
-                    let response:Object
-                    try {
-                        response = await fetch(url)
-                    } catch (error) {
-                        if (!timedOut)
-                            /* eslint-disable no-use-before-define */
-                            currentlyRunningTimeout = setTimeout(
-                                wrapper, pollIntervallInSeconds * 1000)
-                            /* eslint-enable no-use-before-define */
-                        return response
-                    }
-                    try {
-                        resolve(check(response))
-                    } catch (error) {
-                        reject(error)
-                    } finally {
-                        /* eslint-disable no-use-before-define */
-                        clearTimeout(timeoutID)
-                        /* eslint-enable no-use-before-define */
-                    }
-                    return response
-                }
-                let currentlyRunningTimeout = setTimeout(wrapper, 0)
-                const timeoutID:number = setTimeout(():void => {
-                    timedOut = true
-                    clearTimeout(currentlyRunningTimeout)
-                    reject('timeout')
-                }, timeoutInSeconds * 1000)
-            })
-        return check(await fetch(url))
-    }
-    /**
-     * Represents given object as formatted string.
-     * @param object - Object to Represents.
-     * @returns Representation string.
-     */
-    static representObject(object:any):string {
-        return JSON.stringify(object, null, 4)
-    }
-    // endregion
+export default class PluginAPI {
     // region plugin
     /**
      * Calls all plugin methods for given trigger description.
@@ -122,31 +42,31 @@ export default class Helper {
      * @returns A promise which resolves when all callbacks have resolved their
      * promise.
      */
-    static async callPluginStack(
+    static async callStack(
         type:string, plugins:Array<Object>, baseConfiguration:Configuration,
         configuration:Configuration, data:any = null, ...parameter:Array<any>
     ):Promise<any> {
         if (configuration.plugin.hotReloading) {
-            const pluginsWithChangedConfiguration = Helper.hotReloadPluginFile(
+            const pluginsWithChangedConfiguration = PluginAPI.hotReloadFile(
                 'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
-                Helper.loadPluginConfigurations(
+                PluginAPI.loadConfigurations(
                     plugins, configuration, baseConfiguration)
-                Helper.callPluginStack(
+                PluginAPI.callStack(
                     'configurationLoaded', plugins, configuration,
                     baseConfiguration, configuration,
                     pluginsWithChangedConfiguration)
             }
-            const pluginsWithChangedAPIFiles = Helper.hotReloadPluginFile(
+            const pluginsWithChangedAPIFiles = PluginAPI.hotReloadFile(
                 'apiFile', 'scope', plugins)
             if (pluginsWithChangedAPIFiles.length)
-                Helper.callPluginStack(
+                PluginAPI.callStack(
                     'apiFileReloaded', plugins, configuration,
                     baseConfiguration, pluginsWithChangedConfiguration)
         }
         for (const plugin:Object of plugins)
             data = await plugin.api.call(
-                Helper, type, data, ...parameter.concat([
+                PluginAPI, type, data, ...parameter.concat([
                     plugins, configuration, baseConfiguration]))
         return data
     }
@@ -160,7 +80,7 @@ export default class Helper {
      * @returns A list with plugins which have a changed plugin file of given
      * type.
      */
-    static hotReloadPluginFile(
+    static hotReloadFile(
         type:string, targetType:string, plugins:Array<Plugin>
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
@@ -175,7 +95,7 @@ export default class Helper {
                     delete eval('require').cache[eval('require').resolve(
                         plugin[type])]
                     /* eslint-enable no-eval */
-                    plugin[targetType] = Helper.loadPluginFile(
+                    plugin[targetType] = PluginAPI.loadFile(
                         plugin[type], plugin.name, plugin[targetType])
                     pluginsWithChangedFiles.push(plugin)
                 }
@@ -193,17 +113,17 @@ export default class Helper {
      * @param pluginPath - Path to given plugin.
      * @returns An object of plugin specific meta informations.
      */
-    static loadPlugin(
+    static load(
         name:string, plugins:{[key:string]:Plugin},
         configurationPropertyNames:Array<string>, pluginPath:string
     ):Plugin {
         let configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
         let packageConfiguration:?PlainObject = null
-        if (configurationFilePath && WebOptimizerHelper.isDirectorySync(
+        if (configurationFilePath && Tools.isDirectorySync(
             pluginPath
-        ) && WebOptimizerHelper.isFileSync(configurationFilePath))
-            packageConfiguration = Helper.loadPluginFile(
+        ) && Tools.isFileSync(configurationFilePath))
+            packageConfiguration = PluginAPI.loadFile(
                 configurationFilePath, name)
         if (packageConfiguration) {
             for (const propertyName:string of configurationPropertyNames)
@@ -216,7 +136,7 @@ export default class Helper {
                     pluginConfiguration.package = Tools.copyLimitedRecursively(
                         packageConfiguration)
                     delete pluginConfiguration.package[propertyName]
-                    return Helper.loadPluginAPI(
+                    return PluginAPI.loadAPI(
                         apiFilePath, pluginPath, name, plugins,
                         pluginConfiguration, configurationFilePath)
                 }
@@ -225,7 +145,7 @@ export default class Helper {
                 `one of the following keys: "` +
                 `${configurationPropertyNames.join('", "')}".`)
         }
-        return Helper.loadPluginAPI('index.js', pluginPath, name, plugins)
+        return PluginAPI.loadAPI('index.js', pluginPath, name, plugins)
     }
     /**
      * Load given plugin api file in given plugin path generates a plugin
@@ -239,20 +159,17 @@ export default class Helper {
      * @param configurationFilePath - Plugin specific configuration file path.
      * @returns Plugin meta informations object.
      */
-    static loadPluginAPI(
+    static loadAPI(
         relativeFilePath:string, pluginPath:string, name:string,
         plugins:{[key:string]:Object}, configuration:?PlainObject = null,
         configurationFilePath:?string = null
     ):Plugin {
         let filePath:string = path.resolve(pluginPath, relativeFilePath)
-        if (!WebOptimizerHelper.isFileSync(filePath))
+        if (!Tools.isFileSync(filePath))
             for (const fileName:string of fileSystem.readdirSync(pluginPath))
-                if (
-                    fileName !== 'package.json' &&
-                    WebOptimizerHelper.isFileSync(path.resolve(
-                        pluginPath, fileName
-                    ))
-                ) {
+                if (fileName !== 'package.json' && Tools.isFileSync(
+                    path.resolve(pluginPath, fileName)
+                )) {
                     filePath = path.resolve(pluginPath, filePath)
                     if (['index', 'main'].includes(path.basename(
                         filePath, path.extname(fileName)
@@ -260,7 +177,7 @@ export default class Helper {
                         break
                 }
         let api:?Function = null
-        if (WebOptimizerHelper.isFileSync(filePath))
+        if (Tools.isFileSync(filePath))
             if (filePath.endsWith('.js'))
                 api = async (type:string, ...parameter:Array<any>):any => {
                     if (type in plugins[name].scope)
@@ -277,10 +194,10 @@ export default class Helper {
                             shell: true,
                             stdio: 'inherit'
                         })
-                    for (const closeEventName:string of Helper.closeEventNames)
+                    for (const closeEventName:string of Tools.closeEventNames)
                         childProcess.on(
                             closeEventName,
-                            WebOptimizerHelper.getProcessCloseHandler(
+                            Tools.getProcessCloseHandler(
                                 resolve, reject, closeEventName))
                 })
         return {
@@ -296,7 +213,7 @@ export default class Helper {
                 null,
             name,
             path: pluginPath,
-            scope: api && Helper.loadPluginFile(filePath, name)
+            scope: api && PluginAPI.loadFile(filePath, name)
         }
     }
     /**
@@ -307,7 +224,7 @@ export default class Helper {
      * @param baseConfiguration - Global configuration to use as source.
      * @returns Updated given configuration object.
      */
-    static loadPluginConfigurations(
+    static loadConfigurations(
         plugins:Array<Plugin>, configuration:Configuration,
         baseConfiguration:?Configuration
     ):Configuration {
@@ -327,10 +244,10 @@ export default class Helper {
                 ), pluginConfiguration)
             }
         const parameterDescription:Array<string> = [
-            'self', 'webNodePath', 'currentPath', 'path', 'helper', 'tools',
+            'self', 'webNodePath', 'currentPath', 'path', 'pluginAPI', 'tools',
             'plugins']
         const parameter:Array<any> = [
-            configuration, __dirname, process.cwd(), path, Helper, Tools,
+            configuration, __dirname, process.cwd(), path, PluginAPI, Tools,
             plugins]
         return Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
             configuration, parameterDescription, parameter))
@@ -344,7 +261,7 @@ export default class Helper {
      * @param log - Enables logging.
      * @returns Exported api file scope.
      */
-    static loadPluginFile(
+    static loadFile(
         filePath:string, name:string, fallbackScope:?Object = null,
         log:boolean = true
     ):Object {
@@ -359,12 +276,12 @@ export default class Helper {
                 if (log)
                     console.warn(
                         `Couln't load new api plugin file "${filePath}" for ` +
-                        `plugin "${name}": ${Helper.representObject(error)}.` +
+                        `plugin "${name}": ${Tools.representObject(error)}.` +
                         ` Using fallback one.`)
             } else
                 throw new Error(
                     `Couln't load plugin file "${filePath}" for plugin "` +
-                    `${name}": ${Helper.representObject(error)}`)
+                    `${name}": ${Tools.representObject(error)}`)
         }
         if (scope.hasOwnProperty('default'))
             return scope.default
@@ -377,7 +294,7 @@ export default class Helper {
      * @param configuration - Configuration object to extend and use.
      * @returns A topological sorted list of plugins objects.
      */
-    static loadPlugins(configuration:Configuration):{
+    static loadALL(configuration:Configuration):{
         configuration:Configuration;
         plugins:Array<Plugin>
     } {
@@ -385,7 +302,7 @@ export default class Helper {
         for (const type:string in configuration.plugin.directories)
             if (configuration.plugin.directories.hasOwnProperty(
                 type
-            ) && WebOptimizerHelper.isDirectorySync(
+            ) && Tools.isDirectorySync(
                 configuration.plugin.directories[type].path
             ))
                 fileSystem.readdirSync(
@@ -398,7 +315,7 @@ export default class Helper {
                     const currentPluginPath:string = path.resolve(
                         configuration.plugin.directories[type].path, pluginName
                     )
-                    plugins[pluginName] = Helper.loadPlugin(
+                    plugins[pluginName] = PluginAPI.load(
                         pluginName, plugins,
                         configuration.plugin.configurationPropertyNames,
                         currentPluginPath)
@@ -419,7 +336,7 @@ export default class Helper {
             sortedPlugins.push(plugins[pluginName])
         return {
             plugins: sortedPlugins,
-            configuration: Helper.loadPluginConfigurations(
+            configuration: PluginAPI.loadConfigurations(
                 sortedPlugins, configuration)
         }
     }

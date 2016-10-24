@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "clientnode": "latest",
-    "node-fetch": "latest",
     "weboptimizer": "latest"
   },
   "devDependencies": {
@@ -36,8 +35,8 @@
   "files": [
     "configurator.js",
     "configurator.compiled.js",
-    "helper.js",
-    "helper.compiled.js",
+    "pluginAPI.js",
+    "pluginAPI.compiled.js",
     "type.js"
   ],
   "scripts": {

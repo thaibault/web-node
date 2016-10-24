@@ -23,7 +23,7 @@ import path from 'path'
 try {
     require('source-map-support/register')
 } catch (error) {}
-import Helper from './helper'
+import PluginAPI from './pluginAPI'
 import WebOptimizerHelper from 'weboptimizer/helper'
 import packageConfiguration from './package'
 /*
@@ -83,9 +83,10 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'self', 'webNodePath', 'currentPath', 'path', 'helper', 'tools']
+    'self', 'webNodePath', 'currentPath', 'path', 'pluginAPI', 'tools']
 const parameter:Array<any> = [
-    packageConfiguration.webNode, __dirname, process.cwd(), path, Helper, Tools
+    packageConfiguration.webNode, __dirname, process.cwd(), path, PluginAPI,
+    Tools
 ]
 const configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
     packageConfiguration.webNode, parameterDescription, parameter))
