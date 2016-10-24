@@ -14,22 +14,23 @@
 */
 // region  imports
 import Tools from 'clientnode'
+import type {ProcedureFunction} from 'clientnode'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
 } catch (error) {}
 
 import baseConfiguration from './configurator'
-import Helper from './helper'
+import PluginAPI from './pluginAPI'
 import type {Configuration, Plugin, Services} from './type'
 // endregion
-(async ():Promise<any> => {
+const main = async ():Promise<any> => {
     // region load plugins
     const {plugins, configuration}:{
         plugins:Array<Plugin>;
         configuration:Configuration;
-    } = Helper.loadPlugins(Tools.copyLimitedRecursively(baseConfiguration))
-    await Helper.callPluginStack(
+    } = PluginAPI.loadALL(Tools.copyLimitedRecursively(baseConfiguration))
+    await PluginAPI.callStack(
         'initialize', plugins, baseConfiguration, configuration)
     if (plugins.length)
         console.info(
@@ -37,7 +38,7 @@ import type {Configuration, Plugin, Services} from './type'
                 plugin.name
             ).join('", "') + '".')
     for (const type:string of ['pre', 'post'])
-        await Helper.callPluginStack(
+        await PluginAPI.callStack(
             `${type}ConfigurationLoaded`, plugins, baseConfiguration,
             configuration, configuration,
             plugins.filter((plugin:Plugin):boolean =>
@@ -47,7 +48,7 @@ import type {Configuration, Plugin, Services} from './type'
     try {
         // region start services
         for (const type:string of ['pre', 'post'])
-            services = await Helper.callPluginStack(
+            services = await PluginAPI.callStack(
                 `${type}LoadService`, plugins, baseConfiguration,
                 configuration, services)
         for (const serviceName:string in services)
@@ -58,16 +59,16 @@ import type {Configuration, Plugin, Services} from './type'
         let finished:boolean = false
         const closeHandler:Function = async ():Promise<void> => {
             if (!finished)
-                await Helper.callPluginStack(
+                await PluginAPI.callStack(
                     'exit', plugins, baseConfiguration, configuration,
                     services)
             finished = true
         }
-        for (const closeEventName:string of Helper.closeEventNames)
+        for (const closeEventName:string of Tools.closeEventNames)
             process.on(closeEventName, closeHandler)
         // endregion
     } catch (error) {
-        await Helper.callPluginStack(
+        await PluginAPI.callStack(
             'error', plugins, baseConfiguration, configuration, error, services
         )
         if (configuration.debug)
@@ -75,7 +76,11 @@ import type {Configuration, Plugin, Services} from './type'
         else
             console.error(error)
     }
-})()
+}
+// IgnoreTypeCheck
+if (require.main === module)
+    main()
+export default main
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

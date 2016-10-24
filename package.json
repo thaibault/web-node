@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "clientnode": "latest",
-    "node-fetch": "latest",
     "weboptimizer": "latest"
   },
   "devDependencies": {
@@ -36,8 +35,8 @@
   "files": [
     "configurator.js",
     "configurator.compiled.js",
-    "helper.js",
-    "helper.compiled.js",
+    "pluginAPI.js",
+    "pluginAPI.compiled.js",
     "type.js"
   ],
   "scripts": {
@@ -49,7 +48,7 @@
     "prepublish": "npm run build",
     "serve": "webOptimizer build && index.js",
     "start": "npm run serve",
-    "test": "webOptimizer test",
+    "test": "pushd dummyPlugin && npm run build && popd && webOptimizer test",
     "update": "npm version patch && npm publish",
     "updateDocumentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch",

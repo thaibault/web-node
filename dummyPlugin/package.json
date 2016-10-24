@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A dummy web node plugin.",
   "license": "CC-BY-3.0",
-  "main": "index.js",
+  "main": "index.compiled.js",
   "keywords": [
     "dummy",
     "example",
@@ -11,7 +11,8 @@
     "plugin"
   ],
   "scripts": {
-    "start": "index.js"
+    "build": "babel --plugins transform-flow-strip-types,transform-runtime --presets latest,stage-0 --source-maps inline --out-file index.compiled.js index.js",
+    "start": "index.compiled.js"
   },
   "webNode": {
     "modelConfiguration": {
