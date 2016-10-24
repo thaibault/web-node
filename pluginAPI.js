@@ -15,10 +15,10 @@
 // region imports
 import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
 import Tools from 'clientnode'
+import type {PlainObject} from 'clientnode'
 import fileSystem from 'fs'
 import path from 'path'
 import type {Configuration, Plugin} from './type'
-import type {PlainObject} from 'weboptimizer/type'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')

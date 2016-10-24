@@ -13,7 +13,7 @@
     endregion
 */
 // region imports
-import type {PlainObject} from 'weboptimizer/type'
+import type {PlainObject} from 'clientnode'
 // endregion
 // region exports
 export type Configuration = {
