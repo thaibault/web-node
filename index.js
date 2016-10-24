@@ -77,6 +77,7 @@ const main = async ():Promise<any> => {
             console.error(error)
     }
 }
+// IgnoreTypeCheck
 if (require.main === module)
     main()
 export default main

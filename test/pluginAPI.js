@@ -64,10 +64,11 @@ QUnit.test('loadPlugin', (assert:Object):void => {
     ]) {
         const plugin:Plugin = PluginAPI.load(
             test[0], test[1], test[2], test[3])
-        assert.ok(plugin.scope.hasOwnProperty('initialize'))
+        assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
-        delete plugin.configuration.package
+        if (plugin.configuration)
+            delete plugin.configuration.package
         delete plugin.configurationFilePath
         delete plugin.configurationFileLoadTimestamp
         delete plugin.scope
@@ -92,7 +93,7 @@ QUnit.test('loadAPI', (assert:Object):void => {
     ]) {
         const plugin:Plugin = PluginAPI.loadAPI(
             test[0], test[1], test[2], test[3], test[4], test[5])
-        assert.ok(plugin.scope.hasOwnProperty('initialize'))
+        assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
         delete plugin.configurationFileLoadTimestamp
