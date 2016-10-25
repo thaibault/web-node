@@ -3,7 +3,7 @@
 .*/\.git
 .*/_.*\.js
 .+\.compiled(\..+)?
-\(.*/\)?node_modules/weboptimizer/\(configurator\|taskRunner\)\.js
+\(.*/\)?node_modules/weboptimizer/\(configurator\|index\)\.js
 
 # temporary excludes
 .*/documentation-website/.*
