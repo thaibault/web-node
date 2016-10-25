@@ -24,7 +24,6 @@ try {
     require('source-map-support/register')
 } catch (error) {}
 import PluginAPI from './pluginAPI'
-import WebOptimizerHelper from 'weboptimizer/helper'
 import packageConfiguration from './package'
 /*
     To assume to go two folder up from this file until there is no
@@ -96,7 +95,7 @@ Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
 ), specificConfiguration)
 if (process.argv.length > 3) {
-    const result:?Object = WebOptimizerHelper.parseEncodedObject(
+    const result:?Object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration')
     if (Tools.isPlainObject(result))
         Tools.extendObject(
