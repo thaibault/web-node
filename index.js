@@ -12,7 +12,7 @@
     3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-// region  imports
+// region imports
 import Tools from 'clientnode'
 import type {ProcedureFunction} from 'clientnode'
 // NOTE: Only needed for debugging this file.
@@ -24,7 +24,7 @@ import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import type {Configuration, Plugin, Services} from './type'
 // endregion
-const main = async ():Promise<any> => {
+const main:ProcedureFunction = async ():Promise<any> => {
     // region load plugins
     const {plugins, configuration}:{
         plugins:Array<Plugin>;
