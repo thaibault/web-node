@@ -88,11 +88,15 @@
       "external": "commonjs2",
       "self": "commonjs2"
     },
+    "injection": {
+        "internal": {
+            "index": "index",
+            "pluginAPI": "pluginAPI",
+            "configurator": "configurator"
+        }
+    },
     "inPlace": {
       "externalLibrary": false
-    },
-    "libraryName": {
-      "__evaluate__": "[tools.stringConvertToValidVariableName(self.name), '[name]']"
     },
     "targetTechnology": "node"
   }
