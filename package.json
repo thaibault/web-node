@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "A generic web backend configuration and plugin management.",
   "documentationWebsite": {
     "name": "webNode",
@@ -92,7 +92,7 @@
       "externalLibrary": false
     },
     "libraryName": {
-        "__evaluate__": "[tools.stringConvertToValidVariableName(self.name), '[name]']"
+      "__evaluate__": "[tools.stringConvertToValidVariableName(self.name), '[name]']"
     },
     "targetTechnology": "node"
   }
