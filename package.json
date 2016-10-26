@@ -46,7 +46,7 @@
     "document": "webOptimizer document",
     "lint": "webOptimizer typeCheck && webOptimizer lint",
     "prepublish": "npm run build",
-    "serve": "webOptimizer build && index.js",
+    "serve": "webOptimizer build && ./index.compiled.js",
     "start": "npm run serve",
     "test": "pushd dummyPlugin && npm run build && popd && webOptimizer test",
     "update": "npm version patch && npm publish",
@@ -90,6 +90,9 @@
     },
     "inPlace": {
       "externalLibrary": false
+    },
+    "libraryName": {
+        "__evaluate__": "[tools.stringConvertToValidVariableName(self.name), '[name]']"
     },
     "targetTechnology": "node"
   }
