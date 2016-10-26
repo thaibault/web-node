@@ -82,7 +82,7 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'self', 'require',
+    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require', 'self',
     'tools', 'webNodePath']
 let parameter:Array<any> = [
     /* eslint-disable no-eval */
