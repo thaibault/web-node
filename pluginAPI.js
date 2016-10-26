@@ -239,11 +239,11 @@ export default class PluginAPI {
                 ), pluginConfiguration)
             }
         const parameterDescription:Array<string> = [
-            'self', 'webNodePath', 'currentPath', 'path', 'pluginAPI', 'tools',
-            'plugins']
+            'currentPath', 'fileSystem', 'path', 'pluginAPI', 'self', 'tools',
+            'webNodePath']
         const parameter:Array<any> = [
-            configuration, __dirname, process.cwd(), path, PluginAPI, Tools,
-            plugins]
+            process.cwd(), fileSystem, path, PluginAPI, configuration, Tools,
+            __dirname]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(

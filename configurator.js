@@ -84,11 +84,11 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'self', 'webNodePath', 'currentPath', 'path', 'pluginAPI', 'tools']
+    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'self', 'tools',
+    'webNodePath']
 const parameter:Array<any> = [
-    packageConfiguration.webNode, __dirname, process.cwd(), path, PluginAPI,
-    Tools
-]
+    process.cwd(), fileSystem, path, PluginAPI, packageConfiguration.webNode,
+    Tools, __dirname]
 let configuration:Configuration = Tools.unwrapProxy(
     Tools.resolveDynamicDataStructure(
         packageConfiguration.webNode, parameterDescription, parameter))
