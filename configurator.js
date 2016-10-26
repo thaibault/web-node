@@ -84,11 +84,13 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'self', 'tools',
-    'webNodePath']
-const parameter:Array<any> = [
-    process.cwd(), fileSystem, path, PluginAPI, packageConfiguration.webNode,
-    Tools, __dirname]
+    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'self', 'require',
+    'tools', 'webNodePath']
+let parameter:Array<any> = [
+    /* eslint-disable no-eval */
+    process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+    /* eslint-enable no-eval */
+    packageConfiguration.webNode, Tools, __dirname]
 let configuration:Configuration = Tools.unwrapProxy(
     Tools.resolveDynamicDataStructure(
         packageConfiguration.webNode, parameterDescription, parameter))
@@ -103,6 +105,11 @@ if (process.argv.length > 3) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
 }
+parameter= [
+    /* eslint-disable no-eval */
+    process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+    /* eslint-enable no-eval */
+    configuration, Tools, __dirname]
 configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
     Tools.resolveDynamicDataStructure(
         configuration, parameterDescription, parameter
