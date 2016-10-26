@@ -23,6 +23,8 @@ import path from 'path'
 try {
     require('source-map-support/register')
 } catch (error) {}
+
+import type {Configuration} from './type'
 import PluginAPI from './pluginAPI'
 import packageConfiguration from './package'
 /*
@@ -87,10 +89,10 @@ const parameter:Array<any> = [
     packageConfiguration.webNode, __dirname, process.cwd(), path, PluginAPI,
     Tools
 ]
-const configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
-    packageConfiguration.webNode, parameterDescription, parameter))
+let configuration:Configuration = Tools.unwrapProxy(
+    Tools.resolveDynamicDataStructure(
+        packageConfiguration.webNode, parameterDescription, parameter))
 delete packageConfiguration.webNode
-configuration.package = packageConfiguration
 Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
 ), specificConfiguration)
@@ -101,10 +103,12 @@ if (process.argv.length > 3) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
 }
-export default Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
+configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
     Tools.resolveDynamicDataStructure(
         configuration, parameterDescription, parameter
     ), parameterDescription, parameter, true))
+configuration.package = packageConfiguration
+export default configuration
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

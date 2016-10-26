@@ -9,6 +9,7 @@ import * as QUnit from 'qunit-cli'
 try {
     module.require('source-map-support/register')
 } catch (error) {}
+
 import type {Configuration, Plugin} from '../type'
 import configuration from '../configurator'
 import PluginAPI from '../pluginAPI'
@@ -27,8 +28,7 @@ QUnit.test('callStack', async (assert:Object):Promise<any> => {
     ])
         try {
             assert.deepEqual(await PluginAPI.callStack(
-                test[0][0], test[0][1], testConfiguration, testConfiguration,
-                ...test[0].slice(2)
+                test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
             ), test[1])
         } catch (error) {
             console.error(error)
@@ -101,11 +101,15 @@ QUnit.test('loadAPI', (assert:Object):void => {
         assert.deepEqual(plugin, test[6])
     }
 })
-QUnit.test('loadPluginConfigurations', (assert:Object):void => {
+QUnit.test('loadConfigurations', (assert:Object):void => {
     for (const test:Array<any> of [
-        [[], {}, {}],
-        [[], {a: 2}, {a: 2}]
-        // TODO add more tests
+        [[], {}, configuration],
+        [[], {a: 2}, configuration],
+        [
+            [{configuration: {a: 2}}],
+            Tools.copyLimitedRecursively({}),
+            Tools.extendObject({a: 2}, configuration)
+        ]
     ])
         assert.deepEqual(
             PluginAPI.loadConfigurations(test[0], test[1]), test[2])

@@ -90,9 +90,7 @@
     },
     "injection": {
       "internal": {
-        "index": "index",
-        "pluginAPI": "pluginAPI",
-        "configurator": "configurator"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: 'index', pluginAPI: 'pluginAPI', configurator: 'configurator'}"
       }
     },
     "inPlace": {

@@ -18,6 +18,8 @@ import Tools from 'clientnode'
 import type {PlainObject} from 'clientnode'
 import fileSystem from 'fs'
 import path from 'path'
+
+import baseConfiguration from './configurator'
 import type {Configuration, Plugin} from './type'
 // NOTE: Only needed for debugging this file.
 try {
@@ -34,7 +36,6 @@ export default class PluginAPI {
      * Calls all plugin methods for given trigger description.
      * @param type - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
-     * @param baseConfiguration - Immutable base configuration.
      * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
      * plugins have been resolved.
@@ -43,31 +44,29 @@ export default class PluginAPI {
      * promise.
      */
     static async callStack(
-        type:string, plugins:Array<Object>, baseConfiguration:Configuration,
-        configuration:Configuration, data:any = null, ...parameter:Array<any>
+        type:string, plugins:Array<Object>, configuration:Configuration,
+        data:any = null, ...parameter:Array<any>
     ):Promise<any> {
         if (configuration.plugin.hotReloading) {
             const pluginsWithChangedConfiguration = PluginAPI.hotReloadFile(
                 'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
-                PluginAPI.loadConfigurations(
-                    plugins, configuration, baseConfiguration)
+                PluginAPI.loadConfigurations(plugins, configuration)
                 PluginAPI.callStack(
                     'configurationLoaded', plugins, configuration,
-                    baseConfiguration, configuration,
-                    pluginsWithChangedConfiguration)
+                    configuration, pluginsWithChangedConfiguration)
             }
             const pluginsWithChangedAPIFiles = PluginAPI.hotReloadFile(
                 'apiFile', 'scope', plugins)
             if (pluginsWithChangedAPIFiles.length)
                 PluginAPI.callStack(
                     'apiFileReloaded', plugins, configuration,
-                    baseConfiguration, pluginsWithChangedConfiguration)
+                    pluginsWithChangedConfiguration)
         }
         for (const plugin:Object of plugins)
             data = await plugin.api.call(
                 PluginAPI, type, data, ...parameter.concat([
-                    plugins, configuration, baseConfiguration]))
+                    plugins, configuration]))
         return data
     }
     /**
@@ -221,19 +220,15 @@ export default class PluginAPI {
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
      * @param configuration - Global configuration to extend with.
-     * @param baseConfiguration - Global configuration to use as source.
      * @returns Updated given configuration object.
      */
     static loadConfigurations(
-        plugins:Array<Plugin>, configuration:Configuration,
-        baseConfiguration:?Configuration
+        plugins:Array<Plugin>, configuration:Configuration
     ):Configuration {
-        if (baseConfiguration) {
-            for (const key:string in configuration)
-                if (configuration.hasOwnProperty(key))
-                    delete configuration[key]
-            Tools.extendObject(configuration, baseConfiguration)
-        }
+        for (const key:string in configuration)
+            if (configuration.hasOwnProperty(key))
+                delete configuration[key]
+        Tools.extendObject(configuration, baseConfiguration)
         for (const plugin:Plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:PlainObject =
@@ -249,8 +244,12 @@ export default class PluginAPI {
         const parameter:Array<any> = [
             configuration, __dirname, process.cwd(), path, PluginAPI, Tools,
             plugins]
-        return Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
+        const packageConfiguration:PlainObject = configuration.package
+        delete configuration.package
+        configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
             configuration, parameterDescription, parameter))
+        configuration.package = packageConfiguration
+        return configuration
     }
     /**
      * Load given api file path and returns exported scope.
