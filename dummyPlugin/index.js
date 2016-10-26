@@ -47,13 +47,11 @@ export default class Dummy {
      * typological order.
      * @param plugins - Topological sorted list of plugins.
      * @param configuration - Mutable by plugins extended configuration object.
-     * @param baseConfiguration - Immutable base configuration which will be
      * extended by each plugin configuration.
      * @returns Will be ignored.
      */
     static initialize(
-        plugins:Array<Plugin>, configuration:Configuration,
-        baseConfiguration:Configuration
+        plugins:Array<Plugin>, configuration:Configuration
     ):Array<Plugin> {
         return plugins
     }

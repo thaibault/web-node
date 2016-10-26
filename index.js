@@ -30,8 +30,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         plugins:Array<Plugin>;
         configuration:Configuration;
     } = PluginAPI.loadALL(Tools.copyLimitedRecursively(baseConfiguration))
-    await PluginAPI.callStack(
-        'initialize', plugins, baseConfiguration, configuration)
+    await PluginAPI.callStack('initialize', plugins, configuration)
     if (plugins.length)
         console.info(
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
@@ -39,9 +38,8 @@ const main:ProcedureFunction = async ():Promise<any> => {
             ).join('", "') + '".')
     for (const type:string of ['pre', 'post'])
         await PluginAPI.callStack(
-            `${type}ConfigurationLoaded`, plugins, baseConfiguration,
-            configuration, configuration,
-            plugins.filter((plugin:Plugin):boolean =>
+            `${type}ConfigurationLoaded`, plugins, configuration,
+            configuration, plugins.filter((plugin:Plugin):boolean =>
                 Boolean(plugin.configurationFilePath)))
     // endregion
     let services:Services = {}
@@ -49,8 +47,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         // region start services
         for (const type:string of ['pre', 'post'])
             services = await PluginAPI.callStack(
-                `${type}LoadService`, plugins, baseConfiguration,
-                configuration, services)
+                `${type}LoadService`, plugins, configuration, services)
         for (const serviceName:string in services)
             if (services.hasOwnProperty(serviceName))
                 console.info(`Service ${serviceName} loaded.`)
@@ -60,8 +57,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         const closeHandler:Function = async ():Promise<void> => {
             if (!finished)
                 await PluginAPI.callStack(
-                    'exit', plugins, baseConfiguration, configuration,
-                    services)
+                    'exit', plugins, configuration, services)
             finished = true
         }
         for (const closeEventName:string of Tools.closeEventNames)
@@ -69,8 +65,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         // endregion
     } catch (error) {
         await PluginAPI.callStack(
-            'error', plugins, baseConfiguration, configuration, error, services
-        )
+            'error', plugins, configuration, error, services)
         if (configuration.debug)
             throw error
         else
