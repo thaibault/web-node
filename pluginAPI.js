@@ -239,11 +239,13 @@ export default class PluginAPI {
                 ), pluginConfiguration)
             }
         const parameterDescription:Array<string> = [
-            'currentPath', 'fileSystem', 'path', 'pluginAPI', 'self', 'tools',
-            'webNodePath']
+            'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require',
+            'self', 'tools', 'webNodePath']
         const parameter:Array<any> = [
-            process.cwd(), fileSystem, path, PluginAPI, configuration, Tools,
-            __dirname]
+            /* eslint-disable no-eval */
+            process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+            /* eslint-enable no-eval */
+            configuration, Tools, __dirname]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
