@@ -64,9 +64,10 @@ export default class PluginAPI {
                     pluginsWithChangedConfiguration)
         }
         for (const plugin:Object of plugins)
-            data = await plugin.api.call(
-                PluginAPI, type, data, ...parameter.concat([
-                    plugins, configuration]))
+            if (plugin.api)
+                data = await plugin.api.call(
+                    PluginAPI, type, data, ...parameter.concat([
+                        plugins, configuration]))
         return data
     }
     /**
@@ -106,6 +107,7 @@ export default class PluginAPI {
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
      * @param name - Name of plugin to extend.
+     * @param internalName - Internal name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
@@ -113,7 +115,7 @@ export default class PluginAPI {
      * @returns An object of plugin specific meta informations.
      */
     static load(
-        name:string, plugins:{[key:string]:Plugin},
+        name:string, internalName:string, plugins:{[key:string]:Plugin},
         configurationPropertyNames:Array<string>, pluginPath:string
     ):Plugin {
         let configurationFilePath:string = path.resolve(
@@ -136,15 +138,16 @@ export default class PluginAPI {
                         packageConfiguration)
                     delete pluginConfiguration.package[propertyName]
                     return PluginAPI.loadAPI(
-                        apiFilePath, pluginPath, name, plugins,
+                        apiFilePath, pluginPath, name, internalName, plugins,
                         pluginConfiguration, configurationFilePath)
                 }
             throw new Error(
-                `Plugin "${name}" hasn't working configuration object under ` +
-                `one of the following keys: "` +
+                `Plugin "${internalName} (${name})" hasn't working ` +
+                `configuration object under one of the following keys: "` +
                 `${configurationPropertyNames.join('", "')}".`)
         }
-        return PluginAPI.loadAPI('index.js', pluginPath, name, plugins)
+        return PluginAPI.loadAPI(
+            'index.js', pluginPath, name, internalName, plugins)
     }
     /**
      * Load given plugin api file in given plugin path generates a plugin
@@ -153,6 +156,8 @@ export default class PluginAPI {
      * plugin path.
      * @param pluginPath - Path to plugin directory.
      * @param name - Plugin name to use for proper error messages.
+     * @param internalName - Internal plugin name to use for proper error
+     * messages.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin specific configurations.
      * @param configurationFilePath - Plugin specific configuration file path.
@@ -160,7 +165,8 @@ export default class PluginAPI {
      */
     static loadAPI(
         relativeFilePath:string, pluginPath:string, name:string,
-        plugins:{[key:string]:Object}, configuration:?PlainObject = null,
+        internalName:string, plugins:{[key:string]:Object},
+        configuration:?PlainObject = null,
         configurationFilePath:?string = null
     ):Plugin {
         let filePath:string = path.resolve(pluginPath, relativeFilePath)
@@ -210,6 +216,7 @@ export default class PluginAPI {
             configurationFileLoadTimestamp: configurationFilePath &&
                 fileSystem.statSync(configurationFilePath).mtime.getTime() ||
                 null,
+            internalName,
             name,
             path: pluginPath,
             scope: api && PluginAPI.loadFile(filePath, name)
@@ -302,7 +309,7 @@ export default class PluginAPI {
         const plugins:{[key:string]:Object} = {}
         if (configuration.name !== 'webNode')
             plugins[configuration.name] = PluginAPI.load(
-                configuration.name, plugins,
+                configuration.name, configuration.name, plugins,
                 configuration.plugin.configurationPropertyNames,
                 configuration.context.path)
         for (const type:string in configuration.plugin.directories)
@@ -311,21 +318,29 @@ export default class PluginAPI {
             ) && Tools.isDirectorySync(
                 configuration.plugin.directories[type].path
             ))
-                fileSystem.readdirSync(
+                for (const pluginName:string of fileSystem.readdirSync(
                     configuration.plugin.directories[type].path
-                ).forEach((pluginName:string):void => {
-                    if (!(new RegExp(configuration.plugin.directories[
-                        type
-                    ].nameRegularExpressionPattern)).test(pluginName))
-                        return
+                )) {
+                    const compiledRegularExpression:RegExp = new RegExp(
+                        configuration.plugin.directories[
+                            type
+                        ].nameRegularExpressionPattern)
+                    if (!(compiledRegularExpression).test(pluginName))
+                        break
                     const currentPluginPath:string = path.resolve(
                         configuration.plugin.directories[type].path, pluginName
                     )
+                    let internalName:string = pluginName.replace(
+                        compiledRegularExpression, (
+                            fullMatch:string, firstMatch:string|number
+                        ):string => (
+                            typeof firstMatch === 'string'
+                        ) ? firstMatch : fullMatch)
                     plugins[pluginName] = PluginAPI.load(
-                        pluginName, plugins,
+                        pluginName, internalName, plugins,
                         configuration.plugin.configurationPropertyNames,
                         currentPluginPath)
-                })
+                }
         const sortedPlugins:Array<Plugin> = []
         const temporaryPlugins:{[key:string]:Array<string>} = {}
         for (const pluginName:string in plugins)

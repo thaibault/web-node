@@ -46,22 +46,23 @@ QUnit.test('hotReloadFile', async (assert:Object):Promise<any> => {
 })
 QUnit.test('load', (assert:Object):void => {
     for (const test:Array<any> of [
-        ['dummy', {}, ['a'], './']
+        ['dummy', 'dummy', {}, ['a'], './']
     ])
         assert.throws(():Plugin => PluginAPI.load(...test))
     for (const test:Array<any> of [
-        ['dummy', {}, ['webNode'], path.resolve(
+        ['dummy', 'dummy', {}, ['webNode'], path.resolve(
             configuration.context.path, 'dummyPlugin'
         ), {
             apiFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/index.compiled.js'),
             configuration: require('../dummyPlugin/package').webNode,
+            internalName: 'dummy',
             name: 'dummy',
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
         const plugin:Plugin = PluginAPI.load(
-            test[0], test[1], test[2], test[3])
+            test[0], test[1], test[2], test[3], test[4])
         assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
@@ -70,14 +71,14 @@ QUnit.test('load', (assert:Object):void => {
         delete plugin.configurationFilePath
         delete plugin.configurationFileLoadTimestamp
         delete plugin.scope
-        assert.deepEqual(plugin, test[4])
+        assert.deepEqual(plugin, test[5])
     }
 })
 QUnit.test('loadAPI', (assert:Object):void => {
     for (const test:Array<any> of [
         ['index.compiled.js', path.resolve(
             configuration.context.path, 'dummyPlugin'
-        ), 'dummy', {}, {a: 2}, path.resolve(
+        ), 'dummyPlugin', 'dummy', {}, {a: 2}, path.resolve(
             configuration.context.path, 'dummyPlugin/package.json'
         ), {
             apiFilePath: path.resolve(
@@ -85,18 +86,19 @@ QUnit.test('loadAPI', (assert:Object):void => {
             configuration: {a: 2},
             configurationFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'),
-            name: 'dummy',
+            internalName: 'dummy',
+            name: 'dummyPlugin',
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
         const plugin:Plugin = PluginAPI.loadAPI(
-            test[0], test[1], test[2], test[3], test[4], test[5])
+            test[0], test[1], test[2], test[3], test[4], test[5], test[6])
         assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
         delete plugin.configurationFileLoadTimestamp
         delete plugin.scope
-        assert.deepEqual(plugin, test[6])
+        assert.deepEqual(plugin, test[7])
     }
 })
 QUnit.test('loadConfigurations', (assert:Object):void => {
