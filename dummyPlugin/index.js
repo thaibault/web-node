@@ -45,13 +45,13 @@ export default class Dummy {
      * Application started, static configuration loaded and all available
      * plugins are determined and sorted in there dependency specific
      * typological order.
-     * @param plugins - Topological sorted list of plugins.
      * @param configuration - Mutable by plugins extended configuration object.
      * extended by each plugin configuration.
+     * @param plugins - Topological sorted list of plugins.
      * @returns Will be ignored.
      */
     static initialize(
-        plugins:Array<Plugin>, configuration:Configuration
+        configuration:Configuration, plugins:Array<Plugin>
     ):Array<Plugin> {
         return plugins
     }
