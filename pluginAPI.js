@@ -300,6 +300,11 @@ export default class PluginAPI {
         plugins:Array<Plugin>
     } {
         const plugins:{[key:string]:Object} = {}
+        if (configuration.name !== 'webNode')
+            plugins[configuration.name] = PluginAPI.load(
+                configuration.name, plugins,
+                configuration.plugin.configurationPropertyNames,
+                configuration.context.path)
         for (const type:string in configuration.plugin.directories)
             if (configuration.plugin.directories.hasOwnProperty(
                 type

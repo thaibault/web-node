@@ -44,13 +44,11 @@ QUnit.test('hotReloadFile', async (assert:Object):Promise<any> => {
             test[0], test[1], test[2]
         ), test[3])
 })
-QUnit.test('loadPlugin', (assert:Object):void => {
-    /*
+QUnit.test('load', (assert:Object):void => {
     for (const test:Array<any> of [
         ['dummy', {}, ['a'], './']
     ])
         assert.throws(():Plugin => PluginAPI.load(...test))
-    */
     for (const test:Array<any> of [
         ['dummy', {}, ['webNode'], path.resolve(
             configuration.context.path, 'dummyPlugin'
