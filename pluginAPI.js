@@ -67,7 +67,7 @@ export default class PluginAPI {
             if (plugin.api)
                 data = await plugin.api.call(
                     PluginAPI, type, data, ...parameter.concat([
-                        plugins, configuration]))
+                        configuration, plugins]))
         return data
     }
     /**
@@ -193,7 +193,9 @@ export default class PluginAPI {
                     return data
                 }
             } else
-                api = (data:any, ...parameter:Array<any>):Promise<any> => new Promise((
+                api = (
+                    data:any, ...parameter:Array<any>
+                ):Promise<any> => new Promise((
                     resolve:Function, reject:Function
                 ):void => {
                     const childProcess:ChildProcess = spawnChildProcess(
