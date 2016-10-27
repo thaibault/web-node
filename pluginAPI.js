@@ -183,12 +183,12 @@ export default class PluginAPI {
                 }
         let api:?Function = null
         if (Tools.isFileSync(filePath))
-            if (filePath.endsWith('.js'))
+            if (filePath.endsWith('.js')) {
                 api = async (type:string, ...parameter:Array<any>):any => {
                     if (type in plugins[name].scope)
                         return await plugins[name].scope[type](...parameter)
                 }
-            else
+            } else
                 api = (...parameter:Array<any>):Promise<any> => new Promise((
                     resolve:Function, reject:Function
                 ):void => {
