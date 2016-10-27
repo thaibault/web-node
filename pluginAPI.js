@@ -69,7 +69,7 @@ export default class PluginAPI {
                     data = await plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
                             plugins, configuration]))
-                } catche (error) {
+                } catch (error) {
                     console.error(error)
                 }
         return data
