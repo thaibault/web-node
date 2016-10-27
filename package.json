@@ -66,13 +66,13 @@
           "path": {
             "__evaluate__": "`${currentPath}/plugins/`"
           },
-          "nameRegularExpressionPattern": "^[a-z].*$"
+          "nameRegularExpressionPattern": "^([a-zA-Z].*)$"
         },
         "external": {
           "path": {
             "__evaluate__": "`${currentPath}/node_modules/`"
           },
-          "nameRegularExpressionPattern": "^[a-z][a-zA-Z0-9]+webnodeplugin$"
+          "nameRegularExpressionPattern": "^([a-z][a-zA-Z0-9]+)[wW]eb[nN]ode[pP]lugin$"
         }
       },
       "hotReloading": true

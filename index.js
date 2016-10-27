@@ -34,7 +34,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
     if (plugins.length)
         console.info(
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
-                plugin.name
+                plugin.internalName
             ).join('", "') + '".')
     for (const type:string of ['pre', 'post'])
         await PluginAPI.callStack(
