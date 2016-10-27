@@ -73,7 +73,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
     }
 }
 // IgnoreTypeCheck
-if (require.main === module)
+if (require.main === module || typeof __webpack_require__ !== 'undefined')
     main()
 export default main
 // region vim modline
