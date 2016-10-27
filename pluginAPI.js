@@ -330,7 +330,7 @@ export default class PluginAPI {
                     const currentPluginPath:string = path.resolve(
                         configuration.plugin.directories[type].path, pluginName
                     )
-                    let internalName:string = pluginName.replace(
+                    const internalName:string = pluginName.replace(
                         compiledRegularExpression, (
                             fullMatch:string, firstMatch:string|number
                         ):string => (
