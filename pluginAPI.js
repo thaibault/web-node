@@ -65,13 +65,9 @@ export default class PluginAPI {
         }
         for (const plugin:Object of plugins)
             if (plugin.api)
-                try {
-                    data = await plugin.api.call(
-                        PluginAPI, type, data, ...parameter.concat([
-                            plugins, configuration]))
-                } catch (error) {
-                    console.error(error)
-                }
+                data = await plugin.api.call(
+                    PluginAPI, type, data, ...parameter.concat([
+                        plugins, configuration]))
         return data
     }
     /**
@@ -188,12 +184,16 @@ export default class PluginAPI {
         let api:?Function = null
         if (Tools.isFileSync(filePath))
             if (filePath.endsWith('.js')) {
-                api = async (type:string, ...parameter:Array<any>):any => {
+                api = async (
+                    type:string, data:any, ...parameter:Array<any>
+                ):any => {
                     if (type in plugins[name].scope)
-                        return await plugins[name].scope[type](...parameter)
+                        return await plugins[name].scope[type](
+                            data, ...parameter)
+                    return data
                 }
             } else
-                api = (...parameter:Array<any>):Promise<any> => new Promise((
+                api = (data:any, ...parameter:Array<any>):Promise<any> => new Promise((
                     resolve:Function, reject:Function
                 ):void => {
                     const childProcess:ChildProcess = spawnChildProcess(
@@ -208,6 +208,8 @@ export default class PluginAPI {
                             closeEventName,
                             Tools.getProcessCloseHandler(
                                 resolve, reject, closeEventName))
+                    // TODO check how data could by manipulated.
+                    return data
                 })
         return {
             api,
