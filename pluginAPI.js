@@ -182,6 +182,7 @@ export default class PluginAPI {
                         break
                 }
         let api:?Function = null
+        console.log(filePath, Tools.isFileSync(filePath))
         if (Tools.isFileSync(filePath))
             if (filePath.endsWith('.js'))
                 api = async (type:string, ...parameter:Array<any>):any => {
