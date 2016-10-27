@@ -64,8 +64,15 @@ const main:ProcedureFunction = async ():Promise<any> => {
             process.on(closeEventName, closeHandler)
         // endregion
     } catch (error) {
-        await PluginAPI.callStack(
-            'error', plugins, configuration, error, services)
+        try {
+            await PluginAPI.callStack(
+                'error', plugins, configuration, error, services)
+        } catch (error) {
+            if (configuration.debug)
+                throw error
+            else
+                console.error(error)
+        }
         if (configuration.debug)
             throw error
         else
