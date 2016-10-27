@@ -65,9 +65,13 @@ export default class PluginAPI {
         }
         for (const plugin:Object of plugins)
             if (plugin.api)
-                data = await plugin.api.call(
-                    PluginAPI, type, data, ...parameter.concat([
-                        plugins, configuration]))
+                try {
+                    data = await plugin.api.call(
+                        PluginAPI, type, data, ...parameter.concat([
+                            plugins, configuration]))
+                } catche (error) {
+                    console.error(error)
+                }
         return data
     }
     /**
