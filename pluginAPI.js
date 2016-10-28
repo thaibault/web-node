@@ -26,12 +26,10 @@ try {
     require('source-map-support/register')
 } catch (error) {}
 // endregion
-// region methods
 /**
  * A dumm plugin interface with all available hooks.
  */
 export default class PluginAPI {
-    // region plugin
     /**
      * Calls all plugin methods for given trigger description.
      * @param type - Type of trigger.
@@ -224,6 +222,9 @@ export default class PluginAPI {
             configurationFileLoadTimestamp: configurationFilePath &&
                 fileSystem.statSync(configurationFilePath).mtime.getTime() ||
                 null,
+            dependencies: configuration && configuration.hasOwnProperty(
+                'dependencies'
+            ) && configuration.dependencies || [],
             internalName,
             name,
             path: pluginPath,
@@ -325,16 +326,16 @@ export default class PluginAPI {
                 type
             ) && await Tools.isDirectory(
                 configuration.plugin.directories[type].path
-            ))
+            )) {
+                const compiledRegularExpression:RegExp = new RegExp(
+                    configuration.plugin.directories[
+                        type
+                    ].nameRegularExpressionPattern)
                 for (const pluginName:string of fileSystem.readdirSync(
                     configuration.plugin.directories[type].path
                 )) {
-                    const compiledRegularExpression:RegExp = new RegExp(
-                        configuration.plugin.directories[
-                            type
-                        ].nameRegularExpressionPattern)
                     if (!(compiledRegularExpression).test(pluginName))
-                        break
+                        continue
                     const currentPluginPath:string = path.resolve(
                         configuration.plugin.directories[type].path, pluginName
                     )
@@ -349,29 +350,32 @@ export default class PluginAPI {
                         configuration.plugin.configurationPropertyNames,
                         currentPluginPath)
                 }
-        const sortedPlugins:Array<Plugin> = []
+            }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
         for (const pluginName:string in plugins)
             if (plugins.hasOwnProperty(pluginName))
-                if (plugins[pluginName].hasOwnProperty('dependencies'))
-                    temporaryPlugins[plugins[
-                        pluginName
-                    ].internalName] = plugins[pluginName].dependencies
-                else
-                    temporaryPlugins[plugins[pluginName].internalName] = []
+                temporaryPlugins[plugins[
+                    pluginName
+                ].internalName] = plugins[pluginName].dependencies
+        const sortedPlugins:Array<Plugin> = []
         for (const pluginName:string of Tools.arraySortTopological(
             temporaryPlugins
         ))
-            sortedPlugins.push(plugins[pluginName])
+            for (const name:string in plugins)
+                if (plugins.hasOwnProperty(name))
+                    if ([plugins[name].internalName, name].includes(
+                        pluginName
+                    )) {
+                        sortedPlugins.push(plugins[name])
+                        break
+                    }
         return {
             plugins: sortedPlugins,
             configuration: PluginAPI.loadConfigurations(
                 sortedPlugins, configuration)
         }
     }
-    // endregion
 }
-// endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

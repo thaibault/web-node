@@ -56,6 +56,7 @@ QUnit.test('load', (assert:Object):void => {
             apiFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/index.compiled.js'),
             configuration: require('../dummyPlugin/package').webNode,
+            dependencies: [],
             internalName: 'dummy',
             name: 'dummy',
             path: path.resolve(configuration.context.path, 'dummyPlugin')
@@ -86,6 +87,7 @@ QUnit.test('loadAPI', (assert:Object):void => {
             configuration: {a: 2},
             configurationFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'),
+            dependencies: [],
             internalName: 'dummy',
             name: 'dummyPlugin',
             path: path.resolve(configuration.context.path, 'dummyPlugin')

@@ -48,6 +48,7 @@ export type Plugin = {
     configuration:?PlainObject;
     configurationFilePath:?string;
     configurationFileLoadTimestamp:?number;
+    dependencies:Array<string>;
     internalName:string;
     name:string;
     path:string;
