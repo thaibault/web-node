@@ -27,8 +27,8 @@ import type {Configuration, Plugin, Services} from './type'
 const main:ProcedureFunction = async ():Promise<any> => {
     // region load plugins
     const {plugins, configuration}:{
-        plugins:Array<Plugin>;
         configuration:Configuration;
+        plugins:Array<Plugin>;
     } = PluginAPI.loadALL(Tools.copyLimitedRecursively(baseConfiguration))
     await PluginAPI.callStack('initialize', plugins, configuration)
     if (plugins.length)
