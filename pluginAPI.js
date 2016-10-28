@@ -354,11 +354,11 @@ export default class PluginAPI {
         for (const pluginName:string in plugins)
             if (plugins.hasOwnProperty(pluginName))
                 if (plugins[pluginName].hasOwnProperty('dependencies'))
-                    temporaryPlugins[pluginName] = plugins[
+                    temporaryPlugins[plugins[
                         pluginName
-                    ].dependencies
+                    ].internalName] = plugins[pluginName].dependencies
                 else
-                    temporaryPlugins[pluginName] = []
+                    temporaryPlugins[plugins[pluginName].internalName] = []
         for (const pluginName:string of Tools.arraySortTopological(
             temporaryPlugins
         ))
