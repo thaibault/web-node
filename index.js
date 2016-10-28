@@ -57,7 +57,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         const closeHandler:Function = async ():Promise<void> => {
             if (!finished)
                 await PluginAPI.callStack(
-                    'exit', plugins, configuration, services)
+                    'exit', plugins.slice().reverse(), configuration, services)
             finished = true
         }
         for (const closeEventName:string of Tools.closeEventNames)
