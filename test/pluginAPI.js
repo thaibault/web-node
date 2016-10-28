@@ -56,6 +56,7 @@ QUnit.test('load', (assert:Object):void => {
             apiFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/index.compiled.js'),
             configuration: require('../dummyPlugin/package').webNode,
+            dependencies: [],
             internalName: 'dummy',
             name: 'dummy',
             path: path.resolve(configuration.context.path, 'dummyPlugin')
@@ -86,6 +87,7 @@ QUnit.test('loadAPI', (assert:Object):void => {
             configuration: {a: 2},
             configurationFilePath: path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'),
+            dependencies: [],
             internalName: 'dummy',
             name: 'dummyPlugin',
             path: path.resolve(configuration.context.path, 'dummyPlugin')
@@ -125,11 +127,13 @@ QUnit.test('loadPluginFile', (assert:Object):void => {
             PluginAPI.loadFile(test[0], test[1], test[2], test[3]),
             test[4])
 })
-QUnit.test('loadALL', (assert:Object):void => {
+QUnit.test('loadALL', async (assert:Object):Promise<void> => {
+    const done:Function = assert.async()
     for (const test:Array<any> of [
         [configuration, {}, {plugins: [], configuration}]
     ])
-        assert.deepEqual(PluginAPI.loadALL(test[0], test[1]), test[2])
+        assert.deepEqual(await PluginAPI.loadALL(test[0], test[1]), test[2])
+    done()
 })
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
