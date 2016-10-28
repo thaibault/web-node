@@ -29,7 +29,8 @@ const main:ProcedureFunction = async ():Promise<any> => {
     const {plugins, configuration}:{
         configuration:Configuration;
         plugins:Array<Plugin>;
-    } = PluginAPI.loadALL(Tools.copyLimitedRecursively(baseConfiguration))
+    } = await PluginAPI.loadALL(Tools.copyLimitedRecursively(
+        baseConfiguration))
     await PluginAPI.callStack('initialize', plugins, configuration)
     if (plugins.length)
         console.info(

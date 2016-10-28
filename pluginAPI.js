@@ -310,10 +310,10 @@ export default class PluginAPI {
      * @param configuration - Configuration object to extend and use.
      * @returns A topological sorted list of plugins objects.
      */
-    static loadALL(configuration:Configuration):{
+    static async loadALL(configuration:Configuration):Promise<{
         configuration:Configuration;
         plugins:Array<Plugin>
-    } {
+    }> {
         const plugins:{[key:string]:Object} = {}
         if (configuration.name !== 'webNode')
             plugins[configuration.name] = PluginAPI.load(
@@ -323,7 +323,7 @@ export default class PluginAPI {
         for (const type:string in configuration.plugin.directories)
             if (configuration.plugin.directories.hasOwnProperty(
                 type
-            ) && Tools.isDirectorySync(
+            ) && await Tools.isDirectory(
                 configuration.plugin.directories[type].path
             ))
                 for (const pluginName:string of fileSystem.readdirSync(
