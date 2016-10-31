@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.48",
+  "version": "1.0.49",
   "description": "A generic web backend configuration and plugin management.",
   "documentationWebsite": {
     "name": "webNode",
