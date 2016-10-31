@@ -70,7 +70,7 @@ export default class PluginAPI {
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
-                    console.error(
+                    throw new Error(
                         `Plugin "${plugin.internalName}" throws: ` +
                         `${Tools.representObject(error)} during hook "` +
                         `${type}".`)
