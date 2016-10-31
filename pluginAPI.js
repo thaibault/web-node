@@ -63,9 +63,16 @@ export default class PluginAPI {
         }
         for (const plugin:Object of plugins)
             if (plugin.api)
-                data = await plugin.api.call(
-                    PluginAPI, type, data, ...parameter.concat([
-                        configuration, plugins]))
+                try {
+                    data = await plugin.api.call(
+                        PluginAPI, type, data, ...parameter.concat([
+                            configuration, plugins]))
+                } catch (error) {
+                    console.error(
+                        `Plugin "${plugin.internalName}" throws: ` +
+                        `${Tools.representObject(error)} during hook "` +
+                        `${type}".`)
+                }
         return data
     }
     /**
