@@ -45,7 +45,9 @@ export default class PluginAPI {
         type:string, plugins:Array<Object>, configuration:Configuration,
         data:any = null, ...parameter:Array<any>
     ):Promise<any> {
-        if (configuration.plugin.hotReloading) {
+        if (configuration.plugin.hotReloading && ![
+            'configurationLoaded', 'apiFileReloaded'
+        ].includes(type)) {
             const pluginsWithChangedConfiguration = PluginAPI.hotReloadFile(
                 'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
