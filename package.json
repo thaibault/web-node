@@ -33,11 +33,13 @@
     "source-map-support": "latest"
   },
   "files": [
-    "configurator.js",
     "configurator.compiled.js",
-    "pluginAPI.js",
+    "configurator.js",
     "pluginAPI.compiled.js",
-    "type.js"
+    "pluginAPI.js",
+    "type.js",
+    "unixCrypt.compiled.js",
+    "unixCrypt.js"
   ],
   "scripts": {
     "build": "webOptimizer build",
@@ -90,7 +92,7 @@
     },
     "injection": {
       "internal": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: 'index', pluginAPI: 'pluginAPI', configurator: 'configurator'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {configurator: 'configurator', index: 'index', pluginAPI: 'pluginAPI', unixCrypt: 'unixCrypt'}"
       }
     },
     "inPlace": {
