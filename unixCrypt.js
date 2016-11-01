@@ -24,7 +24,7 @@
  * largely on crypt.c in the Seventh Edition Unix distribution released by
  * Caldera Systems under a BSD-style license.
  */
-module.exports.default = (() => {
+export default (() => {
     /*
      * Initial permutation,
      */
@@ -101,13 +101,15 @@ module.exports.default = (() => {
     /*
      * The C and D arrays used to calculate the key schedule.
      */
-
+    // TODO mutable
     var C = [];
+    // TODO mutable
     var D = [];
     /*
      * The key schedule.
      * Generated from the key.
      */
+    // TODO mutable
     var KS = [];
     for (var i = 0; i < 16; ++i) {
         KS[i] = [];
@@ -162,6 +164,7 @@ module.exports.default = (() => {
     /*
      * The E bit-selection table.
      */
+    // TODO mutable
     var E = [];
     var e = [
         32, 1, 2, 3, 4, 5,
@@ -239,13 +242,17 @@ module.exports.default = (() => {
     /*
      * The current block, divided into 2 halves.
      */
+    // TODO mutable
     var L = [], R = [];
+    // TODO mutable
     var tempL = [[]];
+    // TODO mutable
     var f =[];
 
     /*
      * The combination of the key and the input, before selection.
      */
+    // TODO mutable
     var preS = [];
 
     /*
