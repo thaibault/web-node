@@ -13,7 +13,7 @@
     endregion
 */
 // region imports
-import {ChildProcess, spawn as spawnChildProcess} from 'child_process'
+import {spawnSync as spawnChildProcessSync} from 'child_process'
 import Tools from 'clientnode'
 import type {PlainObject} from 'clientnode'
 import fileSystem from 'fs'
@@ -148,11 +148,14 @@ export default class PluginAPI {
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
      * @param pluginPath - Path to given plugin.
+     * @param encoding - Encoding to use to read and write from child
+     * process's.
      * @returns An object of plugin specific meta informations.
      */
     static load(
         name:string, internalName:string, plugins:{[key:string]:Plugin},
-        configurationPropertyNames:Array<string>, pluginPath:string
+        configurationPropertyNames:Array<string>, pluginPath:string,
+        encoding:string = 'utf8'
     ):Plugin {
         let configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
@@ -175,7 +178,7 @@ export default class PluginAPI {
                     delete pluginConfiguration.package[propertyName]
                     return PluginAPI.loadAPI(
                         apiFilePath, pluginPath, name, internalName, plugins,
-                        pluginConfiguration, configurationFilePath)
+                        encoding, pluginConfiguration, configurationFilePath)
                 }
             throw new Error(
                 `Plugin "${internalName} (${name})" hasn't working ` +
@@ -183,7 +186,7 @@ export default class PluginAPI {
                 `${configurationPropertyNames.join('", "')}".`)
         }
         return PluginAPI.loadAPI(
-            'index.js', pluginPath, name, internalName, plugins)
+            'index.js', pluginPath, name, internalName, plugins, encoding)
     }
     /**
      * Load given plugin api file in given plugin path generates a plugin
@@ -195,14 +198,17 @@ export default class PluginAPI {
      * @param internalName - Internal plugin name to use for proper error
      * messages.
      * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param encoding - Encoding to use to read and write from child
+     * process's.
      * @param configuration - Plugin specific configurations.
      * @param configurationFilePath - Plugin specific configuration file path.
+     * standard in- and output.
      * @returns Plugin meta informations object.
      */
     static loadAPI(
         relativeFilePath:string, pluginPath:string, name:string,
         internalName:string, plugins:{[key:string]:Object},
-        configuration:?PlainObject = null,
+        encoding:string = 'utf8', configuration:?PlainObject = null,
         configurationFilePath:?string = null
     ):Plugin {
         let filePath:string = path.resolve(pluginPath, relativeFilePath)
@@ -220,35 +226,33 @@ export default class PluginAPI {
         let api:?Function = null
         if (Tools.isFileSync(filePath))
             if (filePath.endsWith('.js')) {
-                api = async (
+                api = (
                     type:string, data:any, ...parameter:Array<any>
                 ):any => {
                     if (type in plugins[name].scope)
-                        return await plugins[name].scope[type](
-                            data, ...parameter)
+                        return plugins[name].scope[type](data, ...parameter)
                     return data
                 }
             } else
                 api = (
                     data:any, ...parameter:Array<any>
-                ):Promise<any> => new Promise((
-                    resolve:Function, reject:Function
-                ):void => {
-                    const childProcess:ChildProcess = spawnChildProcess(
-                        filePath, Tools.arrayMake(parameter), {
-                            cwd: process.cwd(),
-                            env: process.env,
-                            shell: true,
-                            stdio: 'inherit'
-                        })
-                    for (const closeEventName:string of Tools.closeEventNames)
-                        childProcess.on(
-                            closeEventName,
-                            Tools.getProcessCloseHandler(
-                                resolve, reject, closeEventName))
-                    // TODO check how data could by manipulated.
+                ):any => {
+                    const childProcessResult:PlainObject =
+                        spawnChildProcessSync(
+                            filePath, Tools.arrayMake(parameter), {
+                                cwd: process.cwd(),
+                                encoding,
+                                env: process.env,
+                                input: Tools.representObject(data),
+                                shell: true,
+                                stdio: 'inherit'
+                            })
+                    if (childProcessResult.stdout.startsWith(
+                        '##'
+                    ) && childProcessResult.stdout.endsWith('##'))
+                        data = JSON.parse(data)
                     return data
-                })
+                }
         return {
             api,
             apiFilePath: api && filePath,
@@ -358,7 +362,7 @@ export default class PluginAPI {
             plugins[configuration.name] = PluginAPI.load(
                 configuration.name, configuration.name, plugins,
                 configuration.plugin.configurationPropertyNames,
-                configuration.context.path)
+                configuration.context.path, configuration.encoding)
         for (const type:string in configuration.plugin.directories)
             if (configuration.plugin.directories.hasOwnProperty(
                 type
@@ -386,7 +390,7 @@ export default class PluginAPI {
                     plugins[pluginName] = PluginAPI.load(
                         pluginName, internalName, plugins,
                         configuration.plugin.configurationPropertyNames,
-                        currentPluginPath)
+                        currentPluginPath, configuration.encoding)
                 }
             }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
