@@ -43,7 +43,7 @@ export default class PluginAPI {
      * promise holding given potentially modified data.
      */
     static async callStack(
-        type:string, plugins:Array<Object>, configuration:Configuration,
+        type:string, plugins:Array<Plugin>, configuration:Configuration,
         data:any = null, ...parameter:Array<any>
     ):Promise<any> {
         if (configuration.plugin.hotReloading && ![
@@ -64,7 +64,7 @@ export default class PluginAPI {
                     'apiFileReloaded', plugins, configuration,
                     pluginsWithChangedConfiguration)
         }
-        for (const plugin:Object of plugins)
+        for (const plugin:Plugin of plugins)
             if (plugin.api)
                 try {
                     data = await plugin.api.call(
@@ -89,10 +89,10 @@ export default class PluginAPI {
      * @returns Given potentially modified data.
      */
     static callStackSynchrone(
-        type:string, plugins:Array<Object>, configuration:Configuration,
+        type:string, plugins:Array<Plugin>, configuration:Configuration,
         data:any = null, ...parameter:Array<any>
     ):any {
-        for (const plugin:Object of plugins)
+        for (const plugin:Plugin of plugins)
             if (plugin.api)
                 try {
                     data = plugin.api.call(
