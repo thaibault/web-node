@@ -234,9 +234,7 @@ export default class PluginAPI {
                     return data
                 }
             } else
-                api = (
-                    data:any, ...parameter:Array<any>
-                ):any => {
+                api = (data:any, ...parameter:Array<any>):any => {
                     const childProcessResult:PlainObject =
                         spawnChildProcessSync(
                             filePath, Tools.arrayMake(parameter), {

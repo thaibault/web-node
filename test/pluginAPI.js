@@ -57,9 +57,7 @@ QUnit.test('hotReloadFile', async (assert:Object):Promise<any> => {
         ['apiFile', 'scope', [], []]
         // TODO add more tests
     ])
-        assert.deepEqual(await PluginAPI.hotReloadFile(
-            test[0], test[1], test[2]
-        ), test[3])
+        assert.deepEqual(await PluginAPI.hotReloadFile(...test[0, 3]), test[3])
 })
 QUnit.test('load', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -79,8 +77,7 @@ QUnit.test('load', (assert:Object):void => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
-        const plugin:Plugin = PluginAPI.load(
-            test[0], test[1], test[2], test[3], test[4])
+        const plugin:Plugin = PluginAPI.load(...test.slice(0, 5))
         assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
@@ -96,7 +93,7 @@ QUnit.test('loadAPI', (assert:Object):void => {
     for (const test:Array<any> of [
         ['index.compiled.js', path.resolve(
             configuration.context.path, 'dummyPlugin'
-        ), 'dummyPlugin', 'dummy', {}, {a: 2}, path.resolve(
+        ), 'dummyPlugin', 'dummy', {}, 'utf8', {a: 2}, path.resolve(
             configuration.context.path, 'dummyPlugin/package.json'
         ), {
             apiFilePath: path.resolve(
@@ -110,14 +107,13 @@ QUnit.test('loadAPI', (assert:Object):void => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
-        const plugin:Plugin = PluginAPI.loadAPI(
-            test[0], test[1], test[2], test[3], test[4], test[5], test[6])
+        const plugin:Plugin = PluginAPI.loadAPI(...test.slice(0, 8))
         assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
         delete plugin.configurationFileLoadTimestamp
         delete plugin.scope
-        assert.deepEqual(plugin, test[7])
+        assert.deepEqual(plugin, test[8])
     }
 })
 QUnit.test('loadConfigurations', (assert:Object):void => {
@@ -131,7 +127,7 @@ QUnit.test('loadConfigurations', (assert:Object):void => {
         ]
     ])
         assert.deepEqual(
-            PluginAPI.loadConfigurations(test[0], test[1]), test[2])
+            PluginAPI.loadConfigurations(test.slice(0, 2)), test[2])
 })
 QUnit.test('loadPluginFile', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -149,7 +145,7 @@ QUnit.test('loadALL', async (assert:Object):Promise<void> => {
     for (const test:Array<any> of [
         [configuration, {}, {plugins: [], configuration}]
     ])
-        assert.deepEqual(await PluginAPI.loadALL(test[0], test[1]), test[2])
+        assert.deepEqual(await PluginAPI.loadALL(test.slice(0, 2)), test[2])
     done()
 })
 // region vim modline
