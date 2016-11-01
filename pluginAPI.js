@@ -31,7 +31,8 @@ try {
  */
 export default class PluginAPI {
     /**
-     * Calls all plugin methods for given trigger description.
+     * Calls all plugin methods for given trigger description asynchrone and
+     * waits for their resolved promises.
      * @param type - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
@@ -39,7 +40,7 @@ export default class PluginAPI {
      * plugins have been resolved.
      * @param parameter - Additional parameter to forward into plugin api.
      * @returns A promise which resolves when all callbacks have resolved their
-     * promise.
+     * promise holding given potentially modified data.
      */
     static async callStack(
         type:string, plugins:Array<Object>, configuration:Configuration,
@@ -72,8 +73,36 @@ export default class PluginAPI {
                 } catch (error) {
                     throw new Error(
                         `Plugin "${plugin.internalName}" throws: ` +
-                        `${Tools.representObject(error)} during hook "` +
-                        `${type}".`)
+                        `${Tools.representObject(error)} during asynchrone ` +
+                        `hook "${type}".`)
+                }
+        return data
+    }
+    /**
+     * Calls all plugin methods for given trigger description synchrone.
+     * @param type - Type of trigger.
+     * @param plugins - List of plugins to search for trigger callbacks in.
+     * @param configuration - Plugin extendable configuration object.
+     * @param data - Data to pipe throw all plugins and resolve after all
+     * plugins have been resolved.
+     * @param parameter - Additional parameter to forward into plugin api.
+     * @returns Given potentially modified data.
+     */
+    static callStackSynchrone(
+        type:string, plugins:Array<Object>, configuration:Configuration,
+        data:any = null, ...parameter:Array<any>
+    ):any {
+        for (const plugin:Object of plugins)
+            if (plugin.api)
+                try {
+                    data = plugin.api.call(
+                        PluginAPI, type, data, ...parameter.concat([
+                            configuration, plugins]))
+                } catch (error) {
+                    throw new Error(
+                        `Plugin "${plugin.internalName}" throws: ` +
+                        `${Tools.representObject(error)} during synchrone ` +
+                        `hook "${type}".`)
                 }
         return data
     }

@@ -16,7 +16,7 @@ import PluginAPI from '../pluginAPI'
 // endregion
 QUnit.module('pluginAPI')
 QUnit.load()
-QUnit.test('callStack', async (assert:Object):Promise<any> => {
+QUnit.test('callStack', async (assert:Object):Promise<void> => {
     const done:Function = assert.async()
     const testConfiguration:Configuration = Tools.copyLimitedRecursively(
         configuration)
@@ -34,6 +34,23 @@ QUnit.test('callStack', async (assert:Object):Promise<any> => {
             console.error(error)
         }
     done()
+})
+QUnit.test('callStackSynchrone', (assert:Object):void => {
+    const testConfiguration:Configuration = Tools.copyLimitedRecursively(
+        configuration)
+    for (const test:Array<any> of [
+        [['test', []], null],
+        [['test', [], null], null],
+        [['test', [], {}], {}]
+        // TODO add more tests
+    ])
+        try {
+            assert.deepEqual(PluginAPI.callStackSynchrone(
+                test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
+            ), test[1])
+        } catch (error) {
+            console.error(error)
+        }
 })
 QUnit.test('hotReloadFile', async (assert:Object):Promise<any> => {
     for (const test:Array<any> of [
