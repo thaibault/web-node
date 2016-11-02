@@ -64,7 +64,7 @@ export default class PluginAPI {
                     'apiFileReloaded', plugins, configuration,
                     pluginsWithChangedConfiguration)
         }
-        for (const plugin:Plugin of plugins)
+        for (const plugin:Plugin of plugins) {
             if (plugin.api)
                 try {
                     data = await plugin.api.call(
@@ -76,6 +76,7 @@ export default class PluginAPI {
                         `${Tools.representObject(error)} during asynchrone ` +
                         `hook "${type}".`)
                 }
+        }
         return data
     }
     /**
@@ -88,7 +89,7 @@ export default class PluginAPI {
      * @param parameter - Additional parameter to forward into plugin api.
      * @returns Given potentially modified data.
      */
-    static callStackSynchrone(
+    static callStackSynchronous(
         type:string, plugins:Array<Plugin>, configuration:Configuration,
         data:any = null, ...parameter:Array<any>
     ):any {
@@ -152,11 +153,11 @@ export default class PluginAPI {
      * process's.
      * @returns An object of plugin specific meta informations.
      */
-    static load(
+    static async load(
         name:string, internalName:string, plugins:{[key:string]:Plugin},
         configurationPropertyNames:Array<string>, pluginPath:string,
         encoding:string = 'utf8'
-    ):Plugin {
+    ):Promise<Plugin> {
         let configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
         let packageConfiguration:?PlainObject = null
@@ -176,7 +177,7 @@ export default class PluginAPI {
                     pluginConfiguration.package = Tools.copyLimitedRecursively(
                         packageConfiguration)
                     delete pluginConfiguration.package[propertyName]
-                    return PluginAPI.loadAPI(
+                    return await PluginAPI.loadAPI(
                         apiFilePath, pluginPath, name, internalName, plugins,
                         encoding, pluginConfiguration, configurationFilePath)
                 }
@@ -185,7 +186,7 @@ export default class PluginAPI {
                 `configuration object under one of the following keys: "` +
                 `${configurationPropertyNames.join('", "')}".`)
         }
-        return PluginAPI.loadAPI(
+        return await PluginAPI.loadAPI(
             'index.js', pluginPath, name, internalName, plugins, encoding)
     }
     /**
@@ -205,16 +206,16 @@ export default class PluginAPI {
      * standard in- and output.
      * @returns Plugin meta informations object.
      */
-    static loadAPI(
+    static async loadAPI(
         relativeFilePath:string, pluginPath:string, name:string,
         internalName:string, plugins:{[key:string]:Object},
         encoding:string = 'utf8', configuration:?PlainObject = null,
         configurationFilePath:?string = null
-    ):Plugin {
+    ):Promise<Plugin> {
         let filePath:string = path.resolve(pluginPath, relativeFilePath)
-        if (!Tools.isFileSync(filePath))
+        if (!(await Tools.isFile(filePath)))
             for (const fileName:string of fileSystem.readdirSync(pluginPath))
-                if (fileName !== 'package.json' && Tools.isFileSync(
+                if (fileName !== 'package.json' && await Tools.isFile(
                     path.resolve(pluginPath, fileName)
                 )) {
                     filePath = path.resolve(pluginPath, filePath)
@@ -224,7 +225,7 @@ export default class PluginAPI {
                         break
                 }
         let api:?Function = null
-        if (Tools.isFileSync(filePath))
+        if (await Tools.isFile(filePath))
             if (filePath.endsWith('.js')) {
                 api = (
                     type:string, data:any, ...parameter:Array<any>
@@ -351,13 +352,13 @@ export default class PluginAPI {
      * @param configuration - Configuration object to extend and use.
      * @returns A topological sorted list of plugins objects.
      */
-    static async loadALL(configuration:Configuration):Promise<{
+    static async loadAll(configuration:Configuration):Promise<{
         configuration:Configuration;
         plugins:Array<Plugin>
     }> {
         const plugins:{[key:string]:Object} = {}
         if (configuration.name !== 'webNode')
-            plugins[configuration.name] = PluginAPI.load(
+            plugins[configuration.name] = await PluginAPI.load(
                 configuration.name, configuration.name, plugins,
                 configuration.plugin.configurationPropertyNames,
                 configuration.context.path, configuration.encoding)
@@ -385,7 +386,7 @@ export default class PluginAPI {
                         ):string => (
                             typeof firstMatch === 'string'
                         ) ? firstMatch : fullMatch)
-                    plugins[pluginName] = PluginAPI.load(
+                    plugins[pluginName] = await PluginAPI.load(
                         pluginName, internalName, plugins,
                         configuration.plugin.configurationPropertyNames,
                         currentPluginPath, configuration.encoding)
