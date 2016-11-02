@@ -35,7 +35,7 @@ QUnit.test('callStack', async (assert:Object):Promise<void> => {
         }
     done()
 })
-QUnit.test('callStackSynchrone', (assert:Object):void => {
+QUnit.test('callStackSynchronous', (assert:Object):void => {
     const testConfiguration:Configuration = Tools.copyLimitedRecursively(
         configuration)
     for (const test:Array<any> of [
@@ -45,7 +45,7 @@ QUnit.test('callStackSynchrone', (assert:Object):void => {
         // TODO add more tests
     ])
         try {
-            assert.deepEqual(PluginAPI.callStackSynchrone(
+            assert.deepEqual(PluginAPI.callStackSynchronous(
                 test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
             ), test[1])
         } catch (error) {
@@ -60,11 +60,17 @@ QUnit.test('hotReloadFile', async (assert:Object):Promise<any> => {
         assert.deepEqual(
             await PluginAPI.hotReloadFile(...test.slice(0, 3)), test[3])
 })
-QUnit.test('load', (assert:Object):void => {
+QUnit.test('load', async (assert:Object):Promise<void> => {
+    const done:Function = assert.async()
     for (const test:Array<any> of [
         ['dummy', 'dummy', {}, ['a'], './']
     ])
-        assert.throws(():Plugin => PluginAPI.load(...test))
+        try {
+            await PluginAPI.load(...test)
+            assert.ok(false)
+        } catch (error) {
+            assert.ok(true)
+        }
     for (const test:Array<any> of [
         ['dummy', 'dummy', {}, ['webNode'], path.resolve(
             configuration.context.path, 'dummyPlugin'
@@ -78,7 +84,7 @@ QUnit.test('load', (assert:Object):void => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
-        const plugin:Plugin = PluginAPI.load(...test.slice(0, 5))
+        const plugin:Plugin = await PluginAPI.load(...test.slice(0, 5))
         assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
@@ -89,8 +95,10 @@ QUnit.test('load', (assert:Object):void => {
         delete plugin.scope
         assert.deepEqual(plugin, test[5])
     }
+    done()
 })
-QUnit.test('loadAPI', (assert:Object):void => {
+QUnit.test('loadAPI', async (assert:Object):Promise<void> => {
+    const done:Function = assert.async()
     for (const test:Array<any> of [
         ['index.compiled.js', path.resolve(
             configuration.context.path, 'dummyPlugin'
@@ -108,7 +116,7 @@ QUnit.test('loadAPI', (assert:Object):void => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
-        const plugin:Plugin = PluginAPI.loadAPI(...test.slice(0, 8))
+        const plugin:Plugin = await PluginAPI.loadAPI(...test.slice(0, 8))
         assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
         delete plugin.api
         delete plugin.apiFileLoadTimestamp
@@ -116,6 +124,7 @@ QUnit.test('loadAPI', (assert:Object):void => {
         delete plugin.scope
         assert.deepEqual(plugin, test[8])
     }
+    done()
 })
 QUnit.test('loadConfigurations', (assert:Object):void => {
     for (const test:Array<any> of [
@@ -139,12 +148,12 @@ QUnit.test('loadPluginFile', (assert:Object):void => {
     ])
         assert.deepEqual(PluginAPI.loadFile(...test.slice(0, 4)), test[4])
 })
-QUnit.test('loadALL', async (assert:Object):Promise<void> => {
+QUnit.test('loadAll', async (assert:Object):Promise<void> => {
     const done:Function = assert.async()
     for (const test:Array<any> of [
         [configuration, {}, {plugins: [], configuration}]
     ])
-        assert.deepEqual(await PluginAPI.loadALL(...test.slice(0, 2)), test[2])
+        assert.deepEqual(await PluginAPI.loadAll(...test.slice(0, 2)), test[2])
     done()
 })
 // region vim modline
