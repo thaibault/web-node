@@ -74,8 +74,7 @@ QUnit.test('load', async (assert:Object):Promise<void> => {
         } catch (error) {
             assert.ok(true)
         }
-    // TODO this fails
-    console.log('A', require('../dummyPlugin/package.json'))
+    console.log('A', require('../dummyPlugin/package'))
     for (const test:Array<any> of [
         ['dummy', 'dummy', {}, ['webNode'], path.resolve(
             configuration.context.path, 'dummyPlugin'
