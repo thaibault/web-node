@@ -161,9 +161,9 @@ export default class PluginAPI {
         let configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
         let packageConfiguration:?PlainObject = null
-        if (configurationFilePath && Tools.isDirectorySync(
+        if (configurationFilePath && await Tools.isDirectory(
             pluginPath
-        ) && Tools.isFileSync(configurationFilePath))
+        ) && await Tools.isFile(configurationFilePath))
             packageConfiguration = PluginAPI.loadFile(
                 configurationFilePath, name)
         if (packageConfiguration) {
@@ -305,8 +305,8 @@ export default class PluginAPI {
             configuration, Tools, __dirname]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
-        configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
-            configuration, parameterDescription, parameter))
+        configuration = Tools.resolveDynamicDataStructure(
+            configuration, parameterDescription, parameter)
         configuration.package = packageConfiguration
         return configuration
     }

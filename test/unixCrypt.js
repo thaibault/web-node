@@ -9,7 +9,6 @@ try {
 } catch (error) {}
 
 import crypt from '../unixCrypt'
-console.log(crypt)
 // endregion
 QUnit.module('unixCrypt')
 QUnit.load()
