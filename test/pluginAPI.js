@@ -74,7 +74,6 @@ QUnit.test('load', async (assert:Object):Promise<void> => {
         } catch (error) {
             assert.ok(true)
         }
-    console.log('A', require('../dummyPlugin/package'))
     for (const test:Array<any> of [
         ['dummy', 'dummy', {}, ['webNode'], path.resolve(
             configuration.context.path, 'dummyPlugin'
@@ -88,8 +87,9 @@ QUnit.test('load', async (assert:Object):Promise<void> => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
+        let plugin:Plugin
         try {
-            const plugin:Plugin = await PluginAPI.load(...test.slice(0, 5))
+            plugin = await PluginAPI.load(...test.slice(0, 5))
         } catch (error) {
             console.error(error)
         }
@@ -124,8 +124,9 @@ QUnit.test('loadAPI', async (assert:Object):Promise<void> => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
+        let plugin:Plugin
         try {
-            const plugin:Plugin = await PluginAPI.loadAPI(...test.slice(0, 8))
+            plugin = await PluginAPI.loadAPI(...test.slice(0, 8))
         } catch (error) {
             console.error(error)
         }
@@ -143,13 +144,16 @@ QUnit.test('loadConfigurations', (assert:Object):void => {
         [[], {}, configuration],
         [[], {a: 2}, configuration],
         [
-            [{configuration: {a: 2}}],
-            Tools.copyLimitedRecursively({}),
+            [{configuration: {a: 2}}], {},
             Tools.extendObject({a: 2}, configuration)
         ]
     ])
-        assert.deepEqual(
-            PluginAPI.loadConfigurations(...test.slice(0, 2)), test[2])
+        /*
+            NOTE: "assert.deepEqual()" isn't compatible with the proxy
+            configuration object.
+        */
+        assert.ok(Tools.equals(
+            PluginAPI.loadConfigurations(...test.slice(0, 2)), test[2]))
 })
 QUnit.test('loadPluginFile', (assert:Object):void => {
     for (const test:Array<any> of [
