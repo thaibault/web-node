@@ -89,9 +89,8 @@ let parameter:Array<any> = [
     process.cwd(), fileSystem, path, PluginAPI, eval('require'),
     /* eslint-enable no-eval */
     packageConfiguration.webNode, Tools, __dirname]
-let configuration:Configuration = Tools.unwrapProxy(
-    Tools.resolveDynamicDataStructure(
-        packageConfiguration.webNode, parameterDescription, parameter))
+let configuration:Configuration = Tools.resolveDynamicDataStructure(
+    packageConfiguration.webNode, parameterDescription, parameter)
 delete packageConfiguration.webNode
 Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
@@ -108,10 +107,8 @@ parameter= [
     process.cwd(), fileSystem, path, PluginAPI, eval('require'),
     /* eslint-enable no-eval */
     configuration, Tools, __dirname]
-configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
-    Tools.resolveDynamicDataStructure(
-        configuration, parameterDescription, parameter
-    ), parameterDescription, parameter, true))
+configuration = Tools.resolveDynamicDataStructure(
+    configuration, parameterDescription, parameter, true)
 configuration.package = packageConfiguration
 export default configuration
 // region vim modline

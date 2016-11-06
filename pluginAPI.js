@@ -305,8 +305,8 @@ export default class PluginAPI {
             configuration, Tools, __dirname]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
-        configuration = Tools.unwrapProxy(Tools.resolveDynamicDataStructure(
-            configuration, parameterDescription, parameter))
+        configuration = Tools.resolveDynamicDataStructure(
+            configuration, parameterDescription, parameter)
         configuration.package = packageConfiguration
         return configuration
     }
