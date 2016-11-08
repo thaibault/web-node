@@ -309,7 +309,8 @@ export default class PluginAPI {
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.resolveDynamicDataStructure(
-            configuration, parameterDescription, parameter)
+            PluginAPI.removePropertiesInDynamicObjects(configuration),
+            parameterDescription, parameter)
         configuration.package = packageConfiguration
         return configuration
     }
@@ -418,6 +419,24 @@ export default class PluginAPI {
             configuration: PluginAPI.loadConfigurations(
                 sortedPlugins, configuration)
         }
+    }
+    /**
+     * Removes properties in objects where a dynamic indicator lives.
+     * @param data - Object to traverse recursively.
+     * @returns Given object with removed properties.
+     */
+    static removePropertiesInDynamicObjects(data:PlainObject):PlainObject {
+        for (const key:string in data)
+            if (data.hasOwnProperty(key) && ![
+                '__evaluate__', '__execute__'
+            ].includes(key) && (
+                data.hasOwnProperty('__evaluate__') ||
+                data.hasOwnProperty('__execute__')
+            ))
+                delete data[key]
+            else if (typeof data[key] === 'object' && data[key] !== null)
+                PluginAPI.removePropertiesInDynamicObjects(data[key])
+        return data
     }
 }
 // region vim modline

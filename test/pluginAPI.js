@@ -181,6 +181,18 @@ QUnit.test('loadAll', async (assert:Object):Promise<void> => {
         }
     done()
 })
+QUnit.test('removePropertiesInDynamicObjects', (
+    assert:Object
+):Promise<void> => {
+    for (const test:Array<any> of [
+        [{}, {}],
+        [{a: 2}, {a: 2}],
+        [{a: 2, __evaluate__: ''}, {__evaluate__: ''}],
+        [{a: 2, b: {__evaluate__: '', c: 4}}, {a: 2, b: {__evaluate__: ''}}]
+    ])
+        assert.deepEqual(
+            PluginAPI.removePropertiesInDynamicObjects(test[0]), test[1])
+})
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
