@@ -102,14 +102,15 @@ if (process.argv.length > 3) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
 }
-parameter= [
-    /* eslint-disable no-eval */
-    process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
-    /* eslint-enable no-eval */
-    __dirname]
+/*
+    NOTE: We need to copy the configuration to avoid operating on deduplicated
+    objects in further resolving algorithms which can lead to unexpected
+    errors.
+*/
 configuration = Tools.resolveDynamicDataStructure(
     configuration, parameterDescription, parameter)
 configuration.package = packageConfiguration
+configuration = Tools.copyLimitedRecursively(configuration, -1, null, true)
 export default configuration
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

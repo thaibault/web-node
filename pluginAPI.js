@@ -175,7 +175,7 @@ export default class PluginAPI {
                     const pluginConfiguration:PlainObject =
                         packageConfiguration[propertyName]
                     pluginConfiguration.package = Tools.copyLimitedRecursively(
-                        packageConfiguration)
+                        packageConfiguration, -1, null, true)
                     delete pluginConfiguration.package[propertyName]
                     return await PluginAPI.loadAPI(
                         apiFilePath, pluginPath, name, internalName, plugins,
@@ -260,7 +260,8 @@ export default class PluginAPI {
             ).mtime.getTime(),
             configuration,
             configurationFilePath,
-            configurationFileLoadTimestamp: configurationFilePath &&
+            configurationFileLoadTimestamp:
+                configurationFilePath &&
                 fileSystem.statSync(configurationFilePath).mtime.getTime() ||
                 null,
             dependencies: configuration && configuration.hasOwnProperty(
@@ -285,11 +286,13 @@ export default class PluginAPI {
         for (const key:string in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
-        Tools.extendObject(configuration, baseConfiguration)
+        Tools.extendObject(configuration, Tools.copyLimitedRecursively(
+            baseConfiguration, -1, null, true))
         for (const plugin:Plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:PlainObject =
-                    Tools.copyLimitedRecursively(plugin.configuration)
+                    Tools.copyLimitedRecursively(
+                        plugin.configuration, -1, null, true)
                 delete pluginConfiguration.package
                 Tools.extendObject(true, Tools.modifyObject(
                     configuration, pluginConfiguration
@@ -300,9 +303,9 @@ export default class PluginAPI {
             'tools', 'webNodePath']
         const parameter:Array<any> = [
             /* eslint-disable no-eval */
-            process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+            process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
             /* eslint-enable no-eval */
-            Tools, __dirname]
+            __dirname]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.resolveDynamicDataStructure(
