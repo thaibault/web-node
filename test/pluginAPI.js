@@ -87,21 +87,23 @@ QUnit.test('load', async (assert:Object):Promise<void> => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
-        let plugin:Plugin
+        let plugin:?Plugin
         try {
             plugin = await PluginAPI.load(...test.slice(0, 5))
         } catch (error) {
             console.error(error)
         }
-        assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
-        delete plugin.api
-        delete plugin.apiFileLoadTimestamp
-        if (plugin.configuration)
-            delete plugin.configuration.package
-        delete plugin.configurationFilePath
-        delete plugin.configurationFileLoadTimestamp
-        delete plugin.scope
-        assert.deepEqual(plugin, test[5])
+        if (plugin) {
+            assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
+            delete plugin.api
+            delete plugin.apiFileLoadTimestamp
+            if (plugin.configuration)
+                delete plugin.configuration.package
+            delete plugin.configurationFilePath
+            delete plugin.configurationFileLoadTimestamp
+            delete plugin.scope
+            assert.deepEqual(plugin, test[5])
+        }
     }
     done()
 })
@@ -124,18 +126,20 @@ QUnit.test('loadAPI', async (assert:Object):Promise<void> => {
             path: path.resolve(configuration.context.path, 'dummyPlugin')
         }]
     ]) {
-        let plugin:Plugin
+        let plugin:?Plugin
         try {
             plugin = await PluginAPI.loadAPI(...test.slice(0, 8))
         } catch (error) {
             console.error(error)
         }
-        assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
-        delete plugin.api
-        delete plugin.apiFileLoadTimestamp
-        delete plugin.configurationFileLoadTimestamp
-        delete plugin.scope
-        assert.deepEqual(plugin, test[8])
+        if (plugin) {
+            assert.ok(plugin.scope && plugin.scope.hasOwnProperty('initialize'))
+            delete plugin.api
+            delete plugin.apiFileLoadTimestamp
+            delete plugin.configurationFileLoadTimestamp
+            delete plugin.scope
+            assert.deepEqual(plugin, test[8])
+        }
     }
     done()
 })
