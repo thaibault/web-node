@@ -300,9 +300,9 @@ export default class PluginAPI {
             'tools', 'webNodePath']
         const parameter:Array<any> = [
             /* eslint-disable no-eval */
-            process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+            process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
             /* eslint-enable no-eval */
-            Tools, __dirname]
+            __dirname]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.resolveDynamicDataStructure(
