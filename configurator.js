@@ -107,15 +107,10 @@ if (process.argv.length > 3) {
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
-configuration = Tools.resolveDynamicDataStructure(Tools.copyLimitedRecursively(
-    configuration
-), parameterDescription, parameter)
-console.log(
-    configuration.modelConfiguration.models.User.firstName
-    ===
-    configuration.modelConfiguration.models.User.lastName
-)
+configuration = Tools.resolveDynamicDataStructure(
+    configuration, parameterDescription, parameter)
 configuration.package = packageConfiguration
+configuration = Tools.copyLimitedRecursively(configuration, -1, null, true)
 export default configuration
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
