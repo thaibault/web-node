@@ -285,7 +285,8 @@ export default class PluginAPI {
         for (const key:string in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
-        Tools.extendObject(configuration, baseConfiguration)
+        Tools.extendObject(configuration, Tools.copyLimitedRecursively(
+            baseConfiguration))
         for (const plugin:Plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:PlainObject =

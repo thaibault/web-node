@@ -102,13 +102,19 @@ if (process.argv.length > 3) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
 }
-parameter= [
-    /* eslint-disable no-eval */
-    process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
-    /* eslint-enable no-eval */
-    __dirname]
-configuration = Tools.resolveDynamicDataStructure(
-    configuration, parameterDescription, parameter)
+/*
+    NOTE: We need to copy the configuration to avoid operating on deduplicated
+    objects in further resolving algorithms which can lead to unexpected
+    errors.
+*/
+configuration = Tools.resolveDynamicDataStructure(Tools.copyLimitedRecursively(
+    configuration
+), parameterDescription, parameter)
+console.log(
+    configuration.modelConfiguration.models.User.firstName
+    ===
+    configuration.modelConfiguration.models.User.lastName
+)
 configuration.package = packageConfiguration
 export default configuration
 // region vim modline
