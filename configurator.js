@@ -82,13 +82,13 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const parameterDescription:Array<string> = [
-    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require', 'self',
-    'tools', 'webNodePath']
+    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require', 'tools',
+    'webNodePath']
 let parameter:Array<any> = [
     /* eslint-disable no-eval */
-    process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+    process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
     /* eslint-enable no-eval */
-    packageConfiguration.webNode, Tools, __dirname]
+    __dirname]
 let configuration:Configuration = Tools.resolveDynamicDataStructure(
     packageConfiguration.webNode, parameterDescription, parameter)
 delete packageConfiguration.webNode
@@ -104,11 +104,11 @@ if (process.argv.length > 3) {
 }
 parameter= [
     /* eslint-disable no-eval */
-    process.cwd(), fileSystem, path, PluginAPI, eval('require'),
+    process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
     /* eslint-enable no-eval */
-    configuration, Tools, __dirname]
+    __dirname]
 configuration = Tools.resolveDynamicDataStructure(
-    configuration, parameterDescription, parameter, true)
+    configuration, parameterDescription, parameter)
 configuration.package = packageConfiguration
 export default configuration
 // region vim modline
