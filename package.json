@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "clientnode": "latest",
+    "keypress": "latest",
     "weboptimizer": "latest"
   },
   "devDependencies": {

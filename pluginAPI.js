@@ -52,9 +52,12 @@ export default class PluginAPI {
             const pluginsWithChangedConfiguration = PluginAPI.hotReloadFile(
                 'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
+                PluginAPI.callStack(
+                    'preConfigurationLoaded', plugins, configuration,
+                    configuration, pluginsWithChangedConfiguration)
                 PluginAPI.loadConfigurations(plugins, configuration)
                 PluginAPI.callStack(
-                    'configurationLoaded', plugins, configuration,
+                    'postConfigurationLoaded', plugins, configuration,
                     configuration, pluginsWithChangedConfiguration)
             }
             const pluginsWithChangedAPIFiles = PluginAPI.hotReloadFile(
