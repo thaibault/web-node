@@ -25,7 +25,19 @@ import type {Configuration, Plugin, Services} from '../type'
 export default class Dummy {
     /* eslint-disable no-unused-vars */
     /**
-     * Application will be closed soon.
+     * Triggered hook when at least one plugin has an api file which has been
+     * changed and is reloaded. Asynchronous tasks are allowed and a returning
+     * promise will be respected.
+     * @param pluginsWithChangedAPIFiles - List of plugins which have a changed
+     * plugin api file.
+     * @returns Will be ignored.
+     */
+    static apiFileReloaded(pluginsWithChangedAPIFiles:Array<Plugin>):any {
+        return pluginsWithChangedAPIFiles
+    }
+    /**
+     * Application has thrown an error and will be closed soon. Asynchronous
+     * tasks are allowed and a returning promise will be respected.
      * @param error - An object with stored informations why an error occurs.
      * @param services - An object with stored service instances.
      * @returns Given and maybe changed object of services.
@@ -34,7 +46,8 @@ export default class Dummy {
         return services
     }
     /**
-     * Application will be closed soon.
+     * Triggers if application will be closed immediately no asynchronous tasks
+     * allowed anymore.
      * @param services - An object with stored service instances.
      * @returns Given and maybe changed object of services.
      */
@@ -44,7 +57,8 @@ export default class Dummy {
     /**
      * Application started, static configuration loaded and all available
      * plugins are determined and sorted in there dependency specific
-     * typological order.
+     * typological order. Asynchronous tasks are allowed and a returning
+     * promise will be respected.
      * @param configuration - Mutable by plugins extended configuration object.
      * extended by each plugin configuration.
      * @param plugins - Topological sorted list of plugins.
@@ -57,7 +71,8 @@ export default class Dummy {
     }
     /**
      * Plugins initialized and plugins should start to initialize their
-     * services.
+     * services. Asynchronous tasks are allowed and a returning promise will
+     * be respected.
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */
@@ -66,6 +81,8 @@ export default class Dummy {
     }
     /**
      * Plugins initialized and plugins have start to initialize their services.
+     * Asynchronous tasks are allowed and a returning promise will be
+     * respected.
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */
@@ -74,7 +91,8 @@ export default class Dummy {
     }
     /**
      * Triggered hook when at least one plugin has a new configuration file and
-     * configuration object has been changed.
+     * configuration object has been changed. Asynchronous tasks are allowed
+     * and a returning promise will be respected.
      * @param configuration - Updated configuration object.
      * @param pluginsWithChangedConfiguration - List of plugins which have a
      * changed plugin configuration.
@@ -88,7 +106,8 @@ export default class Dummy {
     }
     /**
      * Triggered hook when at least one plugin has a new configuration file and
-     * configuration object has been changed.
+     * configuration object has been changed. Asynchronous tasks are allowed
+     * and a returning promise will be respected.
      * @param configuration - Updated configuration object.
      * @param pluginsWithChangedConfiguration - List of plugins which have a
      * changed plugin configuration.
@@ -101,24 +120,13 @@ export default class Dummy {
         return configuration
     }
     /**
-     * Triggered hook when at least one plugin has a new api file and has been
-     * changed.
-     * @param pluginsWithChangedAPIFiles - List of plugins which have a changed
-     * plugin api file.
-     * @returns Will be ignored.
+     * Triggers if application will be closed soon. Asynchronous tasks are
+     * allowed and a returning promise will be respected.
+     * @param services - An object with stored service instances.
+     * @returns Given and maybe changed object of services.
      */
-    static preAPIFileReloaded(pluginsWithChangedAPIFiles:Array<Plugin>):any {
-        return pluginsWithChangedAPIFiles
-    }
-    /**
-     * Triggered hook when at least one plugin has a new api file and has been
-     * changed.
-     * @param pluginsWithChangedAPIFiles - List of plugins which have a changed
-     * plugin api file.
-     * @returns Will be ignored.
-     */
-    static postAPIFileReloaded(pluginsWithChangedAPIFiles:Array<Plugin>):any {
-        return pluginsWithChangedAPIFiles
+    static shouldExit(services:Services):Services {
+        return services
     }
     /* eslint-enable no-unused-vars */
 }

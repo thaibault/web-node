@@ -19,6 +19,7 @@ import type {ProcedureFunction} from 'clientnode'
 try {
     require('source-map-support/register')
 } catch (error) {}
+import keypress from 'keypress'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
@@ -55,7 +56,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         // endregion
         // region register close handler
         let finished:boolean = false
-        const closeHandler:Function = ():Promise<void> => {
+        const closeHandler:Function = ():void => {
             if (!finished)
                 try {
                     PluginAPI.callStackSynchronous(
@@ -68,6 +69,18 @@ const main:ProcedureFunction = async ():Promise<any> => {
         }
         for (const closeEventName:string of Tools.closeEventNames)
             process.on(closeEventName, closeHandler)
+        // NOTE: Make "process.stdin" begin emitting events for any key press.
+        keypress(process.stdin)
+        process.stdin.on('keypress', async (
+            char:number, key:Object
+        ):Promise<void> => {
+            if (key && key.name === 'c' && key.ctrl) {
+                await PluginAPI.callStack(
+                    'shouldExit', plugins.slice().reverse(), configuration,
+                    services)
+                process.exit(255)
+            }
+        })
         // endregion
     } catch (error) {
         try {
