@@ -83,11 +83,15 @@ export default class Dummy {
      * Plugins have initialized their continues running service and should
      * start them now. A Promise which observes this service should be
      * returned.
+     * @param servicePromises - An object with stored service promise
+     * instances.
      * @param services - An object with stored service instances.
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
-    static async loadService(services:Services):Object {
+    static async loadService(
+        servicePromises:{[key:string]:Promise<Object>}, services:Services
+    ):Object {
         return {}
     }
     /**
