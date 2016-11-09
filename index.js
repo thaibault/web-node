@@ -96,10 +96,12 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 process.exit(255)
             }
         })
-        await Promise.all(servicePromises)
+        // endregion
+        await Promise.all(Object.keys(servicePromises).map((
+            name:string
+        ):Object => servicePromises[name]))
         await PluginAPI.callStack(
             'shouldExit', plugins.slice().reverse(), configuration, services)
-        // endregion
     } catch (error) {
         try {
             await PluginAPI.callStack(
