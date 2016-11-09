@@ -55,10 +55,10 @@ const main:ProcedureFunction = async ():Promise<any> => {
         // endregion
         // region register close handler
         let finished:boolean = false
-        const closeHandler:Function = async ():Promise<void> => {
+        const closeHandler:Function = ():Promise<void> => {
             if (!finished)
                 try {
-                    await PluginAPI.callStack(
+                    PluginAPI.callStackSynchronous(
                         'exit', plugins.slice().reverse(), configuration,
                         services)
                 } catch (error) {
