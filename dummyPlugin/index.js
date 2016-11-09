@@ -70,9 +70,9 @@ export default class Dummy {
         return plugins
     }
     /**
-     * Plugins initialized and plugins should start to initialize their
-     * services. Asynchronous tasks are allowed and a returning promise will
-     * be respected.
+     * Plugins are initialized now and plugins should initialize their
+     * continues running services (if they have one). Asynchronous tasks are
+     * allowed and a returning promise will be respected.
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */
@@ -80,9 +80,18 @@ export default class Dummy {
         return services
     }
     /**
-     * Plugins initialized and plugins have start to initialize their services.
-     * Asynchronous tasks are allowed and a returning promise will be
-     * respected.
+     * Plugins have initialized their continues running service should start
+     * them now. A Promise which observes this service should be returned.
+     * @param services - An object with stored service instances.
+     * @returns A promise which correspond to the plugin specific continues
+     * service.
+     */
+    static async loadService(services:Services):Object {
+        return {}
+    }
+    /**
+     * Plugins have launched their continues running services and returned a
+     * corresponding promise which can be observed here.
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */

@@ -45,14 +45,29 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 Boolean(plugin.configurationFilePath)))
     // endregion
     let services:Services = {}
+    let servicePromises:{[key:string]:Promise<Object>} = {}
     try {
         // region start services
-        for (const type:string of ['pre', 'post'])
-            services = await PluginAPI.callStack(
-                `${type}LoadService`, plugins, configuration, services)
+        services = await PluginAPI.callStack(
+            `preLoadService`, plugins, configuration, services)
         for (const serviceName:string in services)
-            if (services.hasOwnProperty(serviceName))
-                console.info(`Service ${serviceName} loaded.`)
+            if (services.hasOwnProperty(serviceName)) {
+                console.info(`Load service ${serviceName}.`)
+                for (const plugin:Plugin of plugins)
+                    if (plugin.api) {
+                        const result:any = plugin.api.call(
+                            PluginAPI, 'loadService', null, services,
+                            configuration, plugins)
+                        if (
+                            typeof result === 'object' && result !== null &&
+                            'then' in result
+                        )
+                            servicePromises[serviceName] = result
+                    }
+            }
+        servicePromises = await PluginAPI.callStack(
+            `postLoadService`, plugins, configuration, servicePromises,
+            services)
         // endregion
         // region register close handler
         let finished:boolean = false
@@ -81,6 +96,9 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 process.exit(255)
             }
         })
+        await Promise.all(servicePromises)
+        await PluginAPI.callStack(
+            'shouldExit', plugins.slice().reverse(), configuration, services)
         // endregion
     } catch (error) {
         try {
