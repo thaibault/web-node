@@ -55,7 +55,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 console.info(`Load service ${serviceName}.`)
                 for (const plugin:Plugin of plugins)
                     if (plugin.api) {
-                        const result:any = plugin.api.call(
+                        const result:any = await plugin.api.call(
                             PluginAPI, 'loadService', null, services,
                             configuration, plugins)
                         if (

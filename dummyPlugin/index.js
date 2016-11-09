@@ -82,7 +82,9 @@ export default class Dummy {
     /**
      * Plugins have initialized their continues running service and should
      * start them now. A Promise which observes this service should be
-     * returned.
+     * returned. Asynchronous tasks are allowed and a returning promise will be
+     * respected NOTE: You have to wrap a promise in a promise if a continues
+     * service should be registered.
      * @param servicePromises - An object with stored service promise
      * instances.
      * @param services - An object with stored service instances.
