@@ -182,7 +182,8 @@ export default class PluginAPI {
                         encoding, pluginConfiguration, configurationFilePath)
                 }
             throw new Error(
-                `Plugin "${internalName} (${name})" hasn't working ` +
+                `Plugin "${internalName}" ` +
+                `${internalName === name ? '' : `(${name})`}hasn't working ` +
                 `configuration object under one of the following keys: "` +
                 `${configurationPropertyNames.join('", "')}".`)
         }
@@ -338,8 +339,8 @@ export default class PluginAPI {
                 if (log)
                     console.warn(
                         `Couln't load new api plugin file "${filePath}" for ` +
-                        `plugin "${name}": ${Tools.representObject(error)}.` +
-                        ` Using fallback one.`)
+                        `plugin "${name}": ${Tools.representObject(error)}. ` +
+                        `Using fallback one.`)
             } else
                 throw new Error(
                     `Couln't load plugin file "${filePath}" for plugin "` +
