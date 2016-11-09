@@ -91,17 +91,19 @@ const main:ProcedureFunction = async ():Promise<any> => {
         ):Promise<void> => {
             if (key && key.name === 'c' && key.ctrl) {
                 await PluginAPI.callStack(
-                    'shouldExit', plugins.slice().reverse(), configuration,
-                    services)
-                process.exit(255)
+                    'shouldExit', plugins, configuration, services)
+                process.exit()
             }
         })
+        // IgnoreTypeCheck
+        process.stdin.setRawMode(true)
         // endregion
         await Promise.all(Object.keys(servicePromises).map((
             name:string
         ):Object => servicePromises[name]))
         await PluginAPI.callStack(
-            'shouldExit', plugins.slice().reverse(), configuration, services)
+            'shouldExit', plugins, configuration, services)
+        process.exit()
     } catch (error) {
         try {
             await PluginAPI.callStack(
