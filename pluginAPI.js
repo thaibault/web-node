@@ -72,9 +72,11 @@ export default class PluginAPI {
                             configuration, plugins]))
                 } catch (error) {
                     throw new Error(
-                        `Plugin "${plugin.internalName}" throws: ` +
-                        `${Tools.representObject(error)} during asynchrone ` +
-                        `hook "${type}".`)
+                        `Plugin "${plugin.internalName}" ` + (
+                            plugin.internalName === plugin.name ? '' :
+                            `(${plugin.name}) `
+                        )+ `throws: ${Tools.representObject(error)} during ` +
+                        `asynchrone hook "${type}".`)
                 }
         }
         return data
@@ -101,9 +103,11 @@ export default class PluginAPI {
                             configuration, plugins]))
                 } catch (error) {
                     throw new Error(
-                        `Plugin "${plugin.internalName}" throws: ` +
-                        `${Tools.representObject(error)} during synchrone ` +
-                        `hook "${type}".`)
+                        `Plugin "${plugin.internalName}" ` + (
+                            plugin.internalName === plugin.name ? '' :
+                            `(${plugin.name}) `
+                        ) + `throws: ${Tools.representObject(error)} during ` +
+                        `synchrone hook "${type}".`)
                 }
         return data
     }
@@ -166,29 +170,30 @@ export default class PluginAPI {
         ) && await Tools.isFile(configurationFilePath))
             packageConfiguration = PluginAPI.loadFile(
                 configurationFilePath, name)
+        let apiFilePath:string = 'index.js'
         if (packageConfiguration) {
+            const packageConfigurationCopy:PlainObject =
+                Tools.copyLimitedRecursively(
+                    packageConfiguration, -1, null, true)
             for (const propertyName:string of configurationPropertyNames)
                 if (packageConfiguration.hasOwnProperty(propertyName)) {
-                    let apiFilePath:string = 'index.js'
                     if (packageConfiguration.hasOwnProperty('main'))
                         apiFilePath = packageConfiguration.main
                     const pluginConfiguration:PlainObject =
                         packageConfiguration[propertyName]
-                    pluginConfiguration.package = Tools.copyLimitedRecursively(
-                        packageConfiguration, -1, null, true)
+                    pluginConfiguration.package = packageConfigurationCopy
                     delete pluginConfiguration.package[propertyName]
                     return await PluginAPI.loadAPI(
                         apiFilePath, pluginPath, name, internalName, plugins,
                         encoding, pluginConfiguration, configurationFilePath)
                 }
-            throw new Error(
-                `Plugin "${internalName}" ` +
-                `${internalName === name ? '' : `(${name})`}hasn't working ` +
-                `configuration object under one of the following keys: "` +
-                `${configurationPropertyNames.join('", "')}".`)
+            return await PluginAPI.loadAPI(
+                apiFilePath, pluginPath, name, internalName, plugins,
+                encoding, {package: packageConfigurationCopy},
+                configurationFilePath)
         }
         return await PluginAPI.loadAPI(
-            'index.js', pluginPath, name, internalName, plugins, encoding)
+            apiFilePath, pluginPath, name, internalName, plugins, encoding)
     }
     /**
      * Load given plugin api file in given plugin path generates a plugin
