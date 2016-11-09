@@ -181,9 +181,7 @@ QUnit.test('loadAll', async (assert:Object):Promise<void> => {
         }
     done()
 })
-QUnit.test('removePropertiesInDynamicObjects', (
-    assert:Object
-):Promise<void> => {
+QUnit.test('removePropertiesInDynamicObjects', (assert:Object):void => {
     for (const test:Array<any> of [
         [{}, {}],
         [{a: 2}, {a: 2}],
