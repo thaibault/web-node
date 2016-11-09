@@ -80,8 +80,9 @@ export default class Dummy {
         return services
     }
     /**
-     * Plugins have initialized their continues running service should start
-     * them now. A Promise which observes this service should be returned.
+     * Plugins have initialized their continues running service and should
+     * start them now. A Promise which observes this service should be
+     * returned.
      * @param services - An object with stored service instances.
      * @returns A promise which correspond to the plugin specific continues
      * service.
