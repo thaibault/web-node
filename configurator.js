@@ -108,7 +108,8 @@ if (process.argv.length > 3) {
     errors.
 */
 configuration = Tools.resolveDynamicDataStructure(
-    configuration, parameterDescription, parameter)
+    PluginAPI.removePropertiesInDynamicObjects(configuration),
+    parameterDescription, parameter)
 configuration.package = packageConfiguration
 configuration = Tools.copyLimitedRecursively(configuration, -1, null, true)
 export default configuration
