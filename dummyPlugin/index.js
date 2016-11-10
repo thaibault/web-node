@@ -91,7 +91,7 @@ export default class Dummy {
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
-    static async loadService(
+    static loadService(
         servicePromises:{[key:string]:Promise<Object>}, services:Services
     ):Object {
         return {}

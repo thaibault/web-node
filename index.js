@@ -59,10 +59,11 @@ const main:ProcedureFunction = async ():Promise<any> => {
                             PluginAPI, 'loadService', null, services,
                             configuration, plugins)
                         if (
-                            typeof result === 'object' && result !== null &&
-                            'then' in result
+                            result.hasOwnProperty('promise') &&
+                            typeof result.promise === 'object' &&
+                            result.promise !== null && 'then' in result.promise
                         )
-                            servicePromises[serviceName] = result
+                            servicePromises[serviceName] = result.promise
                     }
             }
         servicePromises = await PluginAPI.callStack(
