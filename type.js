@@ -54,8 +54,8 @@ export type Plugin = {
     path:string;
     scope:?Object;
 }
-export type Services = {[key:string]:Object}
-export type ServicePromises = {[key:string]:Promise<Object>}
+export type Services = {[key:string]:?Object}
+export type ServicePromises = {[key:string]:Promise<?Object>}
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
