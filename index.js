@@ -64,22 +64,28 @@ const main:ProcedureFunction = async ():Promise<any> => {
     try {
         // region start services
         services = await PluginAPI.callStack(
-            `preLoadService`, plugins, configuration, services)
-        for (const serviceName:string in services)
-            if (services.hasOwnProperty(serviceName)) {
-                console.info(`Load service ${serviceName}.`)
-                for (const plugin:Plugin of plugins)
-                    if (plugin.api) {
-                        const result:any = await plugin.api.call(
-                            PluginAPI, 'loadService', null, services,
-                            configuration, plugins)
-                        if (
-                            result.hasOwnProperty('promise') &&
-                            typeof result.promise === 'object' &&
-                            result.promise !== null && 'then' in result.promise
-                        )
-                            servicePromises[serviceName] = result.promise
-                    }
+            'preLoadService', plugins, configuration, services)
+        for (const name:string in services)
+            if (services.hasOwnProperty(name))
+                console.info(`Service "${name}" initialized.`)
+        for (const plugin:Plugin of plugins)
+            if (plugin.api) {
+                const result:any  = await plugin.api.call(
+                    PluginAPI, 'loadService', null, services, configuration,
+                    plugins)
+                if (
+                    result && result.hasOwnProperty('name') &&
+                    typeof result.name === 'string'
+                )
+                    if (
+                        result.hasOwnProperty('promise') &&
+                        typeof result.promise === 'object' &&
+                        result.promise !== null && 'then' in result.promise
+                    ) {
+                        console.info(`Service "${result.name}" started.`)
+                        servicePromises[result.name] = result.promise
+                    } else
+                        console.info(`Service "${result.name}" loaded.`)
             }
         servicePromises = await PluginAPI.callStack(
             `postLoadService`, plugins, configuration, servicePromises,
@@ -114,9 +120,11 @@ const main:ProcedureFunction = async ():Promise<any> => {
         // IgnoreTypeCheck
         process.stdin.setRawMode(true)
         // endregion
-        await Promise.all(Object.keys(servicePromises).map((
-            name:string
-        ):Object => servicePromises[name]))
+        try {
+            await Promise.all(Object.keys(servicePromises).map((
+                name:string
+            ):Object => servicePromises[name]))
+        } catch (error) {}
         exitTriggered = true
         await PluginAPI.callStack(
             'shouldExit', plugins, configuration, services)

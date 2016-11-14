@@ -93,8 +93,11 @@ export default class Dummy {
      */
     static loadService(
         servicePromises:ServicePromises, services:Services
-    ):Promise<Object> {
-        return new Promise((resolve:Function):void => resolve({}))
+    ):{name:string;promise:Promise<Object>} {
+        return {
+            name: 'dummy',
+            promise: new Promise((resolve:Function):void => resolve({}))
+        }
     }
     /**
      * Plugins have launched their continues running services and returned a
