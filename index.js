@@ -23,7 +23,7 @@ import keypress from 'keypress'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
-import type {Configuration, Plugin, Services} from './type'
+import type {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
 const main:ProcedureFunction = async ():Promise<any> => {
     // region load plugins
@@ -45,7 +45,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 Boolean(plugin.configurationFilePath)))
     // endregion
     let services:Services = {}
-    let servicePromises:{[key:string]:Promise<Object>} = {}
+    let servicePromises:ServicePromises = {}
     try {
         // region start services
         services = await PluginAPI.callStack(
