@@ -108,12 +108,21 @@ const main:ProcedureFunction = async ():Promise<any> => {
             process.on(closeEventName, closeHandler)
         // NOTE: Make "process.stdin" begin emitting events for any key press.
         keypress(process.stdin)
+        let cancelTriggered:boolean = false
         process.stdin.on('keypress', async (
             char:number, key:Object
         ):Promise<void> => {
             if (key && key.name === 'c' && key.ctrl) {
-                await PluginAPI.callStack(
-                    'shouldExit', plugins, configuration, services)
+                if (cancelTriggered)
+                    console.warn('Stopping ungracefully.')
+                else {
+                    cancelTriggered = true
+                    console.log(
+                        'You have requested to shut down all services. A ' +
+                        'second request will force to stop ungracefully.')
+                    await PluginAPI.callStack(
+                        'shouldExit', plugins, configuration, services)
+                }
                 process.exit()
             }
         })
