@@ -67,8 +67,12 @@ export default class PluginAPI {
                     'apiFileReloaded', plugins, configuration,
                     pluginsWithChangedConfiguration)
         }
-        for (const plugin:Plugin of plugins) {
-            if (plugin.api)
+        for (const plugin:Plugin of plugins)
+            if (plugin.api) {
+                if (configuration.debug)
+                    console.info(
+                        `Run asynchrone hook "${type}" for plugin "` +
+                        `${plugin.name}".`)
                 try {
                     data = await plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
@@ -81,7 +85,7 @@ export default class PluginAPI {
                         )+ `throws: ${Tools.representObject(error)} during ` +
                         `asynchrone hook "${type}".`)
                 }
-        }
+            }
         return data
     }
     /**
@@ -99,7 +103,11 @@ export default class PluginAPI {
         data:any = null, ...parameter:Array<any>
     ):any {
         for (const plugin:Plugin of plugins)
-            if (plugin.api)
+            if (plugin.api) {
+                if (configuration.debug)
+                    console.info(
+                        `Run synchrone hook "${type}" for plugin "` +
+                        `${plugin.name}".`)
                 try {
                     data = plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
@@ -112,6 +120,7 @@ export default class PluginAPI {
                         ) + `throws: ${Tools.representObject(error)} during ` +
                         `synchrone hook "${type}".`)
                 }
+            }
         return data
     }
     /**

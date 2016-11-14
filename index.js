@@ -25,6 +25,20 @@ import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import type {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
+const handleError:ProcedureFunction = async (
+    plugins:Array<Plugin>, configuration:Configuration, error:Error,
+    services:Services
+):Promise<void> => {
+    try {
+        await PluginAPI.callStack(
+            'error', plugins, configuration, error, services)
+    } catch (error) {
+        if (configuration.debug)
+            throw error
+        else
+            console.error(error)
+    }
+}
 const main:ProcedureFunction = async ():Promise<any> => {
     // region load plugins
     const {configuration, plugins}:{
@@ -46,6 +60,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
     // endregion
     let services:Services = {}
     let servicePromises:ServicePromises = {}
+    let exitTriggered:boolean = false
     try {
         // region start services
         services = await PluginAPI.callStack(
@@ -102,19 +117,19 @@ const main:ProcedureFunction = async ():Promise<any> => {
         await Promise.all(Object.keys(servicePromises).map((
             name:string
         ):Object => servicePromises[name]))
+        exitTriggered = true
         await PluginAPI.callStack(
             'shouldExit', plugins, configuration, services)
         process.exit()
     } catch (error) {
-        try {
-            await PluginAPI.callStack(
-                'error', plugins, configuration, error, services)
-        } catch (error) {
-            if (configuration.debug)
-                throw error
-            else
-                console.error(error)
-        }
+        handleError(plugins, configuration, error, services)
+        if (!exitTriggered)
+            try {
+                await PluginAPI.callStack(
+                    'shouldExit', plugins, configuration, services)
+            } catch (error) {
+                handleError(plugins, configuration, error, services)
+            }
         if (configuration.debug)
             throw error
         else
