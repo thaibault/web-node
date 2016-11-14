@@ -17,7 +17,7 @@
 try {
     module.require('source-map-support/register')
 } catch (error) {}
-import type {Configuration, Plugin, Services} from '../type'
+import type {Configuration, Plugin, ServicePromises, Services} from '../type'
 // endregion
 /**
  * Dummy plugin interface implementing all available hooks.
@@ -92,17 +92,21 @@ export default class Dummy {
      * service.
      */
     static loadService(
-        servicePromises:{[key:string]:Promise<Object>}, services:Services
-    ):Object {
-        return {}
+        servicePromises:ServicePromises, services:Services
+    ):Promise<Object> {
+        return new Promise((resolve:Function):void => resolve({}))
     }
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
+     * @param servicePromises - An object with stored service promise
+     * instances.
      * @param services - An object with stored service instances.
      * @returns Given and maybe extended object of services.
      */
-    static postLoadService(services:Services):Services {
+    static postLoadService(
+        servicePromises:ServicePromises, services:Services
+    ):ServicePromises {
         return services
     }
     /**
