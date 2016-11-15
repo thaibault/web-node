@@ -124,7 +124,7 @@ configuration = Tools.resolveDynamicDataStructure(
     removePropertiesInDynamicObjects(configuration), parameterDescription,
     parameter)
 configuration.package = packageConfiguration
-configuration = Tools.copyLimitedRecursively(configuration, -1, null, true)
+configuration = Tools.copyLimitedRecursively(configuration, -1, true)
 export default configuration
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:

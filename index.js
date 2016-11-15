@@ -45,7 +45,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
         configuration:Configuration;
         plugins:Array<Plugin>;
     } = await PluginAPI.loadAll(Tools.copyLimitedRecursively(
-        baseConfiguration, -1, null, true))
+        baseConfiguration, -1, true))
     await PluginAPI.callStack('initialize', plugins, configuration)
     if (plugins.length)
         console.info(
