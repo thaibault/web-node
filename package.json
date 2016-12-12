@@ -1,17 +1,13 @@
 {
   "name": "web-node",
   "version": "1.0.84",
+  "license": "CC-BY-3.0",
   "description": "A generic web backend configuration and plugin management.",
+  "homepage": "http://torben.website/webNode",
   "documentationWebsite": {
     "name": "webNode",
     "trackingCode": "TODO"
   },
-  "homepage": "http://torben.website/webNode",
-  "license": "CC-BY-3.0",
-  "bin": {
-    "webNode": "index.compiled.js"
-  },
-  "main": "index.compiled.js",
   "keywords": [
     "web",
     "backend",
@@ -19,20 +15,6 @@
     "plugin",
     "management"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/thaibault/webNode.git"
-  },
-  "dependencies": {
-    "clientnode": "latest",
-    "keypress": "latest",
-    "weboptimizer": "latest"
-  },
-  "devDependencies": {
-    "documentation-website": "latest",
-    "qunit-cli": "latest",
-    "source-map-support": "latest"
-  },
   "files": [
     "configurator.compiled.js",
     "configurator.js",
@@ -42,6 +24,14 @@
     "unixCrypt.compiled.js",
     "unixCrypt.js"
   ],
+  "main": "index.compiled.js",
+  "bin": {
+    "webNode": "index.compiled.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thaibault/webNode.git"
+  },
   "scripts": {
     "build": "webOptimizer build",
     "buildDLL": "webOptimizer buildDLL",
@@ -56,6 +46,16 @@
     "updateDocumentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch",
     "watchDLL": "webOptimizer buildDLL --watch"
+  },
+  "dependencies": {
+    "clientnode": "latest",
+    "keypress": "latest",
+    "weboptimizer": "latest"
+  },
+  "devDependencies": {
+    "documentation-website": "latest",
+    "qunit-cli": "latest",
+    "source-map-support": "latest"
   },
   "webNode": {
     "debug": false,
