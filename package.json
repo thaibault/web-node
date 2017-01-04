@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "documentation-website": "latest",
-    "qunit-cli": "latest",
     "source-map-support": "latest"
   },
   "webNode": {
@@ -94,6 +93,11 @@
     "injection": {
       "internal": {
         "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {configurator: './configurator', index: './index', pluginAPI: './pluginAPI', unixCrypt: './unixCrypt'}"
+      }
+    },
+    "module": {
+      "aliases": {
+        "clientnode/test$": "clientnode/test.compiled"
       }
     },
     "targetTechnology": "node"
