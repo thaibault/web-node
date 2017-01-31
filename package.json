@@ -2,7 +2,7 @@
   "name": "web-node",
   "version": "1.0.88",
   "license": "CC-BY-3.0",
-  "description": "A generic web backend configuration and plugin management.",
+  "description": "High level javaScript backend plugin system and configuration merger.",
   "homepage": "http://torben.website/webNode",
   "documentationWebsite": {
     "name": "webNode",
