@@ -95,7 +95,7 @@ delete packageConfiguration.webNode
 Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
 ), specificConfiguration)
-if (process.argv.length > 3) {
+if (process.argv.length > 2) {
     const result:?Object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration')
     if (Tools.isPlainObject(result))
