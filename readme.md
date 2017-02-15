@@ -12,58 +12,11 @@ License
 
 endregion -->
 
-<!--|deDE:Einsatz-->
 Use case
 --------
 
-webNode is a high level javaScript backend plugin and configuration merger.
-
-<!--|deDE:Inhalt-->
-Content
--------
-
-<!--Place for automatic generated table of contents.-->
-[TOC]
-
-<!--|deDE:Merkmale-->
-Features
---------
-
-<ul><li>Based on boostnode.<!--deDE:Basiert auf boostnode.--></li></ul>
-
-<!--|deDE:Verwendung-->
-Usage
------
-
-Copy this folder to your projects directory and write something like:
-<!--deDE:
-    Kopiere diesen Ordner in den Projektordner und verwende das Framework z.B.
-    folgendermaßen:
--->
-
-    #!/usr/bin/env python
-
-    from webnode import Main
-
-    if __name__ == '__main__':
-        Main.run()
-
-Have Fun with webnode!
-<!--deDE:Viel Spass mit webnode!-->
-
-<!--|deDE:Urheberrecht-->
-Copyright
----------
-
-see header in boostnode/\_\_init\_\_.py
-<!--deDE:Siehe Header in boostnode/\_\_init\_\_.py-->
-
-<!--|deDE:Lizenz-->
-License
--------
-
-see header in boostnode/\_\_init\_\_.py
-<!--deDE:Siehe Header in boostnode/\_\_init\_\_.py-->
+webNode is a high level javaScript backend plugin system and configuration
+merger.
 
 <!-- region vim modline
 vim: set tabstop=4 shiftwidth=4 expandtab:

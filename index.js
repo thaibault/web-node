@@ -126,8 +126,9 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 process.exit()
             }
         })
-        // IgnoreTypeCheck
-        process.stdin.setRawMode(true)
+        if ('setRawMode' in process.stdin)
+            // IgnoreTypeCheck
+            process.stdin.setRawMode(true)
         // endregion
         try {
             await Promise.all(Object.keys(servicePromises).map((
