@@ -88,7 +88,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                         console.info(`Service "${result.name}" loaded.`)
             }
         servicePromises = await PluginAPI.callStack(
-            `postLoadService`, plugins, configuration, servicePromises,
+            'postLoadService', plugins, configuration, servicePromises,
             services)
         // endregion
         // region register close handler

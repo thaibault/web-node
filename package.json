@@ -18,6 +18,7 @@
   "files": [
     "configurator.compiled.js",
     "configurator.js",
+    "index.js",
     "pluginAPI.compiled.js",
     "pluginAPI.js",
     "type.js",
