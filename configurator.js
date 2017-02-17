@@ -98,9 +98,12 @@ Tools.extendObject(true, Tools.modifyObject(
 if (process.argv.length > 2) {
     const result:?Object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration')
-    if (Tools.isPlainObject(result))
+    if (Tools.isPlainObject(result)) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
+        configuration.runtimeConfiguration = Tools.copyLimitedRecursively(
+            result, -1, true)
+    }
 }
 const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
     for (const key:string in data)
