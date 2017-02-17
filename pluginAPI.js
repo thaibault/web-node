@@ -314,6 +314,10 @@ export default class PluginAPI {
                 Tools.extendObject(true, Tools.modifyObject(
                     configuration, pluginConfiguration
                 ), pluginConfiguration)
+                if (configuration.runtimeConfiguration)
+                    Tools.extendObject(
+                        true, configuration, configuration.runtimeConfiguration
+                    )
             }
         const parameterDescription:Array<string> = [
             'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require',
