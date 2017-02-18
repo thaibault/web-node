@@ -101,8 +101,7 @@ if (process.argv.length > 2) {
     if (Tools.isPlainObject(result)) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
-        configuration.runtimeConfiguration = Tools.copyLimitedRecursively(
-            result, -1, true)
+        configuration.runtimeConfiguration = result
     }
 }
 const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
