@@ -70,7 +70,12 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 console.info(`Service "${name}" initialized.`)
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
-                const result:any  = await plugin.api.call(
+                services = await PluginAPI.callStack(
+                    `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
+                        'Service',
+                    plugins, configuration, services)
+                // IgnoreTypeCheck
+                const result:any = await plugin.api.call(
                     PluginAPI, 'loadService', null, services, configuration,
                     plugins)
                 if (
@@ -86,6 +91,10 @@ const main:ProcedureFunction = async ():Promise<any> => {
                         servicePromises[result.name] = result.promise
                     } else
                         console.info(`Service "${result.name}" loaded.`)
+                servicePromises = await PluginAPI.callStack(
+                    `postLoad${Tools.stringCapitalize(plugin.internalName)}` +
+                        'Service',
+                    plugins, configuration, servicePromises)
             }
         servicePromises = await PluginAPI.callStack(
             'postLoadService', plugins, configuration, servicePromises,
