@@ -49,8 +49,9 @@ export default class PluginAPI {
         if (configuration.plugin.hotReloading && ![
             'configurationLoaded', 'apiFileReloaded'
         ].includes(type)) {
-            const pluginsWithChangedConfiguration = PluginAPI.hotReloadFile(
-                'configurationFile', 'configuration', plugins)
+            const pluginsWithChangedConfiguration:Array<Plugin> =
+                PluginAPI.hotReloadFile(
+                    'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
                 PluginAPI.callStack(
                     'preConfigurationLoaded', plugins, configuration,
@@ -60,8 +61,8 @@ export default class PluginAPI {
                     'postConfigurationLoaded', plugins, configuration,
                     configuration, pluginsWithChangedConfiguration)
             }
-            const pluginsWithChangedAPIFiles = PluginAPI.hotReloadFile(
-                'apiFile', 'scope', plugins)
+            const pluginsWithChangedAPIFiles:Array<Plugin> =
+                PluginAPI.hotReloadFile('apiFile', 'scope', plugins)
             if (pluginsWithChangedAPIFiles.length)
                 PluginAPI.callStack(
                     'apiFileReloaded', plugins, configuration,
