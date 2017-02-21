@@ -94,7 +94,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 servicePromises = await PluginAPI.callStack(
                     `postLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
-                    plugins, configuration, servicePromises)
+                    plugins, configuration, services, servicePromises)
             }
         servicePromises = await PluginAPI.callStack(
             'postLoadService', plugins, configuration, servicePromises,
