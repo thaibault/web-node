@@ -70,16 +70,6 @@ export default class Dummy {
         return plugins
     }
     /**
-     * Plugins are initialized now and plugins should initialize their
-     * continues running services (if they have one). Asynchronous tasks are
-     * allowed and a returning promise will be respected.
-     * @param services - An object with stored service instances.
-     * @returns Given and maybe extended object of services.
-     */
-    static preLoadService(services:Services):Services {
-        return services
-    }
-    /**
      * Plugins have initialized their continues running service and should
      * start them now. A Promise which observes this service should be
      * returned. Asynchronous tasks are allowed and a returning promise will be
@@ -98,6 +88,21 @@ export default class Dummy {
             name: 'dummy',
             promise: new Promise((resolve:Function):void => resolve({}))
         }
+    }
+    /**
+     * Triggered hook when at least one plugin has a new configuration file and
+     * configuration object has been changed. Asynchronous tasks are allowed
+     * and a returning promise will be respected.
+     * @param configuration - Updated configuration object.
+     * @param pluginsWithChangedConfiguration - List of plugins which have a
+     * changed plugin configuration.
+     * @returns New configuration object to use.
+     */
+    static postConfigurationLoaded(
+        configuration:Configuration,
+        pluginsWithChangedConfiguration:Array<Plugin>
+    ):Configuration {
+        return configuration
     }
     /**
      * Plugins have launched their continues running services and returned a
@@ -128,19 +133,14 @@ export default class Dummy {
         return configuration
     }
     /**
-     * Triggered hook when at least one plugin has a new configuration file and
-     * configuration object has been changed. Asynchronous tasks are allowed
-     * and a returning promise will be respected.
-     * @param configuration - Updated configuration object.
-     * @param pluginsWithChangedConfiguration - List of plugins which have a
-     * changed plugin configuration.
-     * @returns New configuration object to use.
+     * Plugins are initialized now and plugins should initialize their
+     * continues running services (if they have one). Asynchronous tasks are
+     * allowed and a returning promise will be respected.
+     * @param services - An object with stored service instances.
+     * @returns Given and maybe extended object of services.
      */
-    static postConfigurationLoaded(
-        configuration:Configuration,
-        pluginsWithChangedConfiguration:Array<Plugin>
-    ):Configuration {
-        return configuration
+    static preLoadService(services:Services):Services {
+        return services
     }
     /**
      * Triggers if application will be closed soon. Asynchronous tasks are
