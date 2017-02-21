@@ -76,8 +76,8 @@ const main:ProcedureFunction = async ():Promise<any> => {
                     plugins, configuration, services)
                 // IgnoreTypeCheck
                 const result:any = await plugin.api.call(
-                    PluginAPI, 'loadService', null, services, configuration,
-                    plugins)
+                    PluginAPI, 'loadService', servicePromises, services,
+                    configuration, plugins)
                 if (
                     result && result.hasOwnProperty('name') &&
                     typeof result.name === 'string'
@@ -91,7 +91,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                         servicePromises[result.name] = result.promise
                     } else
                         console.info(`Service "${result.name}" loaded.`)
-                servicePromises = await PluginAPI.callStack(
+                services = await PluginAPI.callStack(
                     `postLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
                     plugins, configuration, services, servicePromises)
