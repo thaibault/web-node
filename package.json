@@ -60,6 +60,7 @@
   "webNode": {
     "debug": false,
     "encoding": "utf8",
+    "interDependencies": {},
     "plugin": {
       "configurationPropertyNames": [
         "webNode"

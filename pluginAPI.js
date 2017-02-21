@@ -420,10 +420,24 @@ export default class PluginAPI {
             }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
         for (const pluginName:string in plugins)
-            if (plugins.hasOwnProperty(pluginName))
+            if (plugins.hasOwnProperty(pluginName)) {
                 temporaryPlugins[plugins[
                     pluginName
                 ].internalName] = plugins[pluginName].dependencies
+                if (configuration.interDependencies.hasOwnProperty(plugins[
+                    pluginName
+                ].internalName))
+                    for (const name:string of [].concat(
+                        configuration.interDependencies[
+                            plugins[pluginName].internalName])
+                    )
+                        if (!temporaryPlugins[plugins[
+                            pluginName
+                        ].internalName].includes(name))
+                            temporaryPlugins[plugins[
+                                pluginName
+                            ].internalName].push(name)
+            }
         const sortedPlugins:Array<Plugin> = []
         for (const pluginName:string of Tools.arraySortTopological(
             temporaryPlugins
