@@ -321,8 +321,8 @@ export default class PluginAPI {
                     )
             }
         const parameterDescription:Array<string> = [
-            'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require',
-            'tools', 'webNodePath']
+            'currentPath', 'fileSystem', 'path', 'PluginAPI', 'require',
+            'Tools', 'webNodePath']
         const parameter:Array<any> = [
             /* eslint-disable no-eval */
             process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
