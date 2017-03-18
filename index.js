@@ -15,11 +15,11 @@
 // region imports
 import Tools from 'clientnode'
 import type {ProcedureFunction} from 'clientnode'
+import keypress from 'keypress'
 // NOTE: Only needed for debugging this file.
 try {
     require('source-map-support/register')
 } catch (error) {}
-import keypress from 'keypress'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
