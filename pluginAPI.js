@@ -322,12 +322,17 @@ export default class PluginAPI {
             }
         const parameterDescription:Array<string> = [
             'currentPath', 'fileSystem', 'path', 'PluginAPI', 'require',
-            'Tools', 'webNodePath']
+            'Tools', 'webNodePath', 'now', 'nowUTCTimestamp']
+        const now:Date = new Date()
+        const nowUTCTimestamp:number = Date.UTC(
+            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(),
+            now.getUTCMilliseconds())
         const parameter:Array<any> = [
             /* eslint-disable no-eval */
             process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
             /* eslint-enable no-eval */
-            __dirname]
+            __dirname, now, nowUTCTimestamp]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.resolveDynamicDataStructure(
