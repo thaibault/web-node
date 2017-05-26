@@ -79,6 +79,10 @@ export default class PluginAPI {
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
+                    if ('message' in error && error.message.startsWith(
+                        'NotImplemented:'
+                    ))
+                        continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` + (
                             plugin.internalName === plugin.name ? '' :
@@ -114,6 +118,10 @@ export default class PluginAPI {
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
+                    if ('message' in error && error.message.startsWith(
+                        'NotImplemented:'
+                    ))
+                        continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` + (
                             plugin.internalName === plugin.name ? '' :
@@ -250,7 +258,9 @@ export default class PluginAPI {
                 ):any => {
                     if (type in plugins[name].scope)
                         return plugins[name].scope[type](data, ...parameter)
-                    return data
+                    throw new Error(
+                        `NotImplemented: API method "${type}" is not ` +
+                        `implemented in plugin "${name}".`)
                 }
             } else
                 api = (data:any, ...parameter:Array<any>):any => {
@@ -268,6 +278,8 @@ export default class PluginAPI {
                         '##'
                     ) && childProcessResult.stdout.endsWith('##'))
                         data = JSON.parse(data)
+                    // TODO check if method wasn't implemented by special
+                    // returnCode
                     return data
                 }
         return {
