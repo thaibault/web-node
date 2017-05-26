@@ -70,12 +70,9 @@ export default class PluginAPI {
         }
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
-                if (configuration.debug)
-                    console.info(
-                        `Run asynchrone hook "${type}" for plugin "` +
-                        `${plugin.name}".`)
+                let result:any
                 try {
-                    data = await plugin.api.call(
+                    result = await plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
@@ -90,6 +87,11 @@ export default class PluginAPI {
                         )+ `throws: ${Tools.representObject(error)} during ` +
                         `asynchrone hook "${type}".`)
                 }
+                data = result
+                if (configuration.debug)
+                    console.info(
+                        `Ran asynchrone hook "${type}" for plugin "` +
+                        `${plugin.name}".`)
             }
         return data
     }
@@ -109,12 +111,9 @@ export default class PluginAPI {
     ):any {
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
-                if (configuration.debug)
-                    console.info(
-                        `Run synchrone hook "${type}" for plugin "` +
-                        `${plugin.name}".`)
+                let result:any
                 try {
-                    data = plugin.api.call(
+                    result = plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
@@ -129,6 +128,11 @@ export default class PluginAPI {
                         ) + `throws: ${Tools.representObject(error)} during ` +
                         `synchrone hook "${type}".`)
                 }
+                data = result
+                if (configuration.debug)
+                    console.info(
+                        `Ran synchrone hook "${type}" for plugin "` +
+                        `${plugin.name}".`)
             }
         return data
     }

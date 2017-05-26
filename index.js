@@ -69,7 +69,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
             if (services.hasOwnProperty(name))
                 console.info(`Service "${name}" initialized.`)
         for (const plugin:Plugin of plugins)
-            if (plugin.api) {
+            if (plugin.api && plugin.scope && 'loadService' in plugin.scope) {
                 services = await PluginAPI.callStack(
                     `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
