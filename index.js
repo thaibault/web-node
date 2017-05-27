@@ -69,15 +69,29 @@ const main:ProcedureFunction = async ():Promise<any> => {
             if (services.hasOwnProperty(name))
                 console.info(`Service "${name}" initialized.`)
         for (const plugin:Plugin of plugins)
-            if (plugin.api && plugin.scope && 'loadService' in plugin.scope) {
+            if (plugin.api) {
                 services = await PluginAPI.callStack(
                     `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
                     plugins, configuration, services)
-                // IgnoreTypeCheck
-                const result:any = await plugin.api.call(
-                    PluginAPI, 'loadService', servicePromises, services,
-                    configuration, plugins)
+                let result:any
+                try {
+                    // IgnoreTypeCheck
+                    result = await plugin.api.call(
+                        PluginAPI, 'loadService', servicePromises, services,
+                        configuration, plugins)
+                } catch (error) {
+                    if ('message' in error && error.message.startsWith(
+                        'NotImplemented:'
+                    ))
+                        continue
+                    throw new Error(
+                        `Plugin "${plugin.internalName}" ` + (
+                            plugin.internalName === plugin.name ? '' :
+                            `(${plugin.name}) `
+                        )+ `throws: ${Tools.representObject(error)} during ` +
+                        `asynchrone hook "loadService".`)
+                }
                 if (
                     result && result.hasOwnProperty('name') &&
                     typeof result.name === 'string'
