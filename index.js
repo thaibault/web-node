@@ -81,16 +81,15 @@ const main:ProcedureFunction = async ():Promise<any> => {
                         PluginAPI, 'loadService', servicePromises, services,
                         configuration, plugins)
                 } catch (error) {
-                    if ('message' in error && error.message.startsWith(
+                    if (!('message' in error && error.message.startsWith(
                         'NotImplemented:'
-                    ))
-                        continue
-                    throw new Error(
-                        `Plugin "${plugin.internalName}" ` + (
-                            plugin.internalName === plugin.name ? '' :
-                            `(${plugin.name}) `
-                        )+ `throws: ${Tools.representObject(error)} during ` +
-                        `asynchrone hook "loadService".`)
+                    )))
+                        throw new Error(
+                            `Plugin "${plugin.internalName}" ` + (
+                                plugin.internalName === plugin.name ? '' :
+                                `(${plugin.name}) `
+                            )+ `throws: ${Tools.representObject(error)} ` +
+                            'during asynchrone hook "loadService".')
                 }
                 if (
                     result && result.hasOwnProperty('name') &&
