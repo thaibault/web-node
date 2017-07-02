@@ -31,7 +31,9 @@ export default (():Function => {
         60, 52, 44, 36, 28, 20, 12, 4,
         62, 54, 46, 38, 30, 22, 14, 6,
         64, 56, 48, 40, 32, 24, 16, 8,
+        /* eslint-disable no-multi-spaces */
         57, 49, 41, 33, 25, 17,  9, 1,
+        /* eslint-enable no-multi-spaces */
         59, 51, 43, 35, 27, 19, 11, 3,
         61, 53, 45, 37, 29, 21, 13, 5,
         63, 55, 47, 39, 31, 23, 15, 7
@@ -45,7 +47,9 @@ export default (():Function => {
         36, 4, 44, 12, 52, 20, 60, 28,
         35, 3, 43, 11, 51, 19, 59, 27,
         34, 2, 42, 10, 50, 18, 58, 26,
+        /* eslint-disable no-multi-spaces */
         33, 1, 41,  9, 49, 17, 57, 25
+        /* eslint-enable no-multi-spaces */
     ]
     /*
      * Permuted-choice 1 from the key bits to yield C and D.
@@ -55,14 +59,18 @@ export default (():Function => {
     const PC1_C:Array<number> = [
         57, 49, 41, 33, 25, 17, 9,
          1, 58, 50, 42, 34, 26, 18,
+        /* eslint-disable no-multi-spaces */
         10,  2, 59, 51, 43, 35, 27,
         19, 11,  3, 60, 52, 44, 36
+        /* eslint-enable no-multi-spaces */
     ]
     const PC1_D:Array<number> = [
         63, 55, 47, 39, 31, 23, 15,
          7, 62, 54, 46, 38, 30, 22,
+        /* eslint-disable no-multi-spaces */
         14,  6, 61, 53, 45, 37, 29,
         21, 13,  5, 28, 20, 12,  4
+        /* eslint-enable no-multi-spaces */
     ]
     // Sequence of shifts used for the key schedule.
     const shifts:Array<number> = [
@@ -73,10 +81,12 @@ export default (():Function => {
        the key schedule.
      */
     const PC2_C:Array<number> = [
+        /* eslint-disable no-multi-spaces */
         14, 17, 11, 24,  1,  5,
          3, 28, 15,  6, 21, 10,
         23, 19, 12,  4, 26,  8,
         16,  7, 27, 20, 13,  2
+        /* eslint-enable no-multi-spaces */
     ]
     const PC2_D:Array<number> = [
         41, 52, 31, 37, 47, 55,
@@ -85,54 +95,57 @@ export default (():Function => {
         46, 42, 50, 36, 29, 32
     ]
     // The C and D arrays used to calculate the key schedule.
-    // TODO mutable
-    var C = []
-    // TODO mutable
-    var D = []
+    const C:Array<number> = []
+    const D:Array<number> = []
     // The key schedule. Generated from the key.
-    // TODO mutable
-    var KS = []
-    for (var i = 0; i < 16; ++i) {
-        KS[i] = []
-    }
+    const keySchedule:Array<Array<number>> = []
+    for (let index:number = 0; index < 16; index++)
+        keySchedule[index] = []
     // Set up the key schedule from the key.
-    function setkey(key) {
-        var i, j, k, t
+    const setKey:Function = (key:Array<number>):void => {
         /*
          * First, generate C and D by permuting the key. The low order bit of
          * each 8-bit char is not used, so C and D are only 28 bits apiece.
          */
-        for (i=0; i<28; i++) {
-            C[i] = key[PC1_C[i]-1]
-            D[i] = key[PC1_D[i]-1]
+        for (let index = 0; index < 28; index++) {
+            C[index] = key[PC1_C[index] - 1]
+            D[index] = key[PC1_D[index] - 1]
         }
         /*
          * To generate Ki, rotate C and D according to schedule and pick up a
          * permutation using PC2.
          */
-        for (i=0; i<16; i++) {
+        for (let index:number = 0; index < 16; index++) {
             // Rotate
-            for (k=0; k<shifts[i]; k++) {
-                t = C[0]
-                for (j=0; j<28-1; j++)
-                    C[j] = C[j+1]
+            for (
+                let subIndex:number = 0; subIndex < shifts[index]; subIndex++
+            ) {
+                let t:number = C[0]
+                for (
+                    let subSubIndex:number = 0; subSubIndex < 28 - 1;
+                    subSubIndex++
+                )
+                    C[subSubIndex] = C[subSubIndex + 1]
                 C[27] = t
                 t = D[0]
-                for (j=0; j<28-1; j++)
-                    D[j] = D[j+1]
+                for (
+                    let subSubIndex:number = 0; subSubIndex < 28 - 1;
+                    subSubIndex++
+                )
+                    D[subSubIndex] = D[subSubIndex + 1]
                 D[27] = t
             }
             // get Ki. Note C and D are concatenated.
-            for (j=0; j<24; j++) {
-                KS[i][j] = C[PC2_C[j]-1]
-                KS[i][j+24] = D[PC2_D[j]-28-1]
+            for (let subIndex:number = 0; subIndex < 24; subIndex++) {
+                keySchedule[index][subIndex] = C[PC2_C[subIndex] - 1]
+                keySchedule[index][subIndex + 24] = D[PC2_D[subIndex] - 28 - 1]
             }
         }
     }
     // The E bit-selection table.
-    // TODO mutable
-    var E = []
-    var e = [
+    const E:Array<number> = []
+    const e:Array<number> = [
+        /* eslint-disable no-multi-spaces */
         32,  1,  2,  3,  4,  5,
          4,  5,  6,  7,  8,  9,
          8,  9, 10, 11, 12, 13,
@@ -141,102 +154,123 @@ export default (():Function => {
         20, 21, 22, 23, 24, 25,
         24, 25, 26, 27, 28, 29,
         28, 29, 30, 31, 32,  1
+        /* eslint-enable no-multi-spaces */
     ]
     /*
      * The 8 selection functions. For some reason, they give a 0-origin index,
      * unlike everything else.
      */
-    var S = [
-        [14, 4,13, 1, 2,15,11, 8, 3,10, 6,12, 5, 9, 0, 7,
-         0,15, 7, 4,14, 2,13, 1,10, 6,12,11, 9, 5, 3, 8,
-         4, 1,14, 8,13, 6, 2,11,15,12, 9, 7, 3,10, 5, 0,
-         15,12, 8, 2, 4, 9, 1, 7, 5,11, 3,14,10, 0, 6,13],
-
-        [15, 1, 8,14, 6,11, 3, 4, 9, 7, 2,13,12, 0, 5,10,
-         3,13, 4, 7,15, 2, 8,14,12, 0, 1,10, 6, 9,11, 5,
-         0,14, 7,11,10, 4,13, 1, 5, 8,12, 6, 9, 3, 2,15,
-         13, 8,10, 1, 3,15, 4, 2,11, 6, 7,12, 0, 5,14, 9],
-
-        [10, 0, 9,14, 6, 3,15, 5, 1,13,12, 7,11, 4, 2, 8,
-         13, 7, 0, 9, 3, 4, 6,10, 2, 8, 5,14,12,11,15, 1,
-         13, 6, 4, 9, 8,15, 3, 0,11, 1, 2,12, 5,10,14, 7,
-         1,10,13, 0, 6, 9, 8, 7, 4,15,14, 3,11, 5, 2,12],
-
-        [7,13,14, 3, 0, 6, 9,10, 1, 2, 8, 5,11,12, 4,15,
-         13, 8,11, 5, 6,15, 0, 3, 4, 7, 2,12, 1,10,14, 9,
-         10, 6, 9, 0,12,11, 7,13,15, 1, 3,14, 5, 2, 8, 4,
-         3,15, 0, 6,10, 1,13, 8, 9, 4, 5,11,12, 7, 2,14],
-
-        [2,12, 4, 1, 7,10,11, 6, 8, 5, 3,15,13, 0,14, 9,
-         14,11, 2,12, 4, 7,13, 1, 5, 0,15,10, 3, 9, 8, 6,
-         4, 2, 1,11,10,13, 7, 8,15, 9,12, 5, 6, 3, 0,14,
-         11, 8,12, 7, 1,14, 2,13, 6,15, 0, 9,10, 4, 5, 3],
-
-        [12, 1,10,15, 9, 2, 6, 8, 0,13, 3, 4,14, 7, 5,11,
-         10,15, 4, 2, 7,12, 9, 5, 6, 1,13,14, 0,11, 3, 8,
-         9,14,15, 5, 2, 8,12, 3, 7, 0, 4,10, 1,13,11, 6,
-         4, 3, 2,12, 9, 5,15,10,11,14, 1, 7, 6, 0, 8,13],
-
-        [4,11, 2,14,15, 0, 8,13, 3,12, 9, 7, 5,10, 6, 1,
-         13, 0,11, 7, 4, 9, 1,10,14, 3, 5,12, 2,15, 8, 6,
-         1, 4,11,13,12, 3, 7,14,10,15, 6, 8, 0, 5, 9, 2,
-         6,11,13, 8, 1, 4,10, 7, 9, 5, 0,15,14, 2, 3,12],
-
-        [13, 2, 8, 4, 6,15,11, 1,10, 9, 3,14, 5, 0,12, 7,
-         1,15,13, 8,10, 3, 7, 4,12, 5, 6,11, 0,14, 9, 2,
-         7,11, 4, 1, 9,12,14, 2, 0, 6,10,13,15, 3, 5, 8,
-         2, 1,14, 7, 4,10, 8,13,15,12, 9, 0, 3, 5, 6,11]
+    const S:Array<Array<number>> = [
+        [
+            /* eslint-disable no-multi-spaces */
+            14,  4, 13, 1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9, 0,  7,
+             0, 15,  7, 4, 14,  2, 13,  1, 10,  6, 12, 11,  9,  5, 3,  8,
+             4,  1, 14, 8, 13,  6,  2, 11, 15, 12,  9,  7,  3, 10, 5,  0,
+            15, 12,  8, 2,  4,  9,  1,  7,  5, 11,  3, 14, 10,  0, 6, 13
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+            15, 1,   8, 14,  6, 11, 3,  4,  9, 7,  2, 13, 12, 0,  5, 10,
+             3, 13,  4,  7, 15,  2, 8, 14, 12, 0,  1, 10,  6, 9, 11,  5,
+             0, 14,  7, 11, 10,  4, 13, 1,  5, 8, 12,  6,  9, 3,  2, 15,
+            13,  8, 10,  1,  3, 15,  4, 2, 11, 6,  7, 12,  0, 5, 14, 9
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+            10,  0,  9, 14, 6,  3, 15,  5,  1, 13, 12,  7, 11,  4,  2,  8,
+            13,  7,  0,  9, 3,  4,  6, 10,  2,  8,  5, 14, 12, 11, 15,  1,
+            13,  6,  4,  9, 8, 15,  3,  0, 11,  1,  2, 12,  5, 10, 14,  7,
+             1, 10, 13,  0, 6,  9,  8,  7,  4, 15, 14,  3, 11,  5,  2, 12
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+            7,  13, 14, 3,  0,  6,  9, 10,  1, 2, 8,  5, 11, 12,  4, 15,
+            13,  8, 11, 5,  6, 15,  0,  3,  4, 7, 2, 12,  1, 10, 14,  9,
+            10,  6,  9, 0, 12, 11,  7, 13, 15, 1, 3, 14,  5,  2,  8,  4,
+             3, 15,  0, 6, 10,  1, 13,  8,  9, 4, 5, 11, 12,  7,  2, 14
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+             2, 12,  4,  1,  7, 10, 11,  6,  8,  5, 3,  15, 13, 0, 14,  9,
+            14, 11,  2, 12,  4,  7, 13,  1,  5,  0, 15, 10,  3, 9,  8,  6,
+             4,  2,  1, 11, 10, 13,  7,  8, 15,  9, 12,  5,  6, 3,  0, 14,
+            11,  8, 12,  7,  1, 14,  2, 13,  6, 15,  0,  9, 10, 4,  5, 3
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+            12,  1, 10, 15, 9,  2,  6,  8,  0, 13,  3,  4, 14,  7,  5, 11,
+            10, 15,  4,  2, 7, 12,  9,  5,  6,  1, 13, 14,  0, 11,  3,  8,
+             9, 14, 15,  5, 2,  8, 12,  3,  7,  0,  4, 10,  1, 13, 11,  6,
+             4, 3,   2, 12, 9,  5, 15, 10, 11, 14,  1,  7,  6,  0,  8, 13
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+             4, 11,  2, 14, 15, 0,  8, 13, 3,  12, 9,  7,  5, 10, 6,  1,
+            13,  0, 11,  7,  4, 9,  1, 10, 14,  3, 5, 12,  2, 15, 8,  6,
+             1,  4, 11, 13, 12, 3,  7, 14, 10, 15, 6,  8,  0,  5, 9,  2,
+             6, 11, 13,  8,  1, 4, 10,  7,  9,  5, 0, 15, 14,  2, 3, 12
+            /* eslint-enable no-multi-spaces */
+        ],
+        [
+            /* eslint-disable no-multi-spaces */
+            13,  2,  8, 4,  6, 15, 11,  1, 10,  9,  3, 14,  5,  0, 12,  7,
+             1, 15, 13, 8, 10,  3,  7,  4, 12,  5,  6, 11,  0, 14,  9,  2,
+             7, 11,  4, 1,  9, 12, 14,  2,  0,  6, 10, 13, 15,  3,  5,  8,
+             2,  1, 14, 7,  4, 10,  8, 13, 15, 12,  9,  0,  3,  5,  6, 11
+            /* eslint-enable no-multi-spaces */
+        ]
     ]
     // P is a permutation on the selected combination of the current L and key.
-    var P = [
-        16, 7,20,21,
-        29,12,28,17,
-        1,15,23,26,
-        5,18,31,10,
-        2, 8,24,14,
-        32,27, 3, 9,
-        19,13,30, 6,
-        22,11, 4,25
+    const P:Array<number> = [
+        /* eslint-disable no-multi-spaces */
+        16,  7, 20, 21,
+        29, 12, 28, 17,
+         1, 15, 23, 26,
+         5, 18, 31, 10,
+         2,  8, 24, 14,
+        32, 27,  3,  9,
+        19, 13, 30,  6,
+        22, 11,  4, 25
+        /* eslint-enable no-multi-spaces */
     ]
-    /*
-     * The current block, divided into 2 halves.
-     */
-    // TODO mutable
-    var L = [], R = []
-    // TODO mutable
-    var tempL = [[]]
-    // TODO mutable
-    var f =[]
+    // The current block, divided into 2 halves.
+    const L:Array<number> = []
+    const R:Array<number> = []
+    const tempL:Array<number> = []
+    const f:Array<number> = []
     // The combination of the key and the input, before selection.
-    // TODO mutable
-    var preS = []
+    const preS:Array<number> = []
     // The payoff: encrypt a block.
-    function encrypt(block, edflag) {
-        var i, ii, j, k, t
+    const encrypt:Function = (
+        block:Array<number>, edflag:boolean = false
+    ):void => {
         // First, permute the bits in the input.
-        var perm = []
-        for (j=0; j<64; j++)
-            perm[j] = block[IP[j]-1]
-        for (j=0; j<32; ++j) {
-            L[j] = perm[j]
-            R[j] = perm[j+32]
+        const perm:Array<number> = []
+        for (let index:number = 0; index < 64; index++)
+            perm[index] = block[IP[index] - 1]
+        for (let index:number = 0; index < 32; index++) {
+            L[index] = perm[index]
+            R[index] = perm[index + 32]
         }
         // Perform an encryption operation 16 times.
-        for (ii=0; ii<16; ii++) {
+        for (let index:number = 0; index < 16; index++) {
             // Set direction
-            if (edflag)
-                i = 15-ii
-            else
-                i = ii
+            const direction:number = edflag ? 15 - index : index
             // Save the R array, which will be the new L.
-            for (j=0; j<32; j++)
-                tempL[j] = R[j]
+            for (let index:number = 0; index < 32; index++)
+                tempL[index] = R[index]
             /*
              * Expand R to 48 bits using the E selector; exclusive-or with the
              * current key bits.
              */
-            for (j=0; j<48; j++)
-                preS[j] = R[E[j]-1] ^ KS[i][j]
+            for (let index:number = 0; index < 48; index++)
+                preS[index] = R[E[index] - 1] ^ keySchedule[direction][index]
             /*
              * The pre-select bits are now considered in 8 groups of 6 bits
              * each. The 8 selection functions map these 6-bit quantities into
@@ -244,54 +278,55 @@ export default (():Function => {
              * The indexing into the selection functions is peculiar; it could
              * be simplified by rewriting the tables.
              */
-            for (j=0; j<8; j++) {
-                t = 6*j
-                k = S[j][(preS[t+0]<<5)+
-                         (preS[t+1]<<3)+
-                         (preS[t+2]<<2)+
-                         (preS[t+3]<<1)+
-                         (preS[t+4]<<0)+
-                         (preS[t+5]<<4)]
-                t = 4*j
-                f[t+0] = (k>>3)&0o1
-                f[t+1] = (k>>2)&0o1
-                f[t+2] = (k>>1)&0o1
-                f[t+3] = (k>>0)&0o1
+            for (let index:number = 0; index < 8; index++) {
+                let t:number = 6 * index
+                const k:number = S[index][
+                    (preS[t + 0] << 5) +
+                    (preS[t + 1] << 3) +
+                    (preS[t + 2] << 2) +
+                    (preS[t + 3] << 1) +
+                    (preS[t + 4] << 0) +
+                    (preS[t + 5] << 4)
+                ]
+                t = 4 * index
+                f[t + 0] = (k >> 3) & 0o1
+                f[t + 1] = (k >> 2) & 0o1
+                f[t + 2] = (k >> 1) & 0o1
+                f[t + 3] = (k >> 0) & 0o1
             }
             /*
              * The new R is L ^ f(R, K). The f here has to be permuted first,
              * though.
              */
-            for (j=0; j<32; j++)
-                R[j] = L[j] ^ f[P[j]-1]
+            for (let index:number = 0; index < 32; index++)
+                R[index] = L[index] ^ f[P[index] - 1]
             // Finally, the new L (the original R) is copied back.
-            for (j=0; j<32; j++)
-                L[j] = tempL[j]
+            for (let index = 0; index < 32; index++)
+                L[index] = tempL[index]
         }
         // The output L and R are reversed.
-        for (j=0; j<32; j++) {
-            t = L[j]
-            L[j] = R[j]
-            R[j] = t
+        for (let index:number = 0; index < 32; index++) {
+            const t:number = L[index]
+            L[index] = R[index]
+            R[index] = t
         }
         // The final output gets the inverse permutation of the very original.
-        for (j=0; j<32; ++j) {
-            perm[j] = L[j]
-            perm[j+32] = R[j]
+        for (let index:number = 0; index < 32; index++) {
+            perm[index] = L[index]
+            perm[index + 32] = R[index]
         }
-        for (j=0; j<64; j++)
-            block[j] = perm[FP[j]-1]
+        for (let index:number = 0; index < 64; index++)
+            block[index] = perm[FP[index] - 1]
     }
     // Transform a string to an array of bytes.
-    var strToBytes = function(str) {
-        var i, x = []
-        for (i = 0; i < str.length; ++i)
-            x[i] = str.charCodeAt(i)
-        return x
+    const strToBytes:Function = (string:string):Array<number> => {
+        const result:Array<number> = []
+        for (let index:number = 0; index < string.length; index++)
+            result[index] = string.charCodeAt(index)
+        return result
     }
-    var bytesToStr = function(bytes) {
-        return String.fromCharCode.apply(String, bytes)
-    }
+    const bytesToStr:Function = (bytes:Array<number>):string =>
+        String.fromCharCode(...bytes)
     /**
      * Implements the Unix crypt(3) DES-based hash.
      * @param password - The string to hash.
@@ -300,62 +335,70 @@ export default (():Function => {
      * otherwise.
      * @returns Returns crypted or encrypted buffer or string.
      */
-    return function crypt(
-        pw:Array<string>|string, salt:Array<string>|string = 'aa',
+    return (
+        password:Array<number>|string, salt:Array<number>|string = 'aa',
         returnBytes:boolean = false
-    ):Array<string>|string {
-        if (typeof pw === 'string')
-            pw = strToBytes(pw)
+    ):Array<number>|string => {
+        if (typeof password === 'string')
+            password = strToBytes(password)
         if (typeof salt === 'string') {
             if (salt === '')
                 salt = 'aa'
             salt = strToBytes(salt)
         }
-        var i, j, k, c, temp
-        var block = [], iobuf = []
-        for (i=0; i<66; i++)
-            block[i] = 0
-        for (i=0, k=0; (c= pw[k]) && i<64; ++k) {
-            for (j=0; j<7; j++, i++)
-                block[i] = (c>>(6-j)) & 0o1
-            i++
+        const block:Array<number> = []
+        const iobuf:Array<number> = []
+        for (let index:number = 0; index < 66; index++)
+            block[index] = 0
+        let c:number
+        for (
+            let index:number = 0, otherIndex:number = 0;
+            (c = password[otherIndex]) && index < 64;
+            otherIndex++
+        ) {
+            for (let subIndex:number = 0; subIndex < 7; subIndex++, index++)
+                block[index] = (c >> (6 - subIndex)) & 0o1
+            index++
         }
-        setkey(block)
-        for (i=0; i<66; i++)
-            block[i] = 0
-        for (i=0;i<48;i++)
-            E[i] = e[i]
-        for (i=0, k=0; i<2; i++, ++k) {
-            c = salt[k]
-            iobuf[i] = c
-            if (c>'Z'.charCodeAt(0))
+        setKey(block)
+        for (let index:number = 0; index < 66; index++)
+            block[index] = 0
+        for (let index:number = 0; index < 48; index++)
+            E[index] = e[index]
+        for (
+            let index:number = 0, otherIndex:number = 0;
+            index < 2; index++, otherIndex++
+        ) {
+            let c:number = salt[otherIndex]
+            iobuf[index] = c
+            if (c > 'Z'.charCodeAt(0))
                 c -= 6
-            if (c>'9'.charCodeAt(0))
+            if (c > '9'.charCodeAt(0))
                 c -= 7
             c -= '.'.charCodeAt(0)
-            for (j=0; j<6; j++)
-                if ((c>>j) & 0o1) {
-                    temp = E[6*i+j]
-                    E[6*i+j] = E[6*i+j+24]
-                    E[6*i+j+24] = temp
+            for (let subIndex:number = 0; subIndex < 6; subIndex++)
+                if ((c >> subIndex) & 0o1) {
+                    const temp:number = E[6 * index + subIndex]
+                    E[6 * index + subIndex] = E[6 * index + subIndex + 24]
+                    E[6 * index + subIndex + 24] = temp
                 }
         }
-        for (i=0; i<25; i++)
-            encrypt(block,0)
-        for (i=0; i<11; i++) {
+        for (let index:number = 0; index < 25; index++)
+            encrypt(block)
+        for (let index:number = 0; index < 11; index++) {
             c = 0
-            for (j=0; j<6; j++) {
+            for (let subIndex:number = 0; subIndex < 6; subIndex++) {
                 c <<= 1
-                c |= block[6*i+j]
+                c |= block[6 * index + subIndex]
             }
             c += '.'.charCodeAt(0)
             if (c > '9'.charCodeAt(0))
                 c += 7
             if (c > 'Z'.charCodeAt(0))
                 c += 6
-            iobuf[i+2] = c
+            iobuf[index + 2] = c
         }
-        if (iobuf[1] == 0)
+        if (iobuf[1] === 0)
             iobuf[1] = iobuf[0]
         return returnBytes ? iobuf : bytesToStr(iobuf)
     }
