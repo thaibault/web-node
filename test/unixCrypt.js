@@ -15,6 +15,9 @@ registerTest(async function():Promise<void> {
     // region tests
     this.test('crypt', (assert:Object):void => {
         for (const test:Array<string> of [
+            ['', 'ba', 'baJyGvzMWSid.'],
+            ['ba', '', 'aayPdtR3JLIkk'],
+            ['', '', 'aaQSqAReePlq6'],
             ['foo', 'ba', 'ba4TuD1iozTxw'],
             ['random long string', 'hi', 'hib8W/d4WOlU.'],
             ['foob', 'ar', 'arlEKn0OzVJn.'],
