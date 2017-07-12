@@ -111,12 +111,12 @@ if (process.argv.length > 2) {
 }
 const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
     for (const key:string in data)
-        if (data.hasOwnProperty(key) && ![
-            '__evaluate__', '__execute__'
-        ].includes(key) && (
-            data.hasOwnProperty('__evaluate__') ||
-            data.hasOwnProperty('__execute__')
-        ))
+        if (
+            data.hasOwnProperty(key) &&
+            !['__evaluate__', '__execute__'].includes(key) && (
+                data.hasOwnProperty('__evaluate__') ||
+                data.hasOwnProperty('__execute__'))
+        )
             delete data[key]
         else if (typeof data[key] === 'object' && data[key] !== null)
             removePropertiesInDynamicObjects(data[key])
