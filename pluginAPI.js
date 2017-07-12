@@ -410,11 +410,11 @@ export default class PluginAPI {
                 configuration.plugin.configurationPropertyNames,
                 configuration.context.path, configuration.encoding)
         for (const type:string in configuration.plugin.directories)
-            if (configuration.plugin.directories.hasOwnProperty(
-                type
-            ) && await Tools.isDirectory(
-                configuration.plugin.directories[type].path
-            )) {
+            if (
+                configuration.plugin.directories.hasOwnProperty(type) &&
+                await Tools.isDirectory(
+                    configuration.plugin.directories[type].path)
+            ) {
                 const compiledRegularExpression:RegExp = new RegExp(
                     configuration.plugin.directories[
                         type
@@ -484,12 +484,12 @@ export default class PluginAPI {
      */
     static removePropertiesInDynamicObjects(data:PlainObject):PlainObject {
         for (const key:string in data)
-            if (data.hasOwnProperty(key) && ![
-                '__evaluate__', '__execute__'
-            ].includes(key) && (
-                data.hasOwnProperty('__evaluate__') ||
-                data.hasOwnProperty('__execute__')
-            ))
+            if (
+                data.hasOwnProperty(key) &&
+                !['__evaluate__', '__execute__'].includes(key) && (
+                    data.hasOwnProperty('__evaluate__') ||
+                    data.hasOwnProperty('__execute__'))
+            )
                 delete data[key]
             else if (typeof data[key] === 'object' && data[key] !== null)
                 PluginAPI.removePropertiesInDynamicObjects(data[key])
