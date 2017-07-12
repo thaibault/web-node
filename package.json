@@ -50,12 +50,12 @@
   },
   "dependencies": {
     "clientnode": "latest",
-    "keypress": "latest",
-    "weboptimizer": "latest"
+    "keypress": "latest"
   },
   "devDependencies": {
     "documentation-website": "latest",
-    "source-map-support": "latest"
+    "source-map-support": "latest",
+    "weboptimizer": "latest"
   },
   "webNode": {
     "debug": false,
