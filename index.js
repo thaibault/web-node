@@ -25,7 +25,7 @@ import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import type {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
-const handleError:ProcedureFunction = async (
+const handleError:Function = async (
     plugins:Array<Plugin>, configuration:Configuration, error:Error,
     services:Services
 ):Promise<void> => {
