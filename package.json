@@ -39,7 +39,7 @@
     "clear": "webOptimizer clear && rm --force log.txt &>/dev/null",
     "document": "webOptimizer document",
     "lint": "webOptimizer check:type; webOptimizer lint",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "serve": "webOptimizer build && ./index.compiled.js",
     "start": "npm run serve",
     "test": "pushd dummyPlugin && npm run build && popd && webOptimizer test",
@@ -50,21 +50,21 @@
   },
   "dependencies": {
     "clientnode": "^1.0.220",
-    "keypress": "latest"
+    "keypress": "^0.2.1"
   },
   "devDependencies": {
-    "babel-eslint": "latest",
-    "documentation-website": "latest",
-    "eslint": "latest",
-    "eslint-config-google": "latest",
-    "eslint-plugin-flowtype": "latest",
-    "eslint-plugin-jsdoc": "latest",
-    "flow-bin": "latest",
-    "jsdoc": "latest",
-    "source-map-support": "latest",
-    "weboptimizer": "^1.0.344",
-    "webpack": "latest",
-    "webpack-dev-server": "latest"
+    "babel-eslint": "^7.2.3",
+    "documentation-website": "^1.0.61",
+    "eslint": "^4.2.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-flowtype": "^2.35.0",
+    "eslint-plugin-jsdoc": "^3.1.1",
+    "flow-bin": "^0.50.0",
+    "jsdoc": "^3.5.2",
+    "source-map-support": "^0.4.15",
+    "weboptimizer": "^1.0.347",
+    "webpack": "^3.2.0",
+    "webpack-dev-server": "^2.5.1"
   },
   "webNode": {
     "debug": false,
