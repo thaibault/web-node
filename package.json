@@ -42,7 +42,7 @@
     "prepare": "npm run build",
     "serve": "webOptimizer build && ./index.compiled.js",
     "start": "npm run serve",
-    "test": "pushd dummyPlugin && npm run build && popd && webOptimizer test",
+    "test": "cd dummyPlugin && npm run build && cd - && webOptimizer test",
     "update": "npm version patch && npm publish",
     "update:documentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch",
