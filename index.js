@@ -81,9 +81,12 @@ const main:ProcedureFunction = async ():Promise<any> => {
                         PluginAPI, 'loadService', servicePromises, services,
                         configuration, plugins)
                 } catch (error) {
-                    if (!('message' in error && error.message.startsWith(
-                        'NotImplemented:'
-                    )))
+                    if (!(
+                        typeof error === 'object' &&
+                        error !== null &&
+                        'message' in error &&
+                        error.message.startsWith('NotImplemented:')
+                    ))
                         throw new Error(
                             `Plugin "${plugin.internalName}" ` + (
                                 plugin.internalName === plugin.name ? '' :
