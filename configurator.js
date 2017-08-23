@@ -81,22 +81,27 @@ if (name)
 // endregion
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
-const parameterDescription:Array<string> = [
-    'currentPath', 'fileSystem', 'path', 'PluginAPI', 'require', 'Tools',
-    'webNodePath', 'now', 'nowUTCTimestamp']
 const now:Date = new Date()
 const nowUTCTimestamp:number = Date.UTC(
     now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
     now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(),
     now.getUTCMilliseconds()
 ) / 1000
-let parameter:Array<any> = [
+const scope:{[key:string]:any} = {
+    currentPath: process.cwd(),
+    fileSystem,
+    path,
+    PluginAPI,
     /* eslint-disable no-eval */
-    process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
+    require: eval('require'),
     /* eslint-enable no-eval */
-    __dirname, now, nowUTCTimestamp]
-let configuration:Configuration = Tools.resolveDynamicDataStructure(
-    packageConfiguration.webNode, parameterDescription, parameter)
+    Tools,
+    webNodePath: __dirname,
+    now,
+    nowUTCTimestamp
+}
+let configuration:Configuration = Tools.evaluateDynamicDataStructure(
+    packageConfiguration.webNode, scope)
 delete packageConfiguration.webNode
 Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
@@ -128,9 +133,8 @@ const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
-configuration = Tools.resolveDynamicDataStructure(
-    removePropertiesInDynamicObjects(configuration), parameterDescription,
-    parameter)
+configuration = Tools.evaluateDynamicDataStructure(
+    removePropertiesInDynamicObjects(configuration), scope)
 configuration.package = packageConfiguration
 configuration = Tools.copyLimitedRecursively(configuration, -1, true)
 export default configuration
