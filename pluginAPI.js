@@ -336,25 +336,27 @@ export default class PluginAPI {
                         true, configuration, configuration.runtimeConfiguration
                     )
             }
-        const parameterDescription:Array<string> = [
-            'currentPath', 'fileSystem', 'path', 'PluginAPI', 'require',
-            'Tools', 'webNodePath', 'now', 'nowUTCTimestamp']
         const now:Date = new Date()
-        const nowUTCTimestamp:number = Date.UTC(
-            now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-            now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(),
-            now.getUTCMilliseconds()
-        ) / 1000
-        const parameter:Array<any> = [
-            /* eslint-disable no-eval */
-            process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
-            /* eslint-enable no-eval */
-            __dirname, now, nowUTCTimestamp]
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
-        configuration = Tools.resolveDynamicDataStructure(
-            PluginAPI.removePropertiesInDynamicObjects(configuration),
-            parameterDescription, parameter)
+        configuration = Tools.evaluateDynamicDataStructure(
+            PluginAPI.removePropertiesInDynamicObjects(configuration), {
+                currentPath: process.cwd(),
+                fileSystem,
+                path,
+                PluginAPI,
+                /* eslint-disable no-eval */
+                require: eval('require'),
+                /* eslint-enable no-eval */
+                Tools,
+                webNodePath: __dirname,
+                now,
+                nowUTCTimestamp: Date.UTC(
+                    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+                    now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(),
+                    now.getUTCMilliseconds()
+                ) / 1000
+            })
         configuration.package = packageConfiguration
         return configuration
     }
