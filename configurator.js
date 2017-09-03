@@ -82,11 +82,6 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const now:Date = new Date()
-const nowUTCTimestamp:number = Date.UTC(
-    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-    now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(),
-    now.getUTCMilliseconds()
-) / 1000
 const scope:{[key:string]:any} = {
     currentPath: process.cwd(),
     fileSystem,
@@ -98,7 +93,7 @@ const scope:{[key:string]:any} = {
     Tools,
     webNodePath: __dirname,
     now,
-    nowUTCTimestamp
+    nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
 }
 let configuration:Configuration = Tools.evaluateDynamicDataStructure(
     packageConfiguration.webNode, scope)

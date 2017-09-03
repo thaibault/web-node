@@ -351,11 +351,7 @@ export default class PluginAPI {
                 Tools,
                 webNodePath: __dirname,
                 now,
-                nowUTCTimestamp: Date.UTC(
-                    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-                    now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(),
-                    now.getUTCMilliseconds()
-                ) / 1000
+                nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
             })
         configuration.package = packageConfiguration
         return configuration
