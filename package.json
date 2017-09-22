@@ -49,7 +49,7 @@
     "watch:dll": "webOptimizer build:dll --watch"
   },
   "dependencies": {
-    "clientnode": "^1.0.236",
+    "clientnode": "^1.0.240",
     "keypress": "^0.2.1"
   },
   "devDependencies": {
@@ -63,7 +63,7 @@
     "flow-bin": "^0.50.0",
     "jsdoc": "^3.5.2",
     "source-map-support": "^0.4.15",
-    "weboptimizer": "^1.0.358",
+    "weboptimizer": "^1.0.368",
     "webpack": "^3.2.0",
     "webpack-dev-server": "^2.5.1"
   },
@@ -112,7 +112,7 @@
         "clientnode/test$": "clientnode/test.compiled"
       },
       "optimizer": {
-        "babili": null
+        "babelMinify": null
       },
       "preprocessor": {
         "javaScript": {
