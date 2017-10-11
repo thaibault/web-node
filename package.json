@@ -49,23 +49,23 @@
     "watch:dll": "webOptimizer build:dll --watch"
   },
   "dependencies": {
-    "clientnode": "^1.0.242",
+    "clientnode": "^1.0.246",
     "keypress": "^0.2.1"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
-    "babel-eslint": "^7.2.3",
+    "babel-eslint": "^8.0.1",
     "documentation-website": "^1.0.64",
-    "eslint": "^4.2.0",
+    "eslint": "^4.8.0",
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-flowtype": "^2.36.0",
     "eslint-plugin-jsdoc": "^3.1.1",
-    "flow-bin": "^0.50.0",
+    "flow-bin": "^0.56.0",
     "jsdoc": "^3.5.2",
-    "source-map-support": "^0.4.15",
-    "weboptimizer": "^1.0.369",
+    "source-map-support": "^0.5.0",
+    "weboptimizer": "^1.0.376",
     "webpack": "^3.2.0",
-    "webpack-dev-server": "^2.5.1"
+    "webpack-dev-server": "^2.9.1"
   },
   "webNode": {
     "debug": false,
