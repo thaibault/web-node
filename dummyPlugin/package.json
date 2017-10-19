@@ -11,7 +11,7 @@
     "plugin"
   ],
   "scripts": {
-    "build": "babel --plugins transform-flow-strip-types,transform-runtime --presets es2017-node7,stage-0,babili --source-maps inline --out-file index.compiled.js index.js",
+    "build": "babel --plugins transform-flow-strip-types,transform-runtime --presets env,stage-0,minify --source-maps inline --out-file index.compiled.js index.js",
     "start": "index.compiled.js"
   },
   "webNode": {
