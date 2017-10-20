@@ -49,9 +49,11 @@
     "watch:dll": "webOptimizer build:dll --watch"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "clientnode": "^1.0.269",
     "keypress": "^0.2.1"
+  },
+  "peerDependencies": {
+    "babel-runtime": "*"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
