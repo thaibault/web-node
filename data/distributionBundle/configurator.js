@@ -81,35 +81,43 @@ if (name)
 // endregion
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
-const parameterDescription:Array<string> = [
-    'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require', 'tools',
-    'webNodePath']
-let parameter:Array<any> = [
+const now:Date = new Date()
+const scope:{[key:string]:any} = {
+    currentPath: process.cwd(),
+    fileSystem,
+    path,
+    PluginAPI,
     /* eslint-disable no-eval */
-    process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
+    require: eval('require'),
     /* eslint-enable no-eval */
-    __dirname]
-let configuration:Configuration = Tools.resolveDynamicDataStructure(
-    packageConfiguration.webNode, parameterDescription, parameter)
+    Tools,
+    webNodePath: __dirname,
+    now,
+    nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
+}
+let configuration:Configuration = Tools.evaluateDynamicDataStructure(
+    packageConfiguration.webNode, scope)
 delete packageConfiguration.webNode
 Tools.extendObject(true, Tools.modifyObject(
     configuration, specificConfiguration
 ), specificConfiguration)
-if (process.argv.length > 3) {
+if (process.argv.length > 2) {
     const result:?Object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration')
-    if (Tools.isPlainObject(result))
+    if (Tools.isPlainObject(result)) {
         Tools.extendObject(
             true, Tools.modifyObject(configuration, result), result)
+        configuration.runtimeConfiguration = result
+    }
 }
 const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
     for (const key:string in data)
-        if (data.hasOwnProperty(key) && ![
-            '__evaluate__', '__execute__'
-        ].includes(key) && (
-            data.hasOwnProperty('__evaluate__') ||
-            data.hasOwnProperty('__execute__')
-        ))
+        if (
+            data.hasOwnProperty(key) &&
+            !['__evaluate__', '__execute__'].includes(key) && (
+                data.hasOwnProperty('__evaluate__') ||
+                data.hasOwnProperty('__execute__'))
+        )
             delete data[key]
         else if (typeof data[key] === 'object' && data[key] !== null)
             removePropertiesInDynamicObjects(data[key])
@@ -120,9 +128,8 @@ const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
-configuration = Tools.resolveDynamicDataStructure(
-    removePropertiesInDynamicObjects(configuration), parameterDescription,
-    parameter)
+configuration = Tools.evaluateDynamicDataStructure(
+    removePropertiesInDynamicObjects(configuration), scope)
 configuration.package = packageConfiguration
 configuration = Tools.copyLimitedRecursively(configuration, -1, true)
 export default configuration
