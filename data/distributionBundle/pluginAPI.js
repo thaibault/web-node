@@ -49,8 +49,9 @@ export default class PluginAPI {
         if (configuration.plugin.hotReloading && ![
             'configurationLoaded', 'apiFileReloaded'
         ].includes(type)) {
-            const pluginsWithChangedConfiguration = PluginAPI.hotReloadFile(
-                'configurationFile', 'configuration', plugins)
+            const pluginsWithChangedConfiguration:Array<Plugin> =
+                PluginAPI.hotReloadFile(
+                    'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
                 PluginAPI.callStack(
                     'preConfigurationLoaded', plugins, configuration,
@@ -60,8 +61,8 @@ export default class PluginAPI {
                     'postConfigurationLoaded', plugins, configuration,
                     configuration, pluginsWithChangedConfiguration)
             }
-            const pluginsWithChangedAPIFiles = PluginAPI.hotReloadFile(
-                'apiFile', 'scope', plugins)
+            const pluginsWithChangedAPIFiles:Array<Plugin> =
+                PluginAPI.hotReloadFile('apiFile', 'scope', plugins)
             if (pluginsWithChangedAPIFiles.length)
                 PluginAPI.callStack(
                     'apiFileReloaded', plugins, configuration,
@@ -69,15 +70,16 @@ export default class PluginAPI {
         }
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
-                if (configuration.debug)
-                    console.info(
-                        `Run asynchrone hook "${type}" for plugin "` +
-                        `${plugin.name}".`)
+                let result:any
                 try {
-                    data = await plugin.api.call(
+                    result = await plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
+                    if ('message' in error && error.message.startsWith(
+                        'NotImplemented:'
+                    ))
+                        continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` + (
                             plugin.internalName === plugin.name ? '' :
@@ -85,6 +87,11 @@ export default class PluginAPI {
                         )+ `throws: ${Tools.representObject(error)} during ` +
                         `asynchrone hook "${type}".`)
                 }
+                data = result
+                if (configuration.debug)
+                    console.info(
+                        `Ran asynchrone hook "${type}" for plugin "` +
+                        `${plugin.name}".`)
             }
         return data
     }
@@ -104,15 +111,16 @@ export default class PluginAPI {
     ):any {
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
-                if (configuration.debug)
-                    console.info(
-                        `Run synchrone hook "${type}" for plugin "` +
-                        `${plugin.name}".`)
+                let result:any
                 try {
-                    data = plugin.api.call(
+                    result = plugin.api.call(
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
+                    if ('message' in error && error.message.startsWith(
+                        'NotImplemented:'
+                    ))
+                        continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` + (
                             plugin.internalName === plugin.name ? '' :
@@ -120,6 +128,11 @@ export default class PluginAPI {
                         ) + `throws: ${Tools.representObject(error)} during ` +
                         `synchrone hook "${type}".`)
                 }
+                data = result
+                if (configuration.debug)
+                    console.info(
+                        `Ran synchrone hook "${type}" for plugin "` +
+                        `${plugin.name}".`)
             }
         return data
     }
@@ -249,7 +262,9 @@ export default class PluginAPI {
                 ):any => {
                     if (type in plugins[name].scope)
                         return plugins[name].scope[type](data, ...parameter)
-                    return data
+                    throw new Error(
+                        `NotImplemented: API method "${type}" is not ` +
+                        `implemented in plugin "${name}".`)
                 }
             } else
                 api = (data:any, ...parameter:Array<any>):any => {
@@ -267,6 +282,8 @@ export default class PluginAPI {
                         '##'
                     ) && childProcessResult.stdout.endsWith('##'))
                         data = JSON.parse(data)
+                    // TODO check if method wasn't implemented by special
+                    // returnCode
                     return data
                 }
         return {
@@ -314,20 +331,28 @@ export default class PluginAPI {
                 Tools.extendObject(true, Tools.modifyObject(
                     configuration, pluginConfiguration
                 ), pluginConfiguration)
+                if (configuration.runtimeConfiguration)
+                    Tools.extendObject(
+                        true, configuration, configuration.runtimeConfiguration
+                    )
             }
-        const parameterDescription:Array<string> = [
-            'currentPath', 'fileSystem', 'path', 'pluginAPI', 'require',
-            'tools', 'webNodePath']
-        const parameter:Array<any> = [
-            /* eslint-disable no-eval */
-            process.cwd(), fileSystem, path, PluginAPI, eval('require'), Tools,
-            /* eslint-enable no-eval */
-            __dirname]
+        const now:Date = new Date()
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
-        configuration = Tools.resolveDynamicDataStructure(
-            PluginAPI.removePropertiesInDynamicObjects(configuration),
-            parameterDescription, parameter)
+        configuration = Tools.evaluateDynamicDataStructure(
+            PluginAPI.removePropertiesInDynamicObjects(configuration), {
+                currentPath: process.cwd(),
+                fileSystem,
+                path,
+                PluginAPI,
+                /* eslint-disable no-eval */
+                require: eval('require'),
+                /* eslint-enable no-eval */
+                Tools,
+                webNodePath: __dirname,
+                now,
+                nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
+            })
         configuration.package = packageConfiguration
         return configuration
     }
@@ -384,11 +409,11 @@ export default class PluginAPI {
                 configuration.plugin.configurationPropertyNames,
                 configuration.context.path, configuration.encoding)
         for (const type:string in configuration.plugin.directories)
-            if (configuration.plugin.directories.hasOwnProperty(
-                type
-            ) && await Tools.isDirectory(
-                configuration.plugin.directories[type].path
-            )) {
+            if (
+                configuration.plugin.directories.hasOwnProperty(type) &&
+                await Tools.isDirectory(
+                    configuration.plugin.directories[type].path)
+            ) {
                 const compiledRegularExpression:RegExp = new RegExp(
                     configuration.plugin.directories[
                         type
@@ -415,10 +440,24 @@ export default class PluginAPI {
             }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
         for (const pluginName:string in plugins)
-            if (plugins.hasOwnProperty(pluginName))
+            if (plugins.hasOwnProperty(pluginName)) {
                 temporaryPlugins[plugins[
                     pluginName
                 ].internalName] = plugins[pluginName].dependencies
+                if (configuration.interDependencies.hasOwnProperty(plugins[
+                    pluginName
+                ].internalName))
+                    for (const name:string of [].concat(
+                        configuration.interDependencies[
+                            plugins[pluginName].internalName])
+                    )
+                        if (!temporaryPlugins[plugins[
+                            pluginName
+                        ].internalName].includes(name))
+                            temporaryPlugins[plugins[
+                                pluginName
+                            ].internalName].push(name)
+            }
         const sortedPlugins:Array<Plugin> = []
         for (const pluginName:string of Tools.arraySortTopological(
             temporaryPlugins
@@ -444,12 +483,12 @@ export default class PluginAPI {
      */
     static removePropertiesInDynamicObjects(data:PlainObject):PlainObject {
         for (const key:string in data)
-            if (data.hasOwnProperty(key) && ![
-                '__evaluate__', '__execute__'
-            ].includes(key) && (
-                data.hasOwnProperty('__evaluate__') ||
-                data.hasOwnProperty('__execute__')
-            ))
+            if (
+                data.hasOwnProperty(key) &&
+                !['__evaluate__', '__execute__'].includes(key) && (
+                    data.hasOwnProperty('__evaluate__') ||
+                    data.hasOwnProperty('__execute__'))
+            )
                 delete data[key]
             else if (typeof data[key] === 'object' && data[key] !== null)
                 PluginAPI.removePropertiesInDynamicObjects(data[key])

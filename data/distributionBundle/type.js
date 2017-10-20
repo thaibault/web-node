@@ -23,6 +23,7 @@ export type Configuration = {
     };
     debug:boolean;
     encoding:string;
+    interDependencies:PlainObject;
     name:string;
     package:PlainObject;
     plugin:{
