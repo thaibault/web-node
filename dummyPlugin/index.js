@@ -22,7 +22,7 @@ import type {Configuration, Plugin, ServicePromises, Services} from '../type'
 /**
  * Dummy plugin interface implementing all available hooks.
  */
-export default class Dummy {
+export class Dummy {
     /* eslint-disable no-unused-vars */
     /**
      * Triggered hook when at least one plugin has an api file which has been
@@ -153,6 +153,7 @@ export default class Dummy {
     }
     /* eslint-enable no-unused-vars */
 }
+export default Dummy
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

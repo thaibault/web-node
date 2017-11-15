@@ -29,7 +29,7 @@ try {
 /**
  * A dumm plugin interface with all available hooks.
  */
-export default class PluginAPI {
+export class PluginAPI {
     /**
      * Calls all plugin methods for given trigger description asynchrone and
      * waits for their resolved promises.
@@ -495,6 +495,7 @@ export default class PluginAPI {
         return data
     }
 }
+export default PluginAPI
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:
