@@ -95,7 +95,7 @@ const scope:{[key:string]:any} = {
     now,
     nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
 }
-let configuration:Configuration = Tools.evaluateDynamicDataStructure(
+export let configuration:Configuration = Tools.evaluateDynamicDataStructure(
     packageConfiguration.webNode, scope)
 delete packageConfiguration.webNode
 Tools.extendObject(true, Tools.modifyObject(
