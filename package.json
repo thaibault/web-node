@@ -49,7 +49,7 @@
     "watch:dll": "webOptimizer build:dll --watch"
   },
   "dependencies": {
-    "clientnode": "^1.0.290",
+    "clientnode": "^1.0.291",
     "keypress": "^0.2.1"
   },
   "peerDependencies": {
@@ -67,7 +67,7 @@
     "jsdoc": "^3.5.2",
     "qunit": "^2.4.1",
     "source-map-support": "^0.5.0",
-    "weboptimizer": "^1.0.422",
+    "weboptimizer": "^1.0.425",
     "webpack": "^3.8.0",
     "webpack-dev-server": "^2.9.2"
   },
