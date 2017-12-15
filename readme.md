@@ -12,8 +12,6 @@ License
 
 endregion -->
 
-[![Build Status](https://travis-ci.org/thaibault/webNode.svg?branch=master)](https://travis-ci.org/thaibault/webNode)
-
 [![npm version](https://badge.fury.io/js/web-node.svg)](https://www.npmjs.com/package/web-node)
 [![downloads](https://img.shields.io/npm/dy/web-node.svg)](https://www.npmjs.com/package/web-node)
 [![build status](https://travis-ci.org/thaibault/webNode.svg?branch=master)](https://travis-ci.org/thaibault/webNode)
