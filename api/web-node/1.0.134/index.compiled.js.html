@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: pluginAPI.compiled.js</title>
+    <title>JSDoc: Source: index.compiled.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: pluginAPI.compiled.js</h1>
+    <h1 class="page-title">Source: index.compiled.js</h1>
 
     
 
@@ -92,7 +92,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 16);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -287,21 +287,96 @@ module.exports = require("child_process");
 /* 8 */
 /***/ (function(module, exports) {
 
-module.exports = {"name":"web-node","version":"1.0.129","license":"CC-BY-3.0","description":"High level javaScript backend plugin system and configuration merger.","homepage":"http://torben.website/webNode","documentationWebsite":{"name":"webNode","trackingCode":"UA-40192634-9"},"keywords":["web","backend","api","plugin","management"],"files":["configurator.compiled.js","configurator.js","index.js","pluginAPI.compiled.js","pluginAPI.js","type.js","unixCrypt.compiled.js","unixCrypt.js"],"main":"index.compiled.js","bin":{"webNode":"index.compiled.js"},"repository":{"type":"git","url":"https://github.com/thaibault/webNode.git"},"scripts":{"build":"webOptimizer build","build:dll":"webOptimizer build:dll","clear":"webOptimizer clear &amp;&amp; rm --force log.txt &amp;>/dev/null","document":"webOptimizer document","lint":"webOptimizer check:type; webOptimizer lint","prepare":"npm run build","serve":"webOptimizer build &amp;&amp; ./index.compiled.js","start":"npm run serve","test":"cd dummyPlugin &amp;&amp; npm run build &amp;&amp; cd - &amp;&amp; webOptimizer test","update":"npm version patch &amp;&amp; npm publish","update:documentation":"documentationWebsite --log-level info","watch":"webOptimizer build --watch","watch:dll":"webOptimizer build:dll --watch"},"dependencies":{"clientnode":"^1.0.289","keypress":"^0.2.1"},"peerDependencies":{"babel-runtime":"*"},"devDependencies":{"babel-cli":"^6.24.1","babel-eslint":"^8.0.2","documentation-website":"^1.0.78","eslint":"^4.11.0","eslint-config-google":"^0.9.1","eslint-plugin-flowtype":"^2.36.0","eslint-plugin-jsdoc":"^3.2.0","flow-bin":"^0.59.0","jsdoc":"^3.5.2","qunit":"^2.4.1","source-map-support":"^0.5.0","weboptimizer":"^1.0.422","webpack":"^3.8.0","webpack-dev-server":"^2.9.2"},"webNode":{"debug":false,"encoding":"utf8","interDependencies":{},"plugin":{"configurationPropertyNames":["webNode"],"directories":{"internal":{"path":{"__evaluate__":"`${currentPath}/plugins/`"},"nameRegularExpressionPattern":"^([a-zA-Z].*)$"},"external":{"path":{"__evaluate__":"`${currentPath}/node_modules/`"},"nameRegularExpressionPattern":"^([a-z][a-zA-Z0-9]+)[wW]eb[nN]ode[pP]lugin$"}},"hotReloading":true}},"webOptimizer":{"assetPattern":{"javaScript":{"pattern":"#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n'use strict';\n{1}\n"}},"exportFormat":{"external":"commonjs2","self":"commonjs2"},"injection":{"internal":{"__evaluate__":"2 &lt; self.givenCommandLineArguments.length &amp;&amp; self.givenCommandLineArguments[2] === 'test' ? 'test' : {configurator: './configurator', index: './index', pluginAPI: './pluginAPI', unixCrypt: './unixCrypt'}"}},"module":{"aliases":{"clientnode/test$":"clientnode/test.compiled"},"optimizer":{"babelMinify":{"module":{"mangle":false}}}},"targetTechnology":"node"}}
+module.exports = {"name":"web-node","version":"1.0.134","license":"CC-BY-3.0","description":"High level javaScript backend plugin system and configuration merger.","homepage":"http://torben.website/webNode","documentationWebsite":{"name":"webNode","trackingCode":"UA-40192634-9"},"keywords":["web","backend","api","plugin","management"],"files":["configurator.compiled.js","configurator.js","index.js","pluginAPI.compiled.js","pluginAPI.js","type.js","unixCrypt.compiled.js","unixCrypt.js"],"main":"index.compiled.js","bin":{"webNode":"index.compiled.js"},"repository":{"type":"git","url":"https://github.com/thaibault/webNode.git"},"scripts":{"build":"webOptimizer build","build:dll":"webOptimizer build:dll","clear":"webOptimizer clear &amp;&amp; rm --force log.txt &amp;>/dev/null","document":"webOptimizer document","lint":"webOptimizer check:type; webOptimizer lint","prepare":"npm run build","serve":"webOptimizer build &amp;&amp; ./index.compiled.js","start":"npm run serve","test":"cd dummyPlugin &amp;&amp; npm run build &amp;&amp; cd - &amp;&amp; webOptimizer test","update":"npm version patch &amp;&amp; npm publish","update:documentation":"documentationWebsite --log-level info","watch":"webOptimizer build --watch","watch:dll":"webOptimizer build:dll --watch"},"dependencies":{"clientnode":"^1.0.307","keypress":"^0.2.1"},"peerDependencies":{"babel-runtime":"*"},"devDependencies":{"babel-cli":"^6.24.1","babel-eslint":"^8.0.3","documentation-website":"^1.0.80","eslint":"^4.13.1","eslint-config-google":"^0.9.1","eslint-plugin-flowtype":"^2.40.1","eslint-plugin-jsdoc":"^3.2.0","flow-bin":"^0.61.0","jsdoc":"^3.5.2","qunit":"^2.4.1","source-map-support":"^0.5.0","weboptimizer":"^1.0.437","webpack":"^3.10.0","webpack-dev-server":"^2.9.7"},"webNode":{"debug":false,"encoding":"utf8","interDependencies":{},"plugin":{"configurationPropertyNames":["webNode"],"directories":{"internal":{"path":{"__evaluate__":"`${currentPath}/plugins/`"},"nameRegularExpressionPattern":"^([a-zA-Z].*)$"},"external":{"path":{"__evaluate__":"`${currentPath}/node_modules/`"},"nameRegularExpressionPattern":"^([a-z][a-zA-Z0-9]+)[wW]eb[nN]ode[pP]lugin$"}},"hotReloading":true}},"webOptimizer":{"assetPattern":{"javaScript":{"pattern":"#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n'use strict';\n{1}\n"}},"exportFormat":{"external":"commonjs2","self":"commonjs2"},"injection":{"internal":{"__evaluate__":"2 &lt; self.givenCommandLineArguments.length &amp;&amp; self.givenCommandLineArguments[2] === 'test' ? 'test' : {configurator: './configurator', index: './index', pluginAPI: './pluginAPI', unixCrypt: './unixCrypt'}"}},"module":{"aliases":{"clientnode/test$":"clientnode/test.compiled"},"optimizer":{"babelMinify":{"module":{"mangle":false}}}},"targetTechnology":"node"}}
 
 /***/ }),
 /* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */,
-/* 13 */,
-/* 14 */,
-/* 15 */,
-/* 16 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(5);
+module.exports = __webpack_require__(11);
 
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {// -*- coding: utf-8 -*-
+/* !
+    region header
+    Copyright Torben Sickert (info["~at~"]torben.website) 16.12.2012
+
+    License
+    -------
+
+    This library written by Torben Sickert stand under a creative commons naming
+    3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
+    endregion
+*/// region imports
+exports.__esModule=true;var _keys=__webpack_require__(13);var _keys2=_interopRequireDefault(_keys);var _promise=__webpack_require__(14);var _promise2=_interopRequireDefault(_promise);var _asyncToGenerator2=__webpack_require__(6);var _asyncToGenerator3=_interopRequireDefault(_asyncToGenerator2);var _clientnode=__webpack_require__(0);var _clientnode2=_interopRequireDefault(_clientnode);var _keypress=__webpack_require__(15);var _keypress2=_interopRequireDefault(_keypress);var _configurator=__webpack_require__(4);var _configurator2=_interopRequireDefault(_configurator);var _pluginAPI=__webpack_require__(5);var _pluginAPI2=_interopRequireDefault(_pluginAPI);function _interopRequireDefault(obj){return obj&amp;&amp;obj.__esModule?obj:{default:obj}}// NOTE: Only needed for debugging this file.
+try{__webpack_require__(1)}catch(error){}// endregion
+const handleError=(()=>{var _ref=(0,_asyncToGenerator3.default)(function*(plugins,configuration,error,services){try{yield _pluginAPI2.default.callStack('error',plugins,configuration,error,services)}catch(error){if(configuration.debug)throw error;else console.error(error)}});return function handleError(_x,_x2,_x3,_x4){return _ref.apply(this,arguments)}})();const main=(()=>{var _ref2=(0,_asyncToGenerator3.default)(function*(){// region load plugins
+const{configuration,plugins}=yield _pluginAPI2.default.loadAll(_clientnode2.default.copyLimitedRecursively(_configurator2.default,-1,true));yield _pluginAPI2.default.callStack('initialize',plugins,configuration);if(plugins.length)console.info('Loaded plugins: "'+plugins.map(function(plugin){return plugin.internalName}).join('", "')+'".');for(const type of['pre','post'])yield _pluginAPI2.default.callStack(`${type}ConfigurationLoaded`,plugins,configuration,configuration,plugins.filter(function(plugin){return Boolean(plugin.configurationFilePath)}));// endregion
+let services={};let servicePromises={};let exitTriggered=false;try{// region start services
+services=yield _pluginAPI2.default.callStack('preLoadService',plugins,configuration,services);for(const name in services)if(services.hasOwnProperty(name))console.info(`Service "${name}" initialized.`);for(const plugin of plugins)if(plugin.api){services=yield _pluginAPI2.default.callStack(`preLoad${_clientnode2.default.stringCapitalize(plugin.internalName)}`+'Service',plugins,configuration,services);let result;try{// IgnoreTypeCheck
+result=yield plugin.api.call(_pluginAPI2.default,'loadService',servicePromises,services,configuration,plugins)}catch(error){if(!(typeof error==='object'&amp;&amp;error!==null&amp;&amp;'message'in error&amp;&amp;error.message.startsWith('NotImplemented:')))throw new Error(`Plugin "${plugin.internalName}" `+(plugin.internalName===plugin.name?'':`(${plugin.name}) `)+`throws: ${_clientnode2.default.representObject(error)} `+'during asynchrone hook "loadService".')}if(result&amp;&amp;result.hasOwnProperty('name')&amp;&amp;typeof result.name==='string')if(result.hasOwnProperty('promise')&amp;&amp;typeof result.promise==='object'&amp;&amp;result.promise!==null&amp;&amp;'then'in result.promise){console.info(`Service "${result.name}" started.`);servicePromises[result.name]=result.promise}else console.info(`Service "${result.name}" loaded.`);services=yield _pluginAPI2.default.callStack(`postLoad${_clientnode2.default.stringCapitalize(plugin.internalName)}`+'Service',plugins,configuration,services,servicePromises)}servicePromises=yield _pluginAPI2.default.callStack('postLoadService',plugins,configuration,servicePromises,services);// endregion
+// region register close handler
+let finished=false;const closeHandler=function(){if(!finished)try{_pluginAPI2.default.callStackSynchronous('exit',plugins.slice().reverse(),configuration,services)}catch(error){throw error}finished=true};for(const closeEventName of _clientnode2.default.closeEventNames)process.on(closeEventName,closeHandler);// NOTE: Make "process.stdin" begin emitting events for any key press.
+(0,_keypress2.default)(process.stdin);let cancelTriggered=false;process.stdin.on('keypress',(()=>{var _ref3=(0,_asyncToGenerator3.default)(function*(char,key){if(key&amp;&amp;key.name==='c'&amp;&amp;key.ctrl){if(cancelTriggered)console.warn('Stopping ungracefully.');else{cancelTriggered=true;console.log('You have requested to shut down all services. A '+'second request will force to stop ungracefully.');yield _pluginAPI2.default.callStack('shouldExit',plugins,configuration,services)}process.exit()}});return function(_x5,_x6){return _ref3.apply(this,arguments)}})());if('setRawMode'in process.stdin)// IgnoreTypeCheck
+process.stdin.setRawMode(true);// endregion
+try{yield _promise2.default.all((0,_keys2.default)(servicePromises).map(function(name){return servicePromises[name]}))}catch(error){}exitTriggered=true;yield _pluginAPI2.default.callStack('shouldExit',plugins,configuration,services);process.exit()}catch(error){handleError(plugins,configuration,error,services);if(!exitTriggered)try{yield _pluginAPI2.default.callStack('shouldExit',plugins,configuration,services)}catch(error){handleError(plugins,configuration,error,services)}if(configuration.debug)throw error;else console.error(error)}});return function main(){return _ref2.apply(this,arguments)}})();/* eslint-disable camelcase */// IgnoreTypeCheck
+if(__webpack_require__.c[__webpack_require__.s]===module||typeof __webpack_require__!=='undefined')/* eslint-enable camelcase */main();exports.default=main;// region vim modline
+// vim: set tabstop=4 shiftwidth=4 expandtab:
+// vim: foldmethod=marker foldmarker=region,endregion:
+// endregion
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)(module)))
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+module.exports = require("babel-runtime/core-js/object/keys");
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = require("babel-runtime/core-js/promise");
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+module.exports = require("keypress");
 
 /***/ })
 /******/ ]);
@@ -321,7 +396,7 @@ module.exports = __webpack_require__(5);
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Nov 22 2017 19:33:51 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 15 2017 18:20:53 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
