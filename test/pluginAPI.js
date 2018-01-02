@@ -19,8 +19,7 @@ registerTest(async function():Promise<void> {
     // region tests
     this.test('callStack', async (assert:Object):Promise<void> => {
         const done:Function = assert.async()
-        const testConfiguration:Configuration = Tools.copyLimitedRecursively(
-            configuration)
+        const testConfiguration:Configuration = Tools.copy(configuration)
         for (const test:Array<any> of [
             [['test', []], null],
             [['test', [], null], null],
@@ -38,8 +37,7 @@ registerTest(async function():Promise<void> {
         done()
     })
     this.test('callStackSynchronous', (assert:Object):void => {
-        const testConfiguration:Configuration = Tools.copyLimitedRecursively(
-            configuration)
+        const testConfiguration:Configuration = Tools.copy(configuration)
         for (const test:Array<any> of [
             [['test', []], null],
             [['test', [], null], null],
