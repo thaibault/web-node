@@ -197,8 +197,8 @@ export class PluginAPI {
                 configurationFilePath, name)
         let apiFilePath:string = 'index.js'
         if (packageConfiguration) {
-            const packageConfigurationCopy:PlainObject =
-                Tools.copyLimitedRecursively(packageConfiguration, -1, true)
+            const packageConfigurationCopy:PlainObject = Tools.copy(
+                packageConfiguration, -1, true)
             for (const propertyName:string of configurationPropertyNames)
                 if (packageConfiguration.hasOwnProperty(propertyName)) {
                     if (packageConfiguration.hasOwnProperty('main'))
@@ -320,13 +320,12 @@ export class PluginAPI {
         for (const key:string in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
-        Tools.extendObject(configuration, Tools.copyLimitedRecursively(
+        Tools.extendObject(configuration, Tools.copy(
             baseConfiguration, -1, true))
         for (const plugin:Plugin of plugins)
             if (plugin.configuration) {
-                const pluginConfiguration:PlainObject =
-                    Tools.copyLimitedRecursively(
-                        plugin.configuration, -1, true)
+                const pluginConfiguration:PlainObject = Tools.copy(
+                    plugin.configuration, -1, true)
                 delete pluginConfiguration.package
                 Tools.extendObject(true, Tools.modifyObject(
                     configuration, pluginConfiguration
