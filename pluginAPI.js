@@ -220,7 +220,7 @@ export class PluginAPI {
             apiFilePath, pluginPath, name, internalName, plugins, encoding)
     }
     /**
-     * Load given plugin api file in given plugin path generates a plugin
+     * Load given plugin api file in given path and generates a plugin
      * specific data structure with useful meta informations.
      * @param relativeFilePath - Path to file to load relatively from given
      * plugin path.
@@ -230,10 +230,9 @@ export class PluginAPI {
      * messages.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param encoding - Encoding to use to read and write from child
-     * process's.
+     * process.
      * @param configuration - Plugin specific configurations.
      * @param configurationFilePath - Plugin specific configuration file path.
-     * standard in- and output.
      * @returns Plugin meta informations object.
      */
     static async loadAPI(

@@ -59,8 +59,7 @@ export class Dummy {
      * plugins are determined and sorted in there dependency specific
      * typological order. Asynchronous tasks are allowed and a returning
      * promise will be respected.
-     * @param configuration - Mutable by plugins extended configuration object.
-     * extended by each plugin configuration.
+     * @param configuration - Mutable and extended by each plugin object.
      * @param plugins - Topological sorted list of plugins.
      * @returns Will be ignored.
      */
