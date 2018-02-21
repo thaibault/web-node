@@ -131,7 +131,7 @@ const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
 configuration = Tools.evaluateDynamicDataStructure(
     removePropertiesInDynamicObjects(configuration), scope)
 configuration.package = packageConfiguration
-configuration = Tools.copyLimitedRecursively(configuration, -1, true)
+configuration = Tools.copy(configuration, -1, true)
 export default configuration
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
