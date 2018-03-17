@@ -51,7 +51,7 @@
     "watch:dll": "webOptimizer build:dll --watch"
   },
   "dependencies": {
-    "clientnode": "^3.0.8",
+    "clientnode": "^3.0.11",
     "keypress": "^0.2.1"
   },
   "peerDependencies": {
@@ -61,8 +61,8 @@
     "babel-cli": "^6.24.1",
     "babel-eslint": "^8.2.2",
     "coveralls": "^3.0.0",
-    "documentation-website": "^1.0.113",
-    "eslint": "^4.18.2",
+    "documentation-website": "^1.0.115",
+    "eslint": "^4.19.0",
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-flowtype": "^2.46.1",
     "eslint-plugin-jsdoc": "^3.5.0",
@@ -71,7 +71,7 @@
     "nyc": "^11.6.0",
     "qunit": "^2.5.1",
     "source-map-support": "^0.5.3",
-    "weboptimizer": "^2.0.26",
+    "weboptimizer": "^2.0.32",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.12",
     "webpack-dev-server": "^3.1.1"
