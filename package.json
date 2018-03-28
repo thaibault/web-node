@@ -35,7 +35,6 @@
   },
   "scripts": {
     "build": "webOptimizer build",
-    "build:dll": "webOptimizer build:dll",
     "clear": "webOptimizer clear && rm --force log.txt &>/dev/null",
     "document": "webOptimizer document",
     "lint": "webOptimizer check:type; webOptimizer lint",
@@ -47,11 +46,10 @@
     "test:plain": "cd dummyPlugin && npm run build && cd - && webOptimizer test",
     "update": "npm version patch && npm publish",
     "update:documentation": "documentationWebsite --log-level info",
-    "watch": "webOptimizer build --watch",
-    "watch:dll": "webOptimizer build:dll --watch"
+    "watch": "webOptimizer build --watch"
   },
   "dependencies": {
-    "clientnode": "^3.0.15",
+    "clientnode": "^3.0.22",
     "keypress": "^0.2.1"
   },
   "peerDependencies": {
@@ -61,19 +59,19 @@
     "babel-cli": "^6.24.1",
     "babel-eslint": "^8.2.2",
     "coveralls": "^3.0.0",
-    "documentation-website": "^1.0.116",
-    "eslint": "^4.19.0",
+    "documentation-website": "^1.0.119",
+    "eslint": "^4.19.1",
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-flowtype": "^2.46.1",
     "eslint-plugin-jsdoc": "^3.5.0",
     "flow-bin": "^0.68.0",
     "jsdoc": "^3.5.2",
     "nyc": "^11.6.0",
-    "qunit": "^2.5.1",
+    "qunit": "^2.6.0",
     "source-map-support": "^0.5.3",
-    "weboptimizer": "^2.0.46",
-    "webpack": "^4.2.0",
-    "webpack-cli": "^2.0.12",
+    "weboptimizer": "^2.0.74",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
     "webpack-dev-server": "^3.1.1"
   },
   "webNode": {
