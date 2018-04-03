@@ -14,7 +14,7 @@ registerTest(async function():Promise<void> {
     this.test('main', (assert:Object):void => assert.strictEqual(
         typeof require('../configurator').default.debug, 'boolean'))
     // endregion
-}, ['plain'])
+}, 'plain')
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

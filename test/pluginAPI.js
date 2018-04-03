@@ -199,7 +199,7 @@ registerTest(async function():Promise<void> {
                 PluginAPI.removePropertiesInDynamicObjects(test[0]), test[1])
     })
 // endregion
-}, ['plain'])
+}, 'plain')
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

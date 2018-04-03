@@ -26,7 +26,7 @@ registerTest(async function():Promise<void> {
             assert.strictEqual(unixCrypt(...test.slice(0, 2)), test[2])
     })
     // endregion
-}, ['plain'])
+}, 'plain')
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:
