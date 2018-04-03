@@ -21,10 +21,6 @@ import path from 'path'
 
 import baseConfiguration from './configurator'
 import type {Configuration, Plugin} from './type'
-// NOTE: Only needed for debugging this file.
-try {
-    require('source-map-support/register')
-} catch (error) {}
 // endregion
 /**
  * A dumm plugin interface with all available hooks.
