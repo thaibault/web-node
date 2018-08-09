@@ -49,7 +49,7 @@
     "watch": "webOptimizer build --watch"
   },
   "dependencies": {
-    "clientnode": "^3.0.72",
+    "clientnode": "^3.0.78",
     "keypress": "^0.2.1"
   },
   "peerDependencies": {
@@ -68,7 +68,7 @@
     "jsdoc": "^3.5.2",
     "nyc": "^12.0.2",
     "qunit": "^2.6.1",
-    "weboptimizer": "^2.0.177",
+    "weboptimizer": "^2.0.181",
     "webpack": "^4.16.5",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
@@ -120,14 +120,8 @@
     },
     "module": {
       "aliases": {
+        "#": "Use the pre-compiled artefacts.",
         "clientnode/test$": "clientnode/test.compiled"
-      },
-      "optimizer": {
-        "babelMinify": {
-          "module": {
-            "mangle": false
-          }
-        }
       }
     },
     "targetTechnology": "node"
