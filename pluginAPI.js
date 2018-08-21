@@ -39,8 +39,11 @@ export class PluginAPI {
      * promise holding given potentially modified data.
      */
     static async callStack(
-        type:string, plugins:Array<Plugin>, configuration:Configuration,
-        data:any = null, ...parameter:Array<any>
+        type:string,
+        plugins:Array<Plugin>,
+        configuration:Configuration,
+        data:any = null,
+        ...parameter:Array<any>
     ):Promise<any> {
         if (configuration.plugin.hotReloading && ![
             'configurationLoaded', 'apiFileReloaded'
@@ -102,8 +105,11 @@ export class PluginAPI {
      * @returns Given potentially modified data.
      */
     static callStackSynchronous(
-        type:string, plugins:Array<Plugin>, configuration:Configuration,
-        data:any = null, ...parameter:Array<any>
+        type:string,
+        plugins:Array<Plugin>,
+        configuration:Configuration,
+        data:any = null,
+        ...parameter:Array<any>
     ):any {
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
@@ -179,8 +185,11 @@ export class PluginAPI {
      * @returns An object of plugin specific meta informations.
      */
     static async load(
-        name:string, internalName:string, plugins:{[key:string]:Plugin},
-        configurationPropertyNames:Array<string>, pluginPath:string,
+        name:string,
+        internalName:string,
+        plugins:{[key:string]:Plugin},
+        configurationPropertyNames:Array<string>,
+        pluginPath:string,
         encoding:string = 'utf8'
     ):Promise<Plugin> {
         let configurationFilePath:string = path.resolve(
@@ -204,13 +213,26 @@ export class PluginAPI {
                     pluginConfiguration.package = packageConfigurationCopy
                     delete pluginConfiguration.package[propertyName]
                     return await PluginAPI.loadAPI(
-                        apiFilePath, pluginPath, name, internalName, plugins,
-                        encoding, pluginConfiguration, configurationFilePath)
+                        apiFilePath,
+                        pluginPath,
+                        name,
+                        internalName,
+                        plugins,
+                        encoding,
+                        pluginConfiguration,
+                        configurationFilePath
+                    )
                 }
             return await PluginAPI.loadAPI(
-                apiFilePath, pluginPath, name, internalName, plugins,
-                encoding, {package: packageConfigurationCopy},
-                configurationFilePath)
+                apiFilePath,
+                pluginPath,
+                name,
+                internalName,
+                plugins,
+                encoding,
+                {package: packageConfigurationCopy},
+                configurationFilePath
+            )
         }
         return await PluginAPI.loadAPI(
             apiFilePath, pluginPath, name, internalName, plugins, encoding)
@@ -232,9 +254,12 @@ export class PluginAPI {
      * @returns Plugin meta informations object.
      */
     static async loadAPI(
-        relativeFilePath:string, pluginPath:string, name:string,
-        internalName:string, plugins:{[key:string]:Object},
-        encoding:string = 'utf8', configuration:?PlainObject = null,
+        relativeFilePath:string,
+        pluginPath:string, name:string,
+        internalName:string,
+        plugins:{[key:string]:Object},
+        encoding:string = 'utf8',
+        configuration:?PlainObject = null,
         configurationFilePath:?string = null
     ):Promise<Plugin> {
         let filePath:string = path.resolve(pluginPath, relativeFilePath)
@@ -360,7 +385,9 @@ export class PluginAPI {
      * @returns Exported api file scope.
      */
     static loadFile(
-        filePath:string, name:string, fallbackScope:?Object = null,
+        filePath:string,
+        name:string,
+        fallbackScope:?Object = null,
         log:boolean = true
     ):Object {
         let scope:Object
@@ -399,9 +426,13 @@ export class PluginAPI {
         const plugins:{[key:string]:Object} = {}
         if (configuration.name !== 'webNode')
             plugins[configuration.name] = await PluginAPI.load(
-                configuration.name, configuration.name, plugins,
+                configuration.name,
+                configuration.name,
+                plugins,
                 configuration.plugin.configurationPropertyNames,
-                configuration.context.path, configuration.encoding)
+                configuration.context.path,
+                configuration.encoding
+            )
         for (const type:string in configuration.plugin.directories)
             if (
                 configuration.plugin.directories.hasOwnProperty(type) &&
@@ -427,9 +458,13 @@ export class PluginAPI {
                             typeof firstMatch === 'string'
                         ) ? firstMatch : fullMatch)
                     plugins[pluginName] = await PluginAPI.load(
-                        pluginName, internalName, plugins,
+                        pluginName,
+                        internalName,
+                        plugins,
                         configuration.plugin.configurationPropertyNames,
-                        currentPluginPath, configuration.encoding)
+                        currentPluginPath,
+                        configuration.encoding
+                    )
                 }
             }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
