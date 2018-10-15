@@ -192,7 +192,7 @@ export class PluginAPI {
         pluginPath:string,
         encoding:string = 'utf8'
     ):Promise<Plugin> {
-        let configurationFilePath:string = path.resolve(
+        const configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
         let packageConfiguration:?PlainObject = null
         if (configurationFilePath && await Tools.isDirectory(
