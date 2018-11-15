@@ -53,19 +53,30 @@ export class PluginAPI {
                     'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
                 PluginAPI.callStack(
-                    'preConfigurationLoaded', plugins, configuration,
-                    configuration, pluginsWithChangedConfiguration)
+                    'preConfigurationLoaded',
+                    plugins,
+                    configuration,
+                    configuration,
+                    pluginsWithChangedConfiguration
+                )
                 PluginAPI.loadConfigurations(plugins, configuration)
                 PluginAPI.callStack(
-                    'postConfigurationLoaded', plugins, configuration,
-                    configuration, pluginsWithChangedConfiguration)
+                    'postConfigurationLoaded',
+                    plugins,
+                    configuration,
+                    configuration,
+                    pluginsWithChangedConfiguration
+                )
             }
             const pluginsWithChangedAPIFiles:Array<Plugin> =
                 PluginAPI.hotReloadFile('apiFile', 'scope', plugins)
             if (pluginsWithChangedAPIFiles.length)
                 PluginAPI.callStack(
-                    'apiFileReloaded', plugins, configuration,
-                    pluginsWithChangedConfiguration)
+                    'apiFileReloaded',
+                    plugins,
+                    configuration,
+                    pluginsWithChangedConfiguration
+                )
         }
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
@@ -255,7 +266,8 @@ export class PluginAPI {
      */
     static async loadAPI(
         relativeFilePath:string,
-        pluginPath:string, name:string,
+        pluginPath:string,
+        name:string,
         internalName:string,
         plugins:{[key:string]:Object},
         encoding:string = 'utf8',
@@ -337,6 +349,7 @@ export class PluginAPI {
     static loadConfigurations(
         plugins:Array<Plugin>, configuration:Configuration
     ):Configuration {
+        // First clear current configuration but reuse old given reference.
         for (const key:string in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
@@ -347,9 +360,11 @@ export class PluginAPI {
                 const pluginConfiguration:PlainObject = Tools.copy(
                     plugin.configuration, -1, true)
                 delete pluginConfiguration.package
-                Tools.extendObject(true, Tools.modifyObject(
-                    configuration, pluginConfiguration
-                ), pluginConfiguration)
+                Tools.extendObject(
+                    true,
+                    Tools.modifyObject(configuration, pluginConfiguration),
+                    pluginConfiguration
+                )
                 if (configuration.runtimeConfiguration)
                     Tools.extendObject(
                         true, configuration, configuration.runtimeConfiguration
@@ -359,7 +374,8 @@ export class PluginAPI {
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
         configuration = Tools.evaluateDynamicDataStructure(
-            PluginAPI.removePropertiesInDynamicObjects(configuration), {
+            PluginAPI.removePropertiesInDynamicObjects(configuration),
+            {
                 currentPath: process.cwd(),
                 fileSystem,
                 path,
@@ -371,7 +387,15 @@ export class PluginAPI {
                 webNodePath: __dirname,
                 now,
                 nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
-            })
+            }
+        )
+        /*
+            NOTE: We have to replace the resolved plugin configurations in the
+            plugin data structure.
+        */
+        for (const plugin:Plugin of plugins)
+            if (configuration.hasOwnProperty(plugin.internalName))
+                plugin.configuration = configuration[plugin.internalName]
         configuration.package = packageConfiguration
         return configuration
     }
@@ -424,6 +448,7 @@ export class PluginAPI {
         plugins:Array<Plugin>
     }> {
         const plugins:{[key:string]:Object} = {}
+        // If an application's main
         if (configuration.name !== 'webNode')
             plugins[configuration.name] = await PluginAPI.load(
                 configuration.name,
