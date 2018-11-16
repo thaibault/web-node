@@ -52,6 +52,11 @@ export class PluginAPI {
                 PluginAPI.hotReloadFile(
                     'configurationFile', 'configuration', plugins)
             if (pluginsWithChangedConfiguration.length) {
+                if (configuration.debug)
+                    console.info(
+                        'Configuration for "' +
+                        `${pluginsWithChangedConfiguration.join('", "')}" ` +
+                        'has been changed: reloading initialized.')
                 PluginAPI.callStack(
                     'preConfigurationLoaded',
                     plugins,
@@ -70,13 +75,19 @@ export class PluginAPI {
             }
             const pluginsWithChangedAPIFiles:Array<Plugin> =
                 PluginAPI.hotReloadFile('apiFile', 'scope', plugins)
-            if (pluginsWithChangedAPIFiles.length)
+            if (pluginsWithChangedAPIFiles.length) {
+                if (configuration.debug)
+                    console.info(
+                        'API-file for "' +
+                        `${pluginsWithChangedConfiguration.join('", "')}" ` +
+                        'has been changed: reloading initialized.')
                 PluginAPI.callStack(
                     'apiFileReloaded',
                     plugins,
                     configuration,
                     pluginsWithChangedConfiguration
                 )
+            }
         }
         for (const plugin:Plugin of plugins)
             if (plugin.api) {
