@@ -55,7 +55,9 @@ export class PluginAPI {
                 if (configuration.debug)
                     console.info(
                         'Configuration for "' +
-                        `${pluginsWithChangedConfiguration.join('", "')}" ` +
+                        `${pluginsWithChangedConfiguration.map((
+                            plugin:Plugin
+                        ):string => plugin.name).join('", "')}" ` +
                         'has been changed: reloading initialized.')
                 PluginAPI.callStack(
                     'preConfigurationLoaded',
@@ -79,7 +81,9 @@ export class PluginAPI {
                 if (configuration.debug)
                     console.info(
                         'API-file for "' +
-                        `${pluginsWithChangedConfiguration.join('", "')}" ` +
+                        `${pluginsWithChangedAPIFiles.map((
+                            plugin:Plugin
+                        ):string => plugin.name).join('", "')}" ` +
                         'has been changed: reloading initialized.')
                 PluginAPI.callStack(
                     'apiFileReloaded',
@@ -164,8 +168,8 @@ export class PluginAPI {
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (new timestamp).
      * @param type - Plugin file type to search for updates.
-     * @param targetType - Property name to in plugin meta informations to
-     * update.
+     * @param targetType - Property name existing in plugin meta informations
+     * objects which should be updated.
      * @param plugins - List of plugins to search for updates in.
      * @returns A list with plugins which have a changed plugin file of given
      * type.
@@ -175,7 +179,7 @@ export class PluginAPI {
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         for (const plugin:Plugin of plugins)
-            if (plugin[type]) {
+            if (plugin[targetType]) {
                 const timestamp:number = fileSystem.statSync(
                     plugin[`${type}Path`]
                 ).mtime.getTime()
@@ -183,10 +187,10 @@ export class PluginAPI {
                     // Enforce to reload new file version.
                     /* eslint-disable no-eval */
                     delete eval('require').cache[eval('require').resolve(
-                        plugin[type])]
+                        plugin[`${type}Path`])]
                     /* eslint-enable no-eval */
                     plugin[targetType] = PluginAPI.loadFile(
-                        plugin[type], plugin.name, plugin[targetType])
+                        plugin[`${type}Path`], plugin.name, plugin[targetType])
                     pluginsWithChangedFiles.push(plugin)
                 }
                 plugin[`${type}LoadTimestamp`] = timestamp
