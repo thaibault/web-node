@@ -45,9 +45,10 @@ export class PluginAPI {
         data:any = null,
         ...parameter:Array<any>
     ):Promise<any> {
-        if (configuration.plugin.hotReloading && ![
-            'configurationLoaded', 'apiFileReloaded'
-        ].includes(type)) {
+        if (
+            configuration.plugin.hotReloading &&
+            !['configurationLoaded', 'apiFileReloaded'].includes(type)
+        ) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
                 PluginAPI.hotReloadFile(
                     'configurationFile', 'configuration', plugins)
@@ -189,8 +190,20 @@ export class PluginAPI {
                     delete eval('require').cache[eval('require').resolve(
                         plugin[`${type}Path`])]
                     /* eslint-enable no-eval */
+                    const oldPluginScope:Object = plugin[targetType]
                     plugin[targetType] = PluginAPI.loadFile(
                         plugin[`${type}Path`], plugin.name, plugin[targetType])
+                    // NOTE: We have to migrate old plugin api scope state.
+                    for (const name:string in oldPluginScope)
+                        if (
+                            oldPluginScope.hasOwnProperty(name) &&
+                            plugin[targetType].hasOwnProperty(name) &&
+                            !(
+                                Tools.isFunction(oldPluginScope[name]) ||
+                                Tools.isFunction(plugin[targetType][name])
+                            )
+                        )
+                            plugin[targetType][name] = oldPluginScope[name]
                     pluginsWithChangedFiles.push(plugin)
                 }
                 plugin[`${type}LoadTimestamp`] = timestamp
