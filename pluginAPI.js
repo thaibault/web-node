@@ -20,7 +20,7 @@ import fileSystem from 'fs'
 import path from 'path'
 
 import baseConfiguration from './configurator'
-import type {Configuration, Plugin} from './type'
+import type {Configuration, Plugin, PluginChange} from './type'
 // endregion
 /**
  * A dumm plugin interface with all available hooks.
@@ -50,8 +50,8 @@ export class PluginAPI {
             !['configurationLoaded', 'apiFileReloaded'].includes(type)
         ) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
-                PluginAPI.hotReloadFile(
-                    'configurationFile', 'configuration', plugins)
+                PluginAPI.hotReloadConfigurationFile(
+                    plugins, configuration.plugin.configurationPropertyNames)
             if (pluginsWithChangedConfiguration.length) {
                 if (configuration.debug)
                     console.info(
@@ -77,7 +77,7 @@ export class PluginAPI {
                 )
             }
             const pluginsWithChangedAPIFiles:Array<Plugin> =
-                PluginAPI.hotReloadFile('apiFile', 'scope', plugins)
+                PluginAPI.hotReloadAPIFile(plugins)
             if (pluginsWithChangedAPIFiles.length) {
                 if (configuration.debug)
                     console.info(
@@ -166,19 +166,70 @@ export class PluginAPI {
         return data
     }
     /**
+     * Checks for changed plugin api file in given plugins and reloads them
+     * if necessary (new timestamp).
+     * @param plugins - List of plugins to search for updates in.
+     * @returns A list with plugins which have a changed api scope.
+     */
+    static hotReloadAPIFile(plugins:Array<Plugin>):Array<Plugin> {
+        const pluginsWithChangedFiles:Array<Plugin> = []
+        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFile(
+            'apiFile', 'scope', plugins)
+        for (const pluginChange:PluginChange of pluginChanges) {
+            // NOTE: We have to migrate old plugin api's scope state.
+            for (const name:string in pluginChange.oldArtefact)
+                if (
+                    pluginChange.oldArtefact.hasOwnProperty(name) &&
+                    // IgnoreTypeCheck
+                    pluginChange.newPlugin.scope.hasOwnProperty(name) &&
+                    !(
+                        Tools.isFunction(pluginChange.oldArtefact[name]) ||
+                        // IgnoreTypeCheck
+                        Tools.isFunction(pluginChange.newPlugin.scope[name])
+                    )
+                )
+                    // IgnoreTypeCheck
+                    pluginChange.newPlugin.scope[name] =
+                        pluginChange.oldArtefact[name]
+            pluginsWithChangedFiles.push(pluginChange.newPlugin)
+        }
+        return pluginsWithChangedFiles
+    }
+    /**
+     * Checks for changed plugin configurations in given plugins and reloads
+     * them if necessary (new timestamp).
+     * @param plugins - List of plugins to search for updates in.
+     * @param configurationPropertyNames - Property names to search for to use
+     * as entry in plugin configuration file.
+     * @returns A list with plugins which have a changed configurations.
+     */
+    static hotReloadConfigurationFile(
+        plugins:Array<Plugin>, configurationPropertyNames:Array<string>
+    ):Array<Plugin> {
+        const pluginsWithChangedFiles:Array<Plugin> = []
+        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFile(
+            'configurationFile', 'configuration', plugins)
+        for (const pluginChange:PluginChange of pluginChanges) {
+            pluginChange.newPlugin.configuration = PluginAPI.loadConfiguration(
+                pluginChange.newPlugin.configuration,
+                configurationPropertyNames)
+            pluginsWithChangedFiles.push(pluginChange.newPlugin)
+        }
+        return pluginsWithChangedFiles
+    }
+    /**
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (new timestamp).
      * @param type - Plugin file type to search for updates.
      * @param targetType - Property name existing in plugin meta informations
      * objects which should be updated.
      * @param plugins - List of plugins to search for updates in.
-     * @returns A list with plugins which have a changed plugin file of given
-     * type.
+     * @returns A list with plugin changes.
      */
     static hotReloadFile(
         type:string, targetType:string, plugins:Array<Plugin>
-    ):Array<Plugin> {
-        const pluginsWithChangedFiles:Array<Plugin> = []
+    ):Array<PluginChange> {
+        const pluginChanges:Array<PluginChange> = []
         for (const plugin:Plugin of plugins)
             if (plugin[targetType]) {
                 const timestamp:number = fileSystem.statSync(
@@ -190,25 +241,17 @@ export class PluginAPI {
                     delete eval('require').cache[eval('require').resolve(
                         plugin[`${type}Path`])]
                     /* eslint-enable no-eval */
-                    const oldPluginScope:Object = plugin[targetType]
+                    const oldPluginArtefact:Object = plugin[targetType]
                     plugin[targetType] = PluginAPI.loadFile(
                         plugin[`${type}Path`], plugin.name, plugin[targetType])
-                    // NOTE: We have to migrate old plugin api scope state.
-                    for (const name:string in oldPluginScope)
-                        if (
-                            oldPluginScope.hasOwnProperty(name) &&
-                            plugin[targetType].hasOwnProperty(name) &&
-                            !(
-                                Tools.isFunction(oldPluginScope[name]) ||
-                                Tools.isFunction(plugin[targetType][name])
-                            )
-                        )
-                            plugin[targetType][name] = oldPluginScope[name]
-                    pluginsWithChangedFiles.push(plugin)
+                    pluginChanges.push({
+                        newPlugin: plugin,
+                        oldArtefact: oldPluginArtefact
+                    })
                 }
                 plugin[`${type}LoadTimestamp`] = timestamp
             }
-        return pluginsWithChangedFiles
+        return pluginChanges
     }
     /**
      * Extends given configuration object with given plugin specific ones and
@@ -234,34 +277,19 @@ export class PluginAPI {
         const configurationFilePath:string = path.resolve(
             pluginPath, 'package.json')
         let packageConfiguration:?PlainObject = null
-        if (configurationFilePath && await Tools.isDirectory(
-            pluginPath
-        ) && await Tools.isFile(configurationFilePath))
+        if (
+            configurationFilePath &&
+            await Tools.isDirectory(pluginPath) &&
+            await Tools.isFile(configurationFilePath)
+        )
             packageConfiguration = PluginAPI.loadFile(
                 configurationFilePath, name)
         let apiFilePath:string = 'index.js'
         if (packageConfiguration) {
-            const packageConfigurationCopy:PlainObject = Tools.copy(
-                packageConfiguration, -1, true)
-            for (const propertyName:string of configurationPropertyNames)
-                if (packageConfiguration.hasOwnProperty(propertyName)) {
-                    if (packageConfiguration.hasOwnProperty('main'))
-                        apiFilePath = packageConfiguration.main
-                    const pluginConfiguration:PlainObject =
-                        packageConfiguration[propertyName]
-                    pluginConfiguration.package = packageConfigurationCopy
-                    delete pluginConfiguration.package[propertyName]
-                    return await PluginAPI.loadAPI(
-                        apiFilePath,
-                        pluginPath,
-                        name,
-                        internalName,
-                        plugins,
-                        encoding,
-                        pluginConfiguration,
-                        configurationFilePath
-                    )
-                }
+            const configuration:PlainObject = PluginAPI.loadConfiguration(
+                packageConfiguration, configurationPropertyNames)
+            if (configuration.package.hasOwnProperty('main'))
+                apiFilePath = configuration.package.main
             return await PluginAPI.loadAPI(
                 apiFilePath,
                 pluginPath,
@@ -269,7 +297,7 @@ export class PluginAPI {
                 internalName,
                 plugins,
                 encoding,
-                {package: packageConfigurationCopy},
+                configuration,
                 configurationFilePath
             )
         }
@@ -304,6 +332,7 @@ export class PluginAPI {
     ):Promise<Plugin> {
         let filePath:string = path.resolve(pluginPath, relativeFilePath)
         if (!(await Tools.isFile(filePath)))
+            // TODO describe this loop!
             for (const fileName:string of fileSystem.readdirSync(pluginPath))
                 if (fileName !== 'package.json' && await Tools.isFile(
                     path.resolve(pluginPath, fileName)
@@ -315,8 +344,19 @@ export class PluginAPI {
                         break
                 }
         let api:?Function = null
-        if (await Tools.isFile(filePath))
+        let nativeAPI:boolean = false
+        /*
+            NOTE: We only want to register api's for web node plugins. Others
+            doesn't have a package configuration file with a specified with
+            further recognized "webNode" in it.
+        */
+        if (
+            configuration &&
+            Object.keys(configuration).length > 1 &&
+            await Tools.isFile(filePath)
+        )
             if (filePath.endsWith('.js')) {
+                nativeAPI = true
                 api = (
                     type:string, data:any, ...parameter:Array<any>
                 ):any => {
@@ -327,6 +367,7 @@ export class PluginAPI {
                         `implemented in plugin "${name}".`)
                 }
             } else
+                // NOTE: Any executable file can represent an api.
                 api = (data:any, ...parameter:Array<any>):any => {
                     const childProcessResult:PlainObject =
                         spawnChildProcessSync(
@@ -364,8 +405,38 @@ export class PluginAPI {
             internalName,
             name,
             path: pluginPath,
-            scope: api && PluginAPI.loadFile(filePath, name)
+            scope: nativeAPI ? PluginAPI.loadFile(filePath, name) : null
         }
+    }
+    /**
+     * TODO TEST
+     * Loads plugin specific configuration object.
+     * @param packageConfiguration - Plugin specific package configuration
+     * object.
+     * @param configurationPropertyNames - Property names to search for to use
+     * as entry in plugin configuration file.
+     * @returns Determined configuration object.
+     */
+    static loadConfiguration(
+        packageConfiguration:PlainObject,
+        configurationPropertyNames:Array<string>
+    ):PlainObject {
+        const packageConfigurationCopy:PlainObject = Tools.copy(
+            packageConfiguration, -1, true)
+        for (const propertyName:string of configurationPropertyNames)
+            if (packageConfiguration.hasOwnProperty(propertyName)) {
+                const configuration:PlainObject =
+                    packageConfiguration[propertyName]
+                configuration.package = packageConfigurationCopy
+                // NOTE: We should break the cycle here.
+                delete configuration.package[propertyName]
+                return configuration
+            }
+        /*
+            No plugin specific configuration found. Only provide package
+            configuration.
+        */
+        return {package: packageConfigurationCopy}
     }
     /**
      * Loads given plugin configurations into global configuration.
