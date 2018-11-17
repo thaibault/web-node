@@ -55,6 +55,10 @@ export type Plugin = {
     path:string;
     scope:?Object;
 }
+export type PluginChange = {
+    newPlugin:Plugin;
+    oldArtefact:Object;
+}
 export type Services = {[key:string]:any}
 export type ServicePromises = {[key:string]:Promise<any>}
 // endregion

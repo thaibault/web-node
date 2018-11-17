@@ -48,6 +48,38 @@ registerTest(async function():Promise<void> {
                 test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
             ), test[1])
     })
+    this.test('hotReloadAPIFile', async (assert:Object):Promise<any> => {
+        const done:Function = assert.async()
+        for (const test:Array<any> of [
+            [[], []]
+            // TODO add more tests
+        ])
+            try {
+                assert.deepEqual(
+                    await PluginAPI.hotReloadAPIFile(test[0]), test[1])
+            } catch (error) {
+                console.error(error)
+            }
+        done()
+    })
+    this.test('hotReloadConfigurationFile', async (
+        assert:Object
+    ):Promise<any> => {
+        const done:Function = assert.async()
+        for (const test:Array<any> of [
+            [[], [], []]
+            // TODO add more tests
+        ])
+            try {
+                assert.deepEqual(
+                    await PluginAPI.hotReloadConfigurationFile(...test.slice(
+                        0, test.length - 1)),
+                    test[test.length - 1])
+            } catch (error) {
+                console.error(error)
+            }
+        done()
+    })
     this.test('hotReloadFile', async (assert:Object):Promise<any> => {
         const done:Function = assert.async()
         for (const test:Array<any> of [
@@ -56,8 +88,9 @@ registerTest(async function():Promise<void> {
         ])
             try {
                 assert.deepEqual(
-                    await PluginAPI.hotReloadFile(...test.slice(0, 3)),
-                    test[3])
+                    await PluginAPI.hotReloadFile(...test.slice(
+                        0, test.length - 1)),
+                    test[test.length - 1])
             } catch (error) {
                 console.error(error)
             }
@@ -65,15 +98,6 @@ registerTest(async function():Promise<void> {
     })
     this.test('load', async (assert:Object):Promise<void> => {
         const done:Function = assert.async()
-        for (const test:Array<any> of [
-            ['dummy', 'dummy', {}, ['a'], './']
-        ])
-            try {
-                await PluginAPI.load(...test)
-                assert.ok(false)
-            } catch (error) {
-                assert.ok(true)
-            }
         for (const test:Array<any> of [
             ['dummy', 'dummy', {}, ['webNode'], path.resolve(
                 configuration.context.path, 'dummyPlugin'
@@ -112,26 +136,36 @@ registerTest(async function():Promise<void> {
     this.test('loadAPI', async (assert:Object):Promise<void> => {
         const done:Function = assert.async()
         for (const test:Array<any> of [
-            ['index.compiled.js', path.resolve(
-                configuration.context.path, 'dummyPlugin'
-            ), 'dummyPlugin', 'dummy', {}, 'utf8', {a: 2}, path.resolve(
-                configuration.context.path, 'dummyPlugin/package.json'
-            ), {
-                apiFilePath: path.resolve(
-                    configuration.context.path,
-                    'dummyPlugin/index.compiled.js'),
-                configuration: {a: 2},
-                configurationFilePath: path.resolve(
+            [
+                'index.compiled.js',
+                path.resolve(configuration.context.path, 'dummyPlugin'),
+                'dummyPlugin',
+                'dummy',
+                {},
+                'utf8',
+                {a: 2, package: {webNode: {a: 2}}},
+                path.resolve(
                     configuration.context.path, 'dummyPlugin/package.json'),
-                dependencies: [],
-                internalName: 'dummy',
-                name: 'dummyPlugin',
-                path: path.resolve(configuration.context.path, 'dummyPlugin')
-            }]
+                {
+                    apiFilePath: path.resolve(
+                        configuration.context.path,
+                        'dummyPlugin/index.compiled.js'),
+                    configuration: {a: 2, package: {webNode: {a: 2}}},
+                    configurationFilePath: path.resolve(
+                        configuration.context.path,
+                        'dummyPlugin/package.json'),
+                    dependencies: [],
+                    internalName: 'dummy',
+                    name: 'dummyPlugin',
+                    path: path.resolve(
+                        configuration.context.path, 'dummyPlugin')
+                }
+            ]
         ]) {
             let plugin:?Plugin
             try {
-                plugin = await PluginAPI.loadAPI(...test.slice(0, 8))
+                plugin = await PluginAPI.loadAPI(...test.slice(
+                    0, test.length - 1))
             } catch (error) {
                 console.error(error)
             }
