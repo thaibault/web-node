@@ -99,9 +99,10 @@ export class PluginAPI {
                         PluginAPI, type, data, ...parameter.concat([
                             configuration, plugins]))
                 } catch (error) {
-                    if ('message' in error && error.message.startsWith(
-                        'NotImplemented:'
-                    ))
+                    if (
+                        'message' in error &&
+                        error.message.startsWith('NotImplemented:')
+                    )
                         continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` + (

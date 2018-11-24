@@ -101,7 +101,10 @@
   "webOptimizer": {
     "assetPattern": {
       "javaScript": {
-        "pattern": "#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n'use strict';\n{1}\n"
+        "pattern": {
+          "#": "This is how we can make our main exported artefact executable.",
+          "__evaluate__": "`#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n${self.generic.assetPattern.javaScript.pattern}else module.paths.unshift('/application/node_modules');{1}`"
+        }
       }
     },
     "exportFormat": {
