@@ -90,7 +90,8 @@ const main:ProcedureFunction = async ():Promise<any> => {
                             'during asynchrone hook "loadService".')
                 }
                 if (
-                    result && result.hasOwnProperty('name') &&
+                    result &&
+                    result.hasOwnProperty('name') &&
                     typeof result.name === 'string'
                 )
                     if (
@@ -108,8 +109,12 @@ const main:ProcedureFunction = async ():Promise<any> => {
                     plugins, configuration, services, servicePromises)
             }
         servicePromises = await PluginAPI.callStack(
-            'postLoadService', plugins, configuration, servicePromises,
-            services)
+            'postLoadService',
+            plugins,
+            configuration,
+            servicePromises,
+            services
+        )
         // endregion
         // region register close handler
         let finished:boolean = false
@@ -117,8 +122,11 @@ const main:ProcedureFunction = async ():Promise<any> => {
             if (!finished)
                 try {
                     PluginAPI.callStackSynchronous(
-                        'exit', plugins.slice().reverse(), configuration,
-                        services)
+                        'exit',
+                        plugins.slice().reverse(),
+                        configuration,
+                        services
+                    )
                 } catch (error) {
                     throw error
                 }
