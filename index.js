@@ -49,9 +49,14 @@ const main:ProcedureFunction = async ():Promise<any> => {
             ).join('", "') + '".')
     for (const type:string of ['pre', 'post'])
         await PluginAPI.callStack(
-            `${type}ConfigurationLoaded`, plugins, configuration,
-            configuration, plugins.filter((plugin:Plugin):boolean =>
-                Boolean(plugin.configurationFilePath)))
+            `${type}ConfigurationLoaded`,
+            plugins,
+            configuration,
+            configuration,
+            plugins.filter((plugin:Plugin):boolean => Boolean(
+                plugin.configurationFilePath
+            ))
+        )
     // endregion
     let services:Services = {}
     let servicePromises:ServicePromises = {}
@@ -68,13 +73,21 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 services = await PluginAPI.callStack(
                     `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
-                    plugins, configuration, services)
+                    plugins,
+                    configuration,
+                    services
+                )
                 let result:any
                 try {
                     // IgnoreTypeCheck
                     result = await plugin.api.call(
-                        PluginAPI, 'loadService', servicePromises, services,
-                        configuration, plugins)
+                        PluginAPI,
+                        'loadService',
+                        servicePromises,
+                        services,
+                        configuration,
+                        plugins
+                    )
                 } catch (error) {
                     if (!(
                         typeof error === 'object' &&
@@ -105,11 +118,19 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 services = await PluginAPI.callStack(
                     `postLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
-                    plugins, configuration, services, servicePromises)
+                    plugins,
+                    configuration,
+                    services,
+                    servicePromises
+                )
             }
         servicePromises = await PluginAPI.callStack(
-            'postLoadService', plugins, configuration, servicePromises,
-            services)
+            'postLoadService',
+            plugins,
+            configuration,
+            servicePromises,
+            services
+        )
         // endregion
         // region register close handler
         let finished:boolean = false
@@ -157,14 +178,16 @@ const main:ProcedureFunction = async ():Promise<any> => {
         } catch (error) {}
         exitTriggered = true
         await PluginAPI.callStack(
-            'shouldExit', plugins, configuration, services)
+            'shouldExit', plugins, configuration, services
+        )
         process.exit()
     } catch (error) {
         handleError(plugins, configuration, error, services)
         if (!exitTriggered)
             try {
                 await PluginAPI.callStack(
-                    'shouldExit', plugins, configuration, services)
+                    'shouldExit', plugins, configuration, services
+                )
             } catch (error) {
                 handleError(plugins, configuration, error, services)
             }
