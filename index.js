@@ -137,16 +137,12 @@ const main:ProcedureFunction = async ():Promise<any> => {
         let finished:boolean = false
         const closeHandler:Function = ():void => {
             if (!finished)
-                try {
-                    PluginAPI.callStackSynchronous(
-                        'exit',
-                        plugins.slice().reverse(),
-                        configuration,
-                        services
-                    )
-                } catch (error) {
-                    throw error
-                }
+                PluginAPI.callStackSynchronous(
+                    'exit',
+                    plugins.slice().reverse(),
+                    configuration,
+                    services
+                )
             finished = true
         }
         for (const closeEventName:string of Tools.closeEventNames)
@@ -196,7 +192,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 handleError(plugins, configuration, error, services)
             }
         if (configuration.debug)
-            throw error
+            throw Error(error)
         else
             console.error(error)
     }
