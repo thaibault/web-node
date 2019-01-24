@@ -30,7 +30,7 @@ const handleError:Function = async (
             'error', plugins, configuration, error, services)
     } catch (error) {
         if (configuration.debug)
-            throw error
+            throw Error(error)
         else
             console.error(error)
     }

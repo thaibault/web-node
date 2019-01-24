@@ -187,7 +187,7 @@ registerTest(async function():Promise<void> {
             [[], {a: 2}, configuration],
             [
                 [{configuration: {a: 2}}], {},
-                Tools.extendObject({a: 2}, configuration)
+                Tools.extend({a: 2}, configuration)
             ]
         ])
             /*
