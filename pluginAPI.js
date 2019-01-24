@@ -428,13 +428,15 @@ export class PluginAPI {
                 configuration.package = packageConfigurationCopy
                 // NOTE: We should break the cycle here.
                 delete configuration.package[propertyName]
-                return configuration
+                // Removing comments (default key name to delete is "#").
+                return Tools.removeKeys(configuration)
             }
         /*
             No plugin specific configuration found. Only provide package
             configuration.
+            Removing comments (default key name to delete is "#").
         */
-        return {package: packageConfigurationCopy}
+        return Tools.removeKeys({package: packageConfigurationCopy})
     }
     /**
      * Loads given plugin configurations into global configuration.
@@ -450,20 +452,19 @@ export class PluginAPI {
         for (const key:string in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
-        Tools.extendObject(configuration, Tools.copy(
-            baseConfiguration, -1, true))
+        Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
         for (const plugin:Plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:PlainObject = Tools.copy(
                     plugin.configuration, -1, true)
                 delete pluginConfiguration.package
-                Tools.extendObject(
+                Tools.extend(
                     true,
                     Tools.modifyObject(configuration, pluginConfiguration),
                     pluginConfiguration
                 )
                 if (configuration.runtimeConfiguration)
-                    Tools.extendObject(
+                    Tools.extend(
                         true, configuration, configuration.runtimeConfiguration
                     )
             }

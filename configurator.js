@@ -94,15 +94,16 @@ const scope:{[key:string]:any} = {
 export let configuration:Configuration = Tools.evaluateDynamicDataStructure(
     packageConfiguration.webNode, scope)
 delete packageConfiguration.webNode
-Tools.extendObject(true, Tools.modifyObject(
-    configuration, specificConfiguration
-), specificConfiguration)
+Tools.extend(
+    true,
+    Tools.modifyObject(configuration, specificConfiguration),
+    specificConfiguration
+)
 if (process.argv.length > 2) {
     const result:?Object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration')
     if (Tools.isPlainObject(result)) {
-        Tools.extendObject(
-            true, Tools.modifyObject(configuration, result), result)
+        Tools.extend(true, Tools.modifyObject(configuration, result), result)
         configuration.runtimeConfiguration = result
     }
 }
