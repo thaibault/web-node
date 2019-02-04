@@ -3,6 +3,8 @@
 'use strict'
 /* !
     region header
+    [Project page](https://torben.website/webNode)
+
     Copyright Torben Sickert (info["~at~"]torben.website) 16.12.2012
 
     License
@@ -31,7 +33,7 @@ const handleError:Function = async (
             'error', plugins, configuration, error, services)
     } catch (error) {
         if (configuration.debug)
-            throw Error(error)
+            throw error
         else
             console.error(error)
     }
@@ -193,7 +195,7 @@ const main:ProcedureFunction = async ():Promise<any> => {
                 handleError(plugins, configuration, error, services)
             }
         if (configuration.debug)
-            throw Error(error)
+            throw error
         else
             console.error(error)
     }
