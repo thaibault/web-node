@@ -82,7 +82,7 @@
         "webNode"
       ],
       "directories": {
-        "internal": {
+        "entry": {
           "nameRegularExpressionPattern": "^([a-zA-Z].*)$",
           "path": {
             "__evaluate__": "`${currentPath}/plugins/`"
