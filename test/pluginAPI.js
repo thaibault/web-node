@@ -5,10 +5,6 @@
 import Tools from 'clientnode'
 import path from 'path'
 import registerTest from 'clientnode/test'
-// NOTE: Only needed for debugging this file.
-try {
-    module.require('source-map-support/register')
-} catch (error) {}
 
 import type {Configuration, Plugin} from '../type'
 import configuration from '../configurator'
