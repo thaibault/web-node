@@ -14,10 +14,6 @@
     endregion
 */
 // region imports
-// NOTE: Only needed for debugging this file.
-try {
-    require('source-map-support/register')
-} catch (error) {}
 import type {Configuration, Plugin, ServicePromises, Services} from '../type'
 // endregion
 /**
