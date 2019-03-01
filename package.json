@@ -16,10 +16,8 @@
     "management"
   ],
   "files": [
-    "configurator.compiled.js",
     "configurator.js",
     "index.js",
-    "pluginAPI.compiled.js",
     "pluginAPI.js",
     "type.js",
     "unixCrypt.compiled.js",
@@ -118,26 +116,14 @@
     },
     "injection": {
       "entry": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {configurator: './configurator', index: './index', pluginAPI: './pluginAPI', unixCrypt: './unixCrypt'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: './index', unixCrypt: './unixCrypt'}"
       }
     },
     "module": {
-      "aliases": {
-        "#": "Use the pre-compiled artefacts.",
-        "clientnode/test$": "clientnode/test.compiled"
-      },
       "optimizer": {
         "babelMinify": {
-          "bundle": {
-            "transform": {
-              "#": "To provide a logging output we need this feature.",
-              "removeConsole": false
-            }
-          },
-          "module": {
-            "#": "To provide a logging output we need this feature.",
-            "removeConsole": false
-          }
+          "#": "To provide a logging output we need to exclude this feature.",
+          "__evaluate__": "self.debug ? {bundle: null, module: null} : {bundle: {transform: {removeConsole: false}}, module: {removeConsole: false}}"
         }
       }
     },

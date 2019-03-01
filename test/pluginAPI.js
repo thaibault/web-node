@@ -44,7 +44,7 @@ registerTest(async function():Promise<void> {
                 test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
             ), test[1])
     })
-    this.test('hotReloadAPIFile', async (assert:Object):Promise<any> => {
+    this.test('hotReloadAPIFile', async (assert:Object):Promise<void> => {
         const done:Function = assert.async()
         for (const test:Array<any> of [
             [[], []]
@@ -60,7 +60,7 @@ registerTest(async function():Promise<void> {
     })
     this.test('hotReloadConfigurationFile', async (
         assert:Object
-    ):Promise<any> => {
+    ):Promise<void> => {
         const done:Function = assert.async()
         for (const test:Array<any> of [
             [[], [], []]
@@ -76,7 +76,7 @@ registerTest(async function():Promise<void> {
             }
         done()
     })
-    this.test('hotReloadFile', async (assert:Object):Promise<any> => {
+    this.test('hotReloadFile', async (assert:Object):Promise<void> => {
         const done:Function = assert.async()
         for (const test:Array<any> of [
             ['apiFile', 'scope', [], []]
