@@ -15,6 +15,8 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
+export * from './configurator'
+export * from './pluginAPI'
 // region imports
 import Tools from 'clientnode'
 import type {ProcedureFunction} from 'clientnode'
@@ -38,7 +40,7 @@ const handleError:Function = async (
             console.error(error)
     }
 }
-const main:ProcedureFunction = async ():Promise<any> => {
+const main:ProcedureFunction = async ():Promise<void> => {
     // region load plugins
     const {configuration, plugins}:{
         configuration:Configuration;
