@@ -202,10 +202,7 @@ const main:ProcedureFunction = async ():Promise<void> => {
             console.error(error)
     }
 }
-/* eslint-disable camelcase */
-// IgnoreTypeCheck
-if (require.main === module || typeof __webpack_require__ !== 'undefined')
-/* eslint-enable camelcase */
+if (require.main === module)
     main()
 export default main
 // region vim modline

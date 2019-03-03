@@ -546,7 +546,7 @@ export class PluginAPI {
      */
     static async loadAll(configuration:Configuration):Promise<{
         configuration:Configuration;
-        plugins:Array<Plugin>
+        plugins:Array<Plugin>;
     }> {
         const plugins:{[key:string]:Object} = {}
         // If an application's main
@@ -626,9 +626,9 @@ export class PluginAPI {
                         break
                     }
         return {
-            plugins: sortedPlugins,
             configuration: PluginAPI.loadConfigurations(
-                sortedPlugins, configuration)
+                sortedPlugins, configuration),
+            plugins: sortedPlugins
         }
     }
     /**
