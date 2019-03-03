@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.273",
+  "version": "1.0.274",
   "license": "CC-BY-3.0",
   "description": "High level javaScript backend plugin system and configuration merger.",
   "homepage": "https://torben.website/webNode",
