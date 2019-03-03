@@ -26,8 +26,11 @@ import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import type {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
+declare var ORIGINAL_MAIN_MODULE:Object
 const handleError:Function = async (
-    plugins:Array<Plugin>, configuration:Configuration, error:Error,
+    plugins:Array<Plugin>,
+    configuration:Configuration,
+    error:Error,
     services:Services
 ):Promise<void> => {
     try {
@@ -202,7 +205,12 @@ const main:ProcedureFunction = async ():Promise<void> => {
             console.error(error)
     }
 }
-if (require.main === module)
+if (
+    require.main === module ||
+    eval('require.main') !== require.main &&
+    typeof ORIGINAL_MAIN_MODULE !== 'undefined' &&
+    ORIGINAL_MAIN_MODULE === eval('require.main')
+)
     main()
 export default main
 // region vim modline
