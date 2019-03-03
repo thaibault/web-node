@@ -109,11 +109,6 @@
       "external": "commonjs2",
       "self": "commonjs2"
     },
-    "files": {
-      "compose": {
-        "cascadingStyleSheet": null
-      }
-    },
     "injection": {
       "entry": {
         "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: './index', unixCrypt: './unixCrypt'}"
