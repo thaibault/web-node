@@ -392,7 +392,9 @@ export class PluginAPI {
             apiFileLoadTimestamp: api && fileSystem.statSync(
                 filePath
             ).mtime.getTime(),
-            configuration,
+            configuration: (
+                configuration === null || typeof configuration === 'undefined'
+            ) ? {} : configuration,
             configurationFilePath,
             configurationFileLoadTimestamp:
                 configurationFilePath &&

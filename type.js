@@ -47,7 +47,7 @@ export type Plugin = {
     api:?Function;
     apiFilePath:?string;
     apiFileLoadTimestamp:?number;
-    configuration:?PlainObject;
+    configuration:PlainObject;
     configurationFilePath:?string;
     configurationFileLoadTimestamp:?number;
     dependencies:Array<string>;
