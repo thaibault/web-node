@@ -96,6 +96,7 @@
       "hotReloading": true
     }
   },
+  "sideEffects": false,
   "webOptimizer": {
     "assetPattern": {
       "javaScript": {
