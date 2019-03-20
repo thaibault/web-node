@@ -177,6 +177,23 @@ registerTest(async function():Promise<void> {
         }
         done()
     })
+    this.test('loadConfiguration', (assert:Object):void => {
+        for (const test:Array<any> of [
+            [{}, [], {package: {}}],
+            [{a: 2}, [], {package: {a: 2}}],
+            [{a: 2, b: 3}, [], {package: {a: 2, b: 3}}],
+            [{a: {value: 2}, b: 3}, ['a'], {package: {b: 3}, value: 2}],
+            [{a: {value: 2}, b: 3}, ['a', 'b'], {package: {b: 3}, value: 2}],
+            [
+                {a: {value: 2}, b: 3},
+                ['z', 'a', 'b'],
+                {package: {b: 3}, value: 2}
+            ],
+            [{a: 2, b: {value: 3}}, ['b', 'a'], {package: {a: 2}, value: 3}]
+        ])
+            assert.deepEqual(
+                PluginAPI.loadConfiguration(test[0], test[1]), test[2])
+    })
     this.test('loadConfigurations', (assert:Object):void => {
         for (const test:Array<any> of [
             [[], {}, configuration],
