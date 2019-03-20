@@ -411,7 +411,6 @@ export class PluginAPI {
     }
     /**
      * Loads plugin specific configuration object.
-     * TODO TEST
      * @param packageConfiguration - Plugin specific package configuration
      * object.
      * @param configurationPropertyNames - Property names to search for to use
