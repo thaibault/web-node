@@ -106,11 +106,15 @@ export class PluginAPI {
                     )
                         continue
                     throw new Error(
-                        `Plugin "${plugin.internalName}" ` + (
-                            plugin.internalName === plugin.name ? '' :
-                            `(${plugin.name}) `
-                        )+ `throws: ${Tools.representObject(error)} during ` +
-                        `asynchrone hook "${type}".`)
+                        `Plugin "${plugin.internalName}" ` +
+                        (
+                            (plugin.internalName === plugin.name) ?
+                                '' :
+                                `(${plugin.name}) `
+                        ) +
+                        `throws: ${Tools.represent(error)} during ` +
+                        `asynchrone hook "${type}".`
+                    )
                 }
                 data = result
                 if (configuration.debug)
@@ -150,11 +154,15 @@ export class PluginAPI {
                     ))
                         continue
                     throw new Error(
-                        `Plugin "${plugin.internalName}" ` + (
-                            plugin.internalName === plugin.name ? '' :
-                            `(${plugin.name}) `
-                        ) + `throws: ${Tools.representObject(error)} during ` +
-                        `synchrone hook "${type}".`)
+                        `Plugin "${plugin.internalName}" ` +
+                        (
+                            (plugin.internalName === plugin.name) ?
+                                '' :
+                                `(${plugin.name}) `
+                        ) +
+                        `throws: ${Tools.represent(error)} during ` +
+                        `synchrone hook "${type}".`
+                    )
                 }
                 data = result
                 if (configuration.debug)
@@ -374,7 +382,7 @@ export class PluginAPI {
                                 cwd: process.cwd(),
                                 encoding,
                                 env: process.env,
-                                input: Tools.representObject(data),
+                                input: Tools.represent(data),
                                 shell: true,
                                 stdio: 'inherit'
                             })
@@ -525,12 +533,14 @@ export class PluginAPI {
                 if (log)
                     console.warn(
                         `Couln't load new api plugin file "${filePath}" for ` +
-                        `plugin "${name}": ${Tools.representObject(error)}. ` +
-                        `Using fallback one.`)
+                        `plugin "${name}": ${Tools.represent(error)}. Using ` +
+                        'fallback one.'
+                    )
             } else
                 throw new Error(
                     `Couln't load plugin file "${filePath}" for plugin "` +
-                    `${name}": ${Tools.representObject(error)}`)
+                    `${name}": ${Tools.represent(error)}`
+                )
         }
         if (scope.hasOwnProperty('default'))
             return scope.default

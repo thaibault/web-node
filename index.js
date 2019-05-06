@@ -104,11 +104,15 @@ const main:ProcedureFunction = async ():Promise<void> => {
                         error.message.startsWith('NotImplemented:')
                     ))
                         throw new Error(
-                            `Plugin "${plugin.internalName}" ` + (
-                                plugin.internalName === plugin.name ? '' :
-                                `(${plugin.name}) `
-                            )+ `throws: ${Tools.representObject(error)} ` +
-                            'during asynchrone hook "loadService".')
+                            `Plugin "${plugin.internalName}" ` +
+                            (
+                                (plugin.internalName === plugin.name) ?
+                                    '' :
+                                    `(${plugin.name}) `
+                            ) +
+                            `throws: ${Tools.represent(error)} ` +
+                            'during asynchrone hook "loadService".'
+                        )
                 }
                 if (
                     result &&
