@@ -170,9 +170,10 @@ const main:ProcedureFunction = async ():Promise<void> => {
                     console.warn('Stopping ungracefully.')
                 else {
                     cancelTriggered = true
-                    console.log(
+                    console.info(
                         'You have requested to shut down all services. A ' +
-                        'second request will force to stop ungracefully.')
+                        'second request will force to stop ungracefully.'
+                    )
                     await PluginAPI.callStack(
                         'shouldExit', plugins, configuration, services)
                 }
