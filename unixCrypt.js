@@ -18,11 +18,11 @@
     endregion
 */
 /**
- * Unix crypt(3) javascript implementation
+ * Unix crypt(3) javascript implementation.
  *
  * Straightforward implementation of the DES-based Unix crypt(3) hash, based
  * largely on crypt.c in the Seventh Edition Unix distribution released by
- * Caldera Systems under a BSD-style license.
+ * caldera systems under a BSD-style license.
  */
 // Initial permutation:
 const IP:Array<number> = [
