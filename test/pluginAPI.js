@@ -121,8 +121,8 @@ registerTest(async function():Promise<void> {
                 delete plugin.apiFileLoadTimestamp
                 if (plugin.configuration)
                     delete plugin.configuration.package
-                delete plugin.configurationFilePath
-                delete plugin.configurationFileLoadTimestamp
+                delete plugin.configurationFilePaths
+                delete plugin.configurationFileLoadTimestamps
                 delete plugin.scope
                 assert.deepEqual(plugin, test[5])
             }
@@ -170,7 +170,7 @@ registerTest(async function():Promise<void> {
                     'initialize'))
                 delete plugin.api
                 delete plugin.apiFileLoadTimestamp
-                delete plugin.configurationFileLoadTimestamp
+                delete plugin.configurationFileLoadTimestamps
                 delete plugin.scope
                 assert.deepEqual(plugin, test[8])
             }

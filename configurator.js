@@ -32,9 +32,11 @@ packageConfiguration.webNode.context = {path: __dirname}
 while (true) {
     packageConfiguration.webNode.context.path = path.resolve(
         packageConfiguration.webNode.context.path, '../../')
-    if (path.basename(path.dirname(
-        packageConfiguration.webNode.context.path
-    )) !== 'node_modules')
+    if (
+        path.basename(path.dirname(packageConfiguration.webNode.context.path))
+        !==
+        'node_modules'
+    )
         break
 }
 if (
@@ -55,8 +57,10 @@ else
         is a better assumption than two folders up the hierarchy.
     */
     try {
-        if (fileSystem.lstatSync(path.join(process.cwd(
-        ), 'node_modules')).isSymbolicLink())
+        if (
+            fileSystem.lstatSync(path.join(process.cwd(), 'node_modules'))
+                .isSymbolicLink()
+        )
             packageConfiguration.webNode.context.path = process.cwd()
     } catch (error) {}
 let specificConfiguration:PlainObject = {}
@@ -68,10 +72,10 @@ try {
 } catch (error) {
     packageConfiguration.webNode.context.path = process.cwd()
 }
-const name:string = specificConfiguration.hasOwnProperty(
-    'documentationWebsite'
-) && specificConfiguration.documentationWebsite.name ||
-specificConfiguration.name
+const name:string =
+    specificConfiguration.hasOwnProperty('documentationWebsite') &&
+    specificConfiguration.documentationWebsite.name ||
+    specificConfiguration.name
 specificConfiguration = specificConfiguration.webNode || {}
 if (name)
     specificConfiguration.name = name
@@ -112,9 +116,11 @@ const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
     for (const key:string in data)
         if (
             data.hasOwnProperty(key) &&
-            !['__evaluate__', '__execute__'].includes(key) && (
+            !['__evaluate__', '__execute__'].includes(key) &&
+            (
                 data.hasOwnProperty('__evaluate__') ||
-                data.hasOwnProperty('__execute__'))
+                data.hasOwnProperty('__execute__')
+            )
         )
             delete data[key]
         else if (typeof data[key] === 'object' && data[key] !== null)
