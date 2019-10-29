@@ -33,8 +33,8 @@ while (true) {
     packageConfiguration.webNode.context.path = path.resolve(
         packageConfiguration.webNode.context.path, '../../')
     if (
-        path.basename(path.dirname(packageConfiguration.webNode.context.path))
-        !==
+        path.basename(path.dirname(
+            packageConfiguration.webNode.context.path)) !==
         'node_modules'
     )
         break

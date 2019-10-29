@@ -49,8 +49,8 @@ export type Configuration = {
 }
 export type Plugin = {
     api:?Function;
-    apiFilePath:?string;
-    apiFileLoadTimestamp:?number;
+    apiFilePaths:Array<string>;
+    apiFileLoadTimestamps:Array<number>;
     configuration:PlainObject;
     configurationFilePaths:Array<string>;
     configurationFileLoadTimestamps:Array<number>;

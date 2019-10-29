@@ -76,7 +76,7 @@ registerTest(async function():Promise<void> {
             }
         done()
     })
-    this.test('hotReloadFile', async (assert:Object):Promise<void> => {
+    this.test('hotReloadFiles', async (assert:Object):Promise<void> => {
         const done:Function = assert.async()
         for (const test:Array<any> of [
             ['apiFile', 'scope', [], []]
@@ -84,7 +84,7 @@ registerTest(async function():Promise<void> {
         ])
             try {
                 assert.deepEqual(
-                    await PluginAPI.hotReloadFile(...test.slice(
+                    await PluginAPI.hotReloadFiles(...test.slice(
                         0, test.length - 1)),
                     test[test.length - 1])
             } catch (error) {
@@ -118,11 +118,11 @@ registerTest(async function():Promise<void> {
                 assert.ok(plugin.scope && plugin.scope.hasOwnProperty(
                     'initialize'))
                 delete plugin.api
-                delete plugin.apiFileLoadTimestamp
+                plugin.apiFileLoadTimestamps = []
                 if (plugin.configuration)
                     delete plugin.configuration.package
-                delete plugin.configurationFilePaths
-                delete plugin.configurationFileLoadTimestamps
+                plugin.configurationFilePaths = []
+                plugin.configurationFileLoadTimestamps = []
                 delete plugin.scope
                 assert.deepEqual(plugin, test[5])
             }
@@ -169,8 +169,8 @@ registerTest(async function():Promise<void> {
                 assert.ok(plugin.scope && plugin.scope.hasOwnProperty(
                     'initialize'))
                 delete plugin.api
-                delete plugin.apiFileLoadTimestamp
-                delete plugin.configurationFileLoadTimestamps
+                plugin.apiFileLoadTimestamps = []
+                plugin.configurationFileLoadTimestamps = []
                 delete plugin.scope
                 assert.deepEqual(plugin, test[8])
             }
