@@ -302,6 +302,13 @@ export class PluginAPI {
         }
         const apiFilePaths:Array<string> = ['index.js']
         if (Object.keys(packageConfiguration).length) {
+            if (name === 'bpv')
+                console.log(
+                    'TODO',
+                    name,
+                    Object.keys(packageConfiguration.webNode),
+                    packageConfiguration.webNode.bpv.apiParsing.geocoding.apis[0].key
+                )
             const configuration:PlainObject = PluginAPI.loadConfiguration(
                 packageConfiguration, metaConfiguration.propertyNames)
             if (configuration.package.hasOwnProperty('main'))
@@ -545,6 +552,12 @@ export class PluginAPI {
         log:boolean = true
     ):Object {
         let scope:Object
+        // Clear module cache to get actual new module scope.
+        /* eslint-disable no-eval */
+        const reference:string = eval('require').resolve(filePath)
+        if (reference in eval('require').cache)
+            delete eval('require').cache[reference]
+        /* eslint-enable no-eval */
         try {
             /* eslint-disable no-eval */
             scope = eval('require')(filePath)
