@@ -302,13 +302,6 @@ export class PluginAPI {
         }
         const apiFilePaths:Array<string> = ['index.js']
         if (Object.keys(packageConfiguration).length) {
-            if (name === 'bpv')
-                console.log(
-                    'TODO',
-                    name,
-                    Object.keys(packageConfiguration.webNode),
-                    packageConfiguration.webNode.bpv.apiParsing.geocoding.apis[0].key
-                )
             const configuration:PlainObject = PluginAPI.loadConfiguration(
                 packageConfiguration, metaConfiguration.propertyNames)
             if (configuration.package.hasOwnProperty('main'))
