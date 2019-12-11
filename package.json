@@ -76,9 +76,15 @@
     "encoding": "utf8",
     "interDependencies": {},
     "plugin": {
-      "configurationPropertyNames": [
-        "webNode"
-      ],
+      "configuration": {
+        "fileNames": [
+          "package.json",
+          "private-package.json"
+        ],
+        "propertyNames": [
+          "webNode"
+        ]
+      },
       "directories": {
         "entry": {
           "nameRegularExpressionPattern": "^([a-zA-Z].*)$",

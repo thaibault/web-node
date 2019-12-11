@@ -21,7 +21,9 @@ import fileSystem from 'fs'
 import path from 'path'
 
 import baseConfiguration from './configurator'
-import type {Configuration, Plugin, PluginChange} from './type'
+import type {
+    Configuration, MetaConfiguration, Plugin, PluginChange
+} from './type'
 // endregion
 /**
  * A dumm plugin interface with all available hooks.
@@ -49,7 +51,7 @@ export class PluginAPI {
         if (configuration.plugin.hotReloading) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
                 PluginAPI.hotReloadConfigurationFile(
-                    plugins, configuration.plugin.configurationPropertyNames)
+                    plugins, configuration.plugin.configuration.propertyNames)
             if (pluginsWithChangedConfiguration.length) {
                 if (configuration.debug)
                     console.info(
@@ -180,7 +182,7 @@ export class PluginAPI {
      */
     static hotReloadAPIFile(plugins:Array<Plugin>):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
-        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFile(
+        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
             'apiFile', 'scope', plugins)
         for (const pluginChange:PluginChange of pluginChanges) {
             // NOTE: We have to migrate old plugin api's scope state.
@@ -214,49 +216,54 @@ export class PluginAPI {
         plugins:Array<Plugin>, configurationPropertyNames:Array<string>
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
-        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFile(
+        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
             'configurationFile', 'configuration', plugins)
         for (const pluginChange:PluginChange of pluginChanges) {
             pluginChange.newPlugin.configuration = PluginAPI.loadConfiguration(
                 pluginChange.newPlugin.configuration,
-                configurationPropertyNames)
+                configurationPropertyNames
+            )
             pluginsWithChangedFiles.push(pluginChange.newPlugin)
         }
         return pluginsWithChangedFiles
     }
     /**
      * Checks for changed plugin file type in given plugins and reloads them
-     * if necessary (new timestamp).
+     * if necessary (timestamp has changed).
      * @param type - Plugin file type to search for updates.
      * @param targetType - Property name existing in plugin meta informations
      * objects which should be updated.
      * @param plugins - List of plugins to search for updates in.
      * @returns A list with plugin changes.
      */
-    static hotReloadFile(
+    static hotReloadFiles(
         type:string, targetType:string, plugins:Array<Plugin>
     ):Array<PluginChange> {
         const pluginChanges:Array<PluginChange> = []
         for (const plugin:Plugin of plugins)
             if (plugin[targetType]) {
-                const timestamp:number = fileSystem.statSync(
-                    plugin[`${type}Path`]
-                ).mtime.getTime()
-                if (plugin[`${type}LoadTimestamp`] < timestamp) {
-                    // Enforce to reload new file version.
-                    /* eslint-disable no-eval */
-                    delete eval('require').cache[eval('require').resolve(
-                        plugin[`${type}Path`])]
-                    /* eslint-enable no-eval */
-                    const oldPluginArtefact:Object = plugin[targetType]
-                    plugin[targetType] = PluginAPI.loadFile(
-                        plugin[`${type}Path`], plugin.name, plugin[targetType])
-                    pluginChanges.push({
-                        newPlugin: plugin,
-                        oldArtefact: oldPluginArtefact
-                    })
+                let index:number = 0
+                for (const filePath:string of plugin[`${type}Paths`]) {
+                    const timestamp:number = fileSystem.statSync(
+                        filePath
+                    ).mtime.getTime()
+                    if (plugin[`${type}LoadTimestamps`][index] < timestamp) {
+                        // Enforce to reload new file version.
+                        /* eslint-disable no-eval */
+                        delete eval('require').cache[eval('require').resolve(
+                            filePath)]
+                        /* eslint-enable no-eval */
+                        const oldPluginArtefact:Object = plugin[targetType]
+                        plugin[targetType] = PluginAPI.loadFile(
+                            filePath, plugin.name, plugin[targetType])
+                        pluginChanges.push({
+                            newPlugin: plugin,
+                            oldArtefact: oldPluginArtefact
+                        })
+                    }
+                    plugin[`${type}LoadTimestamps`][index] = timestamp
+                    index += 1
                 }
-                plugin[`${type}LoadTimestamp`] = timestamp
             }
         return pluginChanges
     }
@@ -266,8 +273,7 @@ export class PluginAPI {
      * @param name - Name of plugin to extend.
      * @param internalName - Internal name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
-     * @param configurationPropertyNames - Property names to search for to use
-     * as entry in plugin configuration file.
+     * @param metaConfiguration - Configuration file configuration.
      * @param pluginPath - Path to given plugin.
      * @param encoding - Encoding to use to read and write from child
      * process's.
@@ -277,44 +283,47 @@ export class PluginAPI {
         name:string,
         internalName:string,
         plugins:{[key:string]:Plugin},
-        configurationPropertyNames:Array<string>,
+        metaConfiguration:MetaConfiguration,
         pluginPath:string,
         encoding:string = 'utf8'
     ):Promise<Plugin> {
-        const configurationFilePath:string = path.resolve(
-            pluginPath, 'package.json')
-        let packageConfiguration:?PlainObject = null
-        if (
-            configurationFilePath &&
-            await Tools.isDirectory(pluginPath) &&
-            await Tools.isFile(configurationFilePath)
-        )
-            packageConfiguration = PluginAPI.loadFile(
-                configurationFilePath, name)
-        let apiFilePath:string = 'index.js'
-        if (packageConfiguration) {
+        const configurationFilePaths:Array<string> = []
+        const packageConfiguration:Object = {}
+        for (const fileName:string of metaConfiguration.fileNames) {
+            const filePath:string = path.resolve(pluginPath, fileName)
+            if (await Tools.isFile(filePath)) {
+                Tools.extend(
+                    true,
+                    packageConfiguration,
+                    PluginAPI.loadFile(filePath, name)
+                )
+                configurationFilePaths.push(filePath)
+            }
+        }
+        const apiFilePaths:Array<string> = ['index.js']
+        if (Object.keys(packageConfiguration).length) {
             const configuration:PlainObject = PluginAPI.loadConfiguration(
-                packageConfiguration, configurationPropertyNames)
+                packageConfiguration, metaConfiguration.propertyNames)
             if (configuration.package.hasOwnProperty('main'))
-                apiFilePath = configuration.package.main
+                apiFilePaths[0] = configuration.package.main
             return await PluginAPI.loadAPI(
-                apiFilePath,
+                apiFilePaths,
                 pluginPath,
                 name,
                 internalName,
                 plugins,
                 encoding,
                 configuration,
-                configurationFilePath
+                configurationFilePaths
             )
         }
         return await PluginAPI.loadAPI(
-            apiFilePath, pluginPath, name, internalName, plugins, encoding)
+            apiFilePaths, pluginPath, name, internalName, plugins, encoding)
     }
     /**
      * Load given plugin api file in given path and generates a plugin
      * specific data structure with useful meta informations.
-     * @param relativeFilePath - Path to file to load relatively from given
+     * @param relativeFilePaths - Paths to file to load relatively from given
      * plugin path.
      * @param pluginPath - Path to plugin directory.
      * @param name - Plugin name to use for proper error messages.
@@ -324,26 +333,30 @@ export class PluginAPI {
      * @param encoding - Encoding to use to read and write from child
      * process.
      * @param configuration - Plugin specific configurations.
-     * @param configurationFilePath - Plugin specific configuration file path.
+     * @param configurationFilePaths - Plugin specific configuration file
+     * paths.
      * @returns Plugin meta informations object.
      */
     static async loadAPI(
-        relativeFilePath:string,
+        relativeFilePaths:Array<string>,
         pluginPath:string,
         name:string,
         internalName:string,
         plugins:{[key:string]:Object},
         encoding:string = 'utf8',
         configuration:?PlainObject = null,
-        configurationFilePath:?string = null
+        configurationFilePaths:Array<string> = []
     ):Promise<Plugin> {
-        let filePath:string = path.resolve(pluginPath, relativeFilePath)
+        let filePath:string = path.resolve(pluginPath, relativeFilePaths[0])
         if (!(await Tools.isFile(filePath)))
-            // TODO describe this loop!
+            // Determine entry file if given one does not exist.
             for (const fileName:string of fileSystem.readdirSync(pluginPath))
-                if (fileName !== 'package.json' && await Tools.isFile(
-                    path.resolve(pluginPath, fileName)
-                )) {
+                if (
+                    !configurationFilePaths.map((filePath:string):string =>
+                        path.basename(filePath)
+                    ).includes(fileName) &&
+                    await Tools.isFile(path.resolve(pluginPath, fileName))
+                ) {
                     filePath = path.resolve(pluginPath, filePath)
                     if (['index', 'main'].includes(path.basename(
                         filePath, path.extname(fileName)
@@ -378,17 +391,21 @@ export class PluginAPI {
                 api = (data:any, ...parameter:Array<any>):any => {
                     const childProcessResult:PlainObject =
                         spawnChildProcessSync(
-                            filePath, Tools.arrayMake(parameter), {
+                            filePath,
+                            Tools.arrayMake(parameter),
+                            {
                                 cwd: process.cwd(),
                                 encoding,
                                 env: process.env,
                                 input: Tools.represent(data),
                                 shell: true,
                                 stdio: 'inherit'
-                            })
-                    if (childProcessResult.stdout.startsWith(
-                        '##'
-                    ) && childProcessResult.stdout.endsWith('##'))
+                            }
+                        )
+                    if (
+                        childProcessResult.stdout.startsWith('##') &&
+                        childProcessResult.stdout.endsWith('##')
+                    )
                         data = JSON.parse(data)
                     // TODO check if method wasn't implemented by special
                     // returnCode
@@ -396,21 +413,26 @@ export class PluginAPI {
                 }
         return {
             api,
-            apiFilePath: api && filePath,
-            apiFileLoadTimestamp: api && fileSystem.statSync(
-                filePath
-            ).mtime.getTime(),
-            configuration: (
-                configuration === null || typeof configuration === 'undefined'
-            ) ? {} : configuration,
-            configurationFilePath,
-            configurationFileLoadTimestamp:
-                configurationFilePath &&
-                fileSystem.statSync(configurationFilePath).mtime.getTime() ||
-                null,
-            dependencies: configuration && configuration.hasOwnProperty(
-                'dependencies'
-            ) && configuration.dependencies || [],
+            apiFilePaths: api ? [filePath] : [],
+            apiFileLoadTimestamps:
+                api ? [fileSystem.statSync(filePath).mtime.getTime()] : [],
+            configuration:
+                (
+                    configuration === null ||
+                    typeof configuration === 'undefined'
+                ) ?
+                    {} :
+                    configuration,
+            configurationFilePaths,
+            configurationFileLoadTimestamps:
+                configurationFilePaths.map((filePath:string):number =>
+                    fileSystem.statSync(filePath).mtime.getTime()
+                ),
+            dependencies:
+                configuration &&
+                configuration.hasOwnProperty('dependencies') &&
+                configuration.dependencies ||
+                [],
             internalName,
             name,
             path: pluginPath,
@@ -523,6 +545,12 @@ export class PluginAPI {
         log:boolean = true
     ):Object {
         let scope:Object
+        // Clear module cache to get actual new module scope.
+        /* eslint-disable no-eval */
+        const reference:string = eval('require').resolve(filePath)
+        if (reference in eval('require').cache)
+            delete eval('require').cache[reference]
+        /* eslint-enable no-eval */
         try {
             /* eslint-disable no-eval */
             scope = eval('require')(filePath)
@@ -564,7 +592,7 @@ export class PluginAPI {
                 configuration.name,
                 configuration.name,
                 plugins,
-                configuration.plugin.configurationPropertyNames,
+                configuration.plugin.configuration,
                 configuration.context.path,
                 configuration.encoding
             )
@@ -596,7 +624,7 @@ export class PluginAPI {
                         pluginName,
                         internalName,
                         plugins,
-                        configuration.plugin.configurationPropertyNames,
+                        configuration.plugin.configuration,
                         currentPluginPath,
                         configuration.encoding
                     )

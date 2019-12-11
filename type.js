@@ -17,6 +17,10 @@
 import type {PlainObject} from 'clientnode'
 // endregion
 // region exports
+export type MetaConfiguration = {
+    fileNames:Array<string>;
+    propertyNames:Array<string>;
+}
 export type Configuration = {
     context:{
         path:string;
@@ -28,7 +32,7 @@ export type Configuration = {
     name:string;
     package:PlainObject;
     plugin:{
-        configurationPropertyNames:Array<string>;
+        configuration:MetaConfiguration;
         directories:{
             internal:{
                 path:string;
@@ -45,11 +49,11 @@ export type Configuration = {
 }
 export type Plugin = {
     api:?Function;
-    apiFilePath:?string;
-    apiFileLoadTimestamp:?number;
+    apiFilePaths:Array<string>;
+    apiFileLoadTimestamps:Array<number>;
     configuration:PlainObject;
-    configurationFilePath:?string;
-    configurationFileLoadTimestamp:?number;
+    configurationFilePaths:Array<string>;
+    configurationFileLoadTimestamps:Array<number>;
     dependencies:Array<string>;
     internalName:string;
     name:string;

@@ -62,7 +62,7 @@ const main:ProcedureFunction = async ():Promise<void> => {
             configuration,
             configuration,
             plugins.filter((plugin:Plugin):boolean => Boolean(
-                plugin.configurationFilePath
+                plugin.configurationFilePaths.length
             ))
         )
     // endregion
