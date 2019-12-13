@@ -99,7 +99,7 @@
           }
         }
       },
-      "hotReloading": true
+      "hotReloading": false
     }
   },
   "sideEffects": false,
