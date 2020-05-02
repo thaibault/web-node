@@ -16,16 +16,16 @@
     "management"
   ],
   "files": [
-    "configurator.js",
-    "index.js",
-    "pluginAPI.js",
-    "type.js",
-    "unixCrypt.compiled.js",
-    "unixCrypt.js"
+    "configurator.ts",
+    "index.ts",
+    "pluginAPI.ts",
+    "type.ts",
+    "unixCrypt.js",
+    "unixCrypt.ts"
   ],
-  "main": "index.compiled.js",
+  "main": "index.js",
   "bin": {
-    "webNode": "index.compiled.js"
+    "webNode": "index.js"
   },
   "repository": {
     "type": "git",
@@ -33,15 +33,15 @@
   },
   "scripts": {
     "build": "webOptimizer build",
-    "clear": "webOptimizer clear && rm --force log.txt &>/dev/null",
+    "check": "yarn types:check; yarn lint",
+    "clear": "webOptimizer clear",
     "document": "webOptimizer document",
-    "lint": "webOptimizer check:type; webOptimizer lint",
+    "lint": "webOptimizer lint",
     "prepare": "yarn build",
     "report:coverage": "nyc report --reporter=text-lcov | coveralls",
-    "serve": "webOptimizer build && ./index.compiled.js",
+    "serve": "webOptimizer build && ./index.js",
     "start": "yarn serve",
-    "test": "cd dummyPlugin && yarn build && cd - && nyc webOptimizer test",
-    "test:plain": "cd dummyPlugin && yarn run build && cd - && webOptimizer test",
+    "test": "pushd dummyPlugin && yarn build && popd && webOptimizer test",
     "update": "yarn version --patch && yarn publish",
     "update:documentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch"
