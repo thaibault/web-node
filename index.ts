@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -19,12 +19,12 @@ export * from './configurator'
 export * from './pluginAPI'
 // region imports
 import Tools from 'clientnode'
-import type {ProcedureFunction} from 'clientnode'
+import {ProcedureFunction} from 'clientnode/type'
 import keypress from 'keypress'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
-import type {Configuration, Plugin, ServicePromises, Services} from './type'
+import {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
 declare var ORIGINAL_MAIN_MODULE:Object
 const handleError:Function = async (

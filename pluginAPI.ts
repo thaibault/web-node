@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -16,14 +16,12 @@
 // region imports
 import {spawnSync as spawnChildProcessSync} from 'child_process'
 import Tools from 'clientnode'
-import type {PlainObject} from 'clientnode'
+import {PlainObject} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
 import baseConfiguration from './configurator'
-import type {
-    Configuration, MetaConfiguration, Plugin, PluginChange
-} from './type'
+import {Configuration, MetaConfiguration, Plugin, PluginChange} from './type'
 // endregion
 /**
  * A dumm plugin interface with all available hooks.
@@ -344,7 +342,7 @@ export class PluginAPI {
         internalName:string,
         plugins:{[key:string]:Object},
         encoding:string = 'utf8',
-        configuration:?PlainObject = null,
+        configuration:null|PlainObject = null,
         configurationFilePaths:Array<string> = []
     ):Promise<Plugin> {
         let filePath:string = path.resolve(pluginPath, relativeFilePaths[0])
@@ -363,7 +361,7 @@ export class PluginAPI {
                     )))
                         break
                 }
-        let api:?Function = null
+        let api:Function|null = null
         let nativeAPI:boolean = false
         /*
             NOTE: We only want to register api's for web node plugins. Others
@@ -541,7 +539,7 @@ export class PluginAPI {
     static loadFile(
         filePath:string,
         name:string,
-        fallbackScope:?Object = null,
+        fallbackScope:null|Object = null,
         log:boolean = true
     ):Object {
         let scope:Object

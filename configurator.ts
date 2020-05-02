@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -15,11 +15,11 @@
 */
 // region imports
 import Tools from 'clientnode'
-import type {PlainObject} from 'clientnode'
+import {PlainObject} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
-import type {Configuration} from './type'
+import {Configuration} from './type'
 import PluginAPI from './pluginAPI'
 import packageConfiguration from './package'
 /*
@@ -105,8 +105,9 @@ Tools.extend(
     specificConfiguration
 )
 if (process.argv.length > 2) {
-    const result:?Object = Tools.stringParseEncodedObject(
-        process.argv[process.argv.length - 1], configuration, 'configuration')
+    const result:null|Object = Tools.stringParseEncodedObject(
+        process.argv[process.argv.length - 1], configuration, 'configuration'
+    )
     if (Tools.isPlainObject(result)) {
         Tools.extend(true, Tools.modifyObject(configuration, result), result)
         configuration.runtimeConfiguration = result

@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -14,7 +14,7 @@
     endregion
 */
 // region imports
-import type {PlainObject} from 'clientnode'
+import {PlainObject} from 'clientnode/type'
 // endregion
 // region exports
 export type MetaConfiguration = {
