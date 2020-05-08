@@ -92,7 +92,7 @@ export class PluginAPI {
                 )
             }
         }
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.api) {
                 let result:any
                 try {
@@ -141,7 +141,7 @@ export class PluginAPI {
         data:any = null,
         ...parameter:Array<any>
     ):any {
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.api) {
                 let result:any
                 try {
@@ -182,9 +182,9 @@ export class PluginAPI {
         const pluginsWithChangedFiles:Array<Plugin> = []
         const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
             'apiFile', 'scope', plugins)
-        for (const pluginChange:PluginChange of pluginChanges) {
+        for (const pluginChange of pluginChanges) {
             // NOTE: We have to migrate old plugin api's scope state.
-            for (const name:string in pluginChange.oldArtefact)
+            for (const name in pluginChange.oldArtefact)
                 if (
                     pluginChange.oldArtefact.hasOwnProperty(name) &&
                     // IgnoreTypeCheck
@@ -216,7 +216,7 @@ export class PluginAPI {
         const pluginsWithChangedFiles:Array<Plugin> = []
         const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
             'configurationFile', 'configuration', plugins)
-        for (const pluginChange:PluginChange of pluginChanges) {
+        for (const pluginChange of pluginChanges) {
             pluginChange.newPlugin.configuration = PluginAPI.loadConfiguration(
                 pluginChange.newPlugin.configuration,
                 configurationPropertyNames
@@ -238,10 +238,10 @@ export class PluginAPI {
         type:string, targetType:string, plugins:Array<Plugin>
     ):Array<PluginChange> {
         const pluginChanges:Array<PluginChange> = []
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin[targetType]) {
                 let index:number = 0
-                for (const filePath:string of plugin[`${type}Paths`]) {
+                for (const filePath of plugin[`${type}Paths`]) {
                     const timestamp:number = fileSystem.statSync(
                         filePath
                     ).mtime.getTime()
@@ -287,7 +287,7 @@ export class PluginAPI {
     ):Promise<Plugin> {
         const configurationFilePaths:Array<string> = []
         const packageConfiguration:Object = {}
-        for (const fileName:string of metaConfiguration.fileNames) {
+        for (const fileName of metaConfiguration.fileNames) {
             const filePath:string = path.resolve(pluginPath, fileName)
             if (await Tools.isFile(filePath)) {
                 Tools.extend(
@@ -348,7 +348,7 @@ export class PluginAPI {
         let filePath:string = path.resolve(pluginPath, relativeFilePaths[0])
         if (!(await Tools.isFile(filePath)))
             // Determine entry file if given one does not exist.
-            for (const fileName:string of fileSystem.readdirSync(pluginPath))
+            for (const fileName of fileSystem.readdirSync(pluginPath))
                 if (
                     !configurationFilePaths.map((filePath:string):string =>
                         path.basename(filePath)
@@ -451,7 +451,7 @@ export class PluginAPI {
     ):PlainObject {
         const packageConfigurationCopy:PlainObject = Tools.copy(
             packageConfiguration, -1, true)
-        for (const propertyName:string of configurationPropertyNames)
+        for (const propertyName of configurationPropertyNames)
             if (packageConfiguration.hasOwnProperty(propertyName)) {
                 const configuration:PlainObject =
                     packageConfiguration[propertyName]
@@ -479,11 +479,11 @@ export class PluginAPI {
         plugins:Array<Plugin>, configuration:Configuration
     ):Configuration {
         // First clear current configuration but reuse old given reference.
-        for (const key:string in configuration)
+        for (const key in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
         Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:PlainObject = Tools.copy(
                     plugin.configuration, -1, true)
@@ -521,7 +521,7 @@ export class PluginAPI {
             NOTE: We have to replace the resolved plugin configurations in the
             plugin data structure.
         */
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (configuration.hasOwnProperty(plugin.internalName))
                 plugin.configuration = configuration[plugin.internalName]
         configuration.package = packageConfiguration
@@ -594,7 +594,7 @@ export class PluginAPI {
                 configuration.context.path,
                 configuration.encoding
             )
-        for (const type:string in configuration.plugin.directories)
+        for (const type in configuration.plugin.directories)
             if (
                 configuration.plugin.directories.hasOwnProperty(type) &&
                 await Tools.isDirectory(
@@ -604,7 +604,7 @@ export class PluginAPI {
                     configuration.plugin.directories[
                         type
                     ].nameRegularExpressionPattern)
-                for (const pluginName:string of fileSystem.readdirSync(
+                for (const pluginName of fileSystem.readdirSync(
                     configuration.plugin.directories[type].path
                 )) {
                     if (!(compiledRegularExpression).test(pluginName))
@@ -629,7 +629,7 @@ export class PluginAPI {
                 }
             }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
-        for (const pluginName:string in plugins)
+        for (const pluginName in plugins)
             if (plugins.hasOwnProperty(pluginName)) {
                 temporaryPlugins[plugins[
                     pluginName
@@ -637,10 +637,10 @@ export class PluginAPI {
                 if (configuration.interDependencies.hasOwnProperty(plugins[
                     pluginName
                 ].internalName))
-                    for (const name:string of [].concat(
+                    for (const name of [].concat(
                         configuration.interDependencies[
-                            plugins[pluginName].internalName])
-                    )
+                            plugins[pluginName].internalName]
+                    ))
                         if (!temporaryPlugins[plugins[
                             pluginName
                         ].internalName].includes(name))
@@ -649,10 +649,8 @@ export class PluginAPI {
                             ].internalName].push(name)
             }
         const sortedPlugins:Array<Plugin> = []
-        for (const pluginName:string of Tools.arraySortTopological(
-            temporaryPlugins
-        ))
-            for (const name:string in plugins)
+        for (const pluginName of Tools.arraySortTopological(temporaryPlugins))
+            for (const name in plugins)
                 if (plugins.hasOwnProperty(name))
                     if ([plugins[name].internalName, name].includes(
                         pluginName
@@ -672,7 +670,7 @@ export class PluginAPI {
      * @returns Given object with removed properties.
      */
     static removePropertiesInDynamicObjects(data:PlainObject):PlainObject {
-        for (const key:string in data)
+        for (const key in data)
             if (
                 data.hasOwnProperty(key) &&
                 !['__evaluate__', '__execute__'].includes(key) && (

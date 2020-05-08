@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@types/jest": "*",
+    "@types/keypress": "*",
     "@types/loader-utils": "*",
     "@types/node": "*",
     "@typescript-eslint/eslint-plugin": "*",
@@ -70,6 +71,9 @@
     "webpack-dev-server": "*"
   },
   "webNode": {
+    "context": {
+      "path": "./"
+    },
     "debug": false,
     "encoding": "utf8",
     "interDependencies": {},

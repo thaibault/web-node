@@ -21,7 +21,7 @@ import path from 'path'
 
 import {Configuration} from './type'
 import PluginAPI from './pluginAPI'
-import packageConfiguration from './package'
+import packageConfiguration from './package.json'
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -66,14 +66,15 @@ else
 let specificConfiguration:PlainObject = {}
 try {
     /* eslint-disable no-eval */
-    specificConfiguration = eval('require')(path.join(
-        packageConfiguration.webNode.context.path, 'package'))
+    specificConfiguration = eval('require')(
+        path.join(packageConfiguration.webNode.context.path, 'package')
+    )
     /* eslint-enable no-eval */
 } catch (error) {
     packageConfiguration.webNode.context.path = process.cwd()
 }
 const name:string =
-    specificConfiguration.hasOwnProperty('documentationWebsite') &&
+    specificConfiguration.documentationWebsite &&
     specificConfiguration.documentationWebsite.name ||
     specificConfiguration.name
 specificConfiguration = specificConfiguration.webNode || {}
@@ -114,7 +115,7 @@ if (process.argv.length > 2) {
     }
 }
 const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
-    for (const key:string in data)
+    for (const key in data)
         if (
             data.hasOwnProperty(key) &&
             !['__evaluate__', '__execute__'].includes(key) &&

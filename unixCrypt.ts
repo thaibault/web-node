@@ -106,7 +106,7 @@ const setKey:Function = (key:Array<number>):void => {
      * First, generate C and D by permuting the key. The low order bit of each
      * 8-bit char is not used, so C and D are only 28 bits apiece.
      */
-    for (let index = 0; index < 28; index++) {
+    for (let index:number = 0; index < 28; index++) {
         C[index] = key[PC1_C[index] - 1]
         D[index] = key[PC1_D[index] - 1]
     }

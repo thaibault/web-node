@@ -18,7 +18,7 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
-import Tools from 'clientnode'
+import Tools, {CloseEventNames} from 'clientnode'
 import {ProcedureFunction} from 'clientnode/type'
 import keypress from 'keypress'
 
@@ -55,7 +55,7 @@ const main:ProcedureFunction = async ():Promise<void> => {
             'Loaded plugins: "' + plugins.map((plugin:Object):string =>
                 plugin.internalName
             ).join('", "') + '".')
-    for (const type:string of ['pre', 'post'])
+    for (const type of ['pre', 'post'])
         await PluginAPI.callStack(
             `${type}ConfigurationLoaded`,
             plugins,
@@ -73,10 +73,10 @@ const main:ProcedureFunction = async ():Promise<void> => {
         // region start services
         services = await PluginAPI.callStack(
             'preLoadService', plugins, configuration, services)
-        for (const name:string in services)
+        for (const name in services)
             if (services.hasOwnProperty(name))
                 console.info(`Service "${name}" initialized.`)
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.api) {
                 services = await PluginAPI.callStack(
                     `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
@@ -157,7 +157,7 @@ const main:ProcedureFunction = async ():Promise<void> => {
                 )
             finished = true
         }
-        for (const closeEventName:string of Tools.closeEventNames)
+        for (const closeEventName of CloseEventNames)
             process.on(closeEventName, closeHandler)
         // NOTE: Make "process.stdin" begin emitting events for any key press.
         keypress(process.stdin)
