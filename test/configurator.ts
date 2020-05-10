@@ -1,13 +1,12 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
-import registerTest from 'clientnode/test'
-
-registerTest(async function():Promise<void> {
-    this.module('configurator')
-    this.test('main', (assert:Object):void => assert.strictEqual(
-        typeof require('../configurator').default.debug, 'boolean'))
-}, 'plain')
+describe('configurator', ():void =>
+    test('main', ():void =>
+        expect(typeof require('../configurator').default.debug)
+            .toStrictEqual('boolean')
+    )
+)
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

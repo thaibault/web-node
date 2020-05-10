@@ -1,20 +1,17 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 // region imports
 import Tools from 'clientnode'
 import path from 'path'
-import registerTest from 'clientnode/test'
 
-import type {Configuration, Plugin} from '../type'
+import {Configuration, Plugin} from '../type'
 import configuration from '../configurator'
 import PluginAPI from '../pluginAPI'
 // endregion
-registerTest(async function():Promise<void> {
-    this.module('pluginAPI')
-    // region tests
-    this.test('callStack', async (assert:Object):Promise<void> => {
-        const done:Function = assert.async()
+// region tests
+describe('pluginAPI', ():void => {
+    test('callStack', async ():Promise<void> => {
         const testConfiguration:Configuration = Tools.copy(configuration)
         for (const test:Array<any> of [
             [['test', []], null],
@@ -23,16 +20,18 @@ registerTest(async function():Promise<void> {
             // TODO add more tests
         ])
             try {
-                assert.deepEqual(await PluginAPI.callStack(
-                    test[0][0], test[0][1], testConfiguration,
+                expect(await PluginAPI.callStack(
+                    test[0][0],
+                    test[0][1],
+                    testConfiguration,
                     ...test[0].slice(2)
-                ), test[1])
+                )).toStrictEqual(test[1])
             } catch (error) {
                 console.error(error)
             }
-        done()
     })
-    this.test('callStackSynchronous', (assert:Object):void => {
+    // TODO
+    test('callStackSynchronous', ():void => {
         const testConfiguration:Configuration = Tools.copy(configuration)
         for (const test:Array<any> of [
             [['test', []], null],
@@ -44,8 +43,7 @@ registerTest(async function():Promise<void> {
                 test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
             ), test[1])
     })
-    this.test('hotReloadAPIFile', async (assert:Object):Promise<void> => {
-        const done:Function = assert.async()
+    test('hotReloadAPIFile', async ():Promise<void> => {
         for (const test:Array<any> of [
             [[], []]
             // TODO add more tests
@@ -56,12 +54,8 @@ registerTest(async function():Promise<void> {
             } catch (error) {
                 console.error(error)
             }
-        done()
     })
-    this.test('hotReloadConfigurationFile', async (
-        assert:Object
-    ):Promise<void> => {
-        const done:Function = assert.async()
+    test('hotReloadConfigurationFile', async ():Promise<void> => {
         for (const test:Array<any> of [
             [[], [], []]
             // TODO add more tests
@@ -74,10 +68,8 @@ registerTest(async function():Promise<void> {
             } catch (error) {
                 console.error(error)
             }
-        done()
     })
-    this.test('hotReloadFiles', async (assert:Object):Promise<void> => {
-        const done:Function = assert.async()
+    test('hotReloadFiles', async ():Promise<void> => {
         for (const test:Array<any> of [
             ['apiFile', 'scope', [], []]
             // TODO add more tests
@@ -90,10 +82,8 @@ registerTest(async function():Promise<void> {
             } catch (error) {
                 console.error(error)
             }
-        done()
     })
-    this.test('load', async (assert:Object):Promise<void> => {
-        const done:Function = assert.async()
+    test('load', async ():Promise<void> => {
         for (const test:Array<any> of [
             ['dummy', 'dummy', {}, ['webNode'], path.resolve(
                 configuration.context.path, 'dummyPlugin'
@@ -127,10 +117,8 @@ registerTest(async function():Promise<void> {
                 assert.deepEqual(plugin, test[5])
             }
         }
-        done()
     })
-    this.test('loadAPI', async (assert:Object):Promise<void> => {
-        const done:Function = assert.async()
+    test('loadAPI', async ():Promise<void> => {
         for (const test:Array<any> of [
             [
                 'index.compiled.js',
@@ -175,9 +163,8 @@ registerTest(async function():Promise<void> {
                 assert.deepEqual(plugin, test[8])
             }
         }
-        done()
     })
-    this.test('loadConfiguration', (assert:Object):void => {
+    test('loadConfiguration', ():void => {
         for (const test:Array<any> of [
             [{}, [], {package: {}}],
             [{a: 2}, [], {package: {a: 2}}],
@@ -194,7 +181,7 @@ registerTest(async function():Promise<void> {
             assert.deepEqual(
                 PluginAPI.loadConfiguration(test[0], test[1]), test[2])
     })
-    this.test('loadConfigurations', (assert:Object):void => {
+    test('loadConfigurations', ():void => {
         for (const test:Array<any> of [
             [[], {}, configuration],
             [[], {a: 2}, configuration],
@@ -210,7 +197,7 @@ registerTest(async function():Promise<void> {
             assert.ok(Tools.equals(
                 PluginAPI.loadConfigurations(...test.slice(0, 2)), test[2]))
     })
-    this.test('loadPluginFile', (assert:Object):void => {
+    test('loadPluginFile', ():void => {
         for (const test:Array<any> of [
             [path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'
@@ -219,8 +206,7 @@ registerTest(async function():Promise<void> {
         ])
             assert.deepEqual(PluginAPI.loadFile(...test.slice(0, 4)), test[4])
     })
-    this.test('loadAll', async (assert:Object):Promise<void> => {
-        const done:Function = assert.async()
+    test('loadAll', async ():Promise<void> => {
         for (const test:Array<any> of [
             [configuration, {}, {plugins: [], configuration}]
         ])
@@ -230,9 +216,8 @@ registerTest(async function():Promise<void> {
             } catch (error) {
                 console.error(error)
             }
-        done()
     })
-    this.test('removePropertiesInDynamicObjects', (assert:Object):void => {
+    test('removePropertiesInDynamicObjects', ():void => {
         for (const test:Array<any> of [
             [{}, {}],
             [{a: 2}, {a: 2}],
@@ -245,8 +230,8 @@ registerTest(async function():Promise<void> {
             assert.deepEqual(
                 PluginAPI.removePropertiesInDynamicObjects(test[0]), test[1])
     })
+})
 // endregion
-}, 'plain')
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

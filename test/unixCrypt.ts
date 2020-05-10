@@ -1,13 +1,11 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
-import registerTest from 'clientnode/test'
-
 import unixCrypt from '../unixCrypt'
 
-registerTest(async function():Promise<void> {
-    this.module('unixCrypt')
-    this.test('unixCrypt', (assert:Object):void => {
+describe('unixCrypt', ():void =>
+    // TODO
+    test('unixCrypt', ():void => {
         for (const test:Array<any> of [
             ['', 'ba', 'baJyGvzMWSid.'],
             ['ba', '', 'aayPdtR3JLIkk'],
@@ -19,7 +17,7 @@ registerTest(async function():Promise<void> {
         ])
             assert.strictEqual(unixCrypt(...test.slice(0, 2)), test[2])
     })
-}, 'plain')
+)
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:
