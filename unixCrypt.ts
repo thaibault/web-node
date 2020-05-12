@@ -332,7 +332,8 @@ const bytesToStr:Function = (bytes:Array<number>):string =>
  * @returns Returns crypted or encrypted buffer or string.
  */
 export function unixCrypt(
-    password:Array<number>|string, salt:Array<number>|string = 'aa',
+    password:Array<number>|string,
+    salt:Array<number>|string = 'aa',
     returnBytes:boolean = false
 ):Array<number>|string {
     if (typeof password === 'string')
