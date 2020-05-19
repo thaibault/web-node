@@ -187,15 +187,12 @@ export class PluginAPI {
             for (const name in pluginChange.oldArtefact)
                 if (
                     pluginChange.oldArtefact.hasOwnProperty(name) &&
-                    // IgnoreTypeCheck
                     pluginChange.newPlugin.scope.hasOwnProperty(name) &&
                     !(
                         Tools.isFunction(pluginChange.oldArtefact[name]) ||
-                        // IgnoreTypeCheck
                         Tools.isFunction(pluginChange.newPlugin.scope[name])
                     )
                 )
-                    // IgnoreTypeCheck
                     pluginChange.newPlugin.scope[name] =
                         pluginChange.oldArtefact[name]
             pluginsWithChangedFiles.push(pluginChange.newPlugin)

@@ -13,8 +13,8 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-// region imports
-import {PlainObject} from 'clientnode/type'
+// region impo rts
+import {Encoding, PlainObject} from 'clientnode/type'
 // endregion
 // region exports
 export type MetaConfiguration = {
@@ -27,7 +27,7 @@ export type Configuration = {
         type:string;
     };
     debug:boolean;
-    encoding:string;
+    encoding:Encoding;
     interDependencies:PlainObject;
     name:string;
     package:PlainObject;
