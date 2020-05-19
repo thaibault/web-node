@@ -48,7 +48,7 @@ export type Configuration = {
     [key:string]:any;
 }
 export type Plugin = {
-    api:?Function;
+    api:Function|null;
     apiFilePaths:Array<string>;
     apiFileLoadTimestamps:Array<number>;
     configuration:PlainObject;
@@ -58,11 +58,12 @@ export type Plugin = {
     internalName:string;
     name:string;
     path:string;
-    scope:?Object;
+    scope:null|object;
 }
 export type PluginChange = {
-    newPlugin:Plugin;
-    oldArtefact:Object;
+    newScope:object;
+    oldScope:object;
+    plugin:Plugin;
 }
 export type Services = {[key:string]:any}
 export type ServicePromises = {[key:string]:Promise<any>}

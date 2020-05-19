@@ -82,7 +82,7 @@ describe('pluginAPI', ():void => {
     })
     test('hotReloadFiles', async ():Promise<void> => {
         for (const test:Array<any> of [
-            ['apiFile', 'scope', [], []]
+            ['api', 'scope', [], []]
             // TODO add more tests
         ])
             try {
