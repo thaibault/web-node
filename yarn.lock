@@ -2897,9 +2897,9 @@ camelcase@^6.0.0:
   integrity sha512-8KMDF1Vz2gzOq54ONPJS65IvTUaB1cHJ2DMM7MbPmLZljDH1qpzzLsWdiN9pHh6qvkRVDTi/07+eNGch/oLU4w==
 
 caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30001043:
-  version "1.0.30001061"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001061.tgz#80ca87ef14eb543a7458e7fd2b5e2face3458c9f"
-  integrity sha512-SMICCeiNvMZnyXpuoO+ot7FHpMVPlrsR+HmfByj6nY4xYDHXLqMTbgH7ecEkDNXWkH1vaip+ZS0D7VTXwM1KYQ==
+  version "1.0.30001062"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001062.tgz#d814b648338504b315222ace6f1a533d9a55e390"
+  integrity sha512-ei9ZqeOnN7edDrb24QfJ0OZicpEbsWxv7WusOiQGz/f2SfvBgHHbOEwBJ8HKGVSyx8Z6ndPjxzR6m0NQq+0bfw==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -3055,9 +3055,9 @@ cli-width@^2.0.0:
   integrity sha512-GRMWDxpOB6Dgk2E5Uo+3eEBvtOOlimMmpbFiKuLFnQzYDavtLFY3K5ona41jgN/WdRZtG7utuVSVTL4HbZHGkw==
 
 clientnode@*:
-  version "3.0.422"
-  resolved "https://registry.yarnpkg.com/clientnode/-/clientnode-3.0.422.tgz#b5344df987db1db926c965970ea53335902bf54c"
-  integrity sha512-JZK2ES1NmpCcbLQZqrMOTBls0eAErzNVnQnls8N/KW5g9JquZSL+T0ySEsYp58lj06mvRtoD9hWYGF/H2mA5oQ==
+  version "3.0.423"
+  resolved "https://registry.yarnpkg.com/clientnode/-/clientnode-3.0.423.tgz#b9979fab00e62214fbfcba541206d9369c0de542"
+  integrity sha512-7xnL/Thyic0C8rpY8hpd/wHW59zc6QGrS3uTZG/sdcy+HMQHtXi2dF5t+ce+ZY/GzKN0HOIYUJw8rB1muEnJtw==
 
 cliui@^5.0.0:
   version "5.0.0"
@@ -3716,9 +3716,9 @@ ejs@*:
     jake "^10.6.1"
 
 electron-to-chromium@^1.3.413, electron-to-chromium@^1.3.47:
-  version "1.3.441"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.441.tgz#094f71b992dca5bc96b798cfbaf37dc76302015a"
-  integrity sha512-leBfJwLuyGs1jEei2QioI+PjVMavmUIvPYidE8dCCYWLAq0uefhN3NYgDNb8WxD3uiUNnJ3ScMXg0upSlwySzQ==
+  version "1.3.444"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.444.tgz#d1010f69eecd06595d12f1ceff05f4b66f36c29a"
+  integrity sha512-FtEGg/wRKT765QehmpRqMDaUbRam03Y3brE+6nUfoxCr9XgyEl+zAgN4+EraOJeyTGTGh27u7Mdx5Hl9qAhJPQ==
 
 elliptic@^6.0.0, elliptic@^6.5.2:
   version "6.5.2"
@@ -8912,9 +8912,9 @@ webidl-conversions@^6.0.0:
   integrity sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==
 
 weboptimizer@*:
-  version "2.0.652"
-  resolved "https://registry.yarnpkg.com/weboptimizer/-/weboptimizer-2.0.652.tgz#4cd7f4e37f5951bcc9fb3ba1198109e6e4f88304"
-  integrity sha512-+7+emOd0x56xbqr4zKWfc3t5Zs7lnNoskisuQO0FWhwFQ/Yt+EkZ2XQ04j0XtpHGumkGVQUFGQApTAeFVfqUEg==
+  version "2.0.654"
+  resolved "https://registry.yarnpkg.com/weboptimizer/-/weboptimizer-2.0.654.tgz#a1671487770edbfd17c4cba92e7fad6a15b47374"
+  integrity sha512-OslgluSSFN8XG4OqwWj44adl4E92WL4/CY6nNFoZ6UrKXoPwOiT0o3D87YrIxXYSfGIc14bfdRVGHWaE1I7OVw==
   dependencies:
     "@babel/core" "*"
     "@babel/plugin-proposal-class-properties" "*"
