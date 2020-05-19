@@ -75,9 +75,9 @@ try {
 }
 const name:string =
     specificConfiguration.documentationWebsite &&
-    specificConfiguration.documentationWebsite.name ||
-    specificConfiguration.name
-specificConfiguration = specificConfiguration.webNode || {}
+    (specificConfiguration.documentationWebsite as {name?:string}).name ||
+    specificConfiguration.name as string
+specificConfiguration = specificConfiguration.webNode as PlainObject || {}
 if (name)
     specificConfiguration.name = name
 // endregion
@@ -125,8 +125,8 @@ const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
             )
         )
             delete data[key]
-        else if (typeof data[key] === 'object' && data[key] !== null)
-            removePropertiesInDynamicObjects(data[key])
+        else if (Tools.isPlainObject(data[key]))
+            removePropertiesInDynamicObjects(data[key] as PlainObject)
     return data
 }
 /*

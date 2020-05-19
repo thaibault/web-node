@@ -48,13 +48,11 @@
     "watch": "webOptimizer build --watch"
   },
   "dependencies": {
-    "clientnode": "*",
-    "keypress": "*"
+    "clientnode": "*"
   },
   "devDependencies": {
     "@babel/cli": "*",
     "@types/jest": "*",
-    "@types/keypress": "*",
     "@types/loader-utils": "*",
     "@types/node": "*",
     "@typescript-eslint/eslint-plugin": "*",
@@ -78,6 +76,7 @@
     "debug": false,
     "encoding": "utf8",
     "interDependencies": {},
+    "name": "webNode",
     "plugin": {
       "configuration": {
         "fileNames": [

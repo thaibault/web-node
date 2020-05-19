@@ -20,7 +20,6 @@ export * from './pluginAPI'
 // region imports
 import Tools, {CloseEventNames} from 'clientnode'
 import {ProcedureFunction} from 'clientnode/type'
-import keypress from 'keypress'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
@@ -159,13 +158,12 @@ const main:ProcedureFunction = async ():Promise<void> => {
         }
         for (const closeEventName of CloseEventNames)
             process.on(closeEventName, closeHandler)
-        // NOTE: Make "process.stdin" begin emitting events for any key press.
-        keypress(process.stdin)
         let cancelTriggered:boolean = false
-        process.stdin.on('keypress', async (
-            char:number, key:Object
-        ):Promise<void> => {
-            if (key && key.name === 'c' && key.ctrl) {
+        process.stdin.setRawMode(true)
+        process.stdin.resume()
+        process.stdin.setEncoding(configuration.encoding)
+        process.stdin.on('data', async (key:string):Promise<void> => {
+            if (key === '\u0003') {
                 if (cancelTriggered)
                     console.warn('Stopping ungracefully.')
                 else {
@@ -179,10 +177,8 @@ const main:ProcedureFunction = async ():Promise<void> => {
                 }
                 process.exit()
             }
+            process.stdout.write(key)
         })
-        if ('setRawMode' in process.stdin)
-            // IgnoreTypeCheck
-            process.stdin.setRawMode(true)
         // endregion
         try {
             await Promise.all(Object.keys(servicePromises).map((
