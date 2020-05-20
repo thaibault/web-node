@@ -578,16 +578,21 @@ export class PluginAPI {
     static loadFile(
         filePath:string,
         name:string,
-        fallbackScope:null|Object = null,
+        fallbackScope:null|object = null,
         log:boolean = true
     ):object {
-        let scope:object
+        let reference:string
+        try {
+            /* eslint-disable no-eval */
+            reference = eval('require').resolve(filePath)
+            /* eslint-enable no-eval */
+        } catch (error) {}
         // Clear module cache to get actual new module scope.
-        /* eslint-disable no-eval */
-        const reference:string = eval('require').resolve(filePath)
-        if (reference in eval('require').cache)
+        if (reference && reference in eval('require').cache)
+            /* eslint-disable no-eval */
             delete eval('require').cache[reference]
-        /* eslint-enable no-eval */
+            /* eslint-enable no-eval */
+        let scope:object
         try {
             /* eslint-disable no-eval */
             scope = eval('require')(filePath)

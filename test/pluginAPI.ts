@@ -77,59 +77,87 @@ describe('pluginAPI', ():void => {
             }
         }
     )
-    /*
-    test('hotReloadConfigurationFile', async ():Promise<void> => {
-        for (const test:Array<any> of [
-            [[], [], []]
-            // TODO add more tests
-        ])
+    test.each([
+        [[], [], []]
+        // TODO add more tests
+    ])(
+        'hotReloadConfigurationFile(%p, %p) === %p',
+        async (
+            plugins:Array<Plugin>,
+            configurationPropertyNames:Array<string>,
+            expected:Array<plugin>
+        ):Promise<void> => {
             try {
-                assert.deepEqual(
-                    await PluginAPI.hotReloadConfigurationFile(...test.slice(
-                        0, test.length - 1)),
-                    test[test.length - 1])
+                expect(await PluginAPI.hotReloadConfigurationFile(
+                    plugins, configurationPropertyNames
+                )).toStrictEqual(expected)
             } catch (error) {
                 console.error(error)
             }
-    })
-    test('hotReloadFiles', async ():Promise<void> => {
-        for (const test:Array<any> of [
-            ['api', 'scope', [], []]
-            // TODO add more tests
-        ])
+        }
+    )
+    test.each([
+        ['api', 'scope', [], []]
+        // TODO add more tests
+    ])(
+        `hotReloadFiles('%s', '%s', %p) === PROCESSED_PLUGINS`,
+        async (
+            type:'api'|'configuration',
+            target:'configuration'|'scope',
+            plugins:Array<Plugin>
+        ):Promise<void> => {
             try {
-                assert.deepEqual(
-                    await PluginAPI.hotReloadFiles(...test.slice(
-                        0, test.length - 1)),
-                    test[test.length - 1])
+                expect(await PluginAPI.hotReloadFiles(type, target, plugins))
+                    .toStrictEqual(plugins)
             } catch (error) {
                 console.error(error)
             }
-    })
-    test('load', async ():Promise<void> => {
-        for (const test:Array<any> of [
-            ['dummy', 'dummy', {}, ['webNode'], path.resolve(
-                configuration.context.path, 'dummyPlugin'
-            ), {
-                apiFilePath: path.resolve(
-                    configuration.context.path,
-                    'dummyPlugin/index.compiled.js'),
+        }
+    )
+    test.each([
+        [
+            'dummy',
+            'dummy',
+            {},
+            {fileNames: ['package.json'], propertyNames: ['webNode']},
+            path.resolve(configuration.context.path, 'dummyPlugin'),
+            {
+
+                apiFileLoadTimestamps: [],
+                apiFilePaths: [
+                    path.resolve(
+                        configuration.context.path, 'dummyPlugin/index.js'
+                    )
+                ],
                 configuration: require('../dummyPlugin/package').webNode,
+                configurationFileLoadTimestamps: [],
+                configurationFilePaths: [],
                 dependencies: [],
                 internalName: 'dummy',
                 name: 'dummy',
                 path: path.resolve(configuration.context.path, 'dummyPlugin')
-            }]
-        ]) {
-            let plugin:?Plugin
+            }
+        ]
+    ])(
+        `load('%s', '%s', %p, %p, '%s') === %p`,
+        async (
+            name:string,
+            internalName:string,
+            plugins:{[key:string]:Plugin},
+            metaConfiguration:MetaConfiguration,
+            pluginPath:string,
+            expected:Plugin
+        ):Promise<void> => {
+            let plugin:Plugin
             try {
-                plugin = await PluginAPI.load(...test.slice(0, 5))
+                plugin = await PluginAPI.load(
+                    name, internalName, plugins, metaConfiguration, pluginPath
+                )
             } catch (error) {
                 console.error(error)
             }
             if (plugin) {
-                assert.ok(plugin.scope && plugin.scope.hasOwnProperty(
-                    'initialize'))
+                expect(plugin.scope).toHaveProperty('initialize')
                 delete plugin.api
                 plugin.apiFileLoadTimestamps = []
                 if (plugin.configuration)
@@ -137,102 +165,154 @@ describe('pluginAPI', ():void => {
                 plugin.configurationFilePaths = []
                 plugin.configurationFileLoadTimestamps = []
                 delete plugin.scope
-                assert.deepEqual(plugin, test[5])
+                expect(plugin).toStrictEqual(expected)
             }
         }
-    })
-    test('loadAPI', async ():Promise<void> => {
-        for (const test:Array<any> of [
+    )
+    test.each([
+        [
+            ['index.js'],
+            path.resolve(configuration.context.path, 'dummyPlugin'),
+            'dummyPlugin',
+            'dummy',
+            {},
+            'utf8',
+            {a: 2, package: {webNode: {a: 2}}},
             [
-                'index.compiled.js',
-                path.resolve(configuration.context.path, 'dummyPlugin'),
-                'dummyPlugin',
-                'dummy',
-                {},
-                'utf8',
-                {a: 2, package: {webNode: {a: 2}}},
                 path.resolve(
-                    configuration.context.path, 'dummyPlugin/package.json'),
-                {
-                    apiFilePath: path.resolve(
+                    configuration.context.path, 'dummyPlugin/package.json'
+                )
+            ],
+            {
+                apiFileLoadTimestamps: [],
+                apiFilePaths: [
+                    path.resolve(
+                        configuration.context.path, 'dummyPlugin/index.js'
+                    )
+                ],
+                configuration: {a: 2, package: {webNode: {a: 2}}},
+                configurationFileLoadTimestamps: [],
+                configurationFilePaths: [
+                    path.resolve(
                         configuration.context.path,
-                        'dummyPlugin/index.compiled.js'),
-                    configuration: {a: 2, package: {webNode: {a: 2}}},
-                    configurationFilePath: path.resolve(
-                        configuration.context.path,
-                        'dummyPlugin/package.json'),
-                    dependencies: [],
-                    internalName: 'dummy',
-                    name: 'dummyPlugin',
-                    path: path.resolve(
-                        configuration.context.path, 'dummyPlugin')
-                }
-            ]
-        ]) {
-            let plugin:?Plugin
+                        'dummyPlugin/package.json'
+                    )
+                ],
+                dependencies: [],
+                internalName: 'dummy',
+                name: 'dummyPlugin',
+                path: path.resolve(configuration.context.path, 'dummyPlugin')
+            }
+        ]
+    ])(
+        `loadAPI('%s', '%s', '%s', '%s', %p, '%s', %p, %p) === %p`,
+        async (
+            relativeFilePaths:Array<string>,
+            pluginPath:string,
+            name:string,
+            internalName:string,
+            plugins:{[key:string]:Plugin},
+            encoding:Encoding = 'utf8',
+            configuration:null|PluginConfiguration = null,
+            configurationFilePaths:Array<string>,
+            expected:Plugin
+        ):Promise<void> => {
+            let plugin:Plugin
             try {
-                plugin = await PluginAPI.loadAPI(...test.slice(
-                    0, test.length - 1))
+                plugin = await PluginAPI.loadAPI(
+                    relativeFilePaths,
+                    pluginPath,
+                    name,
+                    internalName,
+                    plugins,
+                    encoding,
+                    configuration,
+                    configurationFilePaths
+                )
             } catch (error) {
                 console.error(error)
             }
             if (plugin) {
-                assert.ok(plugin.scope && plugin.scope.hasOwnProperty(
-                    'initialize'))
+                expect(plugin.scope).toHaveProperty('initialize')
                 delete plugin.api
                 plugin.apiFileLoadTimestamps = []
                 plugin.configurationFileLoadTimestamps = []
                 delete plugin.scope
-                assert.deepEqual(plugin, test[8])
+                expect(plugin).toStrictEqual(expected)
             }
         }
-    })
-    test('loadConfiguration', ():void => {
-        for (const test:Array<any> of [
-            [{}, [], {package: {}}],
-            [{a: 2}, [], {package: {a: 2}}],
-            [{a: 2, b: 3}, [], {package: {a: 2, b: 3}}],
-            [{a: {value: 2}, b: 3}, ['a'], {package: {b: 3}, value: 2}],
-            [{a: {value: 2}, b: 3}, ['a', 'b'], {package: {b: 3}, value: 2}],
-            [
-                {a: {value: 2}, b: 3},
-                ['z', 'a', 'b'],
-                {package: {b: 3}, value: 2}
-            ],
-            [{a: 2, b: {value: 3}}, ['b', 'a'], {package: {a: 2}, value: 3}]
-        ])
-            assert.deepEqual(
-                PluginAPI.loadConfiguration(test[0], test[1]), test[2])
-    })
-    test('loadConfigurations', ():void => {
-        for (const test:Array<any> of [
-            [[], {}, configuration],
-            [[], {a: 2}, configuration],
-            [
-                [{configuration: {a: 2}}], {},
-                Tools.extend({a: 2}, configuration)
-            ]
-        ])
+    )
+    test.each([
+        [{}, [], {package: {}}],
+        [{a: 2}, [], {package: {a: 2}}],
+        [{a: 2, b: 3}, [], {package: {a: 2, b: 3}}],
+        [{a: {value: 2}, b: 3}, ['a'], {package: {b: 3}, value: 2}],
+        [{a: {value: 2}, b: 3}, ['a', 'b'], {package: {b: 3}, value: 2}],
+        [
+            {a: {value: 2}, b: 3},
+            ['z', 'a', 'b'],
+            {package: {b: 3}, value: 2}
+        ],
+        [{a: 2, b: {value: 3}}, ['b', 'a'], {package: {a: 2}, value: 3}]
+    ])(
+        'loadConfiguration(%p, %p) === %p',
+        (
+            packageConfiguration:PlainObject,
+            configurationPropertyNames:Array<string>,
+            expected:PlainObject
+        ):void =>
+            expect(PluginAPI.loadConfiguration(
+                packageConfiguration, configurationPropertyNames
+            )).toStrictEqual(expected)
+    )
+    test.each([
+        [[], {}, configuration],
+        [[], {a: 2}, configuration],
+        [
+            [{configuration: {a: 2}}], {},
+            Tools.extend({a: 2}, configuration)
+        ]
+    ])(
+        'loadConfigurations(%p, %p) === %p',
+        (
+            plugins:Array<Plugin>,
+            configuration:Configuration,
+            expected:Configuration
+        ):void =>
             /*
                 NOTE: "assert.deepEqual()" isn't compatible with the proxy
                 configuration object.
             */
-            /*assert.ok(Tools.equals(
-                PluginAPI.loadConfigurations(...test.slice(0, 2)), test[2]))
-    })
-    test('loadPluginFile', ():void => {
-        for (const test:Array<any> of [
-            [path.resolve(
+            expect(PluginAPI.loadConfigurations(plugins, configuration))
+                .toStrictEqual(expected)
+    )
+    test.each([
+        [
+            path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'
-            ), 'dummy', null, false, require('../dummyPlugin/package')],
-            ['unknown', 'dummy', {a: 2}, false, {a: 2}]
-        ])
-            assert.deepEqual(PluginAPI.loadFile(...test.slice(0, 4)), test[4])
-    })
-    test('loadAll', async ():Promise<void> => {
-        for (const test:Array<any> of [
-            [configuration, {}, {plugins: [], configuration}]
-        ])
+            ),
+            'dummy',
+            null,
+            false,
+            require('../dummyPlugin/package')
+        ],
+        ['unknown', 'dummy', {a: 2}, false, {a: 2}]
+    ])(
+        `loadFile('%s', '%s', %p, %p) === %p`,
+        (
+            filePath:string,
+            name:string,
+            fallbackScope:null|object,
+            log:boolean,
+            expected:object
+        ):void =>
+            expect(PluginAPI.loadFile(filePath, name, fallbackScope, log))
+                .toStrictEqual(expected)
+    )
+    test.each([
+        [configuration, {}, {plugins: [], configuration}]
+    ])('loadAll', async ():Promise<void> => {
+        for (const test:Array<any> of )
             try {
                 assert.deepEqual(
                     await PluginAPI.loadAll(...test.slice(0, 2)), test[2])
@@ -240,6 +320,7 @@ describe('pluginAPI', ():void => {
                 console.error(error)
             }
     })
+    /*
     test('removePropertiesInDynamicObjects', ():void => {
         for (const test:Array<any> of [
             [{}, {}],
