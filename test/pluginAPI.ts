@@ -309,18 +309,20 @@ describe('pluginAPI', ():void => {
             expect(PluginAPI.loadFile(filePath, name, fallbackScope, log))
                 .toStrictEqual(expected)
     )
+    /* TODO
     test.each([
         [configuration, {}, {plugins: [], configuration}]
-    ])('loadAll', async ():Promise<void> => {
-        for (const test:Array<any> of )
+    ])(
+        'loadAll()',
+        async ():Promise<void> => {
             try {
                 assert.deepEqual(
                     await PluginAPI.loadAll(...test.slice(0, 2)), test[2])
             } catch (error) {
                 console.error(error)
             }
-    })
-    /*
+        }
+    )
     test('removePropertiesInDynamicObjects', ():void => {
         for (const test:Array<any> of [
             [{}, {}],
