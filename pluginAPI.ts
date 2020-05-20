@@ -14,14 +14,18 @@
     endregion
 */
 // region imports
-import {spawnSync as spawnChildProcessSync} from 'child_process'
+import {
+    spawnSync as spawnChildProcessSync, SpawnSyncReturns
+} from 'child_process'
 import Tools from 'clientnode'
 import {Encoding, PlainObject, ValueOf} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
 import baseConfiguration from './configurator'
-import {Configuration, MetaConfiguration, Plugin, PluginChange} from './type'
+import {
+    Configuration, MetaConfiguration, Plugin, PluginChange, PluginConfiguration
+} from './type'
 // endregion
 /**
  * A dumm plugin interface with all available hooks.
@@ -247,7 +251,9 @@ export class PluginAPI {
      * @returns A list with plugin changes.
      */
     static hotReloadFiles(
-        type:'api'|'configuration', target:keyof Plugin, plugins:Array<Plugin>
+        type:'api'|'configuration',
+        target:'configuration'|'scope',
+        plugins:Array<Plugin>
     ):Array<PluginChange> {
         const pluginChanges:Array<PluginChange> = []
         for (const plugin of plugins)
@@ -274,9 +280,9 @@ export class PluginAPI {
                         const oldScope:ValueOf<Plugin> = plugin[target]
                         plugin[target] = PluginAPI.loadFile(
                             filePath, plugin.name, plugin[target]
-                        )
+                        ) as PlainObject
                         pluginChanges.push({
-                            newScope: plugin[target],
+                            newScope: plugin[target] as object,
                             oldScope,
                             plugin,
                             target
@@ -313,7 +319,7 @@ export class PluginAPI {
         encoding:Encoding = 'utf8'
     ):Promise<Plugin> {
         const configurationFilePaths:Array<string> = []
-        const packageConfiguration:Object = {}
+        const packageConfiguration:PlainObject = {}
         for (const fileName of metaConfiguration.fileNames) {
             const filePath:string = path.resolve(pluginPath, fileName)
             if (await Tools.isFile(filePath)) {
@@ -328,9 +334,11 @@ export class PluginAPI {
         const apiFilePaths:Array<string> = ['index.js']
         if (Object.keys(packageConfiguration).length) {
             const configuration:PlainObject = PluginAPI.loadConfiguration(
-                packageConfiguration, metaConfiguration.propertyNames)
-            if (configuration.package.hasOwnProperty('main'))
-                apiFilePaths[0] = configuration.package.main
+                packageConfiguration, metaConfiguration.propertyNames
+            )
+            if ((configuration.package as PlainObject).hasOwnProperty('main'))
+                apiFilePaths[0] =
+                    (configuration.package as PlainObject).main as string
             return await PluginAPI.loadAPI(
                 apiFilePaths,
                 pluginPath,
@@ -368,9 +376,9 @@ export class PluginAPI {
         pluginPath:string,
         name:string,
         internalName:string,
-        plugins:{[key:string]:Object},
+        plugins:{[key:string]:Plugin},
         encoding:Encoding = 'utf8',
-        configuration:null|PlainObject = null,
+        configuration:null|PluginConfiguration = null,
         configurationFilePaths:Array<string> = []
     ):Promise<Plugin> {
         let filePath:string = path.resolve(pluginPath, relativeFilePaths[0])
@@ -406,8 +414,10 @@ export class PluginAPI {
                 api = (
                     type:string, data:any, ...parameter:Array<any>
                 ):any => {
-                    if (type in plugins[name].scope)
-                        return plugins[name].scope[type](data, ...parameter)
+                    if (type in plugins[name].scope!)
+                        return (
+                            plugins[name].scope as {[key:string]:Function}
+                        )[type](data, ...parameter)
                     throw new Error(
                         `NotImplemented: API method "${type}" is not ` +
                         `implemented in plugin "${name}".`
@@ -416,7 +426,7 @@ export class PluginAPI {
             } else
                 // NOTE: Any executable file can represent an api.
                 api = (data:any, ...parameter:Array<any>):any => {
-                    const childProcessResult:PlainObject =
+                    const childProcessResult:SpawnSyncReturns<string> =
                         spawnChildProcessSync(
                             filePath,
                             Tools.arrayMake(parameter),
@@ -482,8 +492,8 @@ export class PluginAPI {
             packageConfiguration, -1, true)
         for (const propertyName of configurationPropertyNames)
             if (packageConfiguration.hasOwnProperty(propertyName)) {
-                const configuration:PlainObject =
-                    packageConfiguration[propertyName]
+                const configuration:PluginConfiguration =
+                    packageConfiguration[propertyName] as PluginConfiguration
                 configuration.package = packageConfigurationCopy
                 // NOTE: We should break the cycle here.
                 delete configuration.package[propertyName]
@@ -570,8 +580,8 @@ export class PluginAPI {
         name:string,
         fallbackScope:null|Object = null,
         log:boolean = true
-    ):Object {
-        let scope:Object
+    ):object {
+        let scope:object
         // Clear module cache to get actual new module scope.
         /* eslint-disable no-eval */
         const reference:string = eval('require').resolve(filePath)
@@ -598,7 +608,7 @@ export class PluginAPI {
                 )
         }
         if (scope.hasOwnProperty('default'))
-            return scope.default
+            return (scope as {default:object}).default
         return scope
     }
     /**
@@ -612,7 +622,7 @@ export class PluginAPI {
         configuration:Configuration;
         plugins:Array<Plugin>;
     }> {
-        const plugins:{[key:string]:Object} = {}
+        const plugins:{[key:string]:Plugin} = {}
         // If an application's main
         if (configuration.name !== 'webNode')
             plugins[configuration.name] = await PluginAPI.load(
@@ -627,26 +637,35 @@ export class PluginAPI {
             if (
                 configuration.plugin.directories.hasOwnProperty(type) &&
                 await Tools.isDirectory(
-                    configuration.plugin.directories[type].path)
+                    configuration.plugin.directories[
+                        type as 'external'|'internal'
+                    ].path
+                )
             ) {
                 const compiledRegularExpression:RegExp = new RegExp(
                     configuration.plugin.directories[
-                        type
+                        type as 'external'|'internal'
                     ].nameRegularExpressionPattern)
                 for (const pluginName of fileSystem.readdirSync(
-                    configuration.plugin.directories[type].path
+                    configuration.plugin.directories[
+                        type as 'external'|'internal'
+                    ].path
                 )) {
                     if (!(compiledRegularExpression).test(pluginName))
                         continue
                     const currentPluginPath:string = path.resolve(
-                        configuration.plugin.directories[type].path, pluginName
+                        configuration.plugin.directories[
+                            type as 'external'|'internal'
+                        ].path,
+                        pluginName
                     )
                     const internalName:string = pluginName.replace(
-                        compiledRegularExpression, (
-                            fullMatch:string, firstMatch:string|number
-                        ):string => (
-                            typeof firstMatch === 'string'
-                        ) ? firstMatch : fullMatch)
+                        compiledRegularExpression,
+                        (fullMatch:string, firstMatch:string|number):string =>
+                            typeof firstMatch === 'string' ?
+                                firstMatch :
+                                fullMatch
+                    )
                     plugins[pluginName] = await PluginAPI.load(
                         pluginName,
                         internalName,
@@ -666,9 +685,10 @@ export class PluginAPI {
                 if (configuration.interDependencies.hasOwnProperty(plugins[
                     pluginName
                 ].internalName))
-                    for (const name of [].concat(
+                    for (const name of ([] as Array<string>).concat(
                         configuration.interDependencies[
-                            plugins[pluginName].internalName]
+                            plugins[pluginName].internalName
+                        ] as ConcatArray<string>
                     ))
                         if (!temporaryPlugins[plugins[
                             pluginName
@@ -707,8 +727,10 @@ export class PluginAPI {
                     data.hasOwnProperty('__execute__'))
             )
                 delete data[key]
-            else if (typeof data[key] === 'object' && data[key] !== null)
-                PluginAPI.removePropertiesInDynamicObjects(data[key])
+            else if (Tools.isPlainObject(data[key]))
+                PluginAPI.removePropertiesInDynamicObjects(
+                    data[key] as PlainObject
+                )
         return data
     }
 }

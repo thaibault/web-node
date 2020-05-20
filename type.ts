@@ -62,8 +62,12 @@ export type Plugin = {
 }
 export type PluginChange = {
     newScope:object;
-    oldScope:object;
+    oldScope:null|object;
     plugin:Plugin;
+    target:'configuration'|'scope';
+}
+export type PluginConfiguration = PlainObject & {
+    dependencies?:Array<string>;
 }
 export type Services = {[key:string]:any}
 export type ServicePromises = {[key:string]:Promise<any>}

@@ -315,7 +315,7 @@ const encrypt:Function = (
         block[index] = perm[FP[index] - 1]
 }
 // Transform a string to an array of bytes.
-const strToBytes:Function = (string:string):Array<number> => {
+const stringToBytes:Function = (string:string):Array<number> => {
     const result:Array<number> = []
     for (let index:number = 0; index < string.length; index++)
         result[index] = string.charCodeAt(index)
@@ -332,16 +332,18 @@ const bytesToStr:Function = (bytes:Array<number>):string =>
  * @returns Returns crypted or encrypted buffer or string.
  */
 export function unixCrypt(
-    password:Array<number>|string,
-    salt:Array<number>|string = 'aa',
+    givenPassword:Array<number>|string,
+    givenSalt:Array<number>|string = 'aa',
     returnBytes:boolean = false
 ):Array<number>|string {
-    if (typeof password === 'string')
-        password = strToBytes(password)
-    if (typeof salt === 'string') {
-        if (salt === '')
-            salt = 'aa'
-        salt = strToBytes(salt)
+    const password:Array<number> = typeof givenPassword === 'string' ?
+        stringToBytes(givenPassword) :
+        givenPassword
+    let salt:Array<number> = givenSalt as Array<number>
+    if (typeof givenSalt === 'string') {
+        if (givenSalt === '')
+            givenSalt = 'aa'
+        salt = stringToBytes(givenSalt)
     }
     const block:Array<number> = []
     const iobuf:Array<number> = []
