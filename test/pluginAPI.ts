@@ -42,30 +42,42 @@ describe('pluginAPI', ():void => {
                 testConfiguration,
                 ...parameter
             )).toStrictEqual(expected)
-    )/*
-    test('callStackSynchronous', ():void => {
-        for (const test:Array<any> of [
-            [['test', []], null],
-            [['test', [], null], null],
-            [['test', [], {}], {}]
-            // TODO add more tests
-        ])
-            assert.deepEqual(PluginAPI.callStackSynchronous(
-                test[0][0], test[0][1], testConfiguration, ...test[0].slice(2)
-            ), test[1])
-    })
-    test('hotReloadAPIFile', async ():Promise<void> => {
-        for (const test:Array<any> of [
-            [[], []]
-            // TODO add more tests
-        ])
+    )
+    test.each([
+        [null, 'test', []],
+        [null, 'test', [], null],
+        [{}, 'test', [], {}]
+        // TODO add more tests
+    ])(
+        `%p === callStackSynchronous('%s', %p, ` +
+        `${Tools.represent(testConfiguration).substring(0, 80)}...}, ...%p)`,
+        (
+            expected:any,
+            hook:string,
+            plugins:Array<Plugin>,
+            ...parameter:Array<any>
+        ):void =>
+            expect(PluginAPI.callStackSynchronous(
+                hook, plugins, testConfiguration, ...parameter
+            )).toStrictEqual(expected)
+    )
+    test.each([
+        [[], []]
+        // TODO add more tests
+    ])(
+        'hotReloadAPIFile(%p) === %p',
+        async (
+            plugins:Array<Plugin>, expected:Array<Plugin>
+        ):Promise<void> => {
             try {
-                assert.deepEqual(
-                    await PluginAPI.hotReloadAPIFile(test[0]), test[1])
+                expect(await PluginAPI.hotReloadAPIFile(plugins))
+                    .toStrictEqual(expected)
             } catch (error) {
                 console.error(error)
             }
-    })
+        }
+    )
+    /*
     test('hotReloadConfigurationFile', async ():Promise<void> => {
         for (const test:Array<any> of [
             [[], [], []]
