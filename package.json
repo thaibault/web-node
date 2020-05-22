@@ -117,13 +117,6 @@
         }
       }
     },
-    "commandLine": {
-      "test": {
-        "environments": [
-          "node"
-        ]
-      }
-    },
     "exportFormat": {
       "external": "commonjs2",
       "self": "commonjs2"
