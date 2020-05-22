@@ -69,8 +69,8 @@ export type PluginChange = {
 export type PluginConfiguration = PlainObject & {
     dependencies?:Array<string>;
 }
-export type Services = {[key:string]:any}
-export type ServicePromises = {[key:string]:Promise<any>}
+export type Services = {[key:string]:object}
+export type ServicePromises = {[key:string]:Promise<object>}
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
