@@ -3057,9 +3057,9 @@ cli-width@^2.0.0:
   integrity sha512-GRMWDxpOB6Dgk2E5Uo+3eEBvtOOlimMmpbFiKuLFnQzYDavtLFY3K5ona41jgN/WdRZtG7utuVSVTL4HbZHGkw==
 
 clientnode@*:
-  version "3.0.431"
-  resolved "https://registry.yarnpkg.com/clientnode/-/clientnode-3.0.431.tgz#c48375f545e0df4708be1b3c5dd2ed19eca14287"
-  integrity sha512-PiKPJgptpOrOodMZ3YqClkrYHjfNdc7iBMq8Wm2M4AR0J9IUhzBuKVLJ43RF4hK0KkNDezQ9b0U0AB8+Om7W0Q==
+  version "3.0.433"
+  resolved "https://registry.yarnpkg.com/clientnode/-/clientnode-3.0.433.tgz#4c370e08fb6a16d1a7d54b06ef7ac106f0e3915d"
+  integrity sha512-5WM2plItCE5l3UhfwpVehoQ70WbNPyJjWhR2QwRISGPnXhd1Cxym3TruE90ATq6s8MBzt2Rm1h/f3pjCv/aT1w==
 
 cliui@^5.0.0:
   version "5.0.0"
@@ -5822,9 +5822,9 @@ js-tokens@^3.0.2:
   integrity sha1-mGbfOVECEw449/mWvOtlRDIJwls=
 
 js-yaml@^3.13.1:
-  version "3.13.1"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.13.1.tgz#aff151b30bfdfa8e49e05da22e7415e9dfa37847"
-  integrity sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==
+  version "3.14.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.0.tgz#a7a34170f26a21bb162424d8adacb4113a69e482"
+  integrity sha512-/4IbIeHcD9VMHFqDR/gQ7EdZdLimOvW2DdcxFjdyyZ9NsbS+ccrXqVWDtab/lRl5AlUqmpBx8EhPaWR+OtY17A==
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
@@ -8065,9 +8065,9 @@ source-map@^0.7.3:
   integrity sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==
 
 spdx-correct@^3.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-3.1.0.tgz#fb83e504445268f154b074e218c87c003cd31df4"
-  integrity sha512-lr2EZCctC2BNR7j7WzJ2FpDznxky1sjfxvvYEyzxNyb6lZXHODmEoJeFu4JupYlkfha1KZpJyoqiJ7pgA1qq8Q==
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-3.1.1.tgz#dece81ac9c1e6713e5f7d1b6f17d468fa53d89a9"
+  integrity sha512-cOYcUWwhCuHCXi49RhFRCyJEK3iPj1Ziz9DpViV3tbZOwXD49QzIN3MpOLJNxh2qwq2lJJZaKMVw9qNi4jTC0w==
   dependencies:
     spdx-expression-parse "^3.0.0"
     spdx-license-ids "^3.0.0"
@@ -8919,9 +8919,9 @@ webidl-conversions@^6.0.0:
   integrity sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==
 
 weboptimizer@*:
-  version "2.0.659"
-  resolved "https://registry.yarnpkg.com/weboptimizer/-/weboptimizer-2.0.659.tgz#5f9aa65fdbb0dbf898c26524cb7e522f29a2a955"
-  integrity sha512-ZNsAnls217GesumzQq4O/8bVB0zliiWRI+qweV7TlXEd05LIbCZJS72IkTxbz3zWcLAhxnjoygw8K0lh6ZgTaw==
+  version "2.0.661"
+  resolved "https://registry.yarnpkg.com/weboptimizer/-/weboptimizer-2.0.661.tgz#9c8e323b9954f7795e5c96a4f31e1d72d111f064"
+  integrity sha512-QvLKvFWL3wvJy2a5ryJd4w9ji0YXS52ivEs4tmccazviquVvXoobfJd+R9wBouZqL2+m06yZLfFrUMNMC61Ltg==
   dependencies:
     "@babel/core" "*"
     "@babel/plugin-proposal-class-properties" "*"
