@@ -25,7 +25,7 @@ import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
-declare var ORIGINAL_MAIN_MODULE:Object
+declare var ORIGINAL_MAIN_MODULE:object
 const handleError:Function = async (
     plugins:Array<Plugin>,
     configuration:Configuration,
@@ -186,9 +186,11 @@ const main:ProcedureFunction = async ():Promise<void> => {
         })
         // endregion
         try {
-            await Promise.all(Object.keys(servicePromises).map((
-                name:string
-            ):Object => servicePromises[name]))
+            await Promise.all(
+                Object.keys(servicePromises).map((name:string):object =>
+                    servicePromises[name]
+                )
+            )
         } catch (error) {}
         exitTriggered = true
         await PluginAPI.callStack(

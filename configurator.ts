@@ -108,7 +108,7 @@ Tools.extend(
     specificConfiguration
 )
 if (process.argv.length > 2) {
-    const result:null|Object = Tools.stringParseEncodedObject(
+    const result:null|object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration'
     )
     if (Tools.isPlainObject(result)) {

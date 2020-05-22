@@ -38,7 +38,7 @@ export default class Dummy {
      * @param services - An object with stored service instances.
      * @returns Given and maybe changed object of services.
      */
-    static error(error:Object, services:Services):Services {
+    static error(error:object, services:Services):Services {
         return services
     }
     /**
@@ -89,7 +89,7 @@ export default class Dummy {
      */
     static loadService(
         servicePromises:ServicePromises, services:Services
-    ):{name:string;promise:Promise<Object>} {
+    ):{name:string;promise:Promise<object>} {
         return {
             name: 'dummy',
             promise: new Promise((resolve:Function):void => resolve({}))
