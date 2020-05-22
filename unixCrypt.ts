@@ -1,4 +1,3 @@
-// @flow
 // #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 /** @module unixCrypt */
@@ -107,7 +106,7 @@ const setKey:Function = (key:Array<number>):void => {
      * First, generate C and D by permuting the key. The low order bit of each
      * 8-bit char is not used, so C and D are only 28 bits apiece.
      */
-    for (let index = 0; index < 28; index++) {
+    for (let index:number = 0; index < 28; index++) {
         C[index] = key[PC1_C[index] - 1]
         D[index] = key[PC1_D[index] - 1]
     }
@@ -316,7 +315,7 @@ const encrypt:Function = (
         block[index] = perm[FP[index] - 1]
 }
 // Transform a string to an array of bytes.
-const strToBytes:Function = (string:string):Array<number> => {
+const stringToBytes:Function = (string:string):Array<number> => {
     const result:Array<number> = []
     for (let index:number = 0; index < string.length; index++)
         result[index] = string.charCodeAt(index)
@@ -333,15 +332,18 @@ const bytesToStr:Function = (bytes:Array<number>):string =>
  * @returns Returns crypted or encrypted buffer or string.
  */
 export function unixCrypt(
-    password:Array<number>|string, salt:Array<number>|string = 'aa',
+    givenPassword:Array<number>|string,
+    givenSalt:Array<number>|string = 'aa',
     returnBytes:boolean = false
 ):Array<number>|string {
-    if (typeof password === 'string')
-        password = strToBytes(password)
-    if (typeof salt === 'string') {
-        if (salt === '')
-            salt = 'aa'
-        salt = strToBytes(salt)
+    const password:Array<number> = typeof givenPassword === 'string' ?
+        stringToBytes(givenPassword) :
+        givenPassword
+    let salt:Array<number> = givenSalt as Array<number>
+    if (typeof givenSalt === 'string') {
+        if (givenSalt === '')
+            givenSalt = 'aa'
+        salt = stringToBytes(givenSalt)
     }
     const block:Array<number> = []
     const iobuf:Array<number> = []

@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -18,13 +18,12 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
-import Tools from 'clientnode'
-import type {ProcedureFunction} from 'clientnode'
-import keypress from 'keypress'
+import Tools, {CloseEventNames} from 'clientnode'
+import {ProcedureFunction} from 'clientnode/type'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
-import type {Configuration, Plugin, ServicePromises, Services} from './type'
+import {Configuration, Plugin, ServicePromises, Services} from './type'
 // endregion
 declare var ORIGINAL_MAIN_MODULE:Object
 const handleError:Function = async (
@@ -52,10 +51,13 @@ const main:ProcedureFunction = async ():Promise<void> => {
     await PluginAPI.callStack('initialize', plugins, configuration)
     if (plugins.length)
         console.info(
-            'Loaded plugins: "' + plugins.map((plugin:Object):string =>
-                plugin.internalName
-            ).join('", "') + '".')
-    for (const type:string of ['pre', 'post'])
+            'Loaded plugins: "' +
+            plugins
+                .map((plugin:Plugin):string => plugin.internalName)
+                .join('", "') +
+            '".'
+        )
+    for (const type of ['pre', 'post'])
         await PluginAPI.callStack(
             `${type}ConfigurationLoaded`,
             plugins,
@@ -72,11 +74,12 @@ const main:ProcedureFunction = async ():Promise<void> => {
     try {
         // region start services
         services = await PluginAPI.callStack(
-            'preLoadService', plugins, configuration, services)
-        for (const name:string in services)
+            'preLoadService', plugins, configuration, services
+        )
+        for (const name in services)
             if (services.hasOwnProperty(name))
                 console.info(`Service "${name}" initialized.`)
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.api) {
                 services = await PluginAPI.callStack(
                     `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
@@ -87,7 +90,6 @@ const main:ProcedureFunction = async ():Promise<void> => {
                 )
                 let result:any
                 try {
-                    // IgnoreTypeCheck
                     result = await plugin.api.call(
                         PluginAPI,
                         'loadService',
@@ -157,15 +159,16 @@ const main:ProcedureFunction = async ():Promise<void> => {
                 )
             finished = true
         }
-        for (const closeEventName:string of Tools.closeEventNames)
+        for (const closeEventName of CloseEventNames)
+            // @ts-ignore: Accepts only "NodeSignals" but other strings are
+            // available.
             process.on(closeEventName, closeHandler)
-        // NOTE: Make "process.stdin" begin emitting events for any key press.
-        keypress(process.stdin)
         let cancelTriggered:boolean = false
-        process.stdin.on('keypress', async (
-            char:number, key:Object
-        ):Promise<void> => {
-            if (key && key.name === 'c' && key.ctrl) {
+        process.stdin.setRawMode(true)
+        process.stdin.resume()
+        process.stdin.setEncoding(configuration.encoding)
+        process.stdin.on('data', async (key:string):Promise<void> => {
+            if (key === '\u0003') {
                 if (cancelTriggered)
                     console.warn('Stopping ungracefully.')
                 else {
@@ -179,10 +182,8 @@ const main:ProcedureFunction = async ():Promise<void> => {
                 }
                 process.exit()
             }
+            process.stdout.write(key)
         })
-        if ('setRawMode' in process.stdin)
-            // IgnoreTypeCheck
-            process.stdin.setRawMode(true)
         // endregion
         try {
             await Promise.all(Object.keys(servicePromises).map((

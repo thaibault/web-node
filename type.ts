@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -13,8 +13,8 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-// region imports
-import type {PlainObject} from 'clientnode'
+// region impo rts
+import {Encoding, PlainObject} from 'clientnode/type'
 // endregion
 // region exports
 export type MetaConfiguration = {
@@ -27,7 +27,7 @@ export type Configuration = {
         type:string;
     };
     debug:boolean;
-    encoding:string;
+    encoding:Encoding;
     interDependencies:PlainObject;
     name:string;
     package:PlainObject;
@@ -48,7 +48,7 @@ export type Configuration = {
     [key:string]:any;
 }
 export type Plugin = {
-    api:?Function;
+    api:Function|null;
     apiFilePaths:Array<string>;
     apiFileLoadTimestamps:Array<number>;
     configuration:PlainObject;
@@ -58,11 +58,16 @@ export type Plugin = {
     internalName:string;
     name:string;
     path:string;
-    scope:?Object;
+    scope:null|object;
 }
 export type PluginChange = {
-    newPlugin:Plugin;
-    oldArtefact:Object;
+    newScope:object;
+    oldScope:null|object;
+    plugin:Plugin;
+    target:'configuration'|'scope';
+}
+export type PluginConfiguration = PlainObject & {
+    dependencies?:Array<string>;
 }
 export type Services = {[key:string]:any}
 export type ServicePromises = {[key:string]:Promise<any>}

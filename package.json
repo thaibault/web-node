@@ -16,16 +16,16 @@
     "management"
   ],
   "files": [
-    "configurator.js",
-    "index.js",
-    "pluginAPI.js",
-    "type.js",
-    "unixCrypt.compiled.js",
-    "unixCrypt.js"
+    "configurator.ts",
+    "index.ts",
+    "pluginAPI.ts",
+    "type.ts",
+    "unixCrypt.js",
+    "unixCrypt.ts"
   ],
-  "main": "index.compiled.js",
+  "main": "index.js",
   "bin": {
-    "webNode": "index.compiled.js"
+    "webNode": "index.js"
   },
   "repository": {
     "type": "git",
@@ -33,48 +33,50 @@
   },
   "scripts": {
     "build": "webOptimizer build",
-    "clear": "webOptimizer clear && rm --force log.txt &>/dev/null",
+    "check": "yarn check:types; yarn lint",
+    "check:types": "webOptimizer check:types",
+    "clear": "webOptimizer clear",
     "document": "webOptimizer document",
-    "lint": "webOptimizer check:type; webOptimizer lint",
+    "lint": "webOptimizer lint",
     "prepare": "yarn build",
     "report:coverage": "nyc report --reporter=text-lcov | coveralls",
-    "serve": "webOptimizer build && ./index.compiled.js",
+    "serve": "webOptimizer build && ./index.js",
     "start": "yarn serve",
-    "test": "cd dummyPlugin && yarn build && cd - && nyc webOptimizer test",
-    "test:plain": "cd dummyPlugin && yarn run build && cd - && webOptimizer test",
+    "test": "pushd dummyPlugin && yarn build && popd && webOptimizer test",
     "update": "yarn version --patch && yarn publish",
     "update:documentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch"
   },
   "dependencies": {
-    "clientnode": "*",
-    "keypress": "*"
-  },
-  "peerDependencies": {
-    "@babel/plugin-transform-runtime": "*"
+    "clientnode": "*"
   },
   "devDependencies": {
     "@babel/cli": "*",
+    "@types/jest": "*",
+    "@types/loader-utils": "*",
+    "@types/node": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "@typescript-eslint/parser": "*",
     "babel-eslint": "*",
-    "coveralls": "*",
     "documentation-website": "*",
     "eslint": "*",
     "eslint-config-google": "*",
-    "eslint-plugin-flowtype": "*",
     "eslint-plugin-jsdoc": "*",
-    "flow-bin": "*",
+    "jest": "*",
     "jsdoc": "*",
-    "nyc": "*",
-    "qunit": "*",
     "weboptimizer": "*",
     "webpack": "*",
     "webpack-cli": "*",
     "webpack-dev-server": "*"
   },
   "webNode": {
+    "context": {
+      "path": "./"
+    },
     "debug": false,
     "encoding": "utf8",
     "interDependencies": {},
+    "name": "webNode",
     "plugin": {
       "configuration": {
         "fileNames": [
@@ -112,13 +114,20 @@
         }
       }
     },
+    "commandLine": {
+      "test": {
+        "environments": [
+          "node"
+        ]
+      }
+    },
     "exportFormat": {
       "external": "commonjs2",
       "self": "commonjs2"
     },
     "injection": {
       "entry": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: './index', unixCrypt: './unixCrypt'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
       }
     },
     "module": {

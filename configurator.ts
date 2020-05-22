@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -15,13 +15,14 @@
 */
 // region imports
 import Tools from 'clientnode'
-import type {PlainObject} from 'clientnode'
+import {PlainObject} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
-import type {Configuration} from './type'
+import {Configuration} from './type'
 import PluginAPI from './pluginAPI'
-import packageConfiguration from './package'
+import packageConfiguration from './package.json'
+// endregion
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -66,17 +67,18 @@ else
 let specificConfiguration:PlainObject = {}
 try {
     /* eslint-disable no-eval */
-    specificConfiguration = eval('require')(path.join(
-        packageConfiguration.webNode.context.path, 'package'))
+    specificConfiguration = eval('require')(
+        path.join(packageConfiguration.webNode.context.path, 'package')
+    )
     /* eslint-enable no-eval */
 } catch (error) {
     packageConfiguration.webNode.context.path = process.cwd()
 }
 const name:string =
-    specificConfiguration.hasOwnProperty('documentationWebsite') &&
-    specificConfiguration.documentationWebsite.name ||
-    specificConfiguration.name
-specificConfiguration = specificConfiguration.webNode || {}
+    specificConfiguration.documentationWebsite &&
+    (specificConfiguration.documentationWebsite as {name?:string}).name ||
+    specificConfiguration.name as string
+specificConfiguration = specificConfiguration.webNode as PlainObject || {}
 if (name)
     specificConfiguration.name = name
 // endregion
@@ -96,8 +98,9 @@ const scope:{[key:string]:any} = {
     now,
     nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
 }
-export let configuration:Configuration = Tools.evaluateDynamicDataStructure(
-    packageConfiguration.webNode, scope)
+export let configuration:Configuration = Tools.evaluateDynamicData(
+    packageConfiguration.webNode, scope
+)
 delete packageConfiguration.webNode
 Tools.extend(
     true,
@@ -105,35 +108,22 @@ Tools.extend(
     specificConfiguration
 )
 if (process.argv.length > 2) {
-    const result:?Object = Tools.stringParseEncodedObject(
-        process.argv[process.argv.length - 1], configuration, 'configuration')
+    const result:null|Object = Tools.stringParseEncodedObject(
+        process.argv[process.argv.length - 1], configuration, 'configuration'
+    )
     if (Tools.isPlainObject(result)) {
         Tools.extend(true, Tools.modifyObject(configuration, result), result)
         configuration.runtimeConfiguration = result
     }
-}
-const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
-    for (const key:string in data)
-        if (
-            data.hasOwnProperty(key) &&
-            !['__evaluate__', '__execute__'].includes(key) &&
-            (
-                data.hasOwnProperty('__evaluate__') ||
-                data.hasOwnProperty('__execute__')
-            )
-        )
-            delete data[key]
-        else if (typeof data[key] === 'object' && data[key] !== null)
-            removePropertiesInDynamicObjects(data[key])
-    return data
 }
 /*
     NOTE: We need to copy the configuration to avoid operating on deduplicated
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
-configuration = Tools.evaluateDynamicDataStructure(
-    removePropertiesInDynamicObjects(configuration), scope)
+configuration = Tools.evaluateDynamicData(
+    Tools.removeEvaluationInDynamicData(configuration), scope
+)
 configuration.package = packageConfiguration
 configuration = Tools.copy(configuration, -1, true)
 export default configuration

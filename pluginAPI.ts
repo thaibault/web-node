@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -14,15 +14,17 @@
     endregion
 */
 // region imports
-import {spawnSync as spawnChildProcessSync} from 'child_process'
+import {
+    spawnSync as spawnChildProcessSync, SpawnSyncReturns
+} from 'child_process'
 import Tools from 'clientnode'
-import type {PlainObject} from 'clientnode'
+import {Encoding, PlainObject, ValueOf} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
 import baseConfiguration from './configurator'
-import type {
-    Configuration, MetaConfiguration, Plugin, PluginChange
+import {
+    Configuration, MetaConfiguration, Plugin, PluginChange, PluginConfiguration
 } from './type'
 // endregion
 /**
@@ -32,7 +34,7 @@ export class PluginAPI {
     /**
      * Calls all plugin methods for given trigger description asynchrone and
      * waits for their resolved promises.
-     * @param type - Type of trigger.
+     * @param hook - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
@@ -42,7 +44,7 @@ export class PluginAPI {
      * promise holding given potentially modified data.
      */
     static async callStack(
-        type:string,
+        hook:string,
         plugins:Array<Plugin>,
         configuration:Configuration,
         data:any = null,
@@ -51,15 +53,17 @@ export class PluginAPI {
         if (configuration.plugin.hotReloading) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
                 PluginAPI.hotReloadConfigurationFile(
-                    plugins, configuration.plugin.configuration.propertyNames)
+                    plugins, configuration.plugin.configuration.propertyNames
+                )
             if (pluginsWithChangedConfiguration.length) {
                 if (configuration.debug)
                     console.info(
                         'Configuration for "' +
-                        `${pluginsWithChangedConfiguration.map((
-                            plugin:Plugin
-                        ):string => plugin.name).join('", "')}" ` +
-                        'has been changed: reloading initialized.')
+                        pluginsWithChangedConfiguration
+                            .map((plugin:Plugin):string => plugin.name)
+                            .join('", "') +
+                        '" has been changed: reloading initialized.'
+                    )
                 PluginAPI.callStack(
                     'preConfigurationLoaded',
                     plugins,
@@ -94,13 +98,16 @@ export class PluginAPI {
                 )
             }
         }
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.api) {
                 let result:any
                 try {
                     result = await plugin.api.call(
-                        PluginAPI, type, data, ...parameter.concat([
-                            configuration, plugins]))
+                        PluginAPI,
+                        hook,
+                        data,
+                        ...parameter.concat([configuration, plugins])
+                    )
                 } catch (error) {
                     if (
                         'message' in error &&
@@ -115,20 +122,21 @@ export class PluginAPI {
                                 `(${plugin.name}) `
                         ) +
                         `throws: ${Tools.represent(error)} during ` +
-                        `asynchrone hook "${type}".`
+                        `asynchrone hook "${hook}".`
                     )
                 }
                 data = result
                 if (configuration.debug)
                     console.info(
-                        `Ran asynchrone hook "${type}" for plugin "` +
-                        `${plugin.name}".`)
+                        `Ran asynchrone hook "${hook}" for plugin "` +
+                        `${plugin.name}".`
+                    )
             }
         return data
     }
     /**
      * Calls all plugin methods for given trigger description synchrone.
-     * @param type - Type of trigger.
+     * @param hook - Hook to trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
@@ -137,19 +145,22 @@ export class PluginAPI {
      * @returns Given potentially modified data.
      */
     static callStackSynchronous(
-        type:string,
+        hook:string,
         plugins:Array<Plugin>,
         configuration:Configuration,
         data:any = null,
         ...parameter:Array<any>
     ):any {
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.api) {
                 let result:any
                 try {
                     result = plugin.api.call(
-                        PluginAPI, type, data, ...parameter.concat([
-                            configuration, plugins]))
+                        PluginAPI,
+                        hook,
+                        data,
+                        ...parameter.concat(configuration, plugins)
+                    )
                 } catch (error) {
                     if ('message' in error && error.message.startsWith(
                         'NotImplemented:'
@@ -163,14 +174,15 @@ export class PluginAPI {
                                 `(${plugin.name}) `
                         ) +
                         `throws: ${Tools.represent(error)} during ` +
-                        `synchrone hook "${type}".`
+                        `synchrone hook "${hook}".`
                     )
                 }
                 data = result
                 if (configuration.debug)
                     console.info(
-                        `Ran synchrone hook "${type}" for plugin "` +
-                        `${plugin.name}".`)
+                        `Ran synchrone hook "${hook}" for plugin "` +
+                        `${plugin.name}".`
+                    )
             }
         return data
     }
@@ -182,25 +194,26 @@ export class PluginAPI {
      */
     static hotReloadAPIFile(plugins:Array<Plugin>):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
-        const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
-            'apiFile', 'scope', plugins)
-        for (const pluginChange:PluginChange of pluginChanges) {
+        const pluginChanges:Array<PluginChange> =
+            PluginAPI.hotReloadFiles('api', 'scope', plugins)
+        for (const pluginChange of pluginChanges) {
             // NOTE: We have to migrate old plugin api's scope state.
-            for (const name:string in pluginChange.oldArtefact)
+            for (const name in pluginChange.oldScope)
                 if (
-                    pluginChange.oldArtefact.hasOwnProperty(name) &&
-                    // IgnoreTypeCheck
-                    pluginChange.newPlugin.scope.hasOwnProperty(name) &&
+                    pluginChange.oldScope.hasOwnProperty(name) &&
+                    pluginChange.newScope.hasOwnProperty(name) &&
                     !(
-                        Tools.isFunction(pluginChange.oldArtefact[name]) ||
-                        // IgnoreTypeCheck
-                        Tools.isFunction(pluginChange.newPlugin.scope[name])
+                        Tools.isFunction((
+                            pluginChange.oldScope as {[key:string]:unknown}
+                        )[name]) ||
+                        Tools.isFunction((
+                            pluginChange.newScope as {[key:string]:unknown}
+                        )[name])
                     )
                 )
-                    // IgnoreTypeCheck
-                    pluginChange.newPlugin.scope[name] =
-                        pluginChange.oldArtefact[name]
-            pluginsWithChangedFiles.push(pluginChange.newPlugin)
+                    (pluginChange.newScope as {[key:string]:unknown}) =
+                        pluginChange.oldScope as {[key:string]:unknown}
+            pluginsWithChangedFiles.push(pluginChange.plugin)
         }
         return pluginsWithChangedFiles
     }
@@ -217,13 +230,14 @@ export class PluginAPI {
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
-            'configurationFile', 'configuration', plugins)
-        for (const pluginChange:PluginChange of pluginChanges) {
-            pluginChange.newPlugin.configuration = PluginAPI.loadConfiguration(
-                pluginChange.newPlugin.configuration,
+            'configuration', 'configuration', plugins
+        )
+        for (const change of pluginChanges) {
+            change.plugin.configuration = PluginAPI.loadConfiguration(
+                change.plugin.configuration,
                 configurationPropertyNames
             )
-            pluginsWithChangedFiles.push(pluginChange.newPlugin)
+            pluginsWithChangedFiles.push(change.plugin)
         }
         return pluginsWithChangedFiles
     }
@@ -231,37 +245,54 @@ export class PluginAPI {
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (timestamp has changed).
      * @param type - Plugin file type to search for updates.
-     * @param targetType - Property name existing in plugin meta informations
+     * @param target - Property name existing in plugin meta informations
      * objects which should be updated.
      * @param plugins - List of plugins to search for updates in.
      * @returns A list with plugin changes.
      */
     static hotReloadFiles(
-        type:string, targetType:string, plugins:Array<Plugin>
+        type:'api'|'configuration',
+        target:'configuration'|'scope',
+        plugins:Array<Plugin>
     ):Array<PluginChange> {
         const pluginChanges:Array<PluginChange> = []
-        for (const plugin:Plugin of plugins)
-            if (plugin[targetType]) {
+        for (const plugin of plugins)
+            if (plugin[target]) {
                 let index:number = 0
-                for (const filePath:string of plugin[`${type}Paths`]) {
-                    const timestamp:number = fileSystem.statSync(
-                        filePath
-                    ).mtime.getTime()
-                    if (plugin[`${type}LoadTimestamps`][index] < timestamp) {
+                for (const filePath of plugin[
+                    `${type}FilePaths` as
+                        'apiFilePaths'|'configurationFilePaths'
+                ]) {
+                    const timestamp:number =
+                        fileSystem.statSync(filePath).mtime.getTime()
+                    if (
+                        plugin[
+                            `${type}FileLoadTimestamps` as
+                                'apiFileLoadTimestamps'|
+                                'configurationFileLoadTimestamps'
+                        ][index] < timestamp
+                    ) {
                         // Enforce to reload new file version.
                         /* eslint-disable no-eval */
-                        delete eval('require').cache[eval('require').resolve(
-                            filePath)]
+                        delete eval('require')
+                            .cache[eval('require').resolve(filePath)]
                         /* eslint-enable no-eval */
-                        const oldPluginArtefact:Object = plugin[targetType]
-                        plugin[targetType] = PluginAPI.loadFile(
-                            filePath, plugin.name, plugin[targetType])
+                        const oldScope:ValueOf<Plugin> = plugin[target]
+                        plugin[target] = PluginAPI.loadFile(
+                            filePath, plugin.name, plugin[target]
+                        ) as PlainObject
                         pluginChanges.push({
-                            newPlugin: plugin,
-                            oldArtefact: oldPluginArtefact
+                            newScope: plugin[target] as object,
+                            oldScope,
+                            plugin,
+                            target
                         })
                     }
-                    plugin[`${type}LoadTimestamps`][index] = timestamp
+                    plugin[
+                        `${type}FileLoadTimestamps` as
+                            'apiFileLoadTimestamps'|
+                            'configurationFileLoadTimestamps'
+                    ][index] = timestamp
                     index += 1
                 }
             }
@@ -285,11 +316,11 @@ export class PluginAPI {
         plugins:{[key:string]:Plugin},
         metaConfiguration:MetaConfiguration,
         pluginPath:string,
-        encoding:string = 'utf8'
+        encoding:Encoding = 'utf8'
     ):Promise<Plugin> {
         const configurationFilePaths:Array<string> = []
-        const packageConfiguration:Object = {}
-        for (const fileName:string of metaConfiguration.fileNames) {
+        const packageConfiguration:PlainObject = {}
+        for (const fileName of metaConfiguration.fileNames) {
             const filePath:string = path.resolve(pluginPath, fileName)
             if (await Tools.isFile(filePath)) {
                 Tools.extend(
@@ -303,9 +334,11 @@ export class PluginAPI {
         const apiFilePaths:Array<string> = ['index.js']
         if (Object.keys(packageConfiguration).length) {
             const configuration:PlainObject = PluginAPI.loadConfiguration(
-                packageConfiguration, metaConfiguration.propertyNames)
-            if (configuration.package.hasOwnProperty('main'))
-                apiFilePaths[0] = configuration.package.main
+                packageConfiguration, metaConfiguration.propertyNames
+            )
+            if ((configuration.package as PlainObject).hasOwnProperty('main'))
+                apiFilePaths[0] =
+                    (configuration.package as PlainObject).main as string
             return await PluginAPI.loadAPI(
                 apiFilePaths,
                 pluginPath,
@@ -318,7 +351,8 @@ export class PluginAPI {
             )
         }
         return await PluginAPI.loadAPI(
-            apiFilePaths, pluginPath, name, internalName, plugins, encoding)
+            apiFilePaths, pluginPath, name, internalName, plugins, encoding
+        )
     }
     /**
      * Load given plugin api file in given path and generates a plugin
@@ -342,15 +376,15 @@ export class PluginAPI {
         pluginPath:string,
         name:string,
         internalName:string,
-        plugins:{[key:string]:Object},
-        encoding:string = 'utf8',
-        configuration:?PlainObject = null,
+        plugins:{[key:string]:Plugin},
+        encoding:Encoding = 'utf8',
+        configuration:null|PluginConfiguration = null,
         configurationFilePaths:Array<string> = []
     ):Promise<Plugin> {
         let filePath:string = path.resolve(pluginPath, relativeFilePaths[0])
         if (!(await Tools.isFile(filePath)))
             // Determine entry file if given one does not exist.
-            for (const fileName:string of fileSystem.readdirSync(pluginPath))
+            for (const fileName of fileSystem.readdirSync(pluginPath))
                 if (
                     !configurationFilePaths.map((filePath:string):string =>
                         path.basename(filePath)
@@ -363,7 +397,7 @@ export class PluginAPI {
                     )))
                         break
                 }
-        let api:?Function = null
+        let api:Function|null = null
         let nativeAPI:boolean = false
         /*
             NOTE: We only want to register api's for web node plugins. Others
@@ -380,16 +414,19 @@ export class PluginAPI {
                 api = (
                     type:string, data:any, ...parameter:Array<any>
                 ):any => {
-                    if (type in plugins[name].scope)
-                        return plugins[name].scope[type](data, ...parameter)
+                    if (type in plugins[name].scope!)
+                        return (
+                            plugins[name].scope as {[key:string]:Function}
+                        )[type](data, ...parameter)
                     throw new Error(
                         `NotImplemented: API method "${type}" is not ` +
-                        `implemented in plugin "${name}".`)
+                        `implemented in plugin "${name}".`
+                    )
                 }
             } else
                 // NOTE: Any executable file can represent an api.
                 api = (data:any, ...parameter:Array<any>):any => {
-                    const childProcessResult:PlainObject =
+                    const childProcessResult:SpawnSyncReturns<string> =
                         spawnChildProcessSync(
                             filePath,
                             Tools.arrayMake(parameter),
@@ -453,10 +490,10 @@ export class PluginAPI {
     ):PlainObject {
         const packageConfigurationCopy:PlainObject = Tools.copy(
             packageConfiguration, -1, true)
-        for (const propertyName:string of configurationPropertyNames)
+        for (const propertyName of configurationPropertyNames)
             if (packageConfiguration.hasOwnProperty(propertyName)) {
-                const configuration:PlainObject =
-                    packageConfiguration[propertyName]
+                const configuration:PluginConfiguration =
+                    packageConfiguration[propertyName] as PluginConfiguration
                 configuration.package = packageConfigurationCopy
                 // NOTE: We should break the cycle here.
                 delete configuration.package[propertyName]
@@ -481,11 +518,11 @@ export class PluginAPI {
         plugins:Array<Plugin>, configuration:Configuration
     ):Configuration {
         // First clear current configuration but reuse old given reference.
-        for (const key:string in configuration)
+        for (const key in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
         Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:PlainObject = Tools.copy(
                     plugin.configuration, -1, true)
@@ -503,8 +540,8 @@ export class PluginAPI {
         const now:Date = new Date()
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
-        configuration = Tools.evaluateDynamicDataStructure(
-            PluginAPI.removePropertiesInDynamicObjects(configuration),
+        configuration = Tools.evaluateDynamicData(
+            Tools.removeEvaluationInDynamicData(configuration),
             {
                 currentPath: process.cwd(),
                 fileSystem,
@@ -523,7 +560,7 @@ export class PluginAPI {
             NOTE: We have to replace the resolved plugin configurations in the
             plugin data structure.
         */
-        for (const plugin:Plugin of plugins)
+        for (const plugin of plugins)
             if (configuration.hasOwnProperty(plugin.internalName))
                 plugin.configuration = configuration[plugin.internalName]
         configuration.package = packageConfiguration
@@ -541,16 +578,21 @@ export class PluginAPI {
     static loadFile(
         filePath:string,
         name:string,
-        fallbackScope:?Object = null,
+        fallbackScope:null|object = null,
         log:boolean = true
-    ):Object {
-        let scope:Object
+    ):object {
+        let reference:string|undefined
+        try {
+            /* eslint-disable no-eval */
+            reference = eval('require').resolve(filePath)
+            /* eslint-enable no-eval */
+        } catch (error) {}
         // Clear module cache to get actual new module scope.
-        /* eslint-disable no-eval */
-        const reference:string = eval('require').resolve(filePath)
-        if (reference in eval('require').cache)
+        if (reference && reference in eval('require').cache)
+            /* eslint-disable no-eval */
             delete eval('require').cache[reference]
-        /* eslint-enable no-eval */
+            /* eslint-enable no-eval */
+        let scope:object
         try {
             /* eslint-disable no-eval */
             scope = eval('require')(filePath)
@@ -571,7 +613,7 @@ export class PluginAPI {
                 )
         }
         if (scope.hasOwnProperty('default'))
-            return scope.default
+            return (scope as {default:object}).default
         return scope
     }
     /**
@@ -585,7 +627,7 @@ export class PluginAPI {
         configuration:Configuration;
         plugins:Array<Plugin>;
     }> {
-        const plugins:{[key:string]:Object} = {}
+        const plugins:{[key:string]:Plugin} = {}
         // If an application's main
         if (configuration.name !== 'webNode')
             plugins[configuration.name] = await PluginAPI.load(
@@ -596,30 +638,39 @@ export class PluginAPI {
                 configuration.context.path,
                 configuration.encoding
             )
-        for (const type:string in configuration.plugin.directories)
+        for (const type in configuration.plugin.directories)
             if (
                 configuration.plugin.directories.hasOwnProperty(type) &&
                 await Tools.isDirectory(
-                    configuration.plugin.directories[type].path)
+                    configuration.plugin.directories[
+                        type as 'external'|'internal'
+                    ].path
+                )
             ) {
                 const compiledRegularExpression:RegExp = new RegExp(
                     configuration.plugin.directories[
-                        type
+                        type as 'external'|'internal'
                     ].nameRegularExpressionPattern)
-                for (const pluginName:string of fileSystem.readdirSync(
-                    configuration.plugin.directories[type].path
+                for (const pluginName of fileSystem.readdirSync(
+                    configuration.plugin.directories[
+                        type as 'external'|'internal'
+                    ].path
                 )) {
                     if (!(compiledRegularExpression).test(pluginName))
                         continue
                     const currentPluginPath:string = path.resolve(
-                        configuration.plugin.directories[type].path, pluginName
+                        configuration.plugin.directories[
+                            type as 'external'|'internal'
+                        ].path,
+                        pluginName
                     )
                     const internalName:string = pluginName.replace(
-                        compiledRegularExpression, (
-                            fullMatch:string, firstMatch:string|number
-                        ):string => (
-                            typeof firstMatch === 'string'
-                        ) ? firstMatch : fullMatch)
+                        compiledRegularExpression,
+                        (fullMatch:string, firstMatch:string|number):string =>
+                            typeof firstMatch === 'string' ?
+                                firstMatch :
+                                fullMatch
+                    )
                     plugins[pluginName] = await PluginAPI.load(
                         pluginName,
                         internalName,
@@ -631,7 +682,7 @@ export class PluginAPI {
                 }
             }
         const temporaryPlugins:{[key:string]:Array<string>} = {}
-        for (const pluginName:string in plugins)
+        for (const pluginName in plugins)
             if (plugins.hasOwnProperty(pluginName)) {
                 temporaryPlugins[plugins[
                     pluginName
@@ -639,10 +690,11 @@ export class PluginAPI {
                 if (configuration.interDependencies.hasOwnProperty(plugins[
                     pluginName
                 ].internalName))
-                    for (const name:string of [].concat(
+                    for (const name of ([] as Array<string>).concat(
                         configuration.interDependencies[
-                            plugins[pluginName].internalName])
-                    )
+                            plugins[pluginName].internalName
+                        ] as ConcatArray<string>
+                    ))
                         if (!temporaryPlugins[plugins[
                             pluginName
                         ].internalName].includes(name))
@@ -651,10 +703,8 @@ export class PluginAPI {
                             ].internalName].push(name)
             }
         const sortedPlugins:Array<Plugin> = []
-        for (const pluginName:string of Tools.arraySortTopological(
-            temporaryPlugins
-        ))
-            for (const name:string in plugins)
+        for (const pluginName of Tools.arraySortTopological(temporaryPlugins))
+            for (const name in plugins)
                 if (plugins.hasOwnProperty(name))
                     if ([plugins[name].internalName, name].includes(
                         pluginName
@@ -667,24 +717,6 @@ export class PluginAPI {
                 sortedPlugins, configuration),
             plugins: sortedPlugins
         }
-    }
-    /**
-     * Removes properties in objects where a dynamic indicator lives.
-     * @param data - Object to traverse recursively.
-     * @returns Given object with removed properties.
-     */
-    static removePropertiesInDynamicObjects(data:PlainObject):PlainObject {
-        for (const key:string in data)
-            if (
-                data.hasOwnProperty(key) &&
-                !['__evaluate__', '__execute__'].includes(key) && (
-                    data.hasOwnProperty('__evaluate__') ||
-                    data.hasOwnProperty('__execute__'))
-            )
-                delete data[key]
-            else if (typeof data[key] === 'object' && data[key] !== null)
-                PluginAPI.removePropertiesInDynamicObjects(data[key])
-        return data
     }
 }
 export default PluginAPI

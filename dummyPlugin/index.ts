@@ -1,4 +1,4 @@
-// @flow
+// #!/usr/bin/env node
 // -*- coding: utf-8 -*-
 'use strict'
 /* !
@@ -8,19 +8,18 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
-    naming 3.0 unported license.
-    See https://creativecommons.org/licenses/by/3.0/deed.de
+    This library written by Torben Sickert stand under a creative commons naming
+    3.0 unported license. see http://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
 // region imports
-import type {Configuration, Plugin, ServicePromises, Services} from '../type'
+// NOTE: Only needed for debugging this file.
+import {Configuration, Plugin, ServicePromises, Services} from '../type'
 // endregion
 /**
  * Dummy plugin interface implementing all available hooks.
  */
-export class Dummy {
-    /* eslint-disable no-unused-vars */
+export default class Dummy {
     /**
      * Triggered hook when at least one plugin has an api file which has been
      * changed and is reloaded. Asynchronous tasks are allowed and a returning
@@ -56,7 +55,8 @@ export class Dummy {
      * plugins are determined and sorted in there dependency specific
      * typological order. Asynchronous tasks are allowed and a returning
      * promise will be respected.
-     * @param configuration - Mutable and extended by each plugin object.
+     * @param configuration - Mutable by plugins extended configuration object.
+     * extended by each plugin configuration.
      * @param plugins - Topological sorted list of plugins.
      * @returns Will be ignored.
      */
@@ -64,6 +64,16 @@ export class Dummy {
         configuration:Configuration, plugins:Array<Plugin>
     ):Array<Plugin> {
         return plugins
+    }
+    /**
+     * Plugins are initialized now and plugins should initialize their
+     * continues running services (if they have one). Asynchronous tasks are
+     * allowed and a returning promise will be respected.
+     * @param services - An object with stored service instances.
+     * @returns Given and maybe extended object of services.
+     */
+    static preLoadService(services:Services):Services {
+        return services
     }
     /**
      * Plugins have initialized their continues running service and should
@@ -84,21 +94,6 @@ export class Dummy {
             name: 'dummy',
             promise: new Promise((resolve:Function):void => resolve({}))
         }
-    }
-    /**
-     * Triggered hook when at least one plugin has a new configuration file and
-     * configuration object has been changed. Asynchronous tasks are allowed
-     * and a returning promise will be respected.
-     * @param configuration - Updated configuration object.
-     * @param pluginsWithChangedConfiguration - List of plugins which have a
-     * changed plugin configuration.
-     * @returns New configuration object to use.
-     */
-    static postConfigurationLoaded(
-        configuration:Configuration,
-        pluginsWithChangedConfiguration:Array<Plugin>
-    ):Configuration {
-        return configuration
     }
     /**
      * Plugins have launched their continues running services and returned a
@@ -129,14 +124,19 @@ export class Dummy {
         return configuration
     }
     /**
-     * Plugins are initialized now and plugins should initialize their
-     * continues running services (if they have one). Asynchronous tasks are
-     * allowed and a returning promise will be respected.
-     * @param services - An object with stored service instances.
-     * @returns Given and maybe extended object of services.
+     * Triggered hook when at least one plugin has a new configuration file and
+     * configuration object has been changed. Asynchronous tasks are allowed
+     * and a returning promise will be respected.
+     * @param configuration - Updated configuration object.
+     * @param pluginsWithChangedConfiguration - List of plugins which have a
+     * changed plugin configuration.
+     * @returns New configuration object to use.
      */
-    static preLoadService(services:Services):Services {
-        return services
+    static postConfigurationLoaded(
+        configuration:Configuration,
+        pluginsWithChangedConfiguration:Array<Plugin>
+    ):Configuration {
+        return configuration
     }
     /**
      * Triggers if application will be closed soon. Asynchronous tasks are
@@ -147,9 +147,7 @@ export class Dummy {
     static shouldExit(services:Services):Services {
         return services
     }
-    /* eslint-enable no-unused-vars */
 }
-export default Dummy
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:
