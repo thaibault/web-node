@@ -309,33 +309,22 @@ describe('pluginAPI', ():void => {
             expect(PluginAPI.loadFile(filePath, name, fallbackScope, log))
                 .toStrictEqual(expected)
     )
-    /* TODO
     test.each([
-        [configuration, {}, {plugins: [], configuration}]
+        [configuration, {plugins: [], configuration}]
     ])(
-        'loadAll()',
-        async ():Promise<void> => {
+        'loadAll(%p) === %p',
+        async (
+            configuration:Configuration,
+            expected:{configuration:Configuration;plugins:Array<Plugin>}
+        ):Promise<void> => {
             try {
-                assert.deepEqual(
-                    await PluginAPI.loadAll(...test.slice(0, 2)), test[2])
+                expect(await PluginAPI.loadAll(configuration))
+                    .toStrictEqual(expected)
             } catch (error) {
                 console.error(error)
             }
         }
     )
-    test('removePropertiesInDynamicObjects', ():void => {
-        for (const test:Array<any> of [
-            [{}, {}],
-            [{a: 2}, {a: 2}],
-            [{a: 2, __evaluate__: ''}, {__evaluate__: ''}],
-            [
-                {a: 2, b: {__evaluate__: '', c: 4}},
-                {a: 2, b: {__evaluate__: ''}}
-            ]
-        ])
-            assert.deepEqual(
-                PluginAPI.removePropertiesInDynamicObjects(test[0]), test[1])
-    })*/
 })
 // endregion
 // region vim modline

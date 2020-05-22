@@ -22,6 +22,7 @@ import path from 'path'
 import {Configuration} from './type'
 import PluginAPI from './pluginAPI'
 import packageConfiguration from './package.json'
+// endregion
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -97,8 +98,9 @@ const scope:{[key:string]:any} = {
     now,
     nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
 }
-export let configuration:Configuration = Tools.evaluateDynamicDataStructure(
-    packageConfiguration.webNode, scope)
+export let configuration:Configuration = Tools.evaluateDynamicData(
+    packageConfiguration.webNode, scope
+)
 delete packageConfiguration.webNode
 Tools.extend(
     true,
@@ -114,28 +116,14 @@ if (process.argv.length > 2) {
         configuration.runtimeConfiguration = result
     }
 }
-const removePropertiesInDynamicObjects = (data:PlainObject):PlainObject => {
-    for (const key in data)
-        if (
-            data.hasOwnProperty(key) &&
-            !['__evaluate__', '__execute__'].includes(key) &&
-            (
-                data.hasOwnProperty('__evaluate__') ||
-                data.hasOwnProperty('__execute__')
-            )
-        )
-            delete data[key]
-        else if (Tools.isPlainObject(data[key]))
-            removePropertiesInDynamicObjects(data[key] as PlainObject)
-    return data
-}
 /*
     NOTE: We need to copy the configuration to avoid operating on deduplicated
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
-configuration = Tools.evaluateDynamicDataStructure(
-    removePropertiesInDynamicObjects(configuration), scope)
+configuration = Tools.evaluateDynamicData(
+    Tools.removeEvaluationInDynamicData(configuration), scope
+)
 configuration.package = packageConfiguration
 configuration = Tools.copy(configuration, -1, true)
 export default configuration

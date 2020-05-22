@@ -540,8 +540,8 @@ export class PluginAPI {
         const now:Date = new Date()
         const packageConfiguration:PlainObject = configuration.package
         delete configuration.package
-        configuration = Tools.evaluateDynamicDataStructure(
-            PluginAPI.removePropertiesInDynamicObjects(configuration),
+        configuration = Tools.evaluateDynamicData(
+            Tools.removeEvaluationInDynamicData(configuration),
             {
                 currentPath: process.cwd(),
                 fileSystem,
@@ -581,7 +581,7 @@ export class PluginAPI {
         fallbackScope:null|object = null,
         log:boolean = true
     ):object {
-        let reference:string
+        let reference:string|undefined
         try {
             /* eslint-disable no-eval */
             reference = eval('require').resolve(filePath)
@@ -717,26 +717,6 @@ export class PluginAPI {
                 sortedPlugins, configuration),
             plugins: sortedPlugins
         }
-    }
-    /**
-     * Removes properties in objects where a dynamic indicator lives.
-     * @param data - Object to traverse recursively.
-     * @returns Given object with removed properties.
-     */
-    static removePropertiesInDynamicObjects(data:PlainObject):PlainObject {
-        for (const key in data)
-            if (
-                data.hasOwnProperty(key) &&
-                !['__evaluate__', '__execute__'].includes(key) && (
-                    data.hasOwnProperty('__evaluate__') ||
-                    data.hasOwnProperty('__execute__'))
-            )
-                delete data[key]
-            else if (Tools.isPlainObject(data[key]))
-                PluginAPI.removePropertiesInDynamicObjects(
-                    data[key] as PlainObject
-                )
-        return data
     }
 }
 export default PluginAPI
