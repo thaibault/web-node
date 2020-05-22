@@ -14,7 +14,9 @@
 */
 // region imports
 // NOTE: Only needed for debugging this file.
-import {Configuration, Plugin, ServicePromises, Services} from '../type'
+import {
+    Configuration, Plugin, Service, ServicePromises, Services
+} from '../type'
 // endregion
 /**
  * Dummy plugin interface implementing all available hooks.
@@ -89,7 +91,7 @@ export default class Dummy {
      */
     static loadService(
         servicePromises:ServicePromises, services:Services
-    ):{name:string;promise:Promise<object>} {
+    ):Service {
         return {
             name: 'dummy',
             promise: new Promise((resolve:Function):void => resolve({}))

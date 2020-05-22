@@ -13,7 +13,7 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-// region impo rts
+// region imports
 import {Encoding, PlainObject} from 'clientnode/type'
 // endregion
 // region exports
@@ -69,8 +69,9 @@ export type PluginChange = {
 export type PluginConfiguration = PlainObject & {
     dependencies?:Array<string>;
 }
-export type Services = {[key:string]:object}
-export type ServicePromises = {[key:string]:Promise<object>}
+export type Service = {name:string;promise:Promise<object>}
+export type Services = {[key:string]:Service}
+export type ServicePromises = {[key:string]:Promise<Service>}
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
