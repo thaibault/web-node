@@ -22,9 +22,9 @@ import {PluginAPI} from '../pluginAPI'
  * Dummy plugin implementing a test hook.
  */
 export default class Dummy implements PluginHandler {
-    static loadService(
+    static async loadService(
         this:PluginAPI, servicePromises:ServicePromises, services:Services
-    ):Service {
+    ):Promise<Service> {
         services.dummy = {
             hookCalled: false,
             loaded: true
@@ -37,10 +37,16 @@ export default class Dummy implements PluginHandler {
         }
     }
 
-    static test(
+    static async test(
+        this:PluginAPI, servicePromises:ServicePromises, services:Services
+    ):Promise<void> {
+        services.dummy.hookCalled = true
+    }
+
+    static async testSynchronous(
         this:PluginAPI, servicePromises:ServicePromises, services:Services
     ):void {
-        services.dummy.hookCalled = true
+        services.dummy.synchronousHookCalled = true
     }
 }
 // region vim modline

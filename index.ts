@@ -23,7 +23,9 @@ import {ProcedureFunction} from 'clientnode/type'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
-import {Configuration, Plugin, ServicePromises, Services} from './type'
+import {
+    Configuration, Plugin, Service, ServicePromises, Services
+} from './type'
 // endregion
 declare var ORIGINAL_MAIN_MODULE:object
 const handleError:Function = async (
@@ -89,7 +91,7 @@ const main:ProcedureFunction = async ():Promise<void> => {
                     configuration,
                     services
                 )
-                let result:any
+                let result:null|Service = null
                 try {
                     result = await plugin.api.call(
                         PluginAPI,
@@ -125,7 +127,8 @@ const main:ProcedureFunction = async ():Promise<void> => {
                     if (
                         result.hasOwnProperty('promise') &&
                         typeof result.promise === 'object' &&
-                        result.promise !== null && 'then' in result.promise
+                        result.promise !== null &&
+                        'then' in result.promise
                     ) {
                         console.info(`Service "${result.name}" started.`)
                         servicePromises[result.name] = result.promise
@@ -179,7 +182,8 @@ const main:ProcedureFunction = async ():Promise<void> => {
                         'second request will force to stop ungracefully.'
                     )
                     await PluginAPI.callStack(
-                        'shouldExit', plugins, configuration, services)
+                        'shouldExit', plugins, configuration, services
+                    )
                 }
                 process.exit()
             }
