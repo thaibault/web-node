@@ -32,7 +32,7 @@ import {
  */
 export class PluginAPI {
     /**
-     * Calls all plugin methods for given trigger description asynchrone and
+     * Calls all plugin methods for given trigger description asynchronous and
      * waits for their resolved promises.
      * @param hook - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
@@ -64,7 +64,7 @@ export class PluginAPI {
                             .join('", "') +
                         '" has been changed: reloading initialized.'
                     )
-                PluginAPI.callStack(
+                await PluginAPI.callStack(
                     'preConfigurationLoaded',
                     plugins,
                     configuration,
@@ -72,7 +72,7 @@ export class PluginAPI {
                     pluginsWithChangedConfiguration
                 )
                 PluginAPI.loadConfigurations(plugins, configuration)
-                PluginAPI.callStack(
+                await PluginAPI.callStack(
                     'postConfigurationLoaded',
                     plugins,
                     configuration,
@@ -90,7 +90,7 @@ export class PluginAPI {
                             plugin:Plugin
                         ):string => plugin.name).join('", "')}" ` +
                         'has been changed: reloading initialized.')
-                PluginAPI.callStack(
+                await PluginAPI.callStack(
                     'apiFileReloaded',
                     plugins,
                     configuration,
@@ -106,7 +106,12 @@ export class PluginAPI {
                         PluginAPI,
                         hook,
                         data,
-                        ...parameter.concat([configuration, plugins])
+                        ...parameter
+                            .concat(hook.endsWith('ConfigurationLoaded') ?
+                                [] :
+                                configuration
+                            )
+                            .concat(plugins)
                     )
                 } catch (error) {
                     if (
@@ -122,20 +127,20 @@ export class PluginAPI {
                                 `(${plugin.name}) `
                         ) +
                         `throws: ${Tools.represent(error)} during ` +
-                        `asynchrone hook "${hook}".`
+                        `asynchronous hook "${hook}".`
                     )
                 }
                 data = result
                 if (configuration.debug)
                     console.info(
-                        `Ran asynchrone hook "${hook}" for plugin "` +
+                        `Ran asynchronous hook "${hook}" for plugin "` +
                         `${plugin.name}".`
                     )
             }
         return data
     }
     /**
-     * Calls all plugin methods for given trigger description synchrone.
+     * Calls all plugin methods for given trigger description synchronous.
      * @param hook - Hook to trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
@@ -174,13 +179,13 @@ export class PluginAPI {
                                 `(${plugin.name}) `
                         ) +
                         `throws: ${Tools.represent(error)} during ` +
-                        `synchrone hook "${hook}".`
+                        `synchronous hook "${hook}".`
                     )
                 }
                 data = result
                 if (configuration.debug)
                     console.info(
-                        `Ran synchrone hook "${hook}" for plugin "` +
+                        `Ran synchronous hook "${hook}" for plugin "` +
                         `${plugin.name}".`
                     )
             }
@@ -411,15 +416,13 @@ export class PluginAPI {
         )
             if (filePath.endsWith('.js')) {
                 nativeAPI = true
-                api = (
-                    type:string, data:any, ...parameter:Array<any>
-                ):any => {
-                    if (type in plugins[name].scope!)
+                api = (hook:string, data:any, ...parameter:Array<any>):any => {
+                    if (hook in plugins[name].scope!)
                         return (
                             plugins[name].scope as {[key:string]:Function}
-                        )[type](data, ...parameter)
+                        )[hook](data, ...parameter)
                     throw new Error(
-                        `NotImplemented: API method "${type}" is not ` +
+                        `NotImplemented: API method "${hook}" is not ` +
                         `implemented in plugin "${name}".`
                     )
                 }
@@ -714,7 +717,8 @@ export class PluginAPI {
                     }
         return {
             configuration: PluginAPI.loadConfigurations(
-                sortedPlugins, configuration),
+                sortedPlugins, configuration
+            ),
             plugins: sortedPlugins
         }
     }

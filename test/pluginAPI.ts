@@ -26,10 +26,11 @@ describe('pluginAPI', ():void => {
     test.each([
         [null, 'test', []],
         [null, 'test', [], null],
-        [{}, 'test', [], {}]
+        [{}, 'test', [], {}],
         // TODO add more tests
     ])(
-        `%p === callStack('%s', %p, ...%p)`,
+        `%p === callStack('%s', %p, ` +
+        `${Tools.represent(testConfiguration).substring(0, 80)}...}, ...%p)`,
         async (
             expected:any,
             hook:string,
@@ -37,10 +38,7 @@ describe('pluginAPI', ():void => {
             ...parameter:Array<any>
         ):Promise<void> =>
             expect(await PluginAPI.callStack(
-                hook,
-                plugins,
-                testConfiguration,
-                ...parameter
+                hook, plugins, testConfiguration, ...parameter
             )).toStrictEqual(expected)
     )
     test.each([
