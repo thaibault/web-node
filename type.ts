@@ -71,7 +71,7 @@ export type PluginChange = {
     plugin:Plugin;
     target:'configuration'|'scope';
 }
-export type Service = {name:string;promise:Promise<object>}
+export type Service = {name:string;promise:null|Promise<object>}
 export type Services = {[key:string]:object}
 export type ServicePromises = {[key:string]:Promise<object>}
 export interface PluginHandler {
