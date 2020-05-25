@@ -22,28 +22,29 @@ import {PluginAPI} from '../pluginAPI'
  * Dummy plugin implementing a test hook.
  */
 export default class Dummy implements PluginHandler {
-    static async loadService(
+    static loadService(
         this:PluginAPI, servicePromises:ServicePromises, services:Services
     ):Promise<Service> {
         services.dummy = {
             hookCalled: false,
             loaded: true
         }
-        return {
+        return Promise.resolve({
             name: 'dummy',
             promise: new Promise((resolve:Function):void =>
                 Tools.timeout(resolve)
             )
-        }
+        })
     }
 
-    static async test(
+    static test(
         this:PluginAPI, servicePromises:ServicePromises, services:Services
     ):Promise<void> {
         services.dummy.hookCalled = true
+        return Promise.resolve()
     }
 
-    static async testSynchronous(
+    static testSynchronous(
         this:PluginAPI, servicePromises:ServicePromises, services:Services
     ):void {
         services.dummy.synchronousHookCalled = true
