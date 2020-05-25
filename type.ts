@@ -21,7 +21,7 @@ export type MetaConfiguration = {
     fileNames:Array<string>;
     propertyNames:Array<string>;
 }
-export type Configuration = {
+export type WebNodeConfiguration = PlainObject & {
     context:{
         path:string;
         type:string;
@@ -45,7 +45,12 @@ export type Configuration = {
         };
         hotReloading:boolean;
     };
-    [key:string]:any;
+}
+export type PluginConfiguration = PlainObject & {
+    dependencies?:Array<string>;
+}
+export type Configuration = WebNodeConfiguration & {
+    [key:string]:PluginConfiguration;
 }
 export type Plugin = {
     api:Function|null;
@@ -65,9 +70,6 @@ export type PluginChange = {
     oldScope:null|object;
     plugin:Plugin;
     target:'configuration'|'scope';
-}
-export type PluginConfiguration = PlainObject & {
-    dependencies?:Array<string>;
 }
 export type Service = {name:string;promise:Promise<object>}
 export type Services = {[key:string]:object}
