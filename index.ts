@@ -34,7 +34,8 @@ const handleError:Function = async (
 ):Promise<void> => {
     try {
         await PluginAPI.callStack(
-            'error', plugins, configuration, error, services)
+            'error', plugins, configuration, error, services
+        )
     } catch (error) {
         if (configuration.debug)
             throw error

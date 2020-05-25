@@ -32,12 +32,12 @@ describe('pluginAPI', ():void => {
         `%p === callStack('%s', %p, ...%p)`,
         async (
             expected:any,
-            type:string,
+            hook:string,
             plugins:Array<Plugin>,
             ...parameter:Array<any>
         ):Promise<void> =>
             expect(await PluginAPI.callStack(
-                type,
+                hook,
                 plugins,
                 testConfiguration,
                 ...parameter
@@ -157,7 +157,7 @@ describe('pluginAPI', ():void => {
                 console.error(error)
             }
             if (plugin) {
-                expect(plugin.scope).toHaveProperty('initialize')
+                expect(plugin.scope).toHaveProperty('test')
                 delete plugin.api
                 plugin.apiFileLoadTimestamps = []
                 if (plugin.configuration)
@@ -233,7 +233,7 @@ describe('pluginAPI', ():void => {
                 console.error(error)
             }
             if (plugin) {
-                expect(plugin.scope).toHaveProperty('initialize')
+                expect(plugin.scope).toHaveProperty('test')
                 delete plugin.api
                 plugin.apiFileLoadTimestamps = []
                 plugin.configurationFileLoadTimestamps = []
@@ -309,9 +309,7 @@ describe('pluginAPI', ():void => {
             expect(PluginAPI.loadFile(filePath, name, fallbackScope, log))
                 .toStrictEqual(expected)
     )
-    test.each([
-        [configuration, {plugins: [], configuration}]
-    ])(
+    test.each([[configuration, {plugins: [], configuration}]])(
         'loadAll(%p) === %p',
         async (
             configuration:Configuration,
