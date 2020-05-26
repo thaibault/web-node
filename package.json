@@ -47,9 +47,6 @@
     "update:documentation": "documentationWebsite --log-level info",
     "watch": "webOptimizer build --watch"
   },
-  "dependencies": {
-    "clientnode": "*"
-  },
   "devDependencies": {
     "@babel/cli": "*",
     "@types/jest": "*",
@@ -58,6 +55,7 @@
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "babel-eslint": "*",
+    "clientnode": "*",
     "documentation-website": "*",
     "eslint": "*",
     "eslint-config-google": "*",
@@ -70,8 +68,10 @@
     "webpack-dev-server": "*"
   },
   "peerDependencies": {
-    "@babel/runtime": "*"
+    "@babel/runtime": "*",
+    "clientnode": "*"
   },
+  "sideEffects": false,
   "webNode": {
     "context": {
       "path": "./"
@@ -107,7 +107,6 @@
       "hotReloading": false
     }
   },
-  "sideEffects": false,
   "webOptimizer": {
     "assetPattern": {
       "javaScript": {
