@@ -71,7 +71,7 @@
     "@babel/runtime": "*",
     "clientnode": "*"
   },
-  "sideEffects": false,
+  "sideEffects": true,
   "webNode": {
     "context": {
       "path": "./"
