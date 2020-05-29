@@ -722,6 +722,56 @@ export class PluginAPI {
             plugins: sortedPlugins
         }
     }
+    // TODO test
+    /**
+     * Transform a list of absolute paths respecting the application context.
+     * @param configuration - Configuration object.
+     * @param locations - Locations to process.
+     * @return Given and processed locations.
+     */
+    static determineLocations(
+        configuration:Configuration, locations:Array<string>|string = []
+    ):Array<string> {
+        locations = ([] as Array<string>).concat(locations)
+        return locations.length ?
+            locations.map((location:string):string =>
+                path.resolve(configuration.context.path, location)
+            ) :
+            [configuration.context.path]
+    }
+    /**
+     * Ignore absolute defined locations (relativ to application context) and
+     * relative defined in each loaded plugin location.
+     * @param configuration - Configuration object.
+     * @param plugins - List of acctive plugins.
+     * @param filePath - Path to search for.
+     * @param locations - Locations to search in.
+     * @returns A boolean indicating whether given file path is in provided
+     * locations.
+     */
+    static isInLocations(
+        configuration:Configuration,
+        plugins:Array<Plugin>,
+        filePath:string,
+        locations:Array<string>|string
+    ):boolean {
+        const pluginPaths:Array<string> = plugins.map((plugin:Plugin):string =>
+            plugin.path
+        )
+        for (const location of ([] as Array<string>).concat(locations))
+            if (location.startsWith('/')) {
+                if (filePath.startsWith(
+                    path.join(configuration.context.path, location)
+                ))
+                    return true
+            } else
+                for (const pluginPath of pluginPaths)
+                    if (
+                        filePath.startsWith(path.resolve(pluginPath, location))
+                    )
+                        return true
+        return false
+    }
 }
 export default PluginAPI
 // region vim modline
