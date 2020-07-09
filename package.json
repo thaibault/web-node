@@ -32,20 +32,20 @@
     "url": "https://github.com/thaibault/web-node.git"
   },
   "scripts": {
-    "build": "webOptimizer build",
+    "build": "weboptimizer build",
     "check": "yarn check:types; yarn lint",
-    "check:types": "webOptimizer check:types",
-    "clear": "webOptimizer clear",
-    "document": "webOptimizer document",
-    "lint": "webOptimizer lint",
+    "check:types": "weboptimizer check:types",
+    "clear": "weboptimizer clear",
+    "document": "weboptimizer document",
+    "lint": "weboptimizer lint",
     "prepare": "yarn build",
     "report:coverage": "nyc report --reporter=text-lcov | coveralls",
-    "serve": "webOptimizer build && ./index.js",
+    "serve": "weboptimizer build && ./index.js",
     "start": "yarn serve",
-    "test": "pushd dummyPlugin && yarn build && popd && webOptimizer test",
+    "test": "pushd dummyPlugin && yarn build && popd && weboptimizer test",
     "update": "yarn version --patch && yarn publish",
     "update:documentation": "documentationWebsite --log-level info",
-    "watch": "webOptimizer build --watch"
+    "watch": "weboptimizer build --watch"
   },
   "devDependencies": {
     "@babel/cli": "*",
