@@ -3,9 +3,9 @@
   "version": "1.0.338",
   "license": "CC-BY-3.0",
   "description": "High level javaScript backend plugin system and configuration merger.",
-  "homepage": "https://torben.website/webNode",
+  "homepage": "https://torben.website/web-node",
   "documentationWebsite": {
-    "name": "webNode",
+    "name": "web-node",
     "trackingCode": "UA-40192634-9"
   },
   "keywords": [
@@ -25,11 +25,11 @@
   ],
   "main": "index.js",
   "bin": {
-    "webNode": "index.js"
+    "web-node": "index.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thaibault/webNode.git"
+    "url": "https://github.com/thaibault/web-node.git"
   },
   "scripts": {
     "build": "webOptimizer build",
