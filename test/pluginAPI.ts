@@ -307,7 +307,7 @@ describe('pluginAPI', ():void => {
             expect(PluginAPI.loadFile(filePath, name, fallbackScope, log))
                 .toStrictEqual(expected)
     )
-    test.each([[configuration, {plugins: [], configuration}]])(
+    test.each([[configuration, {configuration, plugins: []}]])(
         'loadAll(%p) === %p',
         async (
             configuration:Configuration,
