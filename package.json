@@ -87,7 +87,9 @@
           "private-package.json"
         ],
         "propertyNames": [
-          "webNode"
+          "webNode",
+          "webnode",
+          "web-node"
         ]
       },
       "directories": {

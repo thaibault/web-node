@@ -406,8 +406,8 @@ export class PluginAPI {
         let nativeAPI:boolean = false
         /*
             NOTE: We only want to register api's for web node plugins. Others
-            doesn't have a package configuration file with a specified with
-            further recognized "webNode" in it.
+            doesn't have a package configuration file with specified "webNode"
+            like key in it.
         */
         if (
             configuration &&
@@ -492,7 +492,8 @@ export class PluginAPI {
         configurationPropertyNames:Array<string>
     ):PlainObject {
         const packageConfigurationCopy:PlainObject = Tools.copy(
-            packageConfiguration, -1, true)
+            packageConfiguration, -1, true
+        )
         for (const propertyName of configurationPropertyNames)
             if (packageConfiguration.hasOwnProperty(propertyName)) {
                 const configuration:PluginConfiguration =
@@ -632,7 +633,7 @@ export class PluginAPI {
     }> {
         const plugins:{[key:string]:Plugin} = {}
         // If an application's main
-        if (configuration.name !== 'webNode')
+        if (configuration.name !== 'web-node')
             plugins[configuration.name] = await PluginAPI.load(
                 configuration.name,
                 configuration.name,
