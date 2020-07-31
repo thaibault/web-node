@@ -90,7 +90,8 @@ export class PluginAPI {
                         `${pluginsWithChangedAPIFiles.map((
                             plugin:Plugin
                         ):string => plugin.name).join('", "')}" ` +
-                        'has been changed: reloading initialized.')
+                        'has been changed: reloading initialized.'
+                    )
                 await PluginAPI.callStack(
                     'apiFileReloaded',
                     plugins,
@@ -240,8 +241,7 @@ export class PluginAPI {
         )
         for (const change of pluginChanges) {
             change.plugin.configuration = PluginAPI.loadConfiguration(
-                change.plugin.configuration,
-                configurationPropertyNames
+                change.plugin.configuration, configurationPropertyNames
             )
             pluginsWithChangedFiles.push(change.plugin)
         }
