@@ -75,8 +75,7 @@ try {
     packageConfiguration.webNode.context.path = process.cwd()
 }
 const name:string =
-    specificConfiguration.documentationWebsite &&
-    (specificConfiguration.documentationWebsite as {name?:string}).name ||
+    (specificConfiguration.documentationWebsite as {name?:string})?.name ||
     specificConfiguration.name as string
 specificConfiguration = specificConfiguration.webNode as PlainObject || {}
 if (name)

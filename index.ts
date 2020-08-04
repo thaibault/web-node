@@ -104,10 +104,9 @@ const main:ProcedureFunction = async ():Promise<void> => {
                     )
                 } catch (error) {
                     if (!(
-                        typeof error === 'object' &&
                         error !== null &&
-                        'message' in error &&
-                        error.message.startsWith('NotImplemented:')
+                        typeof error === 'object' &&
+                        error.message?.startsWith('NotImplemented:')
                     ))
                         throw new Error(
                             `Plugin "${plugin.internalName}" ` +
@@ -120,15 +119,10 @@ const main:ProcedureFunction = async ():Promise<void> => {
                             'during asynchrone hook "loadService".'
                         )
                 }
-                if (
-                    result &&
-                    result.hasOwnProperty('name') &&
-                    typeof result.name === 'string'
-                )
+                if (typeof result?.name === 'string')
                     if (
-                        result.hasOwnProperty('promise') &&
-                        typeof result.promise === 'object' &&
                         result.promise !== null &&
+                        typeof result.promise === 'object' &&
                         'then' in result.promise
                     ) {
                         console.info(`Service "${result.name}" started.`)
