@@ -116,10 +116,7 @@ export class PluginAPI {
                             .concat(plugins)
                     )
                 } catch (error) {
-                    if (
-                        'message' in error &&
-                        error.message.startsWith('NotImplemented:')
-                    )
+                    if (error.message?.startsWith('NotImplemented:'))
                         continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` +
@@ -169,9 +166,7 @@ export class PluginAPI {
                         ...parameter.concat(configuration, plugins)
                     )
                 } catch (error) {
-                    if ('message' in error && error.message.startsWith(
-                        'NotImplemented:'
-                    ))
+                    if (error.message?.startsWith('NotImplemented:'))
                         continue
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` +
@@ -469,11 +464,7 @@ export class PluginAPI {
                 configurationFilePaths.map((filePath:string):number =>
                     fileSystem.statSync(filePath).mtime.getTime()
                 ),
-            dependencies:
-                configuration &&
-                configuration.hasOwnProperty('dependencies') &&
-                configuration.dependencies ||
-                [],
+            dependencies: configuration?.dependencies || [],
             internalName,
             name,
             path: pluginPath,
