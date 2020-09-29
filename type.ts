@@ -18,60 +18,63 @@ import {Encoding, PlainObject} from 'clientnode/type'
 // endregion
 // region exports
 export type MetaConfiguration = {
-    fileNames:Array<string>;
-    propertyNames:Array<string>;
+    fileNames:Array<string>
+    propertyNames:Array<string>
 }
 export type WebNodeConfiguration = PlainObject & {
     context:{
-        path:string;
-        type:string;
-    };
-    debug:boolean;
-    encoding:Encoding;
-    interDependencies:PlainObject;
-    name:string;
-    package:PlainObject;
+        path:string
+        type:string
+    }
+    debug:boolean
+    encoding:Encoding
+    interDependencies:PlainObject
+    name:string
+    package:PlainObject
     plugin:{
-        configuration:MetaConfiguration;
+        configuration:MetaConfiguration
         directories:{
             external:{
-                nameRegularExpressionPattern:string;
-                path:string;
-            };
+                nameRegularExpressionPattern:string
+                path:string
+            }
             internal:{
-                nameRegularExpressionPattern:string;
-                path:string;
-            };
-        };
-        hotReloading:boolean;
-    };
+                nameRegularExpressionPattern:string
+                path:string
+            }
+        }
+        hotReloading:boolean
+    }
 }
 export type PluginConfiguration = PlainObject & {
-    dependencies?:Array<string>;
+    dependencies?:Array<string>
 }
 export type Configuration = WebNodeConfiguration & {
-    [key:string]:PluginConfiguration;
+    [key:string]:PluginConfiguration
 }
 export type Plugin = {
-    api:Function|null;
-    apiFilePaths:Array<string>;
-    apiFileLoadTimestamps:Array<number>;
-    configuration:PlainObject;
-    configurationFilePaths:Array<string>;
-    configurationFileLoadTimestamps:Array<number>;
-    dependencies:Array<string>;
-    internalName:string;
-    name:string;
-    path:string;
-    scope:null|object;
+    api:Function|null
+    apiFilePaths:Array<string>
+    apiFileLoadTimestamps:Array<number>
+    configuration:PlainObject
+    configurationFilePaths:Array<string>
+    configurationFileLoadTimestamps:Array<number>
+    dependencies:Array<string>
+    internalName:string
+    name:string
+    path:string
+    scope:null|object
 }
 export type PluginChange = {
-    newScope:object;
-    oldScope:null|object;
-    plugin:Plugin;
-    target:'configuration'|'scope';
+    newScope:object
+    oldScope:null|object
+    plugin:Plugin
+    target:'configuration'|'scope'
 }
-export type Service = {name:string;promise:null|Promise<object>}
+export type Service = {
+    name:string
+    promise:null|Promise<object>
+}
 export type Services = {[key:string]:object}
 export type ServicePromises = {[key:string]:Promise<object>}
 export interface PluginHandler {

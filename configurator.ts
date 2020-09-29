@@ -15,7 +15,7 @@
 */
 // region imports
 import Tools from 'clientnode'
-import {PlainObject} from 'clientnode/type'
+import {Mapping, PlainObject} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
@@ -84,7 +84,7 @@ if (name)
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
 const now:Date = new Date()
-const scope:{[key:string]:any} = {
+const scope:Mapping<any> = {
     currentPath: process.cwd(),
     fileSystem,
     path,
@@ -100,7 +100,7 @@ const scope:{[key:string]:any} = {
 export let configuration:Configuration = Tools.evaluateDynamicData(
     packageConfiguration.webNode, scope
 )
-delete packageConfiguration.webNode
+delete (packageConfiguration as {webNode?:PlainObject}).webNode
 Tools.extend(
     true,
     Tools.modifyObject(configuration, specificConfiguration),
