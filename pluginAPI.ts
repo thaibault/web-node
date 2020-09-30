@@ -535,7 +535,7 @@ export class PluginAPI {
             }
         const now:Date = new Date()
         const packageConfiguration:PlainObject = configuration.package
-        delete configuration.package
+        delete (configuration as {package?:Configuration['package']}).package
         configuration = Tools.evaluateDynamicData(
             Tools.removeEvaluationInDynamicData(configuration),
             {
@@ -620,8 +620,8 @@ export class PluginAPI {
      * @returns A topological sorted list of plugins objects.
      */
     static async loadAll(configuration:Configuration):Promise<{
-        configuration:Configuration;
-        plugins:Array<Plugin>;
+        configuration:Configuration
+        plugins:Array<Plugin>
     }> {
         const plugins:{[key:string]:Plugin} = {}
         // If an application's main

@@ -311,7 +311,10 @@ describe('pluginAPI', ():void => {
         'loadAll(%p) === %p',
         async (
             configuration:Configuration,
-            expected:{configuration:Configuration;plugins:Array<Plugin>}
+            expected:{
+                configuration:Configuration
+                plugins:Array<Plugin>
+            }
         ):Promise<void> => {
             try {
                 expect(await PluginAPI.loadAll(configuration))

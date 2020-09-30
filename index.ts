@@ -49,8 +49,8 @@ const handleError:Function = async (
 const main:ProcedureFunction = async ():Promise<void> => {
     // region load plugins
     const {configuration, plugins}:{
-        configuration:Configuration;
-        plugins:Array<Plugin>;
+        configuration:Configuration
+        plugins:Array<Plugin>
     } = await PluginAPI.loadAll(Tools.copy(baseConfiguration, -1, true))
     await PluginAPI.callStack('initialize', plugins, configuration)
     if (plugins.length)
