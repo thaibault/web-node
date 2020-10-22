@@ -16,8 +16,8 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-export * from './configurator'
-export * from './pluginAPI'
+export {configuration} from './configurator'
+export {PluginAPI} from './pluginAPI'
 // region imports
 import Tools, {CloseEventNames} from 'clientnode'
 import {ProcedureFunction} from 'clientnode/type'
