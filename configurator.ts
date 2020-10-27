@@ -99,7 +99,7 @@ const scope:Mapping<any> = {
 }
 export let configuration:Configuration = Tools.evaluateDynamicData(
     packageConfiguration.webNode, scope
-)
+) as unknown as Configuration
 delete (packageConfiguration as {webNode?:PlainObject}).webNode
 Tools.extend(
     true,
@@ -115,15 +115,15 @@ if (process.argv.length > 2) {
         configuration.runtimeConfiguration = result
     }
 }
+configuration = Tools.evaluateDynamicData(
+    Tools.removeEvaluationInDynamicData(configuration), scope
+) as Configuration
+configuration.package = packageConfiguration
 /*
     NOTE: We need to copy the configuration to avoid operating on deduplicated
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
-configuration = Tools.evaluateDynamicData(
-    Tools.removeEvaluationInDynamicData(configuration), scope
-)
-configuration.package = packageConfiguration
 configuration = Tools.copy(configuration, -1, true)
 export default configuration
 // region vim modline
