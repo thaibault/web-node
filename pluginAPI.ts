@@ -551,7 +551,7 @@ export class PluginAPI {
                 now,
                 nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
             }
-        )
+        ) as Configuration
         /*
             NOTE: We have to replace the resolved plugin configurations in the
             plugin data structure.
