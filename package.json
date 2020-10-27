@@ -135,6 +135,9 @@
         }
       }
     },
-    "targetTechnology": "node"
+    "targetTechnology": {
+      "boilerplate": "node",
+      "payload": "node"
+    }
   }
 }
