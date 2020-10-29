@@ -62,9 +62,7 @@
     "eslint-plugin-jsdoc": "*",
     "jest": "*",
     "jsdoc": "*",
-    "weboptimizer": "*",
-    "webpack": "*",
-    "webpack-cli": "*"
+    "weboptimizer": "*"
   },
   "peerDependencies": {
     "@babel/runtime": "*",
