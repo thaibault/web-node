@@ -46,7 +46,7 @@ const handleError:Function = async (
             console.error(error)
     }
 }
-const main:ProcedureFunction = async ():Promise<void> => {
+export const main:ProcedureFunction = async ():Promise<void> => {
     // region load plugins
     const {configuration, plugins}:{
         configuration:Configuration
