@@ -14,6 +14,7 @@
 */
 // region imports
 import Tools from 'clientnode'
+import {testEach} from 'clientnode/testHelper'
 import path from 'path'
 
 import {Configuration, Plugin} from '../type'
@@ -22,42 +23,34 @@ import PluginAPI from '../pluginAPI'
 // endregion
 // region tests
 describe('pluginAPI', ():void => {
+
     const testConfiguration:Configuration = Tools.copy(configuration)
-    test.each([
-        [null, 'test', []],
-        [null, 'test', [], null],
-        [{}, 'test', [], {}],
+
+    test.each<[
+        ReturnType<typeof PluginAPI.callStack>,
+        ...Parameters<typeof PluginAPI.callStack>
+    ]>([
+        [null, 'test', [], testConfiguration],
+        [null, 'test', [], testConfiguration, null],
+        [{}, 'test', [], testConfiguration, {}],
         // TODO add more tests
     ])(
-        `%p === callStack('%s', %p, ` +
-        `${Tools.represent(testConfiguration).substring(0, 80)}...}, ...%p)`,
+        '%p === callStack(%p, ...)',
         async (
-            expected:any,
-            hook:string,
-            plugins:Array<Plugin>,
-            ...parameter:Array<any>
+            expected:ReturnType<typeof PluginAPI.callStack>,
+            ...parameters:Parameters<typeof PluginAPI.callStack>
         ):Promise<void> =>
-            expect(await PluginAPI.callStack(
-                hook, plugins, testConfiguration, ...parameter
-            )).toStrictEqual(expected)
+            expect(PluginAPI.callStack(...parameters))
+                .resolves.toStrictEqual(expected)
     )
-    test.each([
-        [null, 'test', []],
-        [null, 'test', [], null],
-        [{}, 'test', [], {}]
+    testEach<typeof PluginAPI.callStackSynchronous>(
+        'callStackSynchronous',
+        PluginAPI.callStackSynchronous,
+
+        [null, 'test', [], testConfiguration],
+        [null, 'test', [], testConfiguration, null],
+        [{}, 'test', [], testConfiguration, {}]
         // TODO add more tests
-    ])(
-        `%p === callStackSynchronous('%s', %p, ` +
-        `${Tools.represent(testConfiguration).substring(0, 80)}...}, ...%p)`,
-        (
-            expected:any,
-            hook:string,
-            plugins:Array<Plugin>,
-            ...parameter:Array<any>
-        ):void =>
-            expect(PluginAPI.callStackSynchronous(
-                hook, plugins, testConfiguration, ...parameter
-            )).toStrictEqual(expected)
     )
     test.each([
         [[], []]
@@ -67,12 +60,8 @@ describe('pluginAPI', ():void => {
         async (
             plugins:Array<Plugin>, expected:Array<Plugin>
         ):Promise<void> => {
-            try {
-                expect(await PluginAPI.hotReloadAPIFile(plugins))
-                    .toStrictEqual(expected)
-            } catch (error) {
-                console.error(error)
-            }
+            expect(PluginAPI.hotReloadAPIFile(plugins))
+                .resolves.toStrictEqual(expected)
         }
     )
     test.each([
