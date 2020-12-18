@@ -14,7 +14,7 @@
 */
 // region imports
 import Tools from 'clientnode'
-import {testEach} from 'clientnode/testHelper'
+import {testEach, testEachPromise} from 'clientnode/testHelper'
 import path from 'path'
 
 import {Configuration, Plugin} from '../type'
@@ -26,22 +26,14 @@ describe('pluginAPI', ():void => {
 
     const testConfiguration:Configuration = Tools.copy(configuration)
 
-    test.each<[
-        ReturnType<typeof PluginAPI.callStack>,
-        ...Parameters<typeof PluginAPI.callStack>
-    ]>([
+    testEachPromise<typeof PluginAPI.callStack>(
+        'callStack',
+        PluginAPI.callStack,
+
         [null, 'test', [], testConfiguration],
         [null, 'test', [], testConfiguration, null],
         [{}, 'test', [], testConfiguration, {}],
         // TODO add more tests
-    ])(
-        '%p === callStack(%p, ...)',
-        async (
-            expected:ReturnType<typeof PluginAPI.callStack>,
-            ...parameters:Parameters<typeof PluginAPI.callStack>
-        ):Promise<void> =>
-            expect(PluginAPI.callStack(...parameters))
-                .resolves.toStrictEqual(expected)
     )
     testEach<typeof PluginAPI.callStackSynchronous>(
         'callStackSynchronous',
@@ -52,62 +44,31 @@ describe('pluginAPI', ():void => {
         [{}, 'test', [], testConfiguration, {}]
         // TODO add more tests
     )
-    test.each([
+    testEach<typeof PluginAPI.hotReloadAPIFile>(
+        'hotReloadAPIFile',
+        PluginAPI.hotReloadAPIFile,
+
         [[], []]
         // TODO add more tests
-    ])(
-        'hotReloadAPIFile(%p) === %p',
-        async (
-            plugins:Array<Plugin>, expected:Array<Plugin>
-        ):Promise<void> => {
-            expect(PluginAPI.hotReloadAPIFile(plugins))
-                .resolves.toStrictEqual(expected)
-        }
     )
-    test.each([
+    testEach<typeof PluginAPI.hotReloadConfigurationFile>(
+        'hotReloadConfigurationFile',
+        PluginAPI.hotReloadConfigurationFile,
+
         [[], [], []]
         // TODO add more tests
-    ])(
-        'hotReloadConfigurationFile(%p, %p) === %p',
-        async (
-            plugins:Array<Plugin>,
-            configurationPropertyNames:Array<string>,
-            expected:Array<plugin>
-        ):Promise<void> => {
-            try {
-                expect(await PluginAPI.hotReloadConfigurationFile(
-                    plugins, configurationPropertyNames
-                )).toStrictEqual(expected)
-            } catch (error) {
-                console.error(error)
-            }
-        }
     )
-    test.each([
-        ['api', 'scope', [], []]
+    testEach<typeof PluginAPI.hotReloadFiles>(
+        'hotReloadFiles',
+        PluginAPI.hotReloadFiles,
+
+        [[], 'api', 'scope', []]
         // TODO add more tests
-    ])(
-        `hotReloadFiles('%s', '%s', %p) === PROCESSED_PLUGINS`,
-        async (
-            type:'api'|'configuration',
-            target:'configuration'|'scope',
-            plugins:Array<Plugin>
-        ):Promise<void> => {
-            try {
-                expect(await PluginAPI.hotReloadFiles(type, target, plugins))
-                    .toStrictEqual(plugins)
-            } catch (error) {
-                console.error(error)
-            }
-        }
     )
-    test.each([
+    test.each<[
+        ReturnType<typeof PluginAPI.load>, ...Parameters<typeof PluginAPI.load>
+    ]>([
         [
-            'dummy',
-            'dummy',
-            {},
-            {fileNames: ['package.json'], propertyNames: ['webNode']},
-            path.resolve(configuration.context.path, 'dummyPlugin'),
             {
 
                 apiFileLoadTimestamps: [],
@@ -123,23 +84,22 @@ describe('pluginAPI', ():void => {
                 internalName: 'dummy',
                 name: 'dummy',
                 path: path.resolve(configuration.context.path, 'dummyPlugin')
-            }
+            },
+            'dummy',
+            'dummy',
+            {},
+            {fileNames: ['package.json'], propertyNames: ['webNode']},
+            path.resolve(configuration.context.path, 'dummyPlugin')
         ]
     ])(
-        `load('%s', '%s', %p, %p, '%s') === %p`,
+        `%p === load('%s', '%s', %p, %p, '%s')`,
         async (
-            name:string,
-            internalName:string,
-            plugins:{[key:string]:Plugin},
-            metaConfiguration:MetaConfiguration,
-            pluginPath:string,
-            expected:Plugin
+            expected:Plugin,
+            ...parameters:Parameters<typeof PluginAPI.load>
         ):Promise<void> => {
-            let plugin:Plugin
+            let plugin:Plugin|undefined
             try {
-                plugin = await PluginAPI.load(
-                    name, internalName, plugins, metaConfiguration, pluginPath
-                )
+                plugin = await PluginAPI.load(...parameters)
             } catch (error) {
                 console.error(error)
             }
@@ -156,6 +116,7 @@ describe('pluginAPI', ():void => {
             }
         }
     )
+    // TODO
     test.each([
         [
             ['index.js'],
