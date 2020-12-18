@@ -14,25 +14,22 @@
     endregion
 */
 // region imports
+import {testEach} from 'clientnode/testHelper'
+
 import unixCrypt from '../unixCrypt'
 // endregion
 describe('unixCrypt', ():void => {
-    test.each([
-        ['', 'ba', 'baJyGvzMWSid.'],
-        ['ba', '', 'aayPdtR3JLIkk'],
-        ['', '', 'aaQSqAReePlq6'],
-        ['foo', 'ba', 'ba4TuD1iozTxw'],
-        ['random long string', 'hi', 'hib8W/d4WOlU.'],
-        ['foob', 'ar', 'arlEKn0OzVJn.'],
-        ['Hello World! This is Unix crypt(3)!', 'ux', 'uxNS5oJDUz4Sc']
-    ])(
-        `unixCrypt('%s', '%s') === '%s'`,
-        (
-            password:Array<number>|string,
-            salt:Array<number>|string,
-            expected:Array<number>|string
-        ):void =>
-            expect(unixCrypt(password, salt)).toStrictEqual(expected)
+    testEach<typeof unixCrypt>(
+        'unixCrypt',
+        unixCrypt,
+
+        ['baJyGvzMWSid.', '', 'ba'],
+        ['aayPdtR3JLIkk', 'ba', ''],
+        ['aaQSqAReePlq6', '', ''],
+        ['ba4TuD1iozTxw', 'foo', 'ba'],
+        ['hib8W/d4WOlU.', 'random long string', 'hi'],
+        ['arlEKn0OzVJn.', 'foob', 'ar'],
+        ['uxNS5oJDUz4Sc', 'Hello World! This is Unix crypt(3)!', 'ux']
     )
 })
 // region vim modline
