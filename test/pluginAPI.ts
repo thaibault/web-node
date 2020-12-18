@@ -195,7 +195,7 @@ describe('pluginAPI', ():void => {
         [configuration, [], {a: 2}],
         [Tools.extend({a: 2}, configuration), [{configuration: {a: 2}}], {}]
     )
-    test.each<typeof PluginAPI.loadFile>(
+    testEach<typeof PluginAPI.loadFile>(
         'loadFile',
         PluginAPI.loadFile,
 
