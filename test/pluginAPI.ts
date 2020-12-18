@@ -116,21 +116,10 @@ describe('pluginAPI', ():void => {
             }
         }
     )
-    // TODO
-    test.each([
+    test.each<[
+        ReturnType<PluginAPI.loadAPI>, ...Parameters<PluginAPI.loadAPI>
+    ]>([
         [
-            ['index.js'],
-            path.resolve(configuration.context.path, 'dummyPlugin'),
-            'dummyPlugin',
-            'dummy',
-            {},
-            'utf8',
-            {a: 2, package: {webNode: {a: 2}}},
-            [
-                path.resolve(
-                    configuration.context.path, 'dummyPlugin/package.json'
-                )
-            ],
             {
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
@@ -150,33 +139,29 @@ describe('pluginAPI', ():void => {
                 internalName: 'dummy',
                 name: 'dummyPlugin',
                 path: path.resolve(configuration.context.path, 'dummyPlugin')
-            }
+            },
+            ['index.js'],
+            path.resolve(configuration.context.path, 'dummyPlugin'),
+            'dummyPlugin',
+            'dummy',
+            {},
+            'utf8',
+            {a: 2, package: {webNode: {a: 2}}},
+            [
+                path.resolve(
+                    configuration.context.path, 'dummyPlugin/package.json'
+                )
+            ]
         ]
     ])(
-        `loadAPI('%s', '%s', '%s', '%s', %p, '%s', %p, %p) === %p`,
+        '%p === loadAPI(%p, ...)',
         async (
-            relativeFilePaths:Array<string>,
-            pluginPath:string,
-            name:string,
-            internalName:string,
-            plugins:{[key:string]:Plugin},
-            encoding:Encoding = 'utf8',
-            configuration:null|PluginConfiguration = null,
-            configurationFilePaths:Array<string>,
-            expected:Plugin
+            expected:ReturnType<typeof PluginAPI.load>,
+            ...parameters:Parameters<typeof PluginAPI.load>
         ):Promise<void> => {
             let plugin:Plugin
             try {
-                plugin = await PluginAPI.loadAPI(
-                    relativeFilePaths,
-                    pluginPath,
-                    name,
-                    internalName,
-                    plugins,
-                    encoding,
-                    configuration,
-                    configurationFilePaths
-                )
+                plugin = await PluginAPI.loadAPI(...parameters)
             } catch (error) {
                 console.error(error)
             }
@@ -190,89 +175,46 @@ describe('pluginAPI', ():void => {
             }
         }
     )
-    test.each([
-        [{}, [], {package: {}}],
-        [{a: 2}, [], {package: {a: 2}}],
-        [{a: 2, b: 3}, [], {package: {a: 2, b: 3}}],
-        [{a: {value: 2}, b: 3}, ['a'], {package: {b: 3}, value: 2}],
-        [{a: {value: 2}, b: 3}, ['a', 'b'], {package: {b: 3}, value: 2}],
-        [
-            {a: {value: 2}, b: 3},
-            ['z', 'a', 'b'],
-            {package: {b: 3}, value: 2}
-        ],
-        [{a: 2, b: {value: 3}}, ['b', 'a'], {package: {a: 2}, value: 3}]
-    ])(
-        'loadConfiguration(%p, %p) === %p',
-        (
-            packageConfiguration:PlainObject,
-            configurationPropertyNames:Array<string>,
-            expected:PlainObject
-        ):void =>
-            expect(PluginAPI.loadConfiguration(
-                packageConfiguration, configurationPropertyNames
-            )).toStrictEqual(expected)
+    testEach<typeof PluginAPI.loadConfiguration>(
+        'loadConfiguration',
+        PluginAPI.loadConfiguration,
+
+        [{package: {}}, {}, []],
+        [{package: {a: 2}}, {a: 2}, []],
+        [{package: {a: 2, b: 3}}, {a: 2, b: 3}, []],
+        [{package: {b: 3}, value: 2}, {a: {value: 2}, b: 3}, ['a']],
+        [{package: {b: 3}, value: 2}, {a: {value: 2}, b: 3}, ['a', 'b']],
+        [{package: {b: 3}, value: 2}, {a: {value: 2}, b: 3}, ['z', 'a', 'b']],
+        [{package: {a: 2}, value: 3}, {a: 2, b: {value: 3}}, ['b', 'a']]
     )
-    test.each([
-        [[], {}, configuration],
-        [[], {a: 2}, configuration],
-        [
-            [{configuration: {a: 2}}], {},
-            Tools.extend({a: 2}, configuration)
-        ]
-    ])(
-        'loadConfigurations(%p, %p) === %p',
-        (
-            plugins:Array<Plugin>,
-            configuration:Configuration,
-            expected:Configuration
-        ):void =>
-            /*
-                NOTE: "assert.deepEqual()" isn't compatible with the proxy
-                configuration object.
-            */
-            expect(PluginAPI.loadConfigurations(plugins, configuration))
-                .toStrictEqual(expected)
+    testEach<typeof PluginAPI.loadConfigurations>(
+        'loadConfigurations',
+        PluginAPI.loadConfigurations,
+
+        [configuration, [], {}],
+        [configuration, [], {a: 2}],
+        [Tools.extend({a: 2}, configuration), [{configuration: {a: 2}}], {}]
     )
-    test.each([
+    test.each<typeof PluginAPI.loadFile>(
+        'loadFile',
+        PluginAPI.loadFile,
+
         [
+            require('../dummyPlugin/package'),
             path.resolve(
                 configuration.context.path, 'dummyPlugin/package.json'
             ),
             'dummy',
             null,
-            false,
-            require('../dummyPlugin/package')
+            false
         ],
-        ['unknown', 'dummy', {a: 2}, false, {a: 2}]
-    ])(
-        `loadFile('%s', '%s', %p, %p) === %p`,
-        (
-            filePath:string,
-            name:string,
-            fallbackScope:null|object,
-            log:boolean,
-            expected:object
-        ):void =>
-            expect(PluginAPI.loadFile(filePath, name, fallbackScope, log))
-                .toStrictEqual(expected)
+        [{a: 2}, 'unknown', 'dummy', {a: 2}, false]
     )
-    test.each([[configuration, {configuration, plugins: []}]])(
-        'loadAll(%p) === %p',
-        async (
-            configuration:Configuration,
-            expected:{
-                configuration:Configuration
-                plugins:Array<Plugin>
-            }
-        ):Promise<void> => {
-            try {
-                expect(await PluginAPI.loadAll(configuration))
-                    .toStrictEqual(expected)
-            } catch (error) {
-                console.error(error)
-            }
-        }
+    testEachPromise<typeof PluginAPI.loadAll>(
+        'loadAll',
+        PluginAPI.loadAll,
+
+        [{configuration, plugins: []}, configuration]
     )
 })
 // endregion
