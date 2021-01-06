@@ -19,7 +19,7 @@ import {
     spawnSync as spawnChildProcessSync, SpawnSyncReturns
 } from 'child_process'
 import Tools from 'clientnode'
-import {Encoding, PlainObject, ValueOf} from 'clientnode/type'
+import {Encoding, Mapping, PlainObject, ValueOf} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
@@ -677,7 +677,7 @@ export class PluginAPI {
                     )
                 }
             }
-        const temporaryPlugins:{[key:string]:Array<string>} = {}
+        const temporaryPlugins:Mapping<Array<string>> = {}
         for (const pluginName in plugins)
             if (plugins.hasOwnProperty(pluginName)) {
                 temporaryPlugins[plugins[
