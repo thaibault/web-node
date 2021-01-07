@@ -624,7 +624,7 @@ export class PluginAPI {
         plugins:Array<Plugin>
     }> {
         const plugins:{[key:string]:Plugin} = {}
-        // If an application's main
+        // If application's main is this itself avoid loading twice.
         if (configuration.name !== 'web-node')
             plugins[configuration.name] = await PluginAPI.load(
                 configuration.name,
