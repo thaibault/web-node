@@ -206,15 +206,15 @@ export class PluginAPI {
                     pluginChange.newScope.hasOwnProperty(name) &&
                     !(
                         Tools.isFunction((
-                            pluginChange.oldScope as {[key:string]:unknown}
+                            pluginChange.oldScope as Mapping<unknown>
                         )[name]) ||
                         Tools.isFunction((
-                            pluginChange.newScope as {[key:string]:unknown}
+                            pluginChange.newScope as Mapping<unknown>
                         )[name])
                     )
                 )
-                    (pluginChange.newScope as {[key:string]:unknown}) =
-                        pluginChange.oldScope as {[key:string]:unknown}
+                    (pluginChange.newScope as Mapping<unknown>) =
+                        pluginChange.oldScope as Mapping<unknown>
             pluginsWithChangedFiles.push(pluginChange.plugin)
         }
         return pluginsWithChangedFiles
@@ -314,7 +314,7 @@ export class PluginAPI {
     static async load(
         name:string,
         internalName:string,
-        plugins:{[key:string]:Plugin},
+        plugins:Mapping<Plugin>,
         metaConfiguration:MetaConfiguration,
         pluginPath:string,
         encoding:Encoding = 'utf8'
@@ -377,7 +377,7 @@ export class PluginAPI {
         pluginPath:string,
         name:string,
         internalName:string,
-        plugins:{[key:string]:Plugin},
+        plugins:Mapping<Plugin>,
         encoding:Encoding = 'utf8',
         configuration:null|PluginConfiguration = null,
         configurationFilePaths:Array<string> = []
@@ -415,7 +415,7 @@ export class PluginAPI {
                 api = (hook:string, data:any, ...parameter:Array<any>):any => {
                     if (hook in plugins[name].scope!)
                         return (
-                            plugins[name].scope as {[key:string]:Function}
+                            plugins[name].scope as Mapping<Function>
                         )[hook](data, ...parameter)
                     throw new Error(
                         `NotImplemented: API method "${hook}" is not ` +
@@ -623,7 +623,7 @@ export class PluginAPI {
         configuration:Configuration
         plugins:Array<Plugin>
     }> {
-        const plugins:{[key:string]:Plugin} = {}
+        const plugins:Mapping<Plugin> = {}
         // If application's main is this itself avoid loading twice.
         if (configuration.name !== 'web-node')
             plugins[configuration.name] = await PluginAPI.load(

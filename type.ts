@@ -14,7 +14,7 @@
     endregion
 */
 // region imports
-import {Encoding, PlainObject} from 'clientnode/type'
+import {Encoding, Mapping, PlainObject} from 'clientnode/type'
 // endregion
 // region exports
 export type MetaConfiguration = {
@@ -49,9 +49,7 @@ export type WebNodeConfiguration = PlainObject & {
 export type PluginConfiguration = PlainObject & {
     dependencies?:Array<string>
 }
-export type Configuration = WebNodeConfiguration & {
-    [key:string]:PluginConfiguration
-}
+export type Configuration = WebNodeConfiguration & Mappign<PluginConfiguration>
 export type Plugin = {
     api:Function|null
     apiFilePaths:Array<string>
@@ -75,8 +73,8 @@ export type Service = {
     name:string
     promise:null|Promise<object>
 }
-export type Services = {[key:string]:object}
-export type ServicePromises = {[key:string]:Promise<object>}
+export type Services = Mapping<object>
+export type ServicePromises = Mapping<Promise<object>>
 export interface PluginHandler {
     /**
      * Application started, static configuration loaded and all available
