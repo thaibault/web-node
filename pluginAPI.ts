@@ -19,7 +19,7 @@ import {
     spawnSync as spawnChildProcessSync, SpawnSyncReturns
 } from 'child_process'
 import Tools from 'clientnode'
-import {Encoding, PlainObject, ValueOf} from 'clientnode/type'
+import {Encoding, Mapping, PlainObject, ValueOf} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
@@ -624,7 +624,7 @@ export class PluginAPI {
         plugins:Array<Plugin>
     }> {
         const plugins:{[key:string]:Plugin} = {}
-        // If an application's main
+        // If application's main is this itself avoid loading twice.
         if (configuration.name !== 'web-node')
             plugins[configuration.name] = await PluginAPI.load(
                 configuration.name,
@@ -677,7 +677,7 @@ export class PluginAPI {
                     )
                 }
             }
-        const temporaryPlugins:{[key:string]:Array<string>} = {}
+        const temporaryPlugins:Mapping<Array<string>> = {}
         for (const pluginName in plugins)
             if (plugins.hasOwnProperty(pluginName)) {
                 temporaryPlugins[plugins[
