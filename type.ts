@@ -49,7 +49,7 @@ export type WebNodeConfiguration = PlainObject & {
 export type PluginConfiguration = PlainObject & {
     dependencies?:Array<string>
 }
-export type Configuration = WebNodeConfiguration & Mappign<PluginConfiguration>
+export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
 export type Plugin = {
     api:Function|null
     apiFilePaths:Array<string>
