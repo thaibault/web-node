@@ -103,11 +103,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                         plugins
                     )
                 } catch (error) {
-                    if (!(
-                        error !== null &&
-                        typeof error === 'object' &&
-                        error.message?.startsWith('NotImplemented:')
-                    ))
+                    if (!error?.message?.startsWith('NotImplemented:'))
                         throw new Error(
                             `Plugin "${plugin.internalName}" ` +
                             (
