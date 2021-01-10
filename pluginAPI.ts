@@ -104,16 +104,15 @@ export class PluginAPI {
             if (plugin.api) {
                 let result:any
                 try {
-                    result = await plugin.api.call(
-                        PluginAPI,
+                    result = await plugin.api(
                         hook,
                         data,
-                        ...parameter
-                            .concat(hook.endsWith('ConfigurationLoaded') ?
+                        ...parameter.concat(
+                            hook.endsWith('ConfigurationLoaded') ?
                                 [] :
-                                configuration
-                            )
-                            .concat(plugins)
+                                configuration,
+                            [plugins]
+                        )
                     )
                 } catch (error) {
                     if (error.message?.startsWith('NotImplemented:'))
@@ -159,8 +158,7 @@ export class PluginAPI {
             if (plugin.api) {
                 let result:any
                 try {
-                    result = plugin.api.call(
-                        PluginAPI,
+                    result = plugin.api(
                         hook,
                         data,
                         ...parameter.concat(configuration, plugins)
