@@ -31,8 +31,8 @@ import packageConfiguration from './package.json'
 */
 packageConfiguration.webNode.context = {path: __dirname}
 while (true) {
-    packageConfiguration.webNode.context.path = path.resolve(
-        packageConfiguration.webNode.context.path, '../../')
+    packageConfiguration.webNode.context.path =
+        path.resolve(packageConfiguration.webNode.context.path, '../../')
     if (
         path.basename(path.dirname(
             packageConfiguration.webNode.context.path)
