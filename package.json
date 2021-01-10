@@ -98,7 +98,7 @@
           }
         },
         "external": {
-          "nameRegularExpressionPattern": "^([a-zA-Z0-9-]+)-?[wW]eb-?[nN]ode-?[pP]lugin$",
+          "nameRegularExpressionPattern": "^([a-zA-Z0-9-]+?)-?[wW]eb-?[nN]ode-?[pP]lugin$",
           "path": {
             "__evaluate__": "`${currentPath}/node_modules/`"
           }
