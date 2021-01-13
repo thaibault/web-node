@@ -111,6 +111,10 @@ export class PluginAPI {
                             hook.endsWith('ConfigurationLoaded') ?
                                 [] :
                                 configuration,
+                            /*
+                                NOTE: We have to wrap into an array here to
+                                avoid spreading the plugins array.
+                            */
                             [plugins]
                         )
                     )
