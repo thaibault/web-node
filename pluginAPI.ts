@@ -737,10 +737,12 @@ export class PluginAPI {
     /**
      * Ignore absolute defined locations (relativ to application context) and
      * relative defined in each loaded plugin location.
+     *
      * @param configuration - Configuration object.
      * @param plugins - List of acctive plugins.
      * @param filePath - Path to search for.
      * @param locations - Locations to search in.
+     *
      * @returns A boolean indicating whether given file path is in provided
      * locations.
      */
