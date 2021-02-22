@@ -69,6 +69,9 @@
     "@babel/runtime": "*",
     "clientnode": "*"
   },
+  "resolutions": {
+    "@types/webpack": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.1.0.tgz"
+  },
   "sideEffects": true,
   "webNode": {
     "context": {
@@ -138,5 +141,8 @@
       "boilerplate": "node",
       "payload": "node"
     }
+  },
+  "dependencies": {
+    "@types/webpack": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.1.0.tgz"
   }
 }
