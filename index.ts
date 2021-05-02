@@ -61,7 +61,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                 .join('", "') +
             '".'
         )
-    for (const type of ['pre', 'post'])
+    for (const type of ['pre', 'post'] as const)
         await PluginAPI.callStack(
             `${type}ConfigurationLoaded`,
             plugins,
