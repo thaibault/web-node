@@ -16,14 +16,14 @@
     "management"
   ],
   "files": [
-    "configurator.ts",
-    "index.ts",
-    "pluginAPI.ts",
-    "type.ts",
-    "unixCrypt.js",
-    "unixCrypt.ts"
+    "configurator.d.ts",
+    "index.d.ts",
+    "index.js",
+    "pluginAPI.d.ts",
+    "type.d.ts",
+    "unixCrypt.d.ts",
+    "unixCrypt.js"
   ],
-  "main": "index.js",
   "bin": {
     "web-node": "index.js"
   },
