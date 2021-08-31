@@ -496,14 +496,14 @@ export class PluginAPI {
                 // NOTE: We should break the cycle here.
                 delete configuration.package[propertyName]
                 // Removing comments (default key name to delete is "#").
-                return Tools.removeKeys(configuration)
+                return Tools.removeKeyPrefixes(configuration)
             }
         /*
             No plugin specific configuration found. Only provide package
             configuration.
             Removing comments (default key name to delete is "#").
         */
-        return Tools.removeKeys({package: packageConfigurationCopy})
+        return Tools.removeKeyPrefixes({package: packageConfigurationCopy})
     }
     /**
      * Loads given plugin configurations into global configuration.
@@ -539,7 +539,7 @@ export class PluginAPI {
         const packageConfiguration:PlainObject = configuration.package
         delete (configuration as {package?:Configuration['package']}).package
         configuration = Tools.evaluateDynamicData(
-            Tools.removeEvaluationInDynamicData(configuration),
+            Tools.removeKeysInEvaluation(configuration),
             {
                 currentPath: process.cwd(),
                 fileSystem,

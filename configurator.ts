@@ -116,7 +116,7 @@ if (process.argv.length > 2) {
     }
 }
 configuration = Tools.evaluateDynamicData(
-    Tools.removeEvaluationInDynamicData(configuration), scope
+    Tools.removeKeysInEvaluation(configuration), scope
 ) as Configuration
 configuration.package = packageConfiguration
 /*
