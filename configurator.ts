@@ -100,21 +100,28 @@ const scope:Mapping<any> = {
 export let configuration:Configuration = Tools.evaluateDynamicData(
     packageConfiguration.webNode, scope
 ) as unknown as Configuration
+
 delete (packageConfiguration as {webNode?:PlainObject}).webNode
-Tools.extend(
+
+Tools.extend<Configuration>(
     true,
-    Tools.modifyObject(configuration, specificConfiguration),
+    Tools.modifyObject<Configuration>(configuration, specificConfiguration),
     specificConfiguration
 )
+
 if (process.argv.length > 2) {
     const result:null|object = Tools.stringParseEncodedObject(
         process.argv[process.argv.length - 1], configuration, 'configuration'
     )
+
     if (Tools.isPlainObject(result)) {
-        Tools.extend(true, Tools.modifyObject(configuration, result), result)
+        Tools.extend<Configuration>(
+            true, Tools.modifyObject(configuration, result), result
+        )
         configuration.runtimeConfiguration = result
     }
 }
+
 configuration = Tools.evaluateDynamicData(
     Tools.removeKeysInEvaluation(configuration), scope
 ) as Configuration

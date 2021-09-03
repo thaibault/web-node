@@ -51,7 +51,6 @@
     "@babel/cli": "*",
     "@babel/eslint-parser": "*",
     "@types/jest": "*",
-    "@types/loader-utils": "*",
     "@types/node": "*",
     "@types/workbox-webpack-plugin": "*",
     "@typescript-eslint/eslint-plugin": "*",
