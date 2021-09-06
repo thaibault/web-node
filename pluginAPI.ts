@@ -35,12 +35,14 @@ export class PluginAPI {
     /**
      * Calls all plugin methods for given trigger description asynchronous and
      * waits for their resolved promises.
+     *
      * @param hook - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
      * plugins have been resolved.
      * @param parameter - Additional parameter to forward into plugin api.
+     *
      * @returns A promise which resolves when all callbacks have resolved their
      * promise holding given potentially modified data.
      */
@@ -119,8 +121,11 @@ export class PluginAPI {
                         )
                     )
                 } catch (error) {
-                    if (error.message?.startsWith('NotImplemented:'))
+                    if (
+                        (error as Error).message?.startsWith('NotImplemented:')
+                    )
                         continue
+
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` +
                         (
@@ -168,8 +173,11 @@ export class PluginAPI {
                         ...parameter.concat(configuration, plugins)
                     )
                 } catch (error) {
-                    if (error.message?.startsWith('NotImplemented:'))
+                    if ((error as Error).message?.startsWith(
+                        'NotImplemented:'
+                    ))
                         continue
+
                     throw new Error(
                         `Plugin "${plugin.internalName}" ` +
                         (
@@ -496,14 +504,14 @@ export class PluginAPI {
                 // NOTE: We should break the cycle here.
                 delete configuration.package[propertyName]
                 // Removing comments (default key name to delete is "#").
-                return Tools.removeKeys(configuration)
+                return Tools.removeKeyPrefixes(configuration)
             }
         /*
             No plugin specific configuration found. Only provide package
             configuration.
             Removing comments (default key name to delete is "#").
         */
-        return Tools.removeKeys({package: packageConfigurationCopy})
+        return Tools.removeKeyPrefixes({package: packageConfigurationCopy})
     }
     /**
      * Loads given plugin configurations into global configuration.
@@ -522,24 +530,31 @@ export class PluginAPI {
         Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
         for (const plugin of plugins)
             if (plugin.configuration) {
-                const pluginConfiguration:PlainObject = Tools.copy(
-                    plugin.configuration, -1, true)
+                const pluginConfiguration:PlainObject =
+                    Tools.copy(plugin.configuration, -1, true)
+
                 delete pluginConfiguration.package
-                Tools.extend(
+
+                Tools.extend<Configuration>(
                     true,
-                    Tools.modifyObject(configuration, pluginConfiguration),
-                    pluginConfiguration
+                    Tools.modifyObject<Configuration>(
+                        configuration, pluginConfiguration
+                    )!,
+                    pluginConfiguration as Configuration
                 )
+
                 if (configuration.runtimeConfiguration)
-                    Tools.extend(
-                        true, configuration, configuration.runtimeConfiguration
+                    Tools.extend<Configuration>(
+                        true,
+                        configuration,
+                        configuration.runtimeConfiguration as Configuration
                     )
             }
         const now:Date = new Date()
         const packageConfiguration:PlainObject = configuration.package
         delete (configuration as {package?:Configuration['package']}).package
         configuration = Tools.evaluateDynamicData(
-            Tools.removeEvaluationInDynamicData(configuration),
+            Tools.removeKeysInEvaluation(configuration),
             {
                 currentPath: process.cwd(),
                 fileSystem,

@@ -16,14 +16,14 @@
     "management"
   ],
   "files": [
-    "configurator.ts",
-    "index.ts",
-    "pluginAPI.ts",
-    "type.ts",
-    "unixCrypt.js",
-    "unixCrypt.ts"
+    "configurator.d.ts",
+    "index.d.ts",
+    "index.js",
+    "pluginAPI.d.ts",
+    "type.d.ts",
+    "unixCrypt.d.ts",
+    "unixCrypt.js"
   ],
-  "main": "index.js",
   "bin": {
     "web-node": "index.js"
   },
@@ -49,13 +49,12 @@
   },
   "devDependencies": {
     "@babel/cli": "*",
+    "@babel/eslint-parser": "*",
     "@types/jest": "*",
-    "@types/loader-utils": "*",
     "@types/node": "*",
     "@types/workbox-webpack-plugin": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
-    "babel-eslint": "*",
     "clientnode": "*",
     "documentation-website": "*",
     "eslint": "*",
