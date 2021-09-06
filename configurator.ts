@@ -105,8 +105,8 @@ delete (packageConfiguration as {webNode?:PlainObject}).webNode
 
 Tools.extend<Configuration>(
     true,
-    Tools.modifyObject<Configuration>(configuration, specificConfiguration),
-    specificConfiguration
+    Tools.modifyObject<Configuration>(configuration, specificConfiguration)!,
+    specificConfiguration as Configuration
 )
 
 if (process.argv.length > 2) {
@@ -116,7 +116,9 @@ if (process.argv.length > 2) {
 
     if (Tools.isPlainObject(result)) {
         Tools.extend<Configuration>(
-            true, Tools.modifyObject(configuration, result), result
+            true,
+            Tools.modifyObject<Configuration>(configuration, result)!,
+            result as Configuration
         )
         configuration.runtimeConfiguration = result
     }
