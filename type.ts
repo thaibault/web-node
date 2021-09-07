@@ -14,7 +14,9 @@
     endregion
 */
 // region imports
-import {Encoding, Mapping, PlainObject} from 'clientnode/type'
+import {
+    Encoding, Mapping, PlainObject, RecursiveEvaluateable, RecursivePartial
+} from 'clientnode/type'
 // endregion
 // region exports
 export interface MetaConfiguration {
@@ -28,9 +30,9 @@ export interface WebNodeConfiguration {
     }
     debug:boolean
     encoding:Encoding
-    interDependencies:PlainObject
+    interDependencies:Mapping<Array<string>|string>
     name:string
-    package:PlainObject
+    package:RecursiveEvaluateable<PackageConfiguration>
     plugin:{
         configuration:MetaConfiguration
         directories:Mapping<{
@@ -39,16 +41,22 @@ export interface WebNodeConfiguration {
         }>
         hotReloading:boolean
     }
+    runtimeConfiguration?:RecursivePartial<Configuration>
 }
 export interface PluginConfiguration {
     dependencies?:Array<string>
 }
 export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
+export type PackageConfiguration = PlainObject & {
+    webnode?:RecursivePartial<Configuration>
+    webNode?:RecursivePartial<Configuration>
+    'web-node'?:RecursivePartial<Configuration>
+}
 export interface Plugin {
     api:Function|null
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
-    configuration:PlainObject
+    configuration:PluginConfiguration
     configurationFilePaths:Array<string>
     configurationFileLoadTimestamps:Array<number>
     dependencies:Array<string>

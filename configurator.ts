@@ -15,11 +15,13 @@
 */
 // region imports
 import Tools from 'clientnode'
-import {Mapping, PlainObject} from 'clientnode/type'
+import {
+    Mapping, PlainObject, RecursiveEvaluateable, RecursivePartial
+} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
-import {Configuration} from './type'
+import {Configuration, PackageConfiguration} from './type'
 import PluginAPI from './pluginAPI'
 import packageConfiguration from './package.json'
 // endregion
@@ -65,10 +67,10 @@ else
             packageConfiguration.webNode.context.path = process.cwd()
     } catch (error) {}
 
-let specificConfiguration: = {}
+let mainConfiguration:PackageConfiguration = {}
 try {
     /* eslint-disable no-eval */
-    specificConfiguration = eval('require')(
+    mainConfiguration = eval('require')(
         path.join(packageConfiguration.webNode.context.path, 'package')
     )
     /* eslint-enable no-eval */
@@ -77,13 +79,14 @@ try {
 }
 
 const name:string =
-    (specificConfiguration.documentationWebsite as {name?:string})?.name ||
-    specificConfiguration.name as string
+    (mainConfiguration.documentationWebsite as {name?:string})?.name ||
+    mainConfiguration.name as string
 
-specificConfiguration = specificConfiguration.webNode || {}
+const applicationConfiguration:RecursivePartial<Configuration> =
+    mainConfiguration.webNode || {}
 
 if (name)
-    specificConfiguration.name = name
+    applicationConfiguration.name = name
 // endregion
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
@@ -109,29 +112,36 @@ delete (packageConfiguration as {webNode?:PlainObject}).webNode
 
 Tools.extend<Configuration>(
     true,
-    Tools.modifyObject<Configuration>(configuration, specificConfiguration)!,
-    specificConfiguration as Configuration
+    Tools.modifyObject<Configuration>(
+        configuration, applicationConfiguration
+    )!,
+    applicationConfiguration as Configuration
 )
 
 if (process.argv.length > 2) {
-    const result:null|object = Tools.stringParseEncodedObject(
-        process.argv[process.argv.length - 1], configuration, 'configuration'
-    )
+    const result:null|RecursivePartial<Configuration> =
+        Tools.stringParseEncodedObject<RecursivePartial<Configuration>>(
+            process.argv[process.argv.length - 1],
+            configuration,
+            'configuration'
+        )
 
     if (Tools.isPlainObject(result)) {
         Tools.extend<Configuration>(
             true,
             Tools.modifyObject<Configuration>(configuration, result)!,
-            result as Configuration
+            result
         )
         configuration.runtimeConfiguration = result
     }
 }
 
-configuration = Tools.evaluateDynamicData(
-    Tools.removeKeysInEvaluation(configuration), scope
-) as Configuration
-configuration.package = packageConfiguration
+configuration = Tools.evaluateDynamicData<Configuration>(
+    Tools.removeKeysInEvaluation<Configuration>(configuration), scope
+)
+configuration.package = packageConfiguration as
+    unknown as
+    RecursiveEvaluateable<PackageConfiguration>
 /*
     NOTE: We need to copy the configuration to avoid operating on deduplicated
     objects in further resolving algorithms which can lead to unexpected
