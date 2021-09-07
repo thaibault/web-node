@@ -33,16 +33,10 @@ export type WebNodeConfiguration = PlainObject & {
     package:PlainObject
     plugin:{
         configuration:MetaConfiguration
-        directories:{
-            external:{
-                nameRegularExpressionPattern:string
-                path:string
-            }
-            internal:{
-                nameRegularExpressionPattern:string
-                path:string
-            }
-        }
+        directories:Mapping<{
+            nameRegularExpressionPattern:string
+            path:string
+        }>
         hotReloading:boolean
     }
 }
