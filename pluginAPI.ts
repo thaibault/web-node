@@ -527,6 +527,7 @@ export class PluginAPI {
         for (const key in configuration)
             if (configuration.hasOwnProperty(key))
                 delete configuration[key]
+
         Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
         for (const plugin of plugins)
             if (plugin.configuration) {
@@ -569,6 +570,7 @@ export class PluginAPI {
                 nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
             }
         ) as Configuration
+
         /*
             NOTE: We have to replace the resolved plugin configurations in the
             plugin data structure.
@@ -576,7 +578,9 @@ export class PluginAPI {
         for (const plugin of plugins)
             if (configuration.hasOwnProperty(plugin.internalName))
                 plugin.configuration = configuration[plugin.internalName]
+
         configuration.package = packageConfiguration
+
         return configuration
     }
     /**
@@ -651,30 +655,27 @@ export class PluginAPI {
                 configuration.context.path,
                 configuration.encoding
             )
+
         for (const type in configuration.plugin.directories)
             if (
                 configuration.plugin.directories.hasOwnProperty(type) &&
                 await Tools.isDirectory(
-                    configuration.plugin.directories[
-                        type as 'external'|'internal'
-                    ].path
+                    configuration.plugin.directories[type].path
                 )
             ) {
                 const compiledRegularExpression:RegExp = new RegExp(
                     configuration.plugin.directories[
-                        type as 'external'|'internal'
+                        type
                     ].nameRegularExpressionPattern)
+
                 for (const pluginName of fileSystem.readdirSync(
-                    configuration.plugin.directories[
-                        type as 'external'|'internal'
-                    ].path
+                    configuration.plugin.directories[type].path
                 )) {
                     if (!(compiledRegularExpression).test(pluginName))
                         continue
+
                     const currentPluginPath:string = path.resolve(
-                        configuration.plugin.directories[
-                            type as 'external'|'internal'
-                        ].path,
+                        configuration.plugin.directories[type].path,
                         pluginName
                     )
                     const internalName:string = pluginName.replace(
@@ -684,6 +685,7 @@ export class PluginAPI {
                                 firstMatch :
                                 fullMatch
                     )
+
                     plugins[pluginName] = await PluginAPI.load(
                         pluginName,
                         internalName,
