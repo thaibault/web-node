@@ -64,7 +64,8 @@ else
         )
             packageConfiguration.webNode.context.path = process.cwd()
     } catch (error) {}
-let specificConfiguration:PlainObject = {}
+
+let specificConfiguration: = {}
 try {
     /* eslint-disable no-eval */
     specificConfiguration = eval('require')(
@@ -74,10 +75,13 @@ try {
 } catch (error) {
     packageConfiguration.webNode.context.path = process.cwd()
 }
+
 const name:string =
     (specificConfiguration.documentationWebsite as {name?:string})?.name ||
     specificConfiguration.name as string
-specificConfiguration = specificConfiguration.webNode as PlainObject || {}
+
+specificConfiguration = specificConfiguration.webNode || {}
+
 if (name)
     specificConfiguration.name = name
 // endregion

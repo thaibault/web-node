@@ -40,7 +40,7 @@ export interface WebNodeConfiguration {
         hotReloading:boolean
     }
 }
-export interface PluginConfiguration extends PlainObject {
+export interface PluginConfiguration {
     dependencies?:Array<string>
 }
 export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
