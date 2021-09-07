@@ -17,11 +17,11 @@
 import {Encoding, Mapping, PlainObject} from 'clientnode/type'
 // endregion
 // region exports
-export type MetaConfiguration = {
+export interface MetaConfiguration {
     fileNames:Array<string>
     propertyNames:Array<string>
 }
-export type WebNodeConfiguration = PlainObject & {
+export interface WebNodeConfiguration {
     context:{
         path:string
         type:string
@@ -40,11 +40,11 @@ export type WebNodeConfiguration = PlainObject & {
         hotReloading:boolean
     }
 }
-export type PluginConfiguration = PlainObject & {
+export interface PluginConfiguration extends PlainObject {
     dependencies?:Array<string>
 }
 export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
-export type Plugin = {
+export interface Plugin {
     api:Function|null
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
@@ -57,13 +57,13 @@ export type Plugin = {
     path:string
     scope:null|object
 }
-export type PluginChange = {
+export interface PluginChange {
     newScope:object
     oldScope:null|object
     plugin:Plugin
     target:'configuration'|'scope'
 }
-export type Service = {
+export interface Service {
     name:string
     promise:null|Promise<object>
 }
