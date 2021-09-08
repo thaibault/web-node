@@ -95,9 +95,9 @@ export interface Service {
     promise:null|Promise<object>
 }
 export type Services<PluginServiceType = {}> =
-    PluginServiceType & Mapping<object>
+    Mapping<object> & PluginServiceType
 export type ServicePromises<PluginPromiseType = {}> =
-    PluginPromiseType & Mapping<Promise<object>>
+    Mapping<Promise<object>> & PluginPromiseType
 
 export interface PluginHandler {
     /**
