@@ -15,11 +15,15 @@
 */
 // region imports
 import Tools from 'clientnode'
-import {Mapping, PlainObject} from 'clientnode/type'
+import {
+    Mapping, PlainObject, RecursiveEvaluateable, RecursivePartial
+} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
-import {Configuration} from './type'
+import {
+    Configuration, EvaluateablePartialConfiguration, PackageConfiguration
+} from './type'
 import PluginAPI from './pluginAPI'
 import packageConfiguration from './package.json'
 // endregion
@@ -64,22 +68,24 @@ else
         )
             packageConfiguration.webNode.context.path = process.cwd()
     } catch (error) {}
-let specificConfiguration:PlainObject = {}
+
+let mainConfiguration:PackageConfiguration = {name: 'main'}
 try {
     /* eslint-disable no-eval */
-    specificConfiguration = eval('require')(
+    mainConfiguration = eval('require')(
         path.join(packageConfiguration.webNode.context.path, 'package')
     )
     /* eslint-enable no-eval */
 } catch (error) {
     packageConfiguration.webNode.context.path = process.cwd()
 }
-const name:string =
-    (specificConfiguration.documentationWebsite as {name?:string})?.name ||
-    specificConfiguration.name as string
-specificConfiguration = specificConfiguration.webNode as PlainObject || {}
-if (name)
-    specificConfiguration.name = name
+
+const name:string|undefined =
+    mainConfiguration.documentationWebsite?.name ||
+    mainConfiguration.name
+
+const applicationConfiguration:EvaluateablePartialConfiguration =
+    mainConfiguration.webNode || {package: mainConfiguration}
 // endregion
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
@@ -97,39 +103,54 @@ const scope:Mapping<any> = {
     now,
     nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
 }
-export let configuration:Configuration = Tools.evaluateDynamicData(
-    packageConfiguration.webNode, scope
-) as unknown as Configuration
+export let configuration:Configuration =
+    Tools.evaluateDynamicData<Configuration>(
+        packageConfiguration.webNode as
+            unknown as
+            RecursiveEvaluateable<Configuration>,
+        scope
+    )
 
-delete (packageConfiguration as {webNode?:PlainObject}).webNode
+delete (packageConfiguration as unknown as PackageConfiguration).webNode
 
 Tools.extend<Configuration>(
     true,
-    Tools.modifyObject<Configuration>(configuration, specificConfiguration)!,
-    specificConfiguration as Configuration
+    Tools.modifyObject<Configuration>(
+        configuration, applicationConfiguration
+    )!,
+    applicationConfiguration as Configuration
 )
 
 if (process.argv.length > 2) {
-    const result:null|object = Tools.stringParseEncodedObject(
-        process.argv[process.argv.length - 1], configuration, 'configuration'
-    )
+    const result:null|EvaluateablePartialConfiguration =
+        Tools.stringParseEncodedObject<EvaluateablePartialConfiguration>(
+            process.argv[process.argv.length - 1],
+            configuration,
+            'configuration'
+        )
 
     if (Tools.isPlainObject(result)) {
-        Tools.extend<Configuration>(
+        Tools.extend<RecursiveEvaluateable<Configuration>>(
             true,
+            /*
+                NOTE: "Tools.modifyObject" removes modifications in "result" in
+                place before it is used as extending source.
+            */
             Tools.modifyObject<Configuration>(configuration, result)!,
-            result as Configuration
+            result as RecursiveEvaluateable<Configuration>
         )
         configuration.runtimeConfiguration = result
     }
 }
 
-configuration = Tools.evaluateDynamicData(
-    Tools.removeKeysInEvaluation(configuration), scope
-) as Configuration
-configuration.package = packageConfiguration
+configuration = Tools.evaluateDynamicData<Configuration>(
+    Tools.removeKeysInEvaluation<Configuration>(configuration), scope
+)
+if (name)
+    configuration.name = name
+configuration.package = packageConfiguration as unknown as PackageConfiguration
 /*
-    NOTE: We need to copy the configuration to avoid operating on deduplicated
+    NOTE: We need to copy the configuration to avoid operating on de-duplicated
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
