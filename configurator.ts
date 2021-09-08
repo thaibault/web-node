@@ -21,7 +21,9 @@ import {
 import fileSystem from 'fs'
 import path from 'path'
 
-import {Configuration, PackageConfiguration} from './type'
+import {
+    Configuration, EvaluateablePartialConfiguration, PackageConfiguration
+} from './type'
 import PluginAPI from './pluginAPI'
 import packageConfiguration from './package.json'
 // endregion
@@ -67,7 +69,7 @@ else
             packageConfiguration.webNode.context.path = process.cwd()
     } catch (error) {}
 
-let mainConfiguration:PackageConfiguration = {}
+let mainConfiguration:PackageConfiguration = {name: 'main'}
 try {
     /* eslint-disable no-eval */
     mainConfiguration = eval('require')(
@@ -79,10 +81,10 @@ try {
 }
 
 const name:string =
-    (mainConfiguration.documentationWebsite as {name?:string})?.name ||
-    mainConfiguration.name as string
+    mainConfiguration.documentationWebsite?.name ||
+    mainConfiguration.name
 
-const applicationConfiguration:RecursivePartial<Configuration> =
+const applicationConfiguration:EvaluateablePartialConfiguration =
     mainConfiguration.webNode || {}
 
 if (name)
@@ -104,11 +106,12 @@ const scope:Mapping<any> = {
     now,
     nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
 }
-export let configuration:Configuration = Tools.evaluateDynamicData(
-    packageConfiguration.webNode, scope
-) as unknown as Configuration
+export let configuration:Configuration =
+    Tools.evaluateDynamicData<Configuration>(
+        packageConfiguration.webNode, scope
+    )
 
-delete (packageConfiguration as {webNode?:PlainObject}).webNode
+delete packageConfiguration.webNode
 
 Tools.extend<Configuration>(
     true,

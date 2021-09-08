@@ -15,7 +15,7 @@
 */
 // region imports
 import {
-    Encoding, Mapping, PlainObject, RecursivePartial
+    Encoding, Mapping, PlainObject, RecursiveEvaluateable, RecursivePartial
 } from 'clientnode/type'
 // endregion
 // region exports
@@ -50,14 +50,18 @@ export interface WebNodeConfiguration extends PluginConfiguration {
         }>
         hotReloading:boolean
     }
-    runtimeConfiguration?:RecursivePartial<Configuration>
+    runtimeConfiguration?:EvaluateablePartialConfiguration
 }
 export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
-export type PackageConfiguration = PlainObject & {
+export type EvaluateablePartialConfiguration =
+    RecursiveEvaluateable<RecursivePartial<Configuration>>
+export interface PackageConfiguration {
+    documentationWebsite?:{name?:string}
     main?:string
-    webnode?:RecursivePartial<Configuration>
-    webNode?:RecursivePartial<Configuration>
-    'web-node'?:RecursivePartial<Configuration>
+    name:string
+    webnode?:EvaluateablePartialConfiguration
+    webNode?:EvaluateablePartialConfiguration
+    'web-node'?:EvaluateablePartialConfiguration
 }
 export interface Plugin {
     api:Function|null

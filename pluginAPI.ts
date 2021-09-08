@@ -27,6 +27,7 @@ import baseConfiguration from './configurator'
 import {
     Configuration,
     EvaluateablePluginConfiguration,
+    EvaluateablePartialConfiguration,
     MetaConfiguration,
     PackageConfiguration,
     Plugin,
@@ -556,8 +557,7 @@ export class PluginAPI {
 
         for (const propertyName of configurationPropertyNames)
             if (packageConfiguration[propertyName]) {
-                // TODO evaluateable?
-                const configuration:RecursivePartial<Configuration> =
+                const configuration:EvaluateablePartialConfiguration =
                     packageConfiguration[propertyName as 'webNode']
 
                 configuration.package = packageConfigurationCopy
