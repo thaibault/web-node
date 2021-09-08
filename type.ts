@@ -68,6 +68,7 @@ export interface PackageConfiguration {
     webNode?:EvaluateablePartialConfiguration
     'web-node'?:EvaluateablePartialConfiguration
 }
+
 export interface Plugin {
     api:Function|null
     apiFilePaths:Array<string>
@@ -88,12 +89,16 @@ export interface PluginChange {
     plugin:Plugin
     target:'packageConfiguration'|'scope'
 }
+
 export interface Service {
     name:string
     promise:null|Promise<object>
 }
-export type Services = Mapping<object>
-export type ServicePromises = Mapping<Promise<object>>
+export type Services<PluginServiceType = {}> =
+    PluginServiceType & Mapping<object>
+export type ServicePromises<PluginPromiseType = {}> =
+    PluginPromiseType & Mapping<Promise<object>>
+
 export interface PluginHandler {
     /**
      * Application started, static configuration loaded and all available
