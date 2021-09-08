@@ -139,11 +139,9 @@ if (process.argv.length > 2) {
 configuration = Tools.evaluateDynamicData<Configuration>(
     Tools.removeKeysInEvaluation<Configuration>(configuration), scope
 )
-configuration.package = packageConfiguration as
-    unknown as
-    RecursiveEvaluateable<PackageConfiguration>
+configuration.package = packageConfiguration as unknown as PackageConfiguration
 /*
-    NOTE: We need to copy the configuration to avoid operating on deduplicated
+    NOTE: We need to copy the configuration to avoid operating on de-duplicated
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
