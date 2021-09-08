@@ -556,13 +556,13 @@ export class PluginAPI {
             Tools.copy(packageConfiguration, -1, true)
 
         for (const propertyName of configurationPropertyNames)
-            if (packageConfiguration[propertyName]) {
+            if (packageConfiguration[propertyName as 'webNode']) {
                 const configuration:EvaluateablePartialConfiguration =
-                    packageConfiguration[propertyName as 'webNode']
+                    packageConfiguration[propertyName as 'webNode']!
 
                 configuration.package = packageConfigurationCopy
                 // NOTE: We should break the cycle here.
-                delete configuration.package[propertyName]
+                delete configuration.package[propertyName as 'webNode']
 
                 // Removing comments (default key prefix to delete is "#").
                 return Tools.removeKeyPrefixes(configuration)
@@ -595,10 +595,17 @@ export class PluginAPI {
         Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
         for (const plugin of plugins)
             if (plugin.configuration) {
-                const pluginConfiguration:PlainObject =
+                const pluginConfiguration:EvaluateablePluginConfiguration =
                     Tools.copy(plugin.configuration, -1, true)
 
-                delete pluginConfiguration.package
+                /*
+                    NOTE: We remove and restore the package configuration to
+                    avoid modifying the initial configuration.
+                */
+                const packageConfiguration:PackageConfiguration =
+                    pluginConfiguration.package
+                delete (pluginConfiguration as {package?:PackageConfiguration})
+                    .package
 
                 Tools.extend<Configuration>(
                     true,
@@ -614,14 +621,20 @@ export class PluginAPI {
                         configuration,
                         configuration.runtimeConfiguration as Configuration
                     )
+
+                pluginConfiguration.package = packageConfiguration
             }
 
         const now:Date = new Date()
+
+        /*
+            NOTE: We remove and restore the package configuration to avoid
+            modifying the initial configuration.
+        */
         const packageConfiguration:PackageConfiguration = configuration.package
+        delete (configuration as {package?:PackageConfiguration}).package
 
-        delete configuration.package
-
-        configuration = Tools.evaluateDynamicData(
+        configuration = Tools.evaluateDynamicData<Configuration>(
             Tools.removeKeysInEvaluation(configuration),
             {
                 currentPath: process.cwd(),
@@ -636,7 +649,7 @@ export class PluginAPI {
                 now,
                 nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
             }
-        ) as Configuration
+        )
 
         /*
             NOTE: We have to replace the resolved plugin configurations in the

@@ -80,15 +80,12 @@ try {
     packageConfiguration.webNode.context.path = process.cwd()
 }
 
-const name:string =
+const name:string|undefined =
     mainConfiguration.documentationWebsite?.name ||
     mainConfiguration.name
 
 const applicationConfiguration:EvaluateablePartialConfiguration =
-    mainConfiguration.webNode || {}
-
-if (name)
-    applicationConfiguration.name = name
+    mainConfiguration.webNode || {package: mainConfiguration}
 // endregion
 packageConfiguration.webNode.name =
     packageConfiguration.documentationWebsite.name
@@ -108,10 +105,13 @@ const scope:Mapping<any> = {
 }
 export let configuration:Configuration =
     Tools.evaluateDynamicData<Configuration>(
-        packageConfiguration.webNode, scope
+        packageConfiguration.webNode as
+            unknown as
+            RecursiveEvaluateable<Configuration>,
+        scope
     )
 
-delete packageConfiguration.webNode
+delete (packageConfiguration as unknown as PackageConfiguration).webNode
 
 Tools.extend<Configuration>(
     true,
@@ -122,18 +122,22 @@ Tools.extend<Configuration>(
 )
 
 if (process.argv.length > 2) {
-    const result:null|RecursivePartial<Configuration> =
-        Tools.stringParseEncodedObject<RecursivePartial<Configuration>>(
+    const result:null|EvaluateablePartialConfiguration =
+        Tools.stringParseEncodedObject<EvaluateablePartialConfiguration>(
             process.argv[process.argv.length - 1],
             configuration,
             'configuration'
         )
 
     if (Tools.isPlainObject(result)) {
-        Tools.extend<Configuration>(
+        Tools.extend<RecursiveEvaluateable<Configuration>>(
             true,
+            /*
+                NOTE: "Tools.modifyObject" removes modifications in "result" in
+                place before it is used as extending source.
+            */
             Tools.modifyObject<Configuration>(configuration, result)!,
-            result
+            result as RecursiveEvaluateable<Configuration>
         )
         configuration.runtimeConfiguration = result
     }
@@ -142,6 +146,8 @@ if (process.argv.length > 2) {
 configuration = Tools.evaluateDynamicData<Configuration>(
     Tools.removeKeysInEvaluation<Configuration>(configuration), scope
 )
+if (name)
+    configuration.name = name
 configuration.package = packageConfiguration as unknown as PackageConfiguration
 /*
     NOTE: We need to copy the configuration to avoid operating on de-duplicated

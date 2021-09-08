@@ -42,6 +42,7 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     debug:boolean
     encoding:Encoding
     interDependencies:Mapping<Array<string>|string>
+    name:string
     plugin:{
         configuration:MetaConfiguration
         directories:Mapping<{
@@ -54,11 +55,12 @@ export interface WebNodeConfiguration extends PluginConfiguration {
 }
 export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
 export type EvaluateablePartialConfiguration =
-    RecursiveEvaluateable<RecursivePartial<Configuration>>
+    RecursiveEvaluateable<RecursivePartial<Configuration>> &
+    PluginConfiguration
 export interface PackageConfiguration {
     documentationWebsite?:{name?:string}
     main?:string
-    name:string
+    name?:string
     webnode?:EvaluateablePartialConfiguration
     webNode?:EvaluateablePartialConfiguration
     'web-node'?:EvaluateablePartialConfiguration

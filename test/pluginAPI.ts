@@ -83,6 +83,10 @@ describe('pluginAPI', ():void => {
                 dependencies: [],
                 internalName: 'dummy',
                 name: 'dummy',
+                packageConfiguration: Tools.mask(
+                    require('../dummyPlugin/package'),
+                    {exclude: {webNode: true}}
+                ),
                 path: path.resolve(configuration.context.path, 'dummyPlugin')
             },
             'dummy',
@@ -103,8 +107,10 @@ describe('pluginAPI', ():void => {
             } catch (error) {
                 console.error(error)
             }
+
             if (plugin) {
                 expect(plugin.scope).toHaveProperty('test')
+
                 delete plugin.api
                 plugin.apiFileLoadTimestamps = []
                 if (plugin.configuration)
@@ -138,6 +144,7 @@ describe('pluginAPI', ():void => {
                 dependencies: [],
                 internalName: 'dummy',
                 name: 'dummyPlugin',
+                packageConfiguration: {webNode: {a: 2}},
                 path: path.resolve(configuration.context.path, 'dummyPlugin')
             },
             ['index.js'],
