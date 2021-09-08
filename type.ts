@@ -53,7 +53,10 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     }
     runtimeConfiguration?:EvaluateablePartialConfiguration
 }
-export type Configuration = WebNodeConfiguration & Mapping<PluginConfiguration>
+export type Configuration<PluginConfigurationType = {}> =
+    WebNodeConfiguration &
+    PluginConfigurationType &
+    Mapping<PluginConfiguration>
 export type EvaluateablePartialConfiguration =
     RecursiveEvaluateable<RecursivePartial<Configuration>> &
     PluginConfiguration
