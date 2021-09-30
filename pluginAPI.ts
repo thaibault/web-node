@@ -20,8 +20,8 @@ import {
 } from 'child_process'
 import Tools from 'clientnode'
 import {Encoding, Mapping, PlainObject, ValueOf} from 'clientnode/type'
-import fileSystem from 'fs'
-import path from 'path'
+import fileSystem, {readdirSync, statSync} from 'fs'
+import path, {basename, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
 import {
@@ -309,8 +309,7 @@ export class PluginAPI {
                     `${type}FilePaths` as
                         'apiFilePaths'|'configurationFilePaths'
                 ]) {
-                    const timestamp:number =
-                        fileSystem.statSync(filePath).mtime.getTime()
+                    const timestamp:number = statSync(filePath).mtime.getTime()
 
                     if (
                         plugin[
@@ -377,7 +376,7 @@ export class PluginAPI {
         const packageConfiguration:PackageConfiguration = {}
 
         for (const fileName of metaConfiguration.fileNames) {
-            const filePath:string = path.resolve(pluginPath, fileName)
+            const filePath:string = resolve(pluginPath, fileName)
 
             if (await Tools.isFile(filePath)) {
                 Tools.extend(
@@ -445,21 +444,21 @@ export class PluginAPI {
         configuration:null|EvaluateablePluginConfiguration = null,
         configurationFilePaths:Array<string> = []
     ):Promise<Plugin> {
-        let filePath:string = path.resolve(pluginPath, relativeFilePaths[0])
+        let filePath:string = resolve(pluginPath, relativeFilePaths[0])
         if (!(await Tools.isFile(filePath)))
             // Determine entry file if given one does not exist.
-            for (const fileName of fileSystem.readdirSync(pluginPath))
+            for (const fileName of readdirSync(pluginPath))
                 if (
                     !configurationFilePaths.map((filePath:string):string =>
-                        path.basename(filePath)
+                        basename(filePath)
                     ).includes(fileName) &&
-                    await Tools.isFile(path.resolve(pluginPath, fileName))
+                    await Tools.isFile(resolve(pluginPath, fileName))
                 ) {
-                    filePath = path.resolve(pluginPath, filePath)
+                    filePath = resolve(pluginPath, filePath)
 
-                    if (['index', 'main'].includes(path.basename(
-                        filePath, path.extname(fileName)
-                    )))
+                    if (['index', 'main'].includes(
+                        basename(filePath, extname(fileName))
+                    ))
                         break
                 }
 
@@ -523,12 +522,12 @@ export class PluginAPI {
             api,
             apiFilePaths: api ? [filePath] : [],
             apiFileLoadTimestamps:
-                api ? [fileSystem.statSync(filePath).mtime.getTime()] : [],
+                api ? [statSync(filePath).mtime.getTime()] : [],
             configuration: pluginConfiguration,
             configurationFilePaths,
             configurationFileLoadTimestamps:
                 configurationFilePaths.map((filePath:string):number =>
-                    fileSystem.statSync(filePath).mtime.getTime()
+                    statSync(filePath).mtime.getTime()
                 ),
             dependencies: configuration?.dependencies || [],
             internalName,
@@ -755,13 +754,13 @@ export class PluginAPI {
                         .nameRegularExpressionPattern
                 )
 
-                for (const pluginName of fileSystem.readdirSync(
+                for (const pluginName of readdirSync(
                     configuration.plugin.directories[type].path
                 )) {
                     if (!(compiledRegularExpression).test(pluginName))
                         continue
 
-                    const currentPluginPath:string = path.resolve(
+                    const currentPluginPath:string = resolve(
                         configuration.plugin.directories[type].path,
                         pluginName
                     )
@@ -840,7 +839,7 @@ export class PluginAPI {
 
         return locations.length ?
             locations.map((location:string):string =>
-                path.resolve(configuration.context.path, location)
+                resolve(configuration.context.path, location)
             ) :
             [configuration.context.path]
     }
@@ -869,13 +868,13 @@ export class PluginAPI {
         for (const location of ([] as Array<string>).concat(locations))
             if (location.startsWith('/')) {
                 if (filePath.startsWith(
-                    path.join(configuration.context.path, location)
+                    join(configuration.context.path, location)
                 ))
                     return true
             } else
                 for (const pluginPath of pluginPaths)
                     if (
-                        filePath.startsWith(path.resolve(pluginPath, location))
+                        filePath.startsWith(resolve(pluginPath, location))
                     )
                         return true
 
