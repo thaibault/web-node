@@ -130,7 +130,7 @@
     },
     "injection": {
       "entry": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? 'test' : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? {testBundle: 'test'} : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
       }
     },
     "module": {

@@ -21,7 +21,7 @@ import {
 import Tools from 'clientnode'
 import {Encoding, Mapping, PlainObject, ValueOf} from 'clientnode/type'
 import fileSystem, {readdirSync, statSync} from 'fs'
-import path, {basename, join, resolve} from 'path'
+import path, {basename, extname, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
 import {
