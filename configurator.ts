@@ -15,9 +15,7 @@
 */
 // region imports
 import Tools from 'clientnode'
-import {
-    Mapping, PlainObject, RecursiveEvaluateable, RecursivePartial
-} from 'clientnode/type'
+import {Mapping, RecursiveEvaluateable} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
@@ -67,7 +65,9 @@ else
                 .isSymbolicLink()
         )
             packageConfiguration.webNode.context.path = process.cwd()
-    } catch (error) {}
+    } catch (error) {
+        // Ignore error.
+    }
 
 let mainConfiguration:PackageConfiguration = {name: 'main'}
 try {
