@@ -791,9 +791,10 @@ export class PluginAPI {
                     pluginName
                 ].internalName] = plugins[pluginName].dependencies
 
-                if (configuration.interDependencies.hasOwnProperty(plugins[
-                    pluginName
-                ].internalName))
+                if (Object.prototype.hasOwnProperty.call(
+                    configuration.interDependencies,
+                    plugins[pluginName].internalName
+                ))
                     for (const name of ([] as Array<string>).concat(
                         configuration.interDependencies[
                             plugins[pluginName].internalName

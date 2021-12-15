@@ -98,7 +98,7 @@ const C:Array<number> = []
 const D:Array<number> = []
 // The key schedule. Generated from the key.
 const keySchedule:Array<Array<number>> = []
-for (let index:number = 0; index < 16; index++)
+for (let index = 0; index < 16; index++)
     keySchedule[index] = []
 // Set up the key schedule from the key.
 const setKey:Function = (key:Array<number>):void => {
@@ -106,7 +106,7 @@ const setKey:Function = (key:Array<number>):void => {
      * First, generate C and D by permuting the key. The low order bit of each
      * 8-bit char is not used, so C and D are only 28 bits apiece.
      */
-    for (let index:number = 0; index < 28; index++) {
+    for (let index = 0; index < 28; index++) {
         C[index] = key[PC1_C[index] - 1]
         D[index] = key[PC1_D[index] - 1]
     }
@@ -114,29 +114,24 @@ const setKey:Function = (key:Array<number>):void => {
      * To generate Ki, rotate C and D according to schedule and pick up a
      * permutation using PC2.
      */
-    for (let index:number = 0; index < 16; index++) {
+    for (let index = 0; index < 16; index++) {
         // Rotate
-        for (let subIndex:number = 0; subIndex < shifts[index]; subIndex++) {
+        for (let subIndex = 0; subIndex < shifts[index]; subIndex++) {
             let t:number = C[0]
-            for (
-                let subSubIndex:number = 0; subSubIndex < 28 - 1; subSubIndex++
-            )
+            for (let subSubIndex = 0; subSubIndex < 28 - 1; subSubIndex++)
                 C[subSubIndex] = C[subSubIndex + 1]
 
             C[27] = t
             t = D[0]
 
-            for (
-                let subSubIndex:number = 0; subSubIndex < 28 - 1;
-                subSubIndex++
-            )
+            for (let subSubIndex = 0; subSubIndex < 28 - 1; subSubIndex++)
                 D[subSubIndex] = D[subSubIndex + 1]
 
             D[27] = t
         }
 
         // get Ki. Note C and D are concatenated.
-        for (let subIndex:number = 0; subIndex < 24; subIndex++) {
+        for (let subIndex = 0; subIndex < 24; subIndex++) {
             keySchedule[index][subIndex] = C[PC2_C[subIndex] - 1]
             keySchedule[index][subIndex + 24] = D[PC2_D[subIndex] - 28 - 1]
         }
@@ -247,30 +242,28 @@ const f:Array<number> = []
 // The combination of the key and the input, before selection.
 const preS:Array<number> = []
 // The payoff: encrypt a block.
-const encrypt:Function = (
-    block:Array<number>, edflag:boolean = false
-):void => {
+const encrypt:Function = (block:Array<number>, edflag = false):void => {
     // First, permute the bits in the input.
     const perm:Array<number> = []
-    for (let index:number = 0; index < 64; index++)
+    for (let index = 0; index < 64; index++)
         perm[index] = block[IP[index] - 1]
 
-    for (let index:number = 0; index < 32; index++) {
+    for (let index = 0; index < 32; index++) {
         L[index] = perm[index]
         R[index] = perm[index + 32]
     }
     // Perform an encryption operation 16 times.
-    for (let index:number = 0; index < 16; index++) {
+    for (let index = 0; index < 16; index++) {
         // Set direction
         const direction:number = edflag ? 15 - index : index
         // Save the R array, which will be the new L.
-        for (let index:number = 0; index < 32; index++)
+        for (let index = 0; index < 32; index++)
             tempL[index] = R[index]
         /*
          * Expand R to 48 bits using the E selector; exclusive-or with the
          * current key bits.
          */
-        for (let index:number = 0; index < 48; index++)
+        for (let index = 0; index < 48; index++)
             preS[index] = R[E[index] - 1] ^ keySchedule[direction][index]
         /*
          * The pre-select bits are now considered in 8 groups of 6 bits each.
@@ -279,7 +272,7 @@ const encrypt:Function = (
          * indexing into the selection functions is peculiar; it could be
          * simplified by rewriting the tables.
          */
-        for (let index:number = 0; index < 8; index++) {
+        for (let index = 0; index < 8; index++) {
             let t:number = 6 * index
             const k:number = S[index][
                 (preS[t + 0] << 5) +
@@ -300,7 +293,7 @@ const encrypt:Function = (
          * The new R is L ^ f(R, K). The f here has to be permuted first,
          * though.
          */
-        for (let index:number = 0; index < 32; index++)
+        for (let index = 0; index < 32; index++)
             R[index] = L[index] ^ f[P[index] - 1]
 
         // Finally, the new L (the original R) is copied back.
@@ -309,26 +302,26 @@ const encrypt:Function = (
     }
 
     // The output L and R are reversed.
-    for (let index:number = 0; index < 32; index++) {
+    for (let index = 0; index < 32; index++) {
         const t:number = L[index]
         L[index] = R[index]
         R[index] = t
     }
 
     // The final output gets the inverse permutation of the very original.
-    for (let index:number = 0; index < 32; index++) {
+    for (let index = 0; index < 32; index++) {
         perm[index] = L[index]
         perm[index + 32] = R[index]
     }
 
-    for (let index:number = 0; index < 64; index++)
+    for (let index = 0; index < 64; index++)
         block[index] = perm[FP[index] - 1]
 }
 // Transform a string to an array of bytes.
 const stringToBytes:Function = (string:string):Array<number> => {
     const result:Array<number> = []
 
-    for (let index:number = 0; index < string.length; index++)
+    for (let index = 0; index < string.length; index++)
         result[index] = string.charCodeAt(index)
 
     return result
@@ -337,9 +330,9 @@ const bytesToStr:Function = (bytes:Array<number>):string =>
     String.fromCharCode(...bytes)
 /**
  * Implements the Unix crypt(3) DES-based hash.
- *
- * @param password - The string to hash.
- * @param salt - The salt to use (two character string from [a-zA-Z0-9./]).
+ * @param givenPassword - The string to hash.
+ * @param givenSalt - The salt to use (two character string from
+ * [a-zA-Z0-9./]).
  * @param returnBytes - If "true", return an array of bytes or a string
  * otherwise.
  *
@@ -348,7 +341,7 @@ const bytesToStr:Function = (bytes:Array<number>):string =>
 export function unixCrypt(
     givenPassword:Array<number>|string,
     givenSalt:Array<number>|string = 'aa',
-    returnBytes:boolean = false
+    returnBytes = false
 ):Array<number>|string {
     const password:Array<number> = typeof givenPassword === 'string' ?
         stringToBytes(givenPassword) :
@@ -365,17 +358,17 @@ export function unixCrypt(
     const block:Array<number> = []
     const iobuf:Array<number> = []
 
-    for (let index:number = 0; index < 66; index++)
+    for (let index = 0; index < 66; index++)
         block[index] = 0
 
     let c:number
 
     for (
-        let index:number = 0, otherIndex:number = 0;
+        let index = 0, otherIndex = 0;
         (c = password[otherIndex]) && index < 64;
         otherIndex++
     ) {
-        for (let subIndex:number = 0; subIndex < 7; subIndex++, index++)
+        for (let subIndex = 0; subIndex < 7; subIndex++, index++)
             block[index] = (c >> (6 - subIndex)) & 0o1
 
         index++
@@ -383,17 +376,13 @@ export function unixCrypt(
 
     setKey(block)
 
-    for (let index:number = 0; index < 66; index++)
+    for (let index = 0; index < 66; index++)
         block[index] = 0
 
-    for (let index:number = 0; index < 48; index++)
+    for (let index = 0; index < 48; index++)
         E[index] = e[index]
 
-    for (
-        let index:number = 0, otherIndex:number = 0;
-        index < 2;
-        index++, otherIndex++
-    ) {
+    for (let index = 0, otherIndex = 0; index < 2; index++, otherIndex++) {
         let c:number = salt[otherIndex]
         iobuf[index] = c
 
@@ -404,7 +393,7 @@ export function unixCrypt(
 
         c -= '.'.charCodeAt(0)
 
-        for (let subIndex:number = 0; subIndex < 6; subIndex++)
+        for (let subIndex = 0; subIndex < 6; subIndex++)
             if ((c >> subIndex) & 0o1) {
                 const temp:number = E[6 * index + subIndex]
                 E[6 * index + subIndex] = E[6 * index + subIndex + 24]
@@ -412,13 +401,13 @@ export function unixCrypt(
             }
     }
 
-    for (let index:number = 0; index < 25; index++)
+    for (let index = 0; index < 25; index++)
         encrypt(block)
 
-    for (let index:number = 0; index < 11; index++) {
+    for (let index = 0; index < 11; index++) {
         c = 0
 
-        for (let subIndex:number = 0; subIndex < 6; subIndex++) {
+        for (let subIndex = 0; subIndex < 6; subIndex++) {
             c <<= 1
             c |= block[6 * index + subIndex]
         }
