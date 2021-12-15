@@ -31,8 +31,7 @@ import {
     MetaConfiguration,
     PackageConfiguration,
     Plugin,
-    PluginChange,
-    PluginConfiguration
+    PluginChange
 } from './type'
 // endregion
 /**
@@ -42,7 +41,6 @@ export class PluginAPI {
     /**
      * Calls all plugin methods for given trigger description asynchronous and
      * waits for their resolved promises.
-     *
      * @param hook - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
@@ -166,7 +164,6 @@ export class PluginAPI {
     }
     /**
      * Calls all plugin methods for given trigger description synchronous.
-     *
      * @param hook - Hook to trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
@@ -224,7 +221,6 @@ export class PluginAPI {
     /**
      * Checks for changed plugin api file in given plugins and reloads them
      * if necessary (new timestamp).
-     *
      * @param plugins - List of plugins to search for updates in.
      *
      * @returns A list with plugins which have a changed api scope.
@@ -238,8 +234,12 @@ export class PluginAPI {
             // NOTE: We have to migrate old plugin api's scope state.
             for (const name in pluginChange.oldScope)
                 if (
-                    pluginChange.oldScope.hasOwnProperty(name) &&
-                    pluginChange.newScope.hasOwnProperty(name) &&
+                    Object.prototype.hasOwnProperty.call(
+                        pluginChange.oldScope, name
+                    ) &&
+                    Object.prototype.hasOwnProperty.call(
+                        pluginChange.newScope, name
+                    ) &&
                     !(
                         Tools.isFunction((
                             pluginChange.oldScope as Mapping<unknown>
@@ -260,7 +260,6 @@ export class PluginAPI {
     /**
      * Checks for changed plugin configurations in given plugins and reloads
      * them if necessary (new timestamp).
-     *
      * @param plugins - List of plugins to search for updates in.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
@@ -287,7 +286,6 @@ export class PluginAPI {
     /**
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (timestamp has changed).
-     *
      * @param type - Plugin file type to search for updates.
      * @param target - Property name existing in plugin meta informations
      * objects which should be updated.
@@ -303,7 +301,7 @@ export class PluginAPI {
         const pluginChanges:Array<PluginChange> = []
         for (const plugin of plugins)
             if (plugin[target]) {
-                let index:number = 0
+                let index = 0
 
                 for (const filePath of plugin[
                     `${type}FilePaths` as
@@ -353,7 +351,6 @@ export class PluginAPI {
     /**
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
-     *
      * @param name - Name of plugin to extend.
      * @param internalName - Internal name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
@@ -418,7 +415,6 @@ export class PluginAPI {
     /**
      * Load given plugin api file in given path and generates a plugin
      * specific data structure with useful meta informations.
-     *
      * @param relativeFilePaths - Paths to file to load relatively from given
      * plugin path.
      * @param pluginPath - Path to plugin directory.
@@ -463,7 +459,7 @@ export class PluginAPI {
                 }
 
         let api:Function|null = null
-        let nativeAPI:boolean = false
+        let nativeAPI = false
 
         /*
             NOTE: We only want to register api's for web node plugins. Others
@@ -539,7 +535,6 @@ export class PluginAPI {
     }
     /**
      * Loads plugin specific configuration object.
-     *
      * @param packageConfiguration - Plugin specific package configuration
      * object.
      * @param configurationPropertyNames - Property names to search for to use
@@ -576,7 +571,6 @@ export class PluginAPI {
     }
     /**
      * Loads given plugin configurations into global configuration.
-     *
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
      * @param configuration - Global configuration to extend with.
@@ -588,7 +582,7 @@ export class PluginAPI {
     ):Configuration {
         // First clear current configuration but reuse old given reference.
         for (const key in configuration)
-            if (configuration.hasOwnProperty(key))
+            if (Object.prototype.hasOwnProperty.call(configuration, key))
                 delete configuration[key]
 
         Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
@@ -655,7 +649,9 @@ export class PluginAPI {
             plugin data structure.
         */
         for (const plugin of plugins)
-            if (configuration.hasOwnProperty(plugin.internalName))
+            if (Object.prototype.hasOwnProperty.call(
+                configuration, plugin.internalName
+            ))
                 plugin.configuration = configuration[plugin.internalName]
 
         configuration.package = packageConfiguration
@@ -664,7 +660,6 @@ export class PluginAPI {
     }
     /**
      * Load given api file path and returns exported scope.
-     *
      * @param filePath - Path to file to load.
      * @param name - Plugin name to use for proper error messages.
      * @param fallbackScope - Scope to return if an error occurs during
@@ -677,14 +672,17 @@ export class PluginAPI {
         filePath:string,
         name:string,
         fallbackScope:null|object = null,
-        log:boolean = true
+        log = true
     ):object {
         let reference:string|undefined
         try {
             /* eslint-disable no-eval */
             reference = eval('require').resolve(filePath)
             /* eslint-enable no-eval */
-        } catch (error) {}
+        } catch (error) {
+            // Ignore error.
+        }
+
         // Clear module cache to get actual new module scope.
         if (reference && reference in eval('require').cache)
             /* eslint-disable no-eval */
@@ -699,6 +697,7 @@ export class PluginAPI {
         } catch (error) {
             if (fallbackScope) {
                 scope = fallbackScope
+
                 if (log)
                     console.warn(
                         `Couln't load new api plugin file "${filePath}" for ` +
@@ -712,7 +711,7 @@ export class PluginAPI {
                 )
         }
 
-        if (scope.hasOwnProperty('default'))
+        if (Object.prototype.hasOwnProperty.call(scope, 'default'))
             return (scope as {default:object}).default
 
         return scope
@@ -721,7 +720,6 @@ export class PluginAPI {
      * Extends given configuration object with all plugin specific ones and
      * returns a topological sorted list of plugins with plugins specific
      * meta informations stored.
-     *
      * @param configuration - Configuration object to extend and use.
      *
      * @returns A topological sorted list of plugins objects.
@@ -744,12 +742,14 @@ export class PluginAPI {
 
         for (const type in configuration.plugin.directories)
             if (
-                configuration.plugin.directories.hasOwnProperty(type) &&
+                Object.prototype.hasOwnProperty.call(
+                    configuration.plugin.directories, type
+                ) &&
                 await Tools.isDirectory(
                     configuration.plugin.directories[type].path
                 )
             ) {
-                const compiledRegularExpression:RegExp = new RegExp(
+                const compiledRegularExpression = new RegExp(
                     configuration.plugin.directories[type]
                         .nameRegularExpressionPattern
                 )
@@ -786,7 +786,7 @@ export class PluginAPI {
         const temporaryPlugins:Mapping<Array<string>> = {}
 
         for (const pluginName in plugins)
-            if (plugins.hasOwnProperty(pluginName)) {
+            if (Object.prototype.hasOwnProperty.call(plugins, pluginName)) {
                 temporaryPlugins[plugins[
                     pluginName
                 ].internalName] = plugins[pluginName].dependencies
@@ -810,7 +810,7 @@ export class PluginAPI {
 
         for (const pluginName of Tools.arraySortTopological(temporaryPlugins))
             for (const name in plugins)
-                if (plugins.hasOwnProperty(name))
+                if (Object.prototype.hasOwnProperty.call(plugins, name))
                     if ([plugins[name].internalName, name].includes(
                         pluginName
                     )) {
@@ -830,7 +830,8 @@ export class PluginAPI {
      * Transform a list of absolute paths respecting the application context.
      * @param configuration - Configuration object.
      * @param locations - Locations to process.
-     * @return Given and processed locations.
+     *
+     * @returns Given and processed locations.
      */
     static determineLocations(
         configuration:Configuration, locations:Array<string>|string = []
@@ -846,7 +847,6 @@ export class PluginAPI {
     /**
      * Ignore absolute defined locations (relativ to application context) and
      * relative defined in each loaded plugin location.
-     *
      * @param configuration - Configuration object.
      * @param plugins - List of acctive plugins.
      * @param filePath - Path to search for.

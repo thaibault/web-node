@@ -28,7 +28,7 @@ import {
     Configuration, Plugin, Service, ServicePromises, Services
 } from './type'
 // endregion
-declare var ORIGINAL_MAIN_MODULE:object
+declare const ORIGINAL_MAIN_MODULE:object
 const handleError:Function = async (
     plugins:Array<Plugin>,
     configuration:Configuration,
@@ -74,15 +74,17 @@ export const main:ProcedureFunction = async ():Promise<void> => {
     // endregion
     let services:Services = {}
     let servicePromises:ServicePromises = {}
-    let exitTriggered:boolean = false
+    let exitTriggered = false
     try {
         // region start services
         services = await PluginAPI.callStack(
             'preLoadService', plugins, configuration, services
         )
+
         for (const name in services)
-            if (services.hasOwnProperty(name))
+            if (Object.prototype.hasOwnProperty.call(services, name))
                 console.info(`Service "${name}" initialized.`)
+
         for (const plugin of plugins)
             if (plugin.api) {
                 services = await PluginAPI.callStack(
@@ -92,6 +94,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                     configuration,
                     services
                 )
+
                 let result:null|Service = null
                 try {
                     result = await plugin.api.call(
@@ -117,6 +120,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                             'during asynchrone hook "loadService".'
                         )
                 }
+
                 if (typeof result?.name === 'string')
                     if (
                         result.promise !== null &&
@@ -124,9 +128,11 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                         'then' in result.promise
                     ) {
                         console.info(`Service "${result.name}" started.`)
+
                         servicePromises[result.name] = result.promise
                     } else
                         console.info(`Service "${result.name}" loaded.`)
+
                 services = await PluginAPI.callStack(
                     `postLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
@@ -136,6 +142,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                     servicePromises
                 )
             }
+
         servicePromises = await PluginAPI.callStack(
             'postLoadService',
             plugins,
@@ -145,8 +152,8 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         )
         // endregion
         // region register close handler
-        let finished:boolean = false
-        const closeHandler:Function = ():void => {
+        let finished = false
+        const closeHandler = ():void => {
             if (!finished)
                 PluginAPI.callStackSynchronous(
                     'exit',
@@ -157,10 +164,10 @@ export const main:ProcedureFunction = async ():Promise<void> => {
             finished = true
         }
         for (const closeEventName of CloseEventNames)
-            // @ts-ignore: Accepts only "NodeSignals" but other strings are
-            // available.
             process.on(closeEventName, closeHandler)
-        let cancelTriggered:boolean = false
+
+        let cancelTriggered = false
+
         process.stdin.setRawMode(true)
         process.stdin.resume()
         process.stdin.setEncoding(configuration.encoding)
@@ -170,16 +177,20 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                     console.warn('Stopping ungracefully.')
                 else {
                     cancelTriggered = true
+
                     console.info(
                         'You have requested to shut down all services. A ' +
                         'second request will force to stop ungracefully.'
                     )
+
                     await PluginAPI.callStack(
                         'shouldExit', plugins, configuration, services
                     )
                 }
+
                 process.exit()
             }
+
             process.stdout.write(key)
         })
         // endregion
@@ -189,14 +200,20 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                     servicePromises[name]
                 )
             )
-        } catch (error) {}
+        } catch (error) {
+            // Ignore error.
+        }
+
         exitTriggered = true
+
         await PluginAPI.callStack(
             'shouldExit', plugins, configuration, services
         )
+
         process.exit()
     } catch (error) {
         handleError(plugins, configuration, error, services)
+
         if (!exitTriggered)
             try {
                 await PluginAPI.callStack(
@@ -209,16 +226,19 @@ export const main:ProcedureFunction = async ():Promise<void> => {
             throw error
         else
             console.error(error)
+
         process.exit(1)
     }
 }
+
 if (
     require.main === module ||
     eval('require.main') !== require.main &&
     typeof ORIGINAL_MAIN_MODULE !== 'undefined' &&
     ORIGINAL_MAIN_MODULE === eval('require.main')
 )
-    main()
+    void main()
+
 export default main
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
