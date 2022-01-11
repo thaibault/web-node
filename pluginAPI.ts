@@ -21,6 +21,7 @@ import {
 import Tools from 'clientnode'
 import {Encoding, Mapping, PlainObject, ValueOf} from 'clientnode/type'
 import fileSystem, {readdirSync, statSync} from 'fs'
+import {Module} from 'module'
 import path, {basename, extname, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
@@ -33,6 +34,28 @@ import {
     Plugin,
     PluginChange
 } from './type'
+// endregion
+// region allow plugins to import "web-node" as main module
+type ModuleType =
+    typeof Module &
+    {
+        _resolveFilename:(
+            _request:string, _module:typeof Module, _isMain:boolean
+        ) => string
+    }
+const oldResolveFilename = (Module as ModuleType)._resolveFilename
+;(Module as ModuleType)._resolveFilename = (
+    request:string, parent:typeof Module, isMain:boolean
+):string => {
+    if (request === 'web-node')
+        return oldResolveFilename(
+            eval('require.main.id') as string,
+            parent,
+            isMain
+        )
+
+    return oldResolveFilename(request, parent, isMain)
+}
 // endregion
 /**
  * A dumm plugin interface with all available hooks.
