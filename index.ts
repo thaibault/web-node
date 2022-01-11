@@ -28,7 +28,9 @@ import {
     Configuration, Plugin, Service, ServicePromises, Services
 } from './type'
 // endregion
+
 declare const ORIGINAL_MAIN_MODULE:object
+
 const handleError:Function = async (
     plugins:Array<Plugin>,
     configuration:Configuration,
