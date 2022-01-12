@@ -69,7 +69,7 @@ export class PluginAPI {
      * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
      * plugins have been resolved.
-     * @param parameter - Additional parameter to forward into plugin api.
+     * @param parameters - Additional parameters to forward into plugin api.
      *
      * @returns A promise which resolves when all callbacks have resolved their
      * promise holding given potentially modified data.
@@ -79,7 +79,7 @@ export class PluginAPI {
         plugins:Array<Plugin>,
         configuration:Configuration,
         data:any = null,
-        ...parameter:Array<any>
+        ...parameters:Array<any>
     ):Promise<any> {
         if (configuration.plugin.hotReloading) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
@@ -145,7 +145,7 @@ export class PluginAPI {
                     result = await plugin.api(
                         hook,
                         data,
-                        ...parameter.concat(
+                        ...parameters.concat(
                             hook.endsWith('ConfigurationLoaded') ?
                                 [] :
                                 configuration,
@@ -192,7 +192,7 @@ export class PluginAPI {
      * @param configuration - Plugin extendable configuration object.
      * @param data - Data to pipe throw all plugins and resolve after all
      * plugins have been resolved.
-     * @param parameter - Additional parameter to forward into plugin api.
+     * @param parameters - Additional parameters to forward into plugin api.
      *
      * @returns Given potentially modified data.
      */
@@ -201,7 +201,7 @@ export class PluginAPI {
         plugins:Array<Plugin>,
         configuration:Configuration,
         data:any = null,
-        ...parameter:Array<any>
+        ...parameters:Array<any>
     ):any {
         for (const plugin of plugins)
             if (plugin.api) {
@@ -210,7 +210,7 @@ export class PluginAPI {
                     result = plugin.api(
                         hook,
                         data,
-                        ...parameter.concat(configuration, plugins)
+                        ...parameters.concat(configuration, plugins)
                     )
                 } catch (error) {
                     if ((error as Error).message?.startsWith(
@@ -496,11 +496,13 @@ export class PluginAPI {
         )
             if (filePath.endsWith('.js')) {
                 nativeAPI = true
-                api = (hook:string, data:any, ...parameter:Array<any>):any => {
+                api = (
+                    hook:string, data:any, ...parameters:Array<any>
+                ):any => {
                     if (hook in plugins[name].scope!)
                         return (
                             plugins[name].scope as Mapping<Function>
-                        )[hook](data, ...parameter)
+                        )[hook](data, ...parameters, PluginAPI)
 
                     throw new Error(
                         `NotImplemented: API method "${hook}" is not ` +
@@ -509,11 +511,11 @@ export class PluginAPI {
                 }
             } else
                 // NOTE: Any executable file can represent an api.
-                api = (data:any, ...parameter:Array<any>):any => {
+                api = (data:any, ...parameters:Array<any>):any => {
                     const childProcessResult:SpawnSyncReturns<string> =
                         spawnChildProcessSync(
                             filePath,
-                            Tools.arrayMake(parameter),
+                            Tools.arrayMake(parameters),
                             {
                                 cwd: process.cwd(),
                                 encoding,
