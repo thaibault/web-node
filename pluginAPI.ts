@@ -294,7 +294,7 @@ export class PluginAPI {
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
-            'packageConfiguration', 'packageConfiguration', plugins
+            'configuration', 'packageConfiguration', plugins
         )
 
         for (const change of pluginChanges) {
@@ -317,7 +317,7 @@ export class PluginAPI {
      * @returns A list with plugin changes.
      */
     static hotReloadFiles(
-        type:'api'|'packageConfiguration',
+        type:'api'|'configuration',
         target:'packageConfiguration'|'scope',
         plugins:Array<Plugin>
     ):Array<PluginChange> {
