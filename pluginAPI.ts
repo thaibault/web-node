@@ -349,7 +349,7 @@ export class PluginAPI {
 
                         plugin[target] = PluginAPI.loadFile(
                             filePath, plugin.name, plugin[target]
-                        ) as PlainObject
+                        ) as object|PackageConfiguration
 
                         pluginChanges.push({
                             newScope: plugin[target] as object,
