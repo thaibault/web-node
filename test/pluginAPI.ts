@@ -75,10 +75,18 @@ describe('pluginAPI', ():void => {
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
                     path.resolve(
-                        configuration.context.path, 'dummyPlugin/index.js'
+                        configuration.core.context.path, 'dummyPlugin/index.js'
                     )
                 ],
-                configuration: require('../dummyPlugin/package').webNode,
+                configuration: {
+                    dummy: {
+                        package: Tools.mask(
+                            require('../dummyPlugin/package'),
+                            {exclude: {webNode: true}}
+                        )
+                    },
+                    ...require('../dummyPlugin/package').webNode
+                },
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [],
                 dependencies: [],
@@ -88,13 +96,15 @@ describe('pluginAPI', ():void => {
                     require('../dummyPlugin/package'),
                     {exclude: {webNode: true}}
                 ),
-                path: path.resolve(configuration.context.path, 'dummyPlugin')
+                path: path.resolve(
+                    configuration.core.context.path, 'dummyPlugin'
+                )
             },
             'dummy',
             'dummy',
             {},
             {fileNames: ['package.json'], propertyNames: ['webNode']},
-            path.resolve(configuration.context.path, 'dummyPlugin')
+            path.resolve(configuration.core.context.path, 'dummyPlugin')
         ]
     ])(
         `%p === load('%s', '%s', %p, %p, '%s')`,
@@ -131,33 +141,35 @@ describe('pluginAPI', ():void => {
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
                     path.resolve(
-                        configuration.context.path, 'dummyPlugin/index.js'
+                        configuration.core.context.path, 'dummyPlugin/index.js'
                     )
                 ],
-                configuration: {a: 2, package: {webNode: {a: 2}}},
+                configuration: {a: 2, dummy: {package: {b: 3}}},
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [
                     path.resolve(
-                        configuration.context.path,
+                        configuration.core.context.path,
                         'dummyPlugin/package.json'
                     )
                 ],
                 dependencies: [],
                 internalName: 'dummy',
                 name: 'dummyPlugin',
-                packageConfiguration: {webNode: {a: 2}},
-                path: path.resolve(configuration.context.path, 'dummyPlugin')
+                packageConfiguration: {b: 3},
+                path: path.resolve(
+                    configuration.core.context.path, 'dummyPlugin'
+                )
             },
             ['index.js'],
-            path.resolve(configuration.context.path, 'dummyPlugin'),
+            path.resolve(configuration.core.context.path, 'dummyPlugin'),
             'dummyPlugin',
             'dummy',
             {},
             'utf8',
-            {a: 2, package: {webNode: {a: 2}}},
+            {a: 2, dummy: {package: {b: 3}}},
             [
                 path.resolve(
-                    configuration.context.path, 'dummyPlugin/package.json'
+                    configuration.core.context.path, 'dummyPlugin/package.json'
                 )
             ]
         ]
@@ -173,6 +185,7 @@ describe('pluginAPI', ():void => {
             } catch (error) {
                 console.error(error)
             }
+
             if (plugin) {
                 expect(plugin.scope).toHaveProperty('test')
                 delete plugin.api
@@ -187,13 +200,40 @@ describe('pluginAPI', ():void => {
         'loadConfiguration',
         PluginAPI.loadConfiguration,
 
-        [{package: {}}, {}, []],
-        [{package: {a: 2}}, {a: 2}, []],
-        [{package: {a: 2, b: 3}}, {a: 2, b: 3}, []],
-        [{package: {b: 3}, value: 2}, {a: {value: 2}, b: 3}, ['a']],
-        [{package: {b: 3}, value: 2}, {a: {value: 2}, b: 3}, ['a', 'b']],
-        [{package: {b: 3}, value: 2}, {a: {value: 2}, b: 3}, ['z', 'a', 'b']],
-        [{package: {a: 2}, value: 3}, {a: 2, b: {value: 3}}, ['b', 'a']]
+        // No package or application configuration exists.
+        [{a: {package: {}}}, 'a', {}, []],
+        // No application but package configuration exists.
+        [{a: {package: {a: 2}}}, 'a', {a: 2}, []],
+        /*
+            Application and package configuration exists but application
+            configuration is not object and will be interpret as package
+            configuration either.
+        */
+        [{a: {package: {a: 2, b: 3}}}, 'a',  {a: 2, b: 3}, []],
+        // Application and package configuration exists.
+        [{a: {package: {b: 3}}, value: 2}, 'a', {a: {value: 2}, b: 3}, ['a']],
+        /*
+            Application and package configuration exists because existing
+            application configuration is not and object.
+        */
+        [
+            {a: {package: {b: 3}}, value: 2},
+            'a',
+            {a: {value: 2}, b: 3},
+            ['a', 'b']
+        ],
+        [
+            {a: {package: {b: 3}}, value: 2},
+            'a',
+            {a: {value: 2}, b: 3},
+            ['z', 'a', 'b']
+        ],
+        [
+            {a: {package: {a: 2}}, value: 3},
+            'a',
+            {a: 2, b: {value: 3}},
+            ['b', 'a']
+        ]
     )
     testEach<typeof PluginAPI.loadConfigurations>(
         'loadConfigurations',
@@ -210,7 +250,7 @@ describe('pluginAPI', ():void => {
         [
             require('../dummyPlugin/package'),
             path.resolve(
-                configuration.context.path, 'dummyPlugin/package.json'
+                configuration.core.context.path, 'dummyPlugin/package.json'
             ),
             'dummy',
             null,

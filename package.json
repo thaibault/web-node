@@ -79,40 +79,42 @@
   },
   "sideEffects": true,
   "webNode": {
-    "context": {
-      "path": "./"
-    },
-    "debug": false,
-    "encoding": "utf8",
-    "interDependencies": {},
-    "name": "web-node",
-    "plugin": {
-      "configuration": {
-        "fileNames": [
-          "package.json",
-          "private-package.json"
-        ],
-        "propertyNames": [
-          "webNode",
-          "webnode",
-          "web-node"
-        ]
+    "core": {
+      "context": {
+        "path": "./"
       },
-      "directories": {
-        "entry": {
-          "nameRegularExpressionPattern": "^([a-zA-Z0-9-_].*)$",
-          "path": {
-            "__evaluate__": "`${currentPath}/plugins/`"
+      "debug": false,
+      "encoding": "utf8",
+      "interDependencies": {},
+      "name": "web-node",
+      "plugin": {
+        "configuration": {
+          "fileNames": [
+            "package.json",
+            "private-package.json"
+          ],
+          "propertyNames": [
+            "webNode",
+            "webnode",
+            "web-node"
+          ]
+        },
+        "directories": {
+          "entry": {
+            "nameRegularExpressionPattern": "^([a-zA-Z0-9-_].*)$",
+            "path": {
+              "__evaluate__": "`${currentPath}/plugins/`"
+            }
+          },
+          "external": {
+            "nameRegularExpressionPattern": "^([a-zA-Z0-9-]+?)-?[wW]eb-?[nN]ode-?[pP]lugin$",
+            "path": {
+              "__evaluate__": "`${currentPath}/node_modules/`"
+            }
           }
         },
-        "external": {
-          "nameRegularExpressionPattern": "^([a-zA-Z0-9-]+?)-?[wW]eb-?[nN]ode-?[pP]lugin$",
-          "path": {
-            "__evaluate__": "`${currentPath}/node_modules/`"
-          }
-        }
-      },
-      "hotReloading": false
+        "hotReloading": false
+      }
     }
   },
   "webOptimizer": {
