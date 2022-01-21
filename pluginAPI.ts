@@ -31,8 +31,7 @@ import {
     MetaPluginConfiguration,
     PackageConfiguration,
     Plugin,
-    PluginChange,
-    PluginConfiguration
+    PluginChange
 } from './type'
 // endregion
 // region allow plugins to import "web-node" as already loaded main module
@@ -242,6 +241,48 @@ export class PluginAPI {
 
         return data
     }
+    // TODO
+    static evaluateConfiguration(
+        configuration:RecursiveEvaluateable<Configuration>
+    ):Configuration
+        const now:Date = new Date()
+
+        /*
+            NOTE: We have to backup, remove and restore all plugin specific
+            package configuration to avoid evaluation non web node#
+            configuration structures.
+        */
+        const pluginPackageConfigurationBackup:Mapping<PackageConfiguration> =
+            {}
+        for (const [name, configuration] of Object.entries(configuration))
+            if (configuration.package) {
+                pluginPackageConfigurationBackup[name] = configuration.package
+                delete configuration.package
+            }
+
+        configuration = Tools.evaluateDynamicData<Configuration>(
+            Tools.removeKeysInEvaluation(configuration),
+            {
+                currentPath: process.cwd(),
+                fileSystem,
+                path,
+                PluginAPI,
+                /* eslint-disable no-eval */
+                require: eval('require'),
+                /* eslint-enable no-eval */
+                Tools,
+                webNodePath: __dirname,
+                now,
+                nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
+            }
+        )
+
+        for (const [name, pluginPackageConfiguration] of Object.entries(
+            pluginPackageConfigurationBackup
+        ))
+            configuration[name] = pluginPackageConfiguration
+
+        return configuration
     /**
      * Checks for changed plugin api file in given plugins and reloads them
      * if necessary (new timestamp).
@@ -620,7 +661,10 @@ export class PluginAPI {
     static loadConfigurations(
         plugins:Array<Plugin>, configuration:Configuration
     ):Configuration {
-        // First clear current configuration but reuse old given reference.
+        /*
+            First clear current configuration content key by key to let old top
+            level configuration reference in usable.
+        */
         for (const key in configuration)
             if (Object.prototype.hasOwnProperty.call(configuration, key))
                 delete configuration[key]
@@ -658,26 +702,7 @@ export class PluginAPI {
                     )
             }
 
-        const now:Date = new Date()
-
-        configuration = Tools.evaluateDynamicData<Configuration>(
-            Tools.removeKeysInEvaluation(configuration),
-            {
-                currentPath: process.cwd(),
-                fileSystem,
-                path,
-                PluginAPI,
-                /* eslint-disable no-eval */
-                require: eval('require'),
-                /* eslint-enable no-eval */
-                Tools,
-                webNodePath: __dirname,
-                now,
-                nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
-            }
-        )
-
-        return configuration
+        return PluginAPI.evaluateConfiguration(configuration)
     }
     /**
      * Load given api file path and returns exported scope.
