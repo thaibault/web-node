@@ -176,27 +176,29 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         process.stdin.setRawMode(true)
         process.stdin.resume()
         process.stdin.setEncoding(configuration.core.encoding)
-        process.stdin.on('data', async (key:string):Promise<void> => {
-            if (key === '\u0003') {
-                if (cancelTriggered)
-                    console.warn('Stopping ungracefully.')
-                else {
-                    cancelTriggered = true
+        process.stdin.on('data', (key:string):void => {
+            void (async ():Promise<void> => {
+                if (key === '\u0003') {
+                    if (cancelTriggered)
+                        console.warn('Stopping ungracefully.')
+                    else {
+                        cancelTriggered = true
 
-                    console.info(
-                        'You have requested to shut down all services. A ' +
-                        'second request will force to stop ungracefully.'
-                    )
+                        console.info(
+                            'You have requested to shut down all services. A' +
+                            ' second request will force to stop ungracefully.'
+                        )
 
-                    await PluginAPI.callStack(
-                        'shouldExit', plugins, configuration, services
-                    )
+                        await PluginAPI.callStack(
+                            'shouldExit', plugins, configuration, services
+                        )
+                    }
+
+                    process.exit()
                 }
 
-                process.exit()
-            }
-
-            process.stdout.write(key)
+                process.stdout.write(key)
+            })()
         })
         // endregion
         try {

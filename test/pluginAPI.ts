@@ -36,6 +36,27 @@ describe('pluginAPI', ():void => {
         [{}, 'test', [], testConfiguration, {}],
         // TODO add more tests
     )
+    testEach<typeof PluginAPI.evaluateConfiguration>(
+        'evaluateConfiguration',
+        PluginAPI.evaluateConfiguration,
+
+        [{}, {}],
+        [{a: {}}, {a: {}}],
+        [{a: {package: {}}}, {a: {package: {}}}],
+        [{a: 3}, {a: {__evaluate__: '2 + 1'}}],
+        [{a: {b: 3}}, {a: {b: {__evaluate__: '2 + 1'}}}],
+        [
+            {a: {package: {b: {__evaluate__: '2 + 1'}}}},
+            {a: {package: {b: {__evaluate__: '2 + 1'}}}}
+        ],
+        [
+            {a: {b: 3, package: {b: {__evaluate__: '2 + 1'}}}},
+            {a: {
+                b: {__evaluate__: '2 + 1'},
+                package: {b: {__evaluate__: '2 + 1'}}
+            }}
+        ]
+    )
     testEach<typeof PluginAPI.callStackSynchronous>(
         'callStackSynchronous',
         PluginAPI.callStackSynchronous,

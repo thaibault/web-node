@@ -19,7 +19,9 @@ import {
     spawnSync as spawnChildProcessSync, SpawnSyncReturns
 } from 'child_process'
 import Tools from 'clientnode'
-import {Encoding, Mapping, PlainObject, ValueOf} from 'clientnode/type'
+import {
+    Encoding, Mapping, RecursiveEvaluateable, ValueOf
+} from 'clientnode/type'
 import fileSystem, {readdirSync, statSync} from 'fs'
 import {Module} from 'module'
 import path, {basename, extname, join, resolve} from 'path'
@@ -31,7 +33,8 @@ import {
     MetaPluginConfiguration,
     PackageConfiguration,
     Plugin,
-    PluginChange
+    PluginChange,
+    PluginConfiguration
 } from './type'
 // endregion
 // region allow plugins to import "web-node" as already loaded main module
@@ -241,12 +244,16 @@ export class PluginAPI {
 
         return data
     }
-    // TODO
+    /**
+     * Evaluates given configuration object by letting plugins package sub
+     * structure untouched.
+     * @param configuration - Evaluateable configuration structure.
+     *
+     * @returns Resolved configuration.
+     */
     static evaluateConfiguration(
         configuration:RecursiveEvaluateable<Configuration>
-    ):Configuration
-        const now:Date = new Date()
-
+    ):Configuration {
         /*
             NOTE: We have to backup, remove and restore all plugin specific
             package configuration to avoid evaluation non web node#
@@ -254,11 +261,15 @@ export class PluginAPI {
         */
         const pluginPackageConfigurationBackup:Mapping<PackageConfiguration> =
             {}
-        for (const [name, configuration] of Object.entries(configuration))
-            if (configuration.package) {
-                pluginPackageConfigurationBackup[name] = configuration.package
-                delete configuration.package
+        for (const [name, subConfiguration] of Object.entries(configuration))
+            if ((subConfiguration as PluginConfiguration).package) {
+                pluginPackageConfigurationBackup[name] =
+                    (subConfiguration as PluginConfiguration).package
+                delete (subConfiguration as Partial<PluginConfiguration>)
+                    .package
             }
+
+        const now:Date = new Date()
 
         configuration = Tools.evaluateDynamicData<Configuration>(
             Tools.removeKeysInEvaluation(configuration),
@@ -280,9 +291,11 @@ export class PluginAPI {
         for (const [name, pluginPackageConfiguration] of Object.entries(
             pluginPackageConfigurationBackup
         ))
-            configuration[name] = pluginPackageConfiguration
+            (configuration[name] as PluginConfiguration).package =
+                pluginPackageConfiguration
 
-        return configuration
+        return configuration as Configuration
+    }
     /**
      * Checks for changed plugin api file in given plugins and reloads them
      * if necessary (new timestamp).
@@ -370,23 +383,17 @@ export class PluginAPI {
             if (plugin[target]) {
                 let index = 0
 
-                for (const filePath of plugin[
-                    `${type}FilePaths` as
-                        'apiFilePaths'|'configurationFilePaths'
-                ]) {
+                for (const filePath of plugin[`${type}FilePaths`]) {
                     const timestamp:number = statSync(filePath).mtime.getTime()
 
                     if (
-                        plugin[
-                            `${type}FileLoadTimestamps` as
-                                'apiFileLoadTimestamps'|
-                                'configurationFileLoadTimestamps'
-                        ][index] < timestamp
+                        plugin[`${type}FileLoadTimestamps`][index] < timestamp
                     ) {
                         // Enforce to reload new file version.
                         /* eslint-disable no-eval */
-                        delete eval('require')
-                            .cache[eval('require').resolve(filePath)]
+                        delete (eval('require').cache as Mapping<unknown>)[
+                            eval('require').resolve(filePath) as string
+                        ]
                         /* eslint-enable no-eval */
 
                         const oldScope:ValueOf<Plugin> = plugin[target]
@@ -403,11 +410,7 @@ export class PluginAPI {
                         })
                     }
 
-                    plugin[
-                        `${type}FileLoadTimestamps` as
-                            'apiFileLoadTimestamps'|
-                            'configurationFileLoadTimestamps'
-                    ][index] = timestamp
+                    plugin[`${type}FileLoadTimestamps`][index] = timestamp
 
                     index += 1
                 }
@@ -627,7 +630,7 @@ export class PluginAPI {
         const packageConfigurationCopy:PackageConfiguration =
             Tools.removeKeyPrefixes(Tools.copy(packageConfiguration, -1, true))
 
-        let result:EvaluateablePartialConfiguration = {
+        const result:EvaluateablePartialConfiguration = {
             [name]: {package: packageConfigurationCopy}
         }
 
@@ -702,7 +705,9 @@ export class PluginAPI {
                     )
             }
 
-        return PluginAPI.evaluateConfiguration(configuration)
+        return PluginAPI.evaluateConfiguration(
+            configuration as RecursiveEvaluateable<Configuration>
+        )
     }
     /**
      * Load given api file path and returns exported scope.
