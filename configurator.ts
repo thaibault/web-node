@@ -140,8 +140,8 @@ if (process.argv.length > 2) {
         Tools.extend<RecursiveEvaluateable<Configuration>>(
             true,
             /*
-                NOTE: "Tools.modifyObject" removes modifications in "result" in
-                place before it is used as extending source.
+                NOTE: "Tools.modifyObject" removes modifications in "result"
+                in-place before it is used as extending source.
             */
             Tools.modifyObject<Configuration>(configuration, result)!,
             result as RecursiveEvaluateable<Configuration>
