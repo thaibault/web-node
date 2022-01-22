@@ -21,7 +21,7 @@ import {
 import {PluginAPI} from './pluginAPI'
 // endregion
 // region exports
-export interface MetaConfiguration {
+export interface MetaPluginConfiguration {
     fileNames:Array<string>
     propertyNames:Array<string>
 }
@@ -35,7 +35,6 @@ export interface PluginConfiguration {
     name?:string
     package:PackageConfiguration
 }
-export type EvaluateablePluginConfiguration = PluginConfiguration
 export interface WebNodeConfiguration extends PluginConfiguration {
     context:{
         path:string
@@ -46,7 +45,7 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     interDependencies:Mapping<Array<string>|string>
     name:string
     plugin:{
-        configuration:MetaConfiguration
+        configuration:MetaPluginConfiguration
         directories:Mapping<{
             nameRegularExpressionPattern:string
             path:string
@@ -56,12 +55,18 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     runtimeConfiguration?:EvaluateablePartialConfiguration
 }
 export type Configuration<PluginConfigurationType = {}> =
-    WebNodeConfiguration &
+    {
+        core:WebNodeConfiguration
+        name:string
+    } &
     PluginConfigurationType &
     Mapping<PluginConfiguration>
 export type EvaluateablePartialConfiguration =
-    RecursiveEvaluateable<RecursivePartial<Configuration>> &
-    PluginConfiguration
+    {
+        core?:RecursiveEvaluateable<RecursivePartial<WebNodeConfiguration>>
+        name?:string
+    } &
+    Mapping<PluginConfiguration>
 export interface PackageConfiguration {
     documentationWebsite?:{name?:string}
     main?:string
@@ -75,7 +80,7 @@ export interface Plugin {
     api:Function|null
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
-    configuration:EvaluateablePluginConfiguration
+    configuration:EvaluateablePartialConfiguration
     configurationFilePaths:Array<string>
     configurationFileLoadTimestamps:Array<number>
     dependencies:Array<string>

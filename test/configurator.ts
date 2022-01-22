@@ -15,7 +15,7 @@
 */
 describe('configurator', ():void => {
     test('main', ():void =>
-        expect(typeof require('../configurator').default.debug)
+        expect(typeof require('../configurator').default.core.debug)
             .toStrictEqual('boolean')
     )
 })

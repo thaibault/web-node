@@ -42,7 +42,7 @@ const handleError:Function = async (
             'error', plugins, configuration, error, services
         )
     } catch (error) {
-        if (configuration.debug)
+        if (configuration.core.debug)
             throw error
         else
             console.error(error)
@@ -54,7 +54,9 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         configuration:Configuration
         plugins:Array<Plugin>
     } = await PluginAPI.loadAll(Tools.copy(baseConfiguration, -1, true))
+
     await PluginAPI.callStack('initialize', plugins, configuration)
+
     if (plugins.length)
         console.info(
             'Loaded plugins: "' +
@@ -63,6 +65,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                 .join('", "') +
             '".'
         )
+
     for (const type of ['pre', 'post'] as const)
         await PluginAPI.callStack(
             `${type}ConfigurationLoaded`,
@@ -172,28 +175,30 @@ export const main:ProcedureFunction = async ():Promise<void> => {
 
         process.stdin.setRawMode(true)
         process.stdin.resume()
-        process.stdin.setEncoding(configuration.encoding)
-        process.stdin.on('data', async (key:string):Promise<void> => {
-            if (key === '\u0003') {
-                if (cancelTriggered)
-                    console.warn('Stopping ungracefully.')
-                else {
-                    cancelTriggered = true
+        process.stdin.setEncoding(configuration.core.encoding)
+        process.stdin.on('data', (key:string):void => {
+            void (async ():Promise<void> => {
+                if (key === '\u0003') {
+                    if (cancelTriggered)
+                        console.warn('Stopping ungracefully.')
+                    else {
+                        cancelTriggered = true
 
-                    console.info(
-                        'You have requested to shut down all services. A ' +
-                        'second request will force to stop ungracefully.'
-                    )
+                        console.info(
+                            'You have requested to shut down all services. A' +
+                            ' second request will force to stop ungracefully.'
+                        )
 
-                    await PluginAPI.callStack(
-                        'shouldExit', plugins, configuration, services
-                    )
+                        await PluginAPI.callStack(
+                            'shouldExit', plugins, configuration, services
+                        )
+                    }
+
+                    process.exit()
                 }
 
-                process.exit()
-            }
-
-            process.stdout.write(key)
+                process.stdout.write(key)
+            })()
         })
         // endregion
         try {
@@ -224,7 +229,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
             } catch (error) {
                 handleError(plugins, configuration, error, services)
             }
-        if (configuration.debug)
+        if (configuration.core.debug)
             throw error
         else
             console.error(error)

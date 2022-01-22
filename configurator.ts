@@ -23,7 +23,7 @@ import {
     Configuration, EvaluateablePartialConfiguration, PackageConfiguration
 } from './type'
 import PluginAPI from './pluginAPI'
-import packageConfiguration from './package.json'
+import webNodePackageConfiguration from './package.json'
 // endregion
 /*
     To assume to go two folder up from this file until there is no
@@ -31,19 +31,20 @@ import packageConfiguration from './package.json'
     projects where current working directory isn't the projects directory and
     this library is located as a nested dependency.
 */
-packageConfiguration.webNode.context = {path: __dirname}
+webNodePackageConfiguration.webNode.core.context = {path: __dirname}
 while (true) {
-    packageConfiguration.webNode.context.path =
-        path.resolve(packageConfiguration.webNode.context.path, '../../')
+    webNodePackageConfiguration.webNode.core.context.path = path.resolve(
+        webNodePackageConfiguration.webNode.core.context.path, '../../'
+    )
     if (
         path.basename(path.dirname(
-            packageConfiguration.webNode.context.path)
+            webNodePackageConfiguration.webNode.core.context.path)
         ) !== 'node_modules'
     )
         break
 }
 if (
-    packageConfiguration.webNode.context.path === '/' ||
+    webNodePackageConfiguration.webNode.core.context.path === '/' ||
     path.basename(path.dirname(process.cwd())) === 'node_modules' ||
     path.basename(path.dirname(process.cwd())) === '.staging' &&
     path.basename(path.dirname(path.dirname(process.cwd()))) === 'node_modules'
@@ -52,7 +53,7 @@ if (
         NOTE: If we are dealing was a dependency project use current directory
         as context.
     */
-    packageConfiguration.webNode.context.path = process.cwd()
+    webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 else
     /*
         NOTE: If the current working directory references this file via a
@@ -64,31 +65,37 @@ else
             fileSystem.lstatSync(path.join(process.cwd(), 'node_modules'))
                 .isSymbolicLink()
         )
-            packageConfiguration.webNode.context.path = process.cwd()
+            webNodePackageConfiguration.webNode.core.context.path =
+                process.cwd()
     } catch (error) {
         // Ignore error.
     }
 
-let mainConfiguration:PackageConfiguration = {name: 'main'}
+let mainPackageConfiguration:PackageConfiguration = {name: 'main'}
 try {
     /* eslint-disable no-eval */
-    mainConfiguration = eval('require')(
-        path.join(packageConfiguration.webNode.context.path, 'package')
-    )
+    mainPackageConfiguration = eval('require')(path.join(
+        webNodePackageConfiguration.webNode.core.context.path, 'package'
+    ))
     /* eslint-enable no-eval */
 } catch (error) {
-    packageConfiguration.webNode.context.path = process.cwd()
+    webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
 
-const name:string|undefined =
-    mainConfiguration.documentationWebsite?.name ||
-    mainConfiguration.name
+const name:string =
+    mainPackageConfiguration.documentationWebsite?.name ||
+    mainPackageConfiguration.name ||
+    'main'
 
 const applicationConfiguration:EvaluateablePartialConfiguration =
-    mainConfiguration.webNode || {package: mainConfiguration}
+    mainPackageConfiguration.webNode ||
+    {[name]: {
+        name,
+        package: mainPackageConfiguration
+    }}
 // endregion
-packageConfiguration.webNode.name =
-    packageConfiguration.documentationWebsite.name
+webNodePackageConfiguration.webNode.core.name =
+    webNodePackageConfiguration.documentationWebsite.name
 const now:Date = new Date()
 const scope:Mapping<any> = {
     currentPath: process.cwd(),
@@ -105,13 +112,13 @@ const scope:Mapping<any> = {
 }
 export let configuration:Configuration =
     Tools.evaluateDynamicData<Configuration>(
-        packageConfiguration.webNode as
+        webNodePackageConfiguration.webNode as
             unknown as
             RecursiveEvaluateable<Configuration>,
         scope
     )
 
-delete (packageConfiguration as unknown as PackageConfiguration).webNode
+delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
 
 Tools.extend<Configuration>(
     true,
@@ -139,22 +146,23 @@ if (process.argv.length > 2) {
             Tools.modifyObject<Configuration>(configuration, result)!,
             result as RecursiveEvaluateable<Configuration>
         )
-        configuration.runtimeConfiguration = result
+        configuration.core.runtimeConfiguration = result
     }
 }
 
 configuration = Tools.evaluateDynamicData<Configuration>(
     Tools.removeKeysInEvaluation<Configuration>(configuration), scope
 )
-if (name)
-    configuration.name = name
-configuration.package = packageConfiguration as unknown as PackageConfiguration
+configuration.name = name
+configuration.core.package =
+    webNodePackageConfiguration as unknown as PackageConfiguration
 /*
     NOTE: We need to copy the configuration to avoid operating on de-duplicated
     objects in further resolving algorithms which can lead to unexpected
     errors.
 */
 configuration = Tools.copy(configuration, -1, true)
+
 export default configuration
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
