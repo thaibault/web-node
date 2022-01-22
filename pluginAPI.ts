@@ -692,8 +692,8 @@ export class PluginAPI {
 
                 /*
                     NOTE: We apply provided runtime configuration after each
-                    plugin specific configuration set to given runtime
-                    configuration always the highest priority when resolving#
+                    plugin specific configuration set to give runtime
+                    configuration always the highest priority when resolving
                     intermediate configuration states.
                 */
                 if (configuration.core.runtimeConfiguration)
