@@ -156,12 +156,6 @@ configuration = Tools.evaluateDynamicData<Configuration>(
 configuration.name = name
 configuration.core.package =
     webNodePackageConfiguration as unknown as PackageConfiguration
-/*
-    NOTE: We need to copy the configuration to avoid operating on de-duplicated
-    objects in further resolving algorithms which can lead to unexpected
-    errors.
-*/
-configuration = Tools.copy(configuration, -1, true)
 
 export default configuration
 // region vim modline

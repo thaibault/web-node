@@ -36,6 +36,22 @@ describe('pluginAPI', ():void => {
         [{}, 'test', [], testConfiguration, {}],
         // TODO add more tests
     )
+    testEach<typeof PluginAPI.callStackSynchronous>(
+        'callStackSyncronous',
+        PluginAPI.callStackSynchronous,
+
+        [null, 'test', [], testConfiguration],
+        [null, 'test', [], testConfiguration, null],
+        [{}, 'test', [], testConfiguration, {}],
+        // TODO add more tests
+    )
+    testEach<typeof PluginAPI.determineInternalName>(
+        'determineInternalName',
+        PluginAPI.determineInternalName,
+
+        ['', '', /^.+$/],
+        // TODO add more tests
+    )
     testEach<typeof PluginAPI.evaluateConfiguration>(
         'evaluateConfiguration',
         PluginAPI.evaluateConfiguration,

@@ -245,6 +245,26 @@ export class PluginAPI {
         return data
     }
     /**
+     * Converts given plugin name into the corresponding internal
+     * representation.
+     * @param name - Name to convert.
+     * @param regularExpression - Regular expression pattern which extracts
+     * relevant name path as first match group.
+     *
+     * @returns Transformed name.
+     */
+    static determineInternalName(
+        name:string, regularExpression:RegExp
+    ):string {
+        return Tools.stringDelimitedToCamelCase(name.replace(
+            regularExpression,
+            (fullMatch:string, firstMatch:string|number):string =>
+                typeof firstMatch === 'string' ?
+                    firstMatch :
+                    fullMatch
+        ))
+    }
+    /**
      * Evaluates given configuration object by letting plugins package sub
      * structure untouched.
      * @param configuration - Evaluateable configuration structure.
@@ -460,11 +480,13 @@ export class PluginAPI {
         if (Object.keys(packageConfiguration).length) {
             const configuration:EvaluateablePartialConfiguration =
                 PluginAPI.loadConfiguration(
-                    name, packageConfiguration, metaConfiguration.propertyNames
+                    internalName,
+                    packageConfiguration,
+                    metaConfiguration.propertyNames
                 )
 
-            if (configuration[name].package.main)
-                apiFilePaths[0] = configuration[name].package.main!
+            if (configuration[internalName].package.main)
+                apiFilePaths[0] = configuration[internalName].package.main!
 
             return await PluginAPI.loadAPI(
                 apiFilePaths,
@@ -628,7 +650,7 @@ export class PluginAPI {
             Removing comments (default key prefix to delete is "#").
         */
         const packageConfigurationCopy:PackageConfiguration =
-            Tools.removeKeyPrefixes(Tools.copy(packageConfiguration, -1, true))
+            Tools.removeKeyPrefixes(Tools.copy(packageConfiguration))
 
         const result:EvaluateablePartialConfiguration = {
             [name]: {package: packageConfigurationCopy}
@@ -671,13 +693,14 @@ export class PluginAPI {
         for (const key in configuration)
             if (Object.prototype.hasOwnProperty.call(configuration, key))
                 delete configuration[key]
+        Tools.extend(configuration, Tools.copy(baseConfiguration))
 
-        Tools.extend(configuration, Tools.copy(baseConfiguration, -1, true))
         for (const plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:EvaluateablePartialConfiguration =
-                    Tools.copy(plugin.configuration, -1, true)
+                    Tools.copy(plugin.configuration)
 
+                console.log('B', Object.keys(configuration))
                 Tools.extend<Configuration>(
                     true,
                     Tools.modifyObject<Configuration>(
@@ -689,6 +712,7 @@ export class PluginAPI {
                     */
                     pluginConfiguration as Configuration
                 )
+                console.log('C', Object.keys(configuration))
 
                 /*
                     NOTE: We apply provided runtime configuration after each
@@ -783,12 +807,18 @@ export class PluginAPI {
         /*
             Load main plugin configuration at first.
 
-            NOTE: If application's main is this itself avoid loading twice.
+            NOTE: If application's main is this itself avoid loading it twice.
         */
         if (configuration.name !== 'web-node')
             plugins[configuration.name] = await PluginAPI.load(
                 configuration.name,
-                configuration.name,
+                PluginAPI.determineInternalName(
+                    configuration.name,
+                    new RegExp(
+                        configuration.core.plugin.directories.external
+                            .nameRegularExpressionPattern
+                    )
+                ),
                 plugins,
                 configuration.core.plugin.configuration,
                 configuration.core.context.path,
@@ -819,13 +849,10 @@ export class PluginAPI {
                         configuration.core.plugin.directories[type].path,
                         pluginName
                     )
-                    const internalName:string = pluginName.replace(
-                        compiledRegularExpression,
-                        (fullMatch:string, firstMatch:string|number):string =>
-                            typeof firstMatch === 'string' ?
-                                firstMatch :
-                                fullMatch
-                    )
+                    const internalName:string =
+                        PluginAPI.determineInternalName(
+                            pluginName, compiledRegularExpression
+                        )
 
                     plugins[pluginName] = await PluginAPI.load(
                         pluginName,
