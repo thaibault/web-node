@@ -84,7 +84,8 @@
   "webNode": {
     "core": {
       "context": {
-        "path": "./"
+        "path": "./",
+        "type": "relative"
       },
       "debug": false,
       "encoding": "utf8",
