@@ -31,7 +31,9 @@ import webNodePackageConfiguration from './package.json'
     projects where current working directory isn't the projects directory and
     this library is located as a nested dependency.
 */
-webNodePackageConfiguration.webNode.core.context = {path: __dirname}
+webNodePackageConfiguration.webNode.core.context = {
+    path: __dirname, type: 'relative'
+}
 while (true) {
     webNodePackageConfiguration.webNode.core.context.path = path.resolve(
         webNodePackageConfiguration.webNode.core.context.path, '../../'
