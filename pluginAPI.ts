@@ -700,7 +700,6 @@ export class PluginAPI {
                 const pluginConfiguration:EvaluateablePartialConfiguration =
                     Tools.copy(plugin.configuration)
 
-                console.log('B', Object.keys(configuration))
                 Tools.extend<Configuration>(
                     true,
                     Tools.modifyObject<Configuration>(
@@ -712,7 +711,6 @@ export class PluginAPI {
                     */
                     pluginConfiguration as Configuration
                 )
-                console.log('C', Object.keys(configuration))
 
                 /*
                     NOTE: We apply provided runtime configuration after each
