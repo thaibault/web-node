@@ -103,16 +103,16 @@
           ]
         },
         "directories": {
-          "entry": {
-            "nameRegularExpressionPattern": "^([a-zA-Z0-9-_].*)$",
-            "path": {
-              "__evaluate__": "`${currentPath}/plugins/`"
-            }
-          },
           "external": {
             "nameRegularExpressionPattern": "^([a-zA-Z0-9-]+?)-?[wW]eb-?[nN]ode-?[pP]lugin$",
             "path": {
               "__evaluate__": "`${currentPath}/node_modules/`"
+            }
+          },
+          "internal": {
+            "nameRegularExpressionPattern": "^([a-zA-Z0-9-_].*)$",
+            "path": {
+              "__evaluate__": "`${currentPath}/plugins/`"
             }
           }
         },

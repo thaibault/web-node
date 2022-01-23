@@ -53,7 +53,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
     const {configuration, plugins}:{
         configuration:Configuration
         plugins:Array<Plugin>
-    } = await PluginAPI.loadAll(Tools.copy(baseConfiguration, -1, true))
+    } = await PluginAPI.loadAll(Tools.copy(baseConfiguration))
 
     await PluginAPI.callStack('initialize', plugins, configuration)
 
