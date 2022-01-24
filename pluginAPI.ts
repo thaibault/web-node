@@ -565,7 +565,11 @@ export class PluginAPI {
         if (
             configuration &&
             configuration[internalName] &&
-            Object.keys(configuration[internalName]).length > 0 &&
+            /*
+                NOTE: A "package" key is always present so search for at least
+                two keys.
+            */
+            Object.keys(configuration[internalName]).length > 1 &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
