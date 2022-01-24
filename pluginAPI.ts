@@ -471,6 +471,7 @@ export class PluginAPI {
                     packageConfiguration,
                     PluginAPI.loadFile(filePath, name)
                 )
+
                 configurationFilePaths.push(filePath)
             }
         }
@@ -478,6 +479,9 @@ export class PluginAPI {
         const apiFilePaths:Array<string> = ['index.js']
 
         if (Object.keys(packageConfiguration).length) {
+            internalName =
+                packageConfiguration.webNodeInternalName || internalName
+
             const configuration:EvaluateablePartialConfiguration =
                 PluginAPI.loadConfiguration(
                     internalName,
@@ -867,9 +871,8 @@ export class PluginAPI {
 
         for (const pluginName in plugins)
             if (Object.prototype.hasOwnProperty.call(plugins, pluginName)) {
-                temporaryPlugins[plugins[
-                    pluginName
-                ].internalName] = plugins[pluginName].dependencies
+                temporaryPlugins[plugins[pluginName].internalName] =
+                    plugins[pluginName].dependencies
 
                 if (Object.prototype.hasOwnProperty.call(
                     configuration.core.interDependencies,

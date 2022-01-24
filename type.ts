@@ -73,6 +73,7 @@ export interface PackageConfiguration {
     name?:string
     webnode?:EvaluateablePartialConfiguration
     webNode?:EvaluateablePartialConfiguration
+    webNodeInternalName?:string
     'web-node'?:EvaluateablePartialConfiguration
 }
 
