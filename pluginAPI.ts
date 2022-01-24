@@ -564,7 +564,8 @@ export class PluginAPI {
         */
         if (
             configuration &&
-            Object.keys(configuration).length > 1 &&
+            configuration[internalName] &&
+            Object.keys(configuration[internalName]).length > 0 &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
