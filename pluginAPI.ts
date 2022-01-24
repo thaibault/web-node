@@ -471,6 +471,7 @@ export class PluginAPI {
                     packageConfiguration,
                     PluginAPI.loadFile(filePath, name)
                 )
+
                 configurationFilePaths.push(filePath)
             }
         }
@@ -478,6 +479,9 @@ export class PluginAPI {
         const apiFilePaths:Array<string> = ['index.js']
 
         if (Object.keys(packageConfiguration).length) {
+            internalName =
+                packageConfiguration.webNodeInternalName || internalName
+
             const configuration:EvaluateablePartialConfiguration =
                 PluginAPI.loadConfiguration(
                     internalName,
@@ -560,7 +564,12 @@ export class PluginAPI {
         */
         if (
             configuration &&
-            Object.keys(configuration).length > 1 &&
+            configuration[internalName] &&
+            /*
+                NOTE: A "package" key is always present so search for at least
+                two keys.
+            */
+            Object.keys(configuration[internalName]).length > 1 &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
@@ -867,9 +876,8 @@ export class PluginAPI {
 
         for (const pluginName in plugins)
             if (Object.prototype.hasOwnProperty.call(plugins, pluginName)) {
-                temporaryPlugins[plugins[
-                    pluginName
-                ].internalName] = plugins[pluginName].dependencies
+                temporaryPlugins[plugins[pluginName].internalName] =
+                    plugins[pluginName].dependencies
 
                 if (Object.prototype.hasOwnProperty.call(
                     configuration.core.interDependencies,
