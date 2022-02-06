@@ -202,6 +202,7 @@ describe('pluginAPI', ():void => {
             'dummyPlugin',
             'dummy',
             {},
+            ['webNode'],
             'utf8',
             {a: 2, dummy: {package: {b: 3}}},
             [

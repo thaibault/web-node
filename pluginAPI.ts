@@ -498,6 +498,7 @@ export class PluginAPI {
                 name,
                 internalName,
                 plugins,
+                metaConfiguration.propertyNames,
                 encoding,
                 configuration,
                 configurationFilePaths
@@ -505,7 +506,13 @@ export class PluginAPI {
         }
 
         return await PluginAPI.loadAPI(
-            apiFilePaths, pluginPath, name, internalName, plugins, encoding
+            apiFilePaths,
+            pluginPath,
+            name,
+            internalName,
+            plugins,
+            metaConfiguration.propertyNames,
+            encoding
         )
     }
     /**
@@ -520,6 +527,8 @@ export class PluginAPI {
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param encoding - Encoding to use to read and write from child
      * process.
+     * @param configurationPropertyNames - Property names where to find webNode
+     * configurations under package configurations.
      * @param configuration - Plugin specific configurations.
      * @param configurationFilePaths - Plugin specific configuration file
      * paths.
@@ -532,6 +541,7 @@ export class PluginAPI {
         name:string,
         internalName:string,
         plugins:Mapping<Plugin>,
+        configurationPropertyNames:Array<string> = ['webNode'],
         encoding:Encoding = 'utf8',
         configuration:null|EvaluateablePartialConfiguration = null,
         configurationFilePaths:Array<string> = []
@@ -557,19 +567,16 @@ export class PluginAPI {
         let api:Function|null = null
         let nativeAPI = false
 
-        /*
-            NOTE: We only want to register api's for web node plugins. Others
-            doesn't have a package configuration file with specified "webNode"
-            like key in it.
-        */
         if (
-            configuration &&
-            configuration[internalName] &&
             /*
-                NOTE: A "package" key is always present so search for at least
-                two keys.
+                NOTE: Check if a webNode configuration is available indicating
+                a backend responsibility for api file.
             */
-            Object.keys(configuration[internalName]).length > 1 &&
+            configurationPropertyNames.some(
+                (name:string):boolean =>
+                    configuration[name] &&
+                    configuration[name].backend !== false
+            ) &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
