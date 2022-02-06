@@ -498,7 +498,6 @@ export class PluginAPI {
                 name,
                 internalName,
                 plugins,
-                metaConfiguration.propertyNames,
                 encoding,
                 configuration,
                 configurationFilePaths
@@ -511,7 +510,6 @@ export class PluginAPI {
             name,
             internalName,
             plugins,
-            metaConfiguration.propertyNames,
             encoding
         )
     }
@@ -527,8 +525,6 @@ export class PluginAPI {
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param encoding - Encoding to use to read and write from child
      * process.
-     * @param configurationPropertyNames - Property names where to find webNode
-     * configurations under package configurations.
      * @param configuration - Plugin specific configurations.
      * @param configurationFilePaths - Plugin specific configuration file
      * paths.
@@ -541,7 +537,6 @@ export class PluginAPI {
         name:string,
         internalName:string,
         plugins:Mapping<Plugin>,
-        configurationPropertyNames:Array<string> = ['webNode'],
         encoding:Encoding = 'utf8',
         configuration:null|EvaluateablePartialConfiguration = null,
         configurationFilePaths:Array<string> = []
@@ -571,12 +566,10 @@ export class PluginAPI {
             /*
                 NOTE: Check if a webNode configuration is available indicating
                 a backend responsibility for api file.
+                NOTE: One key is always there representing the whole package
+                configuration.
             */
-            configurationPropertyNames.some(
-                (name:string):boolean =>
-                    configuration[name] &&
-                    configuration[name].backend !== false
-            ) &&
+            Object.keys(configuration).length > 1 &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
