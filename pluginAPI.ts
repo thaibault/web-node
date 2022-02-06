@@ -563,6 +563,7 @@ export class PluginAPI {
         let nativeAPI = false
 
         if (
+            configuration &&
             /*
                 NOTE: Check if a webNode configuration is available indicating
                 a backend responsibility for api file.
