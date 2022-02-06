@@ -30,6 +30,7 @@ export default class Dummy implements PluginHandler {
             hookCalled: false,
             loaded: true
         }
+
         return Promise.resolve({
             name: 'dummy',
             promise: new Promise((resolve:Function):void =>
@@ -42,6 +43,7 @@ export default class Dummy implements PluginHandler {
         this:PluginAPI, servicePromises:ServicePromises, services:Services
     ):Promise<void> {
         services.dummy.hookCalled = true
+
         return Promise.resolve()
     }
 

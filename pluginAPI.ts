@@ -505,7 +505,12 @@ export class PluginAPI {
         }
 
         return await PluginAPI.loadAPI(
-            apiFilePaths, pluginPath, name, internalName, plugins, encoding
+            apiFilePaths,
+            pluginPath,
+            name,
+            internalName,
+            plugins,
+            encoding
         )
     }
     /**
@@ -557,19 +562,14 @@ export class PluginAPI {
         let api:Function|null = null
         let nativeAPI = false
 
-        /*
-            NOTE: We only want to register api's for web node plugins. Others
-            doesn't have a package configuration file with specified "webNode"
-            like key in it.
-        */
         if (
-            configuration &&
-            configuration[internalName] &&
             /*
-                NOTE: A "package" key is always present so search for at least
-                two keys.
+                NOTE: Check if a webNode configuration is available indicating
+                a backend responsibility for api file.
+                NOTE: One key is always there representing the whole package
+                configuration.
             */
-            Object.keys(configuration[internalName]).length > 1 &&
+            Object.keys(configuration).length > 1 &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
