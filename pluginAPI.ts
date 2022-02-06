@@ -565,12 +565,16 @@ export class PluginAPI {
         if (
             configuration &&
             /*
-                NOTE: Check if a webNode configuration is available indicating
-                a backend responsibility for api file.
+                NOTE: Check if a webNode or webNode plugin configuration is
+                available indicating a backend responsibility for api file.
                 NOTE: One key is always there representing the whole package
                 configuration.
             */
-            Object.keys(configuration).length > 1 &&
+            (
+                Object.keys(configuration).length > 1 ||
+                configuration[internalName] && 
+                Object.keys(configuration[internalName]).length > 1
+            ) &&
             await Tools.isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
