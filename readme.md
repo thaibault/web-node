@@ -1,33 +1,38 @@
-<!-- #!/usr/bin/env markdown
+<!-- !/usr/bin/env markdown
 -*- coding: utf-8 -*-
 region header
 Copyright Torben Sickert (info["~at~"]torben.website) 16.12.2012
 
 License
-   This library written by Torben Sickert stand under a creative commons
-   naming 3.0 unported license.
-   See https://creativecommons.org/licenses/by/3.0/deed.de
+-------
+
+This library written by Torben Sickert stand under a creative commons naming
+3.0 unported license. See https://creativecommons.org/licenses/by/3.0/deed.de
 endregion -->
 
 Project status
 --------------
 
-[![npm version](https://badge.fury.io/js/web-node.svg)](https://www.npmjs.com/package/web-node)
-[![downloads](https://img.shields.io/npm/dy/web-node.svg)](https://www.npmjs.com/package/web-node)
-[![build status](https://travis-ci.org/thaibault/webNode.svg?branch=master)](https://travis-ci.org/thaibault/webNode)
-[![code coverage](https://coveralls.io/repos/github/thaibault/webNode/badge.svg)](https://coveralls.io/github/thaibault/webNode)
+[![npm](https://img.shields.io/npm/v/web-node?color=%23d55e5d&label=npm%20package%20version&logoColor=%23d55e5d)](https://www.npmjs.com/package/web-node)
+[![npm downloads](https://img.shields.io/npm/dy/web-node.svg)](https://www.npmjs.com/package/web-node)
+
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/build.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/build.yaml)
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/test.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/test.yaml)
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/test:coverage:report.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/test:coverage:report.yaml)
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/check:types.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/check:types.yaml)
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/lint.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/lint.yaml)
+
+[![code coverage](https://coveralls.io/repos/github/thaibault/web-node/badge.svg)](https://coveralls.io/github/thaibault/web-node)
+
+<!-- Too unstable yet
 [![dependencies](https://img.shields.io/david/thaibault/web-node.svg)](https://david-dm.org/thaibault/web-node)
 [![development dependencies](https://img.shields.io/david/dev/thaibault/web-node.svg)](https://david-dm.org/thaibault/web-node?type=dev)
 [![peer dependencies](https://img.shields.io/david/peer/thaibault/web-node.svg)](https://david-dm.org/thaibault/web-node?type=peer)
-[![documentation website](https://img.shields.io/website-up-down-green-red/https/torben.website/webNode.svg?label=documentation-website)](https://torben.website/webNode)
+-->
+[![documentation website](https://img.shields.io/website-up-down-green-red/https/torben.website/web-node.svg?label=documentation-website)](https://torben.website/web-node)
 
 Use case
 --------
 
 webNode is a high level javaScript backend plugin system and configuration
 merger.
-
-<!-- region vim modline
-vim: set tabstop=4 shiftwidth=4 expandtab:
-vim: foldmethod=marker foldmarker=region,endregion:
-endregion -->
