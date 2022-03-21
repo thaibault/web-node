@@ -1,13 +1,7 @@
 {
   "name": "web-node",
   "version": "1.0.429",
-  "license": "CC-BY-3.0",
   "description": "High level javaScript backend plugin system and configuration merger.",
-  "homepage": "https://torben.website/web-node",
-  "documentationWebsite": {
-    "name": "web-node",
-    "trackingCode": "UA-40192634-9"
-  },
   "keywords": [
     "web",
     "backend",
@@ -15,6 +9,17 @@
     "plugin",
     "management"
   ],
+  "homepage": "https://torben.website/web-node",
+  "bugs": {
+    "email": "info@torben.website",
+    "url": "https://github.com/thaibault/web-node/issues"
+  },
+  "license": "CC-BY-3.0",
+  "author": {
+    "name": "Torben Sickert",
+    "email": "info@torben.website",
+    "url": "https://torben.website"
+  },
   "files": [
     "configurator.d.ts",
     "index.d.ts",
@@ -75,11 +80,19 @@
       "optional": true
     }
   },
+  "engines": {
+    "node": ">=17",
+    "npm": ">=7"
+  },
   "resolutions": {
     "@types/webpack": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.1.1.tgz",
     "colors": "1.4.0"
   },
   "sideEffects": true,
+  "documentationWebsite": {
+    "name": "web-node",
+    "trackingCode": "UA-40192634-9"
+  },
   "webNode": {
     "core": {
       "context": {
