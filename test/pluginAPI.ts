@@ -15,16 +15,16 @@
 */
 // region imports
 import Tools from 'clientnode'
+import {ThenParameter} from 'clientnode/type'
 import {testEach, testEachPromise} from 'clientnode/testHelper'
 import path from 'path'
 
-import {Configuration, Plugin} from '../type'
+import {Configuration, Plugin, PluginConfiguration} from '../type'
 import configuration from '../configurator'
 import PluginAPI from '../pluginAPI'
 // endregion
 // region tests
 describe('pluginAPI', ():void => {
-
     const testConfiguration:Configuration = Tools.copy(configuration)
 
     testEachPromise<typeof PluginAPI.callStack>(
@@ -33,7 +33,7 @@ describe('pluginAPI', ():void => {
 
         [null, 'test', [], testConfiguration],
         [null, 'test', [], testConfiguration, null],
-        [{}, 'test', [], testConfiguration, {}],
+        [{}, 'test', [], testConfiguration, {}]
         // TODO add more tests
     )
     testEach<typeof PluginAPI.callStackSynchronous>(
@@ -42,14 +42,14 @@ describe('pluginAPI', ():void => {
 
         [null, 'test', [], testConfiguration],
         [null, 'test', [], testConfiguration, null],
-        [{}, 'test', [], testConfiguration, {}],
+        [{}, 'test', [], testConfiguration, {}]
         // TODO add more tests
     )
     testEach<typeof PluginAPI.determineInternalName>(
         'determineInternalName',
         PluginAPI.determineInternalName,
 
-        ['', '', /^.+$/],
+        ['', '', /^.+$/]
         // TODO add more tests
     )
     testEach<typeof PluginAPI.evaluateConfiguration>(
@@ -57,9 +57,8 @@ describe('pluginAPI', ():void => {
         PluginAPI.evaluateConfiguration,
 
         [{}, {}],
-        [{a: {}}, {a: {}}],
         [{a: {package: {}}}, {a: {package: {}}}],
-        [{a: 3}, {a: {__evaluate__: '2 + 1'}}],
+        [{a: {a: 3}}, {a: {__evaluate__: '{a: 2 + 1}'}}],
         [{a: {b: 3}}, {a: {b: {__evaluate__: '2 + 1'}}}],
         [
             {a: {package: {b: {__evaluate__: '2 + 1'}}}},
@@ -104,38 +103,60 @@ describe('pluginAPI', ():void => {
         // TODO add more tests
     )
     test.each<[
-        ReturnType<typeof PluginAPI.load>, ...Parameters<typeof PluginAPI.load>
+        ThenParameter<ReturnType<typeof PluginAPI.load>>,
+        ...Parameters<typeof PluginAPI.load>
     ]>([
         [
             {
-
+                api: null,
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
                     path.resolve(
                         configuration.core.context.path, 'dummyPlugin/index.js'
                     )
                 ],
+
                 configuration: {
                     dummy: {
                         package: Tools.mask(
+                            /*
+                                eslint-disable
+                                @typescript-eslint/no-var-requires
+                            */
                             require('../dummyPlugin/package'),
+                            /*
+                                eslint-enable
+                                @typescript-eslint/no-var-requires
+                            */
                             {exclude: {webNode: true}}
                         )
                     },
-                    ...require('../dummyPlugin/package').webNode
+                    ...((
+                        /* eslint-disable @typescript-eslint/no-var-requires */
+                        require('../dummyPlugin/package')
+                        /* eslint-enable @typescript-eslint/no-var-requires */
+                    ) as PackageConfiguration).webNode
                 },
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [],
+
                 dependencies: [],
+
                 internalName: 'dummy',
                 name: 'dummy',
+
                 packageConfiguration: Tools.mask(
+                    /* eslint-disable @typescript-eslint/no-var-requires */
                     require('../dummyPlugin/package'),
+                    /* eslint-enable @typescript-eslint/no-var-requires */
                     {exclude: {webNode: true}}
                 ),
+
                 path: path.resolve(
                     configuration.core.context.path, 'dummyPlugin'
-                )
+                ),
+
+                scope: null
             },
             'dummy',
             'dummy',
@@ -159,29 +180,37 @@ describe('pluginAPI', ():void => {
             if (plugin) {
                 expect(plugin.scope).toHaveProperty('test')
 
-                delete plugin.api
+                plugin.api = null
+                plugin.scope = null
+
                 plugin.apiFileLoadTimestamps = []
                 if (plugin.configuration)
                     delete plugin.configuration.package
                 plugin.configurationFilePaths = []
                 plugin.configurationFileLoadTimestamps = []
-                delete plugin.scope
+
                 expect(plugin).toStrictEqual(expected)
             }
         }
     )
     test.each<[
-        ReturnType<PluginAPI.loadAPI>, ...Parameters<PluginAPI.loadAPI>
+        ThenParameter<ReturnType<typeof PluginAPI.loadAPI>>,
+        ...Parameters<typeof PluginAPI.loadAPI>
     ]>([
         [
             {
+                api: null,
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
                     path.resolve(
                         configuration.core.context.path, 'dummyPlugin/index.js'
                     )
                 ],
-                configuration: {a: 2, dummy: {package: {b: 3}}},
+
+                configuration: {
+                    a: {a: 2} as unknown as PluginConfiguration,
+                    dummy: {package: {b: 3}}
+                },
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [
                     path.resolve(
@@ -189,13 +218,19 @@ describe('pluginAPI', ():void => {
                         'dummyPlugin/package.json'
                     )
                 ],
+
                 dependencies: [],
+
                 internalName: 'dummy',
                 name: 'dummyPlugin',
+
                 packageConfiguration: {b: 3},
+
                 path: path.resolve(
                     configuration.core.context.path, 'dummyPlugin'
-                )
+                ),
+
+                scope: null
             },
             ['index.js'],
             path.resolve(configuration.core.context.path, 'dummyPlugin'),
@@ -203,7 +238,10 @@ describe('pluginAPI', ():void => {
             'dummy',
             {},
             'utf8',
-            {a: 2, dummy: {package: {b: 3}}},
+            {
+                a: {a: 2} as unknown as PluginConfiguration,
+                dummy: {package: {b: 3}}
+            },
             [
                 path.resolve(
                     configuration.core.context.path, 'dummyPlugin/package.json'
@@ -213,10 +251,10 @@ describe('pluginAPI', ():void => {
     ])(
         '%p === loadAPI(%p, ...)',
         async (
-            expected:ReturnType<typeof PluginAPI.load>,
-            ...parameters:Parameters<typeof PluginAPI.load>
+            expected:ThenParameter<ReturnType<typeof PluginAPI.loadAPI>>,
+            ...parameters:Parameters<typeof PluginAPI.loadAPI>
         ):Promise<void> => {
-            let plugin:Plugin
+            let plugin:Plugin|undefined
             try {
                 plugin = await PluginAPI.loadAPI(...parameters)
             } catch (error) {
@@ -224,11 +262,14 @@ describe('pluginAPI', ():void => {
             }
 
             if (plugin) {
+                plugin.api = null
+
                 expect(plugin.scope).toHaveProperty('test')
-                delete plugin.api
+
+                plugin.scope = null
+
                 plugin.apiFileLoadTimestamps = []
                 plugin.configurationFileLoadTimestamps = []
-                delete plugin.scope
                 expect(plugin).toStrictEqual(expected)
             }
         }
@@ -246,27 +287,35 @@ describe('pluginAPI', ():void => {
             configuration is not object and will be interpret as package
             configuration either.
         */
-        [{a: {package: {a: 2, b: 3}}}, 'a',  {a: 2, b: 3}, []],
+        [{a: {package: {a: 2, b: 3}}}, 'a', {a: 2, b: 3}, []],
         // Application and package configuration exists.
-        [{a: {package: {b: 3}}, value: 2}, 'a', {a: {value: 2}, b: 3}, ['a']],
+        [
+            {
+                a: {package: {b: 3}},
+                value: {a: 2} as unknown as PluginConfiguration
+            },
+            'a',
+            {a: {value: {a: 2}}, b: 3},
+            ['a']
+        ],
         /*
             Application and package configuration exists because existing
             application configuration is not and object.
         */
         [
-            {a: {package: {b: 3}}, value: 2},
+            {a: {package: {b: 3}}, value: 2 as unknown as PluginConfiguration},
             'a',
             {a: {value: 2}, b: 3},
             ['a', 'b']
         ],
         [
-            {a: {package: {b: 3}}, value: 2},
+            {a: {package: {b: 3}}, value: 2 as unknown as PluginConfiguration},
             'a',
             {a: {value: 2}, b: 3},
             ['z', 'a', 'b']
         ],
         [
-            {a: {package: {a: 2}}, value: 3},
+            {a: {package: {a: 2}}, value: 3 as unknown as PluginConfiguration},
             'a',
             {a: 2, b: {value: 3}},
             ['b', 'a']
@@ -276,9 +325,13 @@ describe('pluginAPI', ():void => {
         'loadConfigurations',
         PluginAPI.loadConfigurations,
 
-        [configuration, [], {}],
-        [configuration, [], {a: 2}],
-        [{a: 2, ...configuration}, [{configuration: {a: 2}}], {}]
+        [configuration, [], {} as unknown as Configuration],
+        [configuration, [], {a: 2} as unknown as Configuration],
+        [
+            {a: {a: 2}, ...configuration} as unknown as Configuration,
+            [{configuration: {a: {a: 2}}} as unknown as Plugin],
+            {} as unknown as Configuration
+        ]
     )
     testEach<typeof PluginAPI.loadFile>(
         'loadFile',

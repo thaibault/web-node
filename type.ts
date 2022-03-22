@@ -79,15 +79,17 @@ export type EvaluateablePartialConfiguration =
         name?:string
     } &
     Mapping<PluginConfiguration>
-export interface PackageConfiguration {
-    documentationWebsite?:{name?:string}
-    main?:string
-    name?:string
-    webnode?:EvaluateablePartialConfiguration
-    webNode?:EvaluateablePartialConfiguration
-    webNodeInternalName?:string
-    'web-node'?:EvaluateablePartialConfiguration
-}
+export type PackageConfiguration =
+    Mapping<unknown> &
+    {
+        documentationWebsite?:{name?:string}
+        main?:string
+        name?:string
+        webnode?:EvaluateablePartialConfiguration
+        webNode?:EvaluateablePartialConfiguration
+        webNodeInternalName?:string
+        'web-node'?:EvaluateablePartialConfiguration
+    }
 
 export type APIFunction =
     null |
@@ -113,14 +115,14 @@ export interface PluginChange {
     target:'packageConfiguration'|'scope'
 }
 
-export interface Service {
+export interface Service<Type = unknown> {
     name:string
-    promise:null|Promise<object>
+    promise:null|Promise<Type>
 }
 export type Services<PluginServiceType = Mapping<unknown>> =
-    Mapping<object> & PluginServiceType
+    Mapping<unknown> & PluginServiceType
 export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
-    Mapping<Promise<object>> & PluginPromiseType
+    Mapping<Promise<unknown>> & PluginPromiseType
 
 export interface PluginHandler {
     /**
