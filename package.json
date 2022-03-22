@@ -1,6 +1,7 @@
 {
   "name": "web-node",
   "version": "1.0.436",
+  "license": "CC-BY-3.0",
   "description": "High level javaScript backend plugin system and configuration merger.",
   "keywords": [
     "web",
