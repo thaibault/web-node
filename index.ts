@@ -31,14 +31,14 @@ import {
 
 declare const ORIGINAL_MAIN_MODULE:object
 
-const handleError:Function = async (
+const handleError = async (
     plugins:Array<Plugin>,
     configuration:Configuration,
     error:Error,
     services:Services
 ):Promise<void> => {
     try {
-        await PluginAPI.callStack(
+        await PluginAPI.callStack<Error>(
             'error', plugins, configuration, error, services
         )
     } catch (error) {
@@ -55,7 +55,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         plugins:Array<Plugin>
     } = await PluginAPI.loadAll(Tools.copy(baseConfiguration))
 
-    await PluginAPI.callStack('initialize', plugins, configuration)
+    await PluginAPI.callStack<void>('initialize', plugins, configuration)
 
     if (plugins.length)
         console.info(
@@ -67,7 +67,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         )
 
     for (const type of ['pre', 'post'] as const)
-        await PluginAPI.callStack(
+        await PluginAPI.callStack<Configuration>(
             `${type}ConfigurationLoaded`,
             plugins,
             configuration,
@@ -82,7 +82,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
     let exitTriggered = false
     try {
         // region start services
-        services = await PluginAPI.callStack(
+        services = await PluginAPI.callStack<Services, Services>(
             'preLoadService', plugins, configuration, services
         )
 
@@ -92,7 +92,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
 
         for (const plugin of plugins)
             if (plugin.api) {
-                services = await PluginAPI.callStack(
+                services = await PluginAPI.callStack<Services, Services>(
                     `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
                     plugins,
@@ -109,7 +109,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                         services,
                         configuration,
                         plugins
-                    )
+                    ) as null|Service
                 } catch (error) {
                     if (!(error as Error)?.message?.startsWith(
                         'NotImplemented:'
@@ -138,7 +138,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                     } else
                         console.info(`Service "${result.name}" loaded.`)
 
-                services = await PluginAPI.callStack(
+                services = await PluginAPI.callStack<Services, Services>(
                     `postLoad${Tools.stringCapitalize(plugin.internalName)}` +
                         'Service',
                     plugins,
@@ -148,7 +148,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                 )
             }
 
-        servicePromises = await PluginAPI.callStack(
+        servicePromises = await PluginAPI.callStack<Services, ServicePromises>(
             'postLoadService',
             plugins,
             configuration,
@@ -160,7 +160,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         let finished = false
         const closeHandler = ():void => {
             if (!finished)
-                PluginAPI.callStackSynchronous(
+                PluginAPI.callStackSynchronous<Services>(
                     'exit',
                     plugins.slice().reverse(),
                     configuration,
@@ -189,7 +189,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                             ' second request will force to stop ungracefully.'
                         )
 
-                        await PluginAPI.callStack(
+                        await PluginAPI.callStack<Services>(
                             'shouldExit', plugins, configuration, services
                         )
                     }
@@ -213,21 +213,23 @@ export const main:ProcedureFunction = async ():Promise<void> => {
 
         exitTriggered = true
 
-        await PluginAPI.callStack(
+        await PluginAPI.callStack<Services>(
             'shouldExit', plugins, configuration, services
         )
 
         process.exit()
     } catch (error) {
-        handleError(plugins, configuration, error, services)
+        await handleError(plugins, configuration, error as Error, services)
 
         if (!exitTriggered)
             try {
-                await PluginAPI.callStack(
+                await PluginAPI.callStack<Services>(
                     'shouldExit', plugins, configuration, services
                 )
             } catch (error) {
-                handleError(plugins, configuration, error, services)
+                await handleError(
+                    plugins, configuration, error as Error, services
+                )
             }
         if (configuration.core.debug)
             throw error

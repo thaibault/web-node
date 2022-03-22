@@ -28,6 +28,7 @@ import path, {basename, extname, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
 import {
+    APIFunction,
     Configuration,
     EvaluateablePartialConfiguration,
     MetaPluginConfiguration,
@@ -37,6 +38,7 @@ import {
     PluginConfiguration
 } from './type'
 // endregion
+export const currentRequire = eval('require') as typeof require
 // region allow plugins to import "web-node" as already loaded main module
 type ModuleType =
     typeof Module &
@@ -50,11 +52,7 @@ const oldResolveFilename = (Module as ModuleType)._resolveFilename
     request:string, parent:typeof Module, isMain:boolean
 ):string => {
     if (request === 'web-node')
-        return oldResolveFilename(
-            eval('require.main.id') as string,
-            parent,
-            isMain
-        )
+        return oldResolveFilename(currentRequire.main!.id, parent, isMain)
 
     return oldResolveFilename(request, parent, isMain)
 }
@@ -66,6 +64,7 @@ export class PluginAPI {
     /**
      * Calls all plugin methods for given trigger description asynchronous and
      * waits for their resolved promises.
+     * @param this - Nothing.
      * @param hook - Type of trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
@@ -76,13 +75,14 @@ export class PluginAPI {
      * @returns A promise which resolves when all callbacks have resolved their
      * promise holding given potentially modified data.
      */
-    static async callStack(
+    static async callStack<Input = unknown, Result = unknown>(
+        this:void,
         hook:string,
         plugins:Array<Plugin>,
         configuration:Configuration,
-        data:any = null,
-        ...parameters:Array<any>
-    ):Promise<any> {
+        data:Input = null as unknown as Input,
+        ...parameters:Array<unknown>
+    ):Promise<Result> {
         if (configuration.core.plugin.hotReloading) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
                 PluginAPI.hotReloadConfigurationFile(
@@ -143,7 +143,7 @@ export class PluginAPI {
 
         for (const plugin of plugins)
             if (plugin.api) {
-                let result:any
+                let result:Result
                 try {
                     result = await plugin.api(
                         hook,
@@ -158,7 +158,7 @@ export class PluginAPI {
                             */
                             [plugins]
                         )
-                    )
+                    ) as Result
                 } catch (error) {
                     if (
                         (error as Error).message?.startsWith('NotImplemented:')
@@ -177,7 +177,7 @@ export class PluginAPI {
                     )
                 }
 
-                data = result
+                data = result as unknown as Input
 
                 if (configuration.core.debug)
                     console.info(
@@ -186,10 +186,11 @@ export class PluginAPI {
                     )
             }
 
-        return data
+        return data as unknown as Result
     }
     /**
      * Calls all plugin methods for given trigger description synchronous.
+     * @param this - Nothing.
      * @param hook - Hook to trigger.
      * @param plugins - List of plugins to search for trigger callbacks in.
      * @param configuration - Plugin extendable configuration object.
@@ -199,22 +200,23 @@ export class PluginAPI {
      *
      * @returns Given potentially modified data.
      */
-    static callStackSynchronous(
+    static callStackSynchronous<Input = unknown, Result = unknown>(
+        this:void,
         hook:string,
         plugins:Array<Plugin>,
         configuration:Configuration,
-        data:any = null,
-        ...parameters:Array<any>
-    ):any {
+        data:Input = null as unknown as Input,
+        ...parameters:Array<unknown>
+    ):Result {
         for (const plugin of plugins)
             if (plugin.api) {
-                let result:any
+                let result:Result
                 try {
                     result = plugin.api(
                         hook,
                         data,
                         ...parameters.concat(configuration, plugins)
-                    )
+                    ) as Result
                 } catch (error) {
                     if ((error as Error).message?.startsWith(
                         'NotImplemented:'
@@ -233,7 +235,7 @@ export class PluginAPI {
                     )
                 }
 
-                data = result
+                data = result as unknown as Input
 
                 if (configuration.core.debug)
                     console.info(
@@ -242,11 +244,12 @@ export class PluginAPI {
                     )
             }
 
-        return data
+        return data as unknown as Result
     }
     /**
      * Converts given plugin name into the corresponding internal
      * representation.
+     * @param this - Nothing.
      * @param name - Name to convert.
      * @param regularExpression - Regular expression pattern which extracts
      * relevant name path as first match group.
@@ -254,7 +257,7 @@ export class PluginAPI {
      * @returns Transformed name.
      */
     static determineInternalName(
-        name:string, regularExpression:RegExp
+        this:void, name:string, regularExpression:RegExp
     ):string {
         return Tools.stringDelimitedToCamelCase(name.replace(
             regularExpression,
@@ -267,13 +270,14 @@ export class PluginAPI {
     /**
      * Evaluates given configuration object by letting plugins package sub
      * structure untouched.
+     * @param this - Nothing.
      * @param configuration - Evaluateable configuration structure.
      *
      * @returns Resolved configuration.
      */
-    static evaluateConfiguration(
-        configuration:RecursiveEvaluateable<Configuration>
-    ):Configuration {
+    static evaluateConfiguration<Type = Configuration>(
+        this:void, configuration:RecursiveEvaluateable<Type>|Type
+    ):Type {
         /*
             NOTE: We have to backup, remove and restore all plugin specific
             package configuration to avoid evaluation non web node#
@@ -289,18 +293,17 @@ export class PluginAPI {
                     .package
             }
 
-        const now:Date = new Date()
+        const now = new Date()
 
-        configuration = Tools.evaluateDynamicData<Configuration>(
-            Tools.removeKeysInEvaluation(configuration),
+        configuration = Tools.evaluateDynamicData<Type>(
+            Tools.removeKeysInEvaluation(configuration) as
+                RecursiveEvaluateable<Type>,
             {
                 currentPath: process.cwd(),
                 fileSystem,
                 path,
                 PluginAPI,
-                /* eslint-disable no-eval */
-                require: eval('require'),
-                /* eslint-enable no-eval */
+                require: currentRequire,
                 Tools,
                 webNodePath: __dirname,
                 now,
@@ -311,19 +314,20 @@ export class PluginAPI {
         for (const [name, pluginPackageConfiguration] of Object.entries(
             pluginPackageConfigurationBackup
         ))
-            (configuration[name] as PluginConfiguration).package =
+            (configuration as unknown as Configuration)[name].package =
                 pluginPackageConfiguration
 
-        return configuration as Configuration
+        return configuration
     }
     /**
      * Checks for changed plugin api file in given plugins and reloads them
      * if necessary (new timestamp).
+     * @param this - Nothing.
      * @param plugins - List of plugins to search for updates in.
      *
      * @returns A list with plugins which have a changed api scope.
      */
-    static hotReloadAPIFile(plugins:Array<Plugin>):Array<Plugin> {
+    static hotReloadAPIFile(this:void, plugins:Array<Plugin>):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         const pluginChanges:Array<PluginChange> =
             PluginAPI.hotReloadFiles('api', 'scope', plugins)
@@ -358,6 +362,7 @@ export class PluginAPI {
     /**
      * Checks for changed plugin configurations in given plugins and reloads
      * them if necessary (new timestamp).
+     * @param this - Nothing.
      * @param plugins - List of plugins to search for updates in.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
@@ -365,7 +370,9 @@ export class PluginAPI {
      * @returns A list with plugins which have a changed configurations.
      */
     static hotReloadConfigurationFile(
-        plugins:Array<Plugin>, configurationPropertyNames:Array<string>
+        this:void,
+        plugins:Array<Plugin>,
+        configurationPropertyNames:Array<string>
     ):Array<Plugin> {
         const pluginsWithChangedFiles:Array<Plugin> = []
         const pluginChanges:Array<PluginChange> = PluginAPI.hotReloadFiles(
@@ -386,6 +393,7 @@ export class PluginAPI {
     /**
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (timestamp has changed).
+     * @param this - Nothing.
      * @param type - Plugin file type to search for updates.
      * @param target - Property name existing in plugin meta informations
      * objects which should be updated.
@@ -394,6 +402,7 @@ export class PluginAPI {
      * @returns A list with plugin changes.
      */
     static hotReloadFiles(
+        this:void,
         type:'api'|'configuration',
         target:'packageConfiguration'|'scope',
         plugins:Array<Plugin>
@@ -410,17 +419,15 @@ export class PluginAPI {
                         plugin[`${type}FileLoadTimestamps`][index] < timestamp
                     ) {
                         // Enforce to reload new file version.
-                        /* eslint-disable no-eval */
-                        delete (eval('require').cache as Mapping<unknown>)[
-                            eval('require').resolve(filePath) as string
+                        delete (currentRequire.cache as Mapping<unknown>)[
+                            currentRequire.resolve(filePath)
                         ]
-                        /* eslint-enable no-eval */
 
                         const oldScope:ValueOf<Plugin> = plugin[target]
 
                         plugin[target] = PluginAPI.loadFile(
                             filePath, plugin.name, plugin[target]
-                        ) as object|PackageConfiguration
+                        ) as PackageConfiguration
 
                         pluginChanges.push({
                             newScope: plugin[target] as object,
@@ -441,6 +448,7 @@ export class PluginAPI {
     /**
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
+     * @param this - Nothing.
      * @param name - Name of plugin to extend.
      * @param internalName - Internal name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
@@ -452,6 +460,7 @@ export class PluginAPI {
      * @returns An object of plugin specific meta informations.
      */
     static async load(
+        this:void,
         name:string,
         internalName:string,
         plugins:Mapping<Plugin>,
@@ -516,6 +525,7 @@ export class PluginAPI {
     /**
      * Load given plugin api file in given path and generates a plugin
      * specific data structure with useful meta informations.
+     * @param this - Nothing.
      * @param relativeFilePaths - Paths to file to load relatively from given
      * plugin path.
      * @param pluginPath - Path to plugin directory.
@@ -532,6 +542,7 @@ export class PluginAPI {
      * @returns Plugin meta informations object.
      */
     static async loadAPI(
+        this:void,
         relativeFilePaths:Array<string>,
         pluginPath:string,
         name:string,
@@ -559,7 +570,7 @@ export class PluginAPI {
                         break
                 }
 
-        let api:Function|null = null
+        let api:APIFunction = null
         let nativeAPI = false
 
         if (
@@ -572,7 +583,7 @@ export class PluginAPI {
             */
             (
                 Object.keys(configuration).length > 1 ||
-                configuration[internalName] && 
+                configuration[internalName] &&
                 Object.keys(configuration[internalName]).length > 1
             ) &&
             await Tools.isFile(filePath)
@@ -580,11 +591,15 @@ export class PluginAPI {
             if (filePath.endsWith('.js')) {
                 nativeAPI = true
                 api = (
-                    hook:string, data:any, ...parameters:Array<any>
-                ):any => {
+                    hook:string, data:unknown, ...parameters:Array<unknown>
+                ):unknown => {
                     if (hook in plugins[name].scope!)
                         return (
-                            plugins[name].scope as Mapping<Function>
+                            plugins[name].scope as
+                                Mapping<(
+                                    _data:unknown,
+                                    ..._parameters:Array<unknown>
+                                ) => unknown>
                         )[hook](data, ...parameters, PluginAPI)
 
                     throw new Error(
@@ -594,7 +609,7 @@ export class PluginAPI {
                 }
             } else
                 // NOTE: Any executable file can represent an api.
-                api = (data:any, ...parameters:Array<any>):any => {
+                api = (data:unknown, ...parameters:Array<unknown>):unknown => {
                     const childProcessResult:SpawnSyncReturns<string> =
                         spawnChildProcessSync(
                             filePath,
@@ -612,7 +627,7 @@ export class PluginAPI {
                         childProcessResult.stdout.startsWith('##') &&
                         childProcessResult.stdout.endsWith('##')
                     )
-                        data = JSON.parse(data)
+                        data = JSON.parse(data as string)
 
                     // TODO check if method wasn't implemented by special
                     // returnCode
@@ -624,26 +639,33 @@ export class PluginAPI {
 
         return {
             api,
-            apiFilePaths: api ? [filePath] : [],
             apiFileLoadTimestamps:
                 api ? [statSync(filePath).mtime.getTime()] : [],
+            apiFilePaths: api ? [filePath] : [],
+
             configuration: pluginConfiguration,
             configurationFilePaths,
             configurationFileLoadTimestamps:
                 configurationFilePaths.map((filePath:string):number =>
                     statSync(filePath).mtime.getTime()
                 ),
+
             dependencies:
                 pluginConfiguration[internalName]?.dependencies || [],
+
             internalName,
             name,
+
             packageConfiguration: pluginConfiguration[internalName]?.package,
+
             path: pluginPath,
+
             scope: nativeAPI ? PluginAPI.loadFile(filePath, name) : null
         }
     }
     /**
      * Loads plugin specific configuration object.
+     * @param this - Nothing.
      * @param name - Property name where to inject resolved configuration into
      * global one.
      * @param packageConfiguration - Plugin specific package configuration
@@ -654,6 +676,7 @@ export class PluginAPI {
      * @returns Determined configuration object.
      */
     static loadConfiguration(
+        this:void,
         name:string,
         packageConfiguration:PackageConfiguration,
         configurationPropertyNames:Array<string>
@@ -691,6 +714,7 @@ export class PluginAPI {
     }
     /**
      * Loads given plugin configurations into global configuration.
+     * @param this - Nothing.
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
      * @param configuration - Global configuration to extend with.
@@ -698,7 +722,7 @@ export class PluginAPI {
      * @returns Updated given configuration object.
      */
     static loadConfigurations(
-        plugins:Array<Plugin>, configuration:Configuration
+        this:void, plugins:Array<Plugin>, configuration:Configuration
     ):Configuration {
         /*
             First clear current configuration content key by key to let old top
@@ -743,10 +767,11 @@ export class PluginAPI {
 
         return PluginAPI.evaluateConfiguration(
             configuration as RecursiveEvaluateable<Configuration>
-        )
+        ) as Configuration
     }
     /**
      * Load given api file path and returns exported scope.
+     * @param this - Nothing.
      * @param filePath - Path to file to load.
      * @param name - Plugin name to use for proper error messages.
      * @param fallbackScope - Scope to return if an error occurs during
@@ -756,6 +781,7 @@ export class PluginAPI {
      * @returns Exported api file scope.
      */
     static loadFile(
+        this:void,
         filePath:string,
         name:string,
         fallbackScope:null|object = null,
@@ -763,24 +789,18 @@ export class PluginAPI {
     ):object {
         let reference:string|undefined
         try {
-            /* eslint-disable no-eval */
-            reference = eval('require').resolve(filePath)
-            /* eslint-enable no-eval */
+            reference = currentRequire.resolve(filePath)
         } catch (error) {
             // Ignore error.
         }
 
         // Clear module cache to get actual new module scope.
-        if (reference && reference in eval('require').cache)
-            /* eslint-disable no-eval */
-            delete eval('require').cache[reference]
-            /* eslint-enable no-eval */
+        if (reference && reference in currentRequire.cache)
+            delete currentRequire.cache[reference]
 
         let scope:object
         try {
-            /* eslint-disable no-eval */
-            scope = eval('require')(filePath)
-            /* eslint-enable no-eval */
+            scope = currentRequire(filePath) as object
         } catch (error) {
             if (fallbackScope) {
                 scope = fallbackScope
@@ -807,11 +827,12 @@ export class PluginAPI {
      * Extends given configuration object with all plugin specific ones and
      * returns a topological sorted list of plugins with plugins specific
      * meta informations stored.
+     * @param this - Nothing.
      * @param configuration - Configuration object to extend and use.
      *
      * @returns A topological sorted list of plugins objects.
      */
-    static async loadAll(configuration:Configuration):Promise<{
+    static async loadAll(this:void, configuration:Configuration):Promise<{
         configuration:Configuration
         plugins:Array<Plugin>
     }> {
@@ -922,13 +943,16 @@ export class PluginAPI {
     // TODO test
     /**
      * Transform a list of absolute paths respecting the application context.
+     * @param this - Nothing.
      * @param configuration - Configuration object.
      * @param locations - Locations to process.
      *
      * @returns Given and processed locations.
      */
     static determineLocations(
-        configuration:Configuration, locations:Array<string>|string = []
+        this:void,
+        configuration:Configuration,
+        locations:Array<string>|string = []
     ):Array<string> {
         locations = ([] as Array<string>).concat(locations)
 
@@ -941,6 +965,7 @@ export class PluginAPI {
     /**
      * Ignore absolute defined locations (relativ to application context) and
      * relative defined in each loaded plugin location.
+     * @param this - Nothing.
      * @param configuration - Configuration object.
      * @param plugins - List of acctive plugins.
      * @param filePath - Path to search for.
@@ -950,6 +975,7 @@ export class PluginAPI {
      * locations.
      */
     static isInLocations(
+        this:void,
         configuration:Configuration,
         plugins:Array<Plugin>,
         filePath:string,

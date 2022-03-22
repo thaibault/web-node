@@ -13,12 +13,21 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
+// region imports
+import {Configuration} from '../type'
+// endregion
 describe('configurator', ():void => {
     test('main', ():void =>
-        expect(typeof require('../configurator').default.core.debug)
+        expect(typeof (
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            require('../configurator') as {default:Configuration}
+        ).default.core.debug)
             .toStrictEqual('boolean')
     )
 })
+
+// NOTE: Needed to mark this file as module (instead of global script).
+export default {}
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
 // vim: foldmethod=marker foldmarker=region,endregion:

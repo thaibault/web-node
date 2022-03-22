@@ -14,6 +14,7 @@
     endregion
 */
 // region imports
+import Tools from 'clientnode'
 import {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial
 } from 'clientnode/type'
@@ -21,6 +22,17 @@ import {
 import {PluginAPI} from './pluginAPI'
 // endregion
 // region exports
+export interface EvaluateConfigurationScope {
+    currentPath:string
+    fileSystem:typeof import('fs')
+    path:typeof import('path')
+    PluginAPI:PluginAPI
+    require:typeof require
+    Tools:typeof Tools
+    webNodePath:string
+    now:Date
+    nowUTCTimestamp:number
+}
 export interface MetaPluginConfiguration {
     fileNames:Array<string>
     propertyNames:Array<string>
@@ -54,7 +66,7 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     }
     runtimeConfiguration?:EvaluateablePartialConfiguration
 }
-export type Configuration<PluginConfigurationType = {}> =
+export type Configuration<PluginConfigurationType = Mapping<unknown>> =
     {
         core:WebNodeConfiguration
         name:string
@@ -67,18 +79,23 @@ export type EvaluateablePartialConfiguration =
         name?:string
     } &
     Mapping<PluginConfiguration>
-export interface PackageConfiguration {
-    documentationWebsite?:{name?:string}
-    main?:string
-    name?:string
-    webnode?:EvaluateablePartialConfiguration
-    webNode?:EvaluateablePartialConfiguration
-    webNodeInternalName?:string
-    'web-node'?:EvaluateablePartialConfiguration
-}
+export type PackageConfiguration =
+    Mapping<unknown> &
+    {
+        documentationWebsite?:{name?:string}
+        main?:string
+        name?:string
+        webnode?:EvaluateablePartialConfiguration
+        webNode?:EvaluateablePartialConfiguration
+        webNodeInternalName?:string
+        'web-node'?:EvaluateablePartialConfiguration
+    }
 
+export type APIFunction =
+    null |
+    ((_hook:string, _data:unknown, ..._parameters:Array<unknown>) => unknown)
 export interface Plugin {
-    api:Function|null
+    api:APIFunction
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
     configuration:EvaluateablePartialConfiguration
@@ -98,14 +115,14 @@ export interface PluginChange {
     target:'packageConfiguration'|'scope'
 }
 
-export interface Service {
+export interface Service<Type = unknown> {
     name:string
-    promise:null|Promise<object>
+    promise:null|Promise<Type>
 }
-export type Services<PluginServiceType = {}> =
-    Mapping<object> & PluginServiceType
-export type ServicePromises<PluginPromiseType = {}> =
-    Mapping<Promise<object>> & PluginPromiseType
+export type Services<PluginServiceType = Mapping<unknown>> =
+    Mapping<unknown> & PluginServiceType
+export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
+    Mapping<Promise<unknown>> & PluginPromiseType
 
 export interface PluginHandler {
     /**
