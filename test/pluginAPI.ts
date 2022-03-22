@@ -19,7 +19,9 @@ import {ThenParameter} from 'clientnode/type'
 import {testEach, testEachPromise} from 'clientnode/testHelper'
 import path from 'path'
 
-import {Configuration, Plugin, PluginConfiguration} from '../type'
+import {
+    Configuration, PackageConfiguration, Plugin, PluginConfiguration
+} from '../type'
 import configuration from '../configurator'
 import PluginAPI from '../pluginAPI'
 // endregion
@@ -136,7 +138,7 @@ describe('pluginAPI', ():void => {
                         require('../dummyPlugin/package')
                         /* eslint-enable @typescript-eslint/no-var-requires */
                     ) as PackageConfiguration).webNode
-                },
+                } as unknown as Configuration,
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [],
 
