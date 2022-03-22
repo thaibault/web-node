@@ -47,7 +47,7 @@
     "report:coverage": "nyc report --reporter=text-lcov | coveralls",
     "serve": "weboptimizer build && yarn serve",
     "start": "./index.js '{plugin: {hotReloading: true}}'",
-    "test": "pushd dummyPlugin && yarn build && popd && weboptimizer test",
+    "test": "cd dummyPlugin && yarn build && cd .. && weboptimizer test",
     "update": "yarn version --patch && yarn publish",
     "update:documentation": "documentationWebsite --log-level info",
     "watch": "weboptimizer build --watch"
