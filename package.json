@@ -37,7 +37,10 @@
     "url": "https://github.com/thaibault/web-node.git"
   },
   "scripts": {
+    "build": "yarn build:types; yarn build:plain",
     "build": "weboptimizer build",
+    "build:plain": "weboptimizer build",
+    "build:types": "weboptimizer build:types",
     "check": "yarn check:types; yarn lint",
     "check:types": "weboptimizer check:types",
     "clear": "weboptimizer clear",
