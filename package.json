@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.434",
+  "version": "1.0.435",
   "description": "High level javaScript backend plugin system and configuration merger.",
   "keywords": [
     "web",
