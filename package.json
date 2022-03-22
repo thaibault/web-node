@@ -1,7 +1,6 @@
 {
   "name": "web-node",
   "version": "1.0.436",
-  "license": "CC-BY-3.0",
   "description": "High level javaScript backend plugin system and configuration merger.",
   "keywords": [
     "web",
@@ -15,6 +14,7 @@
     "email": "info@torben.website",
     "url": "https://github.com/thaibault/web-node/issues"
   },
+  "license": "CC-BY-3.0",
   "author": {
     "name": "Torben Sickert",
     "email": "info@torben.website",
