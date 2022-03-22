@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.433",
+  "version": "1.0.434",
   "description": "High level javaScript backend plugin system and configuration merger.",
   "keywords": [
     "web",
@@ -37,7 +37,6 @@
     "url": "https://github.com/thaibault/web-node.git"
   },
   "scripts": {
-    "build": "yarn build:types; yarn build:plain",
     "build": "weboptimizer build",
     "build:plain": "weboptimizer build",
     "build:types": "weboptimizer build:types",
