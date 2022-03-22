@@ -18,7 +18,7 @@
 import {
     spawnSync as spawnChildProcessSync, SpawnSyncReturns
 } from 'child_process'
-import Tools from 'clientnode'
+import Tools, {currentRequire} from 'clientnode'
 import {
     Encoding, Mapping, RecursiveEvaluateable, ValueOf
 } from 'clientnode/type'
@@ -28,6 +28,7 @@ import path, {basename, extname, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
 import {
+    APIFunction,
     Configuration,
     EvaluateablePartialConfiguration,
     MetaPluginConfiguration,
@@ -50,11 +51,7 @@ const oldResolveFilename = (Module as ModuleType)._resolveFilename
     request:string, parent:typeof Module, isMain:boolean
 ):string => {
     if (request === 'web-node')
-        return oldResolveFilename(
-            eval('require.main.id') as string,
-            parent,
-            isMain
-        )
+        return oldResolveFilename(currentRequire!.main!.id, parent, isMain)
 
     return oldResolveFilename(request, parent, isMain)
 }
@@ -76,13 +73,13 @@ export class PluginAPI {
      * @returns A promise which resolves when all callbacks have resolved their
      * promise holding given potentially modified data.
      */
-    static async callStack(
+    static async callStack<Input = unknown, Result = unknown>(
         hook:string,
         plugins:Array<Plugin>,
         configuration:Configuration,
-        data:any = null,
-        ...parameters:Array<any>
-    ):Promise<any> {
+        data:Input = null as unknown as Input,
+        ...parameters:Array<unknown>
+    ):Promise<Result> {
         if (configuration.core.plugin.hotReloading) {
             const pluginsWithChangedConfiguration:Array<Plugin> =
                 PluginAPI.hotReloadConfigurationFile(
@@ -143,7 +140,7 @@ export class PluginAPI {
 
         for (const plugin of plugins)
             if (plugin.api) {
-                let result:any
+                let result:Result
                 try {
                     result = await plugin.api(
                         hook,
@@ -158,7 +155,7 @@ export class PluginAPI {
                             */
                             [plugins]
                         )
-                    )
+                    ) as Result
                 } catch (error) {
                     if (
                         (error as Error).message?.startsWith('NotImplemented:')
@@ -177,7 +174,7 @@ export class PluginAPI {
                     )
                 }
 
-                data = result
+                data = result as unknown as Input
 
                 if (configuration.core.debug)
                     console.info(
@@ -186,7 +183,7 @@ export class PluginAPI {
                     )
             }
 
-        return data
+        return data as unknown as Result
     }
     /**
      * Calls all plugin methods for given trigger description synchronous.
@@ -199,22 +196,22 @@ export class PluginAPI {
      *
      * @returns Given potentially modified data.
      */
-    static callStackSynchronous(
+    static callStackSynchronous<Input = unknown, Result = unknown>(
         hook:string,
         plugins:Array<Plugin>,
         configuration:Configuration,
-        data:any = null,
-        ...parameters:Array<any>
-    ):any {
+        data:Input = null as unknown as Input,
+        ...parameters:Array<unknown>
+    ):Result {
         for (const plugin of plugins)
             if (plugin.api) {
-                let result:any
+                let result:Result
                 try {
                     result = plugin.api(
                         hook,
                         data,
                         ...parameters.concat(configuration, plugins)
-                    )
+                    ) as Result
                 } catch (error) {
                     if ((error as Error).message?.startsWith(
                         'NotImplemented:'
@@ -233,7 +230,7 @@ export class PluginAPI {
                     )
                 }
 
-                data = result
+                data = result as unknown as Input
 
                 if (configuration.core.debug)
                     console.info(
@@ -242,7 +239,7 @@ export class PluginAPI {
                     )
             }
 
-        return data
+        return data as unknown as Result
     }
     /**
      * Converts given plugin name into the corresponding internal
@@ -298,9 +295,7 @@ export class PluginAPI {
                 fileSystem,
                 path,
                 PluginAPI,
-                /* eslint-disable no-eval */
-                require: eval('require'),
-                /* eslint-enable no-eval */
+                require: currentRequire!,
                 Tools,
                 webNodePath: __dirname,
                 now,
@@ -410,11 +405,9 @@ export class PluginAPI {
                         plugin[`${type}FileLoadTimestamps`][index] < timestamp
                     ) {
                         // Enforce to reload new file version.
-                        /* eslint-disable no-eval */
-                        delete (eval('require').cache as Mapping<unknown>)[
-                            eval('require').resolve(filePath) as string
+                        delete (currentRequire!.cache as Mapping<unknown>)[
+                            currentRequire!.resolve(filePath)
                         ]
-                        /* eslint-enable no-eval */
 
                         const oldScope:ValueOf<Plugin> = plugin[target]
 
@@ -559,7 +552,7 @@ export class PluginAPI {
                         break
                 }
 
-        let api:Function|null = null
+        let api:APIFunction = null
         let nativeAPI = false
 
         if (
@@ -572,7 +565,7 @@ export class PluginAPI {
             */
             (
                 Object.keys(configuration).length > 1 ||
-                configuration[internalName] && 
+                configuration[internalName] &&
                 Object.keys(configuration[internalName]).length > 1
             ) &&
             await Tools.isFile(filePath)
@@ -580,11 +573,15 @@ export class PluginAPI {
             if (filePath.endsWith('.js')) {
                 nativeAPI = true
                 api = (
-                    hook:string, data:any, ...parameters:Array<any>
-                ):any => {
+                    hook:string, data:unknown, ...parameters:Array<unknown>
+                ):unknown => {
                     if (hook in plugins[name].scope!)
                         return (
-                            plugins[name].scope as Mapping<Function>
+                            plugins[name].scope as
+                                Mapping<(
+                                    _data:unknown,
+                                    ..._parameters:Array<unknown>
+                                ) => unknown>
                         )[hook](data, ...parameters, PluginAPI)
 
                     throw new Error(
@@ -594,7 +591,7 @@ export class PluginAPI {
                 }
             } else
                 // NOTE: Any executable file can represent an api.
-                api = (data:any, ...parameters:Array<any>):any => {
+                api = (data:unknown, ...parameters:Array<unknown>):unknown => {
                     const childProcessResult:SpawnSyncReturns<string> =
                         spawnChildProcessSync(
                             filePath,
@@ -612,7 +609,7 @@ export class PluginAPI {
                         childProcessResult.stdout.startsWith('##') &&
                         childProcessResult.stdout.endsWith('##')
                     )
-                        data = JSON.parse(data)
+                        data = JSON.parse(data as string)
 
                     // TODO check if method wasn't implemented by special
                     // returnCode
@@ -763,24 +760,18 @@ export class PluginAPI {
     ):object {
         let reference:string|undefined
         try {
-            /* eslint-disable no-eval */
-            reference = eval('require').resolve(filePath)
-            /* eslint-enable no-eval */
+            reference = currentRequire!.resolve(filePath)
         } catch (error) {
             // Ignore error.
         }
 
         // Clear module cache to get actual new module scope.
-        if (reference && reference in eval('require').cache)
-            /* eslint-disable no-eval */
-            delete eval('require').cache[reference]
-            /* eslint-enable no-eval */
+        if (reference && reference in currentRequire!.cache)
+            delete currentRequire!.cache[reference]
 
         let scope:object
         try {
-            /* eslint-disable no-eval */
-            scope = eval('require')(filePath)
-            /* eslint-enable no-eval */
+            scope = currentRequire!(filePath) as object
         } catch (error) {
             if (fallbackScope) {
                 scope = fallbackScope

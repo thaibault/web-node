@@ -14,13 +14,16 @@
     endregion
 */
 // region imports
-import Tools from 'clientnode'
+import Tools, {currentRequire} from 'clientnode'
 import {Mapping, RecursiveEvaluateable} from 'clientnode/type'
 import fileSystem from 'fs'
 import path from 'path'
 
 import {
-    Configuration, EvaluateablePartialConfiguration, PackageConfiguration
+    Configuration,
+    EvaluateConfigurationScope,
+    EvaluateablePartialConfiguration,
+    PackageConfiguration
 } from './type'
 import PluginAPI from './pluginAPI'
 import webNodePackageConfiguration from './package.json'
@@ -75,11 +78,9 @@ else
 
 let mainPackageConfiguration:PackageConfiguration = {name: 'main'}
 try {
-    /* eslint-disable no-eval */
-    mainPackageConfiguration = eval('require')(path.join(
+    mainPackageConfiguration = currentRequire!(path.join(
         webNodePackageConfiguration.webNode.core.context.path, 'package'
-    ))
-    /* eslint-enable no-eval */
+    )) as PackageConfiguration
 } catch (error) {
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
@@ -99,14 +100,12 @@ const applicationConfiguration:EvaluateablePartialConfiguration =
 webNodePackageConfiguration.webNode.core.name =
     webNodePackageConfiguration.documentationWebsite.name
 const now:Date = new Date()
-const scope:Mapping<any> = {
+const scope:EvaluateConfigurationScope = {
     currentPath: process.cwd(),
     fileSystem,
     path,
     PluginAPI,
-    /* eslint-disable no-eval */
-    require: eval('require'),
-    /* eslint-enable no-eval */
+    require: currentRequire!,
     Tools,
     webNodePath: __dirname,
     now,
@@ -117,7 +116,7 @@ export let configuration:Configuration =
         webNodePackageConfiguration.webNode as
             unknown as
             RecursiveEvaluateable<Configuration>,
-        scope
+        scope as unknown as Mapping<unknown>
     )
 
 delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
@@ -153,7 +152,8 @@ if (process.argv.length > 2) {
 }
 
 configuration = Tools.evaluateDynamicData<Configuration>(
-    Tools.removeKeysInEvaluation<Configuration>(configuration), scope
+    Tools.removeKeysInEvaluation<Configuration>(configuration),
+    scope as unknown as Mapping<unknown>
 )
 configuration.name = name
 configuration.core.package =

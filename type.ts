@@ -14,6 +14,7 @@
     endregion
 */
 // region imports
+import Tools from 'clientnode'
 import {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial
 } from 'clientnode/type'
@@ -21,6 +22,17 @@ import {
 import {PluginAPI} from './pluginAPI'
 // endregion
 // region exports
+export interface EvaluateConfigurationScope {
+    currentPath:string
+    fileSystem:typeof import('fs')
+    path:typeof import('path')
+    PluginAPI:PluginAPI
+    require:typeof require
+    Tools:typeof Tools
+    webNodePath:string
+    now:Date
+    nowUTCTimestamp:number
+}
 export interface MetaPluginConfiguration {
     fileNames:Array<string>
     propertyNames:Array<string>
@@ -54,7 +66,7 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     }
     runtimeConfiguration?:EvaluateablePartialConfiguration
 }
-export type Configuration<PluginConfigurationType = {}> =
+export type Configuration<PluginConfigurationType = Mapping<unknown>> =
     {
         core:WebNodeConfiguration
         name:string
@@ -77,8 +89,11 @@ export interface PackageConfiguration {
     'web-node'?:EvaluateablePartialConfiguration
 }
 
+export type APIFunction =
+    null |
+    ((_hook:string, _data:unknown, ..._parameters:Array<unknown>) => unknown)
 export interface Plugin {
-    api:Function|null
+    api:APIFunction
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
     configuration:EvaluateablePartialConfiguration
@@ -102,9 +117,9 @@ export interface Service {
     name:string
     promise:null|Promise<object>
 }
-export type Services<PluginServiceType = {}> =
+export type Services<PluginServiceType = Mapping<unknown>> =
     Mapping<object> & PluginServiceType
-export type ServicePromises<PluginPromiseType = {}> =
+export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
     Mapping<Promise<object>> & PluginPromiseType
 
 export interface PluginHandler {

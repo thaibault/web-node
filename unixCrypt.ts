@@ -101,7 +101,7 @@ const keySchedule:Array<Array<number>> = []
 for (let index = 0; index < 16; index++)
     keySchedule[index] = []
 // Set up the key schedule from the key.
-const setKey:Function = (key:Array<number>):void => {
+const setKey = (key:Array<number>):void => {
     /*
      * First, generate C and D by permuting the key. The low order bit of each
      * 8-bit char is not used, so C and D are only 28 bits apiece.
@@ -242,7 +242,7 @@ const f:Array<number> = []
 // The combination of the key and the input, before selection.
 const preS:Array<number> = []
 // The payoff: encrypt a block.
-const encrypt:Function = (block:Array<number>, edflag = false):void => {
+const encrypt = (block:Array<number>, edflag = false):void => {
     // First, permute the bits in the input.
     const perm:Array<number> = []
     for (let index = 0; index < 64; index++)
@@ -318,7 +318,7 @@ const encrypt:Function = (block:Array<number>, edflag = false):void => {
         block[index] = perm[FP[index] - 1]
 }
 // Transform a string to an array of bytes.
-const stringToBytes:Function = (string:string):Array<number> => {
+const stringToBytes = (string:string):Array<number> => {
     const result:Array<number> = []
 
     for (let index = 0; index < string.length; index++)
@@ -326,7 +326,7 @@ const stringToBytes:Function = (string:string):Array<number> => {
 
     return result
 }
-const bytesToStr:Function = (bytes:Array<number>):string =>
+const bytesToStr = (bytes:Array<number>):string =>
     String.fromCharCode(...bytes)
 /**
  * Implements the Unix crypt(3) DES-based hash.
