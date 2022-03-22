@@ -46,7 +46,7 @@
     "prepare": "yarn build",
     "serve": "weboptimizer build && yarn serve",
     "start": "./index.js '{plugin: {hotReloading: true}}'",
-    "prepare:test": "cd dummyPlugin && yarn build && cd ..",
+    "prepare:test": "yarn clear && cd dummyPlugin && yarn build && cd ..",
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
@@ -151,7 +151,7 @@
     },
     "injection": {
       "entry": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2] === 'test' ? {testBundle: 'test'} : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2].startsWith('test') ? {testBundle: 'test'} : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
       }
     },
     "module": {
