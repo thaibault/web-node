@@ -16,7 +16,7 @@
 // region imports
 import Tools, {currentRequire} from 'clientnode'
 import {Mapping, RecursiveEvaluateable} from 'clientnode/type'
-import fileSystem from 'fs'
+import fileSystemSynchronous, {lstatSync} from 'fs'
 import path from 'path'
 
 import {
@@ -67,7 +67,7 @@ else
     */
     try {
         if (
-            fileSystem.lstatSync(path.join(process.cwd(), 'node_modules'))
+            lstatSync(path.join(process.cwd(), 'node_modules'))
                 .isSymbolicLink()
         )
             webNodePackageConfiguration.webNode.core.context.path =
@@ -102,7 +102,7 @@ webNodePackageConfiguration.webNode.core.name =
 const now:Date = new Date()
 const scope:EvaluateConfigurationScope = {
     currentPath: process.cwd(),
-    fileSystem,
+    fileSystem: fileSystemSynchronous,
     path,
     PluginAPI,
     require: currentRequire!,

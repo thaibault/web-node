@@ -24,7 +24,7 @@ import {PluginAPI} from './pluginAPI'
 // region exports
 export interface EvaluateConfigurationScope {
     currentPath:string
-    fileSystem:typeof import('fs/promises')
+    fileSystem:typeof import('fs')
     path:typeof import('path')
     PluginAPI:PluginAPI
     require:typeof require
