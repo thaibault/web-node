@@ -86,9 +86,8 @@ export const main:ProcedureFunction = async ():Promise<void> => {
             'preLoadService', plugins, configuration, services
         )
 
-        for (const name in services)
-            if (Object.prototype.hasOwnProperty.call(services, name))
-                console.info(`Service "${name}" initialized.`)
+        for (const name of Object.keys(services))
+            console.info(`Service "${name}" initialized.`)
 
         for (const plugin of plugins)
             if (plugin.api) {

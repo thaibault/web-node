@@ -334,25 +334,17 @@ export class PluginAPI {
 
         for (const pluginChange of pluginChanges) {
             // NOTE: We have to migrate old plugin api's scope state.
-            for (const name in pluginChange.oldScope)
+            for (const [name, value] of Object.entries(pluginChange.oldScope))
                 if (
-                    Object.prototype.hasOwnProperty.call(
-                        pluginChange.oldScope, name
-                    ) &&
                     Object.prototype.hasOwnProperty.call(
                         pluginChange.newScope, name
                     ) &&
-                    !(
-                        Tools.isFunction((
-                            pluginChange.oldScope as Mapping<unknown>
-                        )[name]) ||
-                        Tools.isFunction((
-                            pluginChange.newScope as Mapping<unknown>
-                        )[name])
+                    !Tools.isFunction(
+                        (pluginChange.newScope as Mapping<unknown>)[name]
                     )
                 )
-                    (pluginChange.newScope as Mapping<unknown>) =
-                        pluginChange.oldScope as Mapping<unknown>
+                    (pluginChange.newScope as Mapping<unknown>)[name] =
+                        (pluginChange.oldScope as Mapping<unknown>)[name]
 
             pluginsWithChangedFiles.push(pluginChange.plugin)
         }
@@ -728,9 +720,8 @@ export class PluginAPI {
             First clear current configuration content key by key to let old top
             level configuration reference in usable.
         */
-        for (const key in configuration)
-            if (Object.prototype.hasOwnProperty.call(configuration, key))
-                delete configuration[key]
+        for (const key of Object.keys(configuration))
+            delete configuration[key]
         Tools.extend(configuration, Tools.copy(baseConfiguration))
 
         for (const plugin of plugins)
@@ -858,29 +849,19 @@ export class PluginAPI {
                 configuration.core.encoding
             )
 
-        for (const type in configuration.core.plugin.directories)
-            if (
-                Object.prototype.hasOwnProperty.call(
-                    configuration.core.plugin.directories, type
-                ) &&
-                await Tools.isDirectory(
-                    configuration.core.plugin.directories[type].path
-                )
-            ) {
-                const compiledRegularExpression = new RegExp(
-                    configuration.core.plugin.directories[type]
-                        .nameRegularExpressionPattern
-                )
+        for (const [type, directory] of Object.entries(
+            configuration.core.plugin.directories
+        ))
+            if (await Tools.isDirectory(directory.path)) {
+                const compiledRegularExpression =
+                    new RegExp(directory.nameRegularExpressionPattern)
 
-                for (const pluginName of readdirSync(
-                    configuration.core.plugin.directories[type].path
-                )) {
+                for (const pluginName of readdirSync(directory.path)) {
                     if (!(compiledRegularExpression).test(pluginName))
                         continue
 
                     const currentPluginPath:string = resolve(
-                        configuration.core.plugin.directories[type].path,
-                        pluginName
+                        directory.path, pluginName
                     )
                     const internalName:string =
                         PluginAPI.determineInternalName(
@@ -900,26 +881,20 @@ export class PluginAPI {
 
         const temporaryPlugins:Mapping<Array<string>> = {}
 
-        for (const pluginName in plugins)
-            if (Object.prototype.hasOwnProperty.call(plugins, pluginName)) {
-                temporaryPlugins[plugins[pluginName].internalName] =
-                    plugins[pluginName].dependencies
+        for (const plugin of Object.values(plugins)) {
+            temporaryPlugins[plugin.internalName] = plugin.dependencies
 
-                if (Object.prototype.hasOwnProperty.call(
-                    configuration.core.interDependencies,
-                    plugins[pluginName].internalName
+            if (Object.prototype.hasOwnProperty.call(
+                configuration.core.interDependencies, plugin.internalName
+            ))
+                for (const name of ([] as Array<string>).concat(
+                    configuration.core.interDependencies[
+                        plugin.internalName
+                    ] as ConcatArray<string>
                 ))
-                    for (const name of ([] as Array<string>).concat(
-                        configuration.core.interDependencies[
-                            plugins[pluginName].internalName
-                        ] as ConcatArray<string>
-                    ))
-                        if (!temporaryPlugins[plugins[
-                            pluginName
-                        ].internalName].includes(name))
-                            temporaryPlugins[plugins[pluginName].internalName]
-                                .push(name)
-            }
+                    if (!temporaryPlugins[plugin.internalName].includes(name))
+                        temporaryPlugins[plugin.internalName].push(name)
+        }
 
         const sortedPlugins:Array<Plugin> = []
 
