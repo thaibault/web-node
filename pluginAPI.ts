@@ -332,22 +332,25 @@ export class PluginAPI {
         const pluginChanges:Array<PluginChange> =
             PluginAPI.hotReloadFiles('api', 'scope', plugins)
 
-        for (const pluginChange of pluginChanges) {
-            // NOTE: We have to migrate old plugin api's scope state.
-            for (const [name, value] of Object.entries(pluginChange.oldScope))
-                if (
-                    Object.prototype.hasOwnProperty.call(
-                        pluginChange.newScope, name
-                    ) &&
-                    !Tools.isFunction(
-                        (pluginChange.newScope as Mapping<unknown>)[name]
+        for (const pluginChange of pluginChanges)
+            if (pluginChange.oldScope) {
+                // NOTE: We have to migrate old plugin api's scope state.
+                for (const [name, value] of Object.entries(
+                    pluginChange.oldScope
+                ))
+                    if (
+                        Object.prototype.hasOwnProperty.call(
+                            pluginChange.newScope, name
+                        ) &&
+                        !Tools.isFunction(
+                            (pluginChange.newScope as Mapping<unknown>)[name]
+                        )
                     )
-                )
-                    (pluginChange.newScope as Mapping<unknown>)[name] =
-                        (pluginChange.oldScope as Mapping<unknown>)[name]
+                        (pluginChange.newScope as Mapping<unknown>)[name] =
+                            value
 
-            pluginsWithChangedFiles.push(pluginChange.plugin)
-        }
+                pluginsWithChangedFiles.push(pluginChange.plugin)
+            }
 
         return pluginsWithChangedFiles
     }
@@ -849,7 +852,7 @@ export class PluginAPI {
                 configuration.core.encoding
             )
 
-        for (const [type, directory] of Object.entries(
+        for (const directory of Object.values(
             configuration.core.plugin.directories
         ))
             if (await Tools.isDirectory(directory.path)) {
