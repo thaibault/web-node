@@ -902,14 +902,12 @@ export class PluginAPI {
         const sortedPlugins:Array<Plugin> = []
 
         for (const pluginName of Tools.arraySortTopological(temporaryPlugins))
-            for (const name in plugins)
-                if (Object.prototype.hasOwnProperty.call(plugins, name))
-                    if ([plugins[name].internalName, name].includes(
-                        pluginName
-                    )) {
-                        sortedPlugins.push(plugins[name])
-                        break
-                    }
+            for (const [name, plugin] of Object.entries(plugins))
+                if ([plugin.internalName, name].includes(pluginName)) {
+                    sortedPlugins.push(plugin)
+
+                    break
+                }
 
         return {
             configuration: PluginAPI.loadConfigurations(
