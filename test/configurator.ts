@@ -14,6 +14,7 @@
     endregion
 */
 // region imports
+import {describe, expect, test} from '@jest/globals'
 import {Configuration} from '../type'
 // endregion
 describe('configurator', ():void => {

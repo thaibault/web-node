@@ -14,6 +14,7 @@
     endregion
 */
 // region imports
+import {describe, expect, test} from '@jest/globals'
 import Tools from 'clientnode'
 import {ThenParameter} from 'clientnode/type'
 import {testEach, testEachPromise} from 'clientnode/testHelper'
@@ -104,10 +105,7 @@ describe('pluginAPI', ():void => {
         [[], 'api', 'scope', []]
         // TODO add more tests
     )
-    test.each<[
-        ThenParameter<ReturnType<typeof PluginAPI.load>>,
-        ...Parameters<typeof PluginAPI.load>
-    ]>([
+    test.each([
         [
             {
                 api: null,
@@ -195,10 +193,7 @@ describe('pluginAPI', ():void => {
             }
         }
     )
-    test.each<[
-        ThenParameter<ReturnType<typeof PluginAPI.loadAPI>>,
-        ...Parameters<typeof PluginAPI.loadAPI>
-    ]>([
+    test.each([
         [
             {
                 api: null,

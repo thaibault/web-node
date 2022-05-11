@@ -14,6 +14,7 @@
     endregion
 */
 // region imports
+import {describe} from '@jest/globals'
 import {testEach} from 'clientnode/testHelper'
 
 import unixCrypt from '../unixCrypt'
