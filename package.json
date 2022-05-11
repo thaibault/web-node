@@ -62,7 +62,6 @@
   "devDependencies": {
     "@babel/cli": "*",
     "@babel/eslint-parser": "*",
-    "@types/jest": "*",
     "@types/node": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
