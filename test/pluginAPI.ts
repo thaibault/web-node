@@ -16,7 +16,7 @@
 // region imports
 import {describe, expect, test} from '@jest/globals'
 import Tools from 'clientnode'
-import {ThenParameter} from 'clientnode/type'
+import {Encoding, ThenParameter} from 'clientnode/type'
 import {testEach, testEachPromise} from 'clientnode/testHelper'
 import path from 'path'
 
@@ -234,7 +234,7 @@ describe('pluginAPI', ():void => {
             'dummyPlugin',
             'dummy',
             {},
-            'utf8',
+            'utf8' as Encoding,
             {
                 a: {a: 2} as unknown as PluginConfiguration,
                 dummy: {package: {b: 3}}
