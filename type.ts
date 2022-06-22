@@ -275,7 +275,7 @@ export interface PluginHandler {
      *
      * @returns Given and maybe extended object of services.
      */
-    postLoadService?(
+    postLoadSeevice?(
         _servicePromises:ServicePromises,
         _services:Services,
         _configuration:Configuration,
