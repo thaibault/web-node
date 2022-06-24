@@ -30,18 +30,13 @@ import {
 
 declare const ORIGINAL_MAIN_MODULE:object
 
-const handleError = async (
-    plugins:Array<Plugin>,
-    configuration:Configuration,
-    error:Error,
-    services:Services
-):Promise<void> => {
+const handleError = async (state:ServicesState, error:Error):Promise<void> => {
     try {
-        await PluginAPI.callStack<Error, void>(
-            'error', plugins, configuration, error, services
+        await PluginAPI.callStack<HookState<Error, ServicesState>, void>(
+            {...state, data: error, hook: 'error'}
         )
     } catch (error) {
-        if (configuration.core.debug)
+        if (state.configuration.core.debug)
             throw error
         else
             console.error(error)
@@ -54,7 +49,9 @@ export const main = async ():Promise<void> => {
         plugins:Array<Plugin>
     } = await PluginAPI.loadAll(Tools.copy(baseConfiguration))
 
-    await PluginAPI.callStack<void, void>('initialize', plugins, configuration)
+    await PluginAPI.callStack<HookState<void, BaseState>, void>(
+        {configuration, hook: 'initialize', plugins}
+    )
 
     if (plugins.length)
         console.info(
@@ -70,39 +67,54 @@ export const main = async ():Promise<void> => {
             plugin.configurationFilePaths.length
         ))
     for (const type of ['pre', 'post'] as const)
-        await PluginAPI.callStack<Configuration, void>(
-            `${type}ConfigurationLoaded`,
+        await PluginAPI.callStack<
+            HookState<Configuration, ChangedConfigurationState>, void
+        >({
+            configuration,
+            data: configuration,
+            hook: `${type}ConfigurationLoaded`,
             plugins,
-            configuration,
-            configuration,
             pluginsWithChangedConfiguration
-        )
+        })
     // endregion
     let services:Services = {}
     let servicePromises:ServicePromises = {}
     let exitTriggered = false
     try {
         // region start services
-        services = await PluginAPI.callStack<Services, Services>(
-            'preLoadService', plugins, configuration, services
-        )
+        services = await PluginAPI.callStack<
+            HookState<Services, ServicesState>, Services
+        >({
+            configuration,
+            data: services,
+            hook: 'preLoadService',
+            plugins,
+            services
+        })
 
         for (const name of Object.keys(services))
             console.info(`Service "${name}" initialized.`)
 
         for (const plugin of plugins)
             if (plugin.api) {
-                services = await PluginAPI.callStack<Services, Services>(
-                    `preLoad${Tools.stringCapitalize(plugin.internalName)}` +
+                services = await PluginAPI.callStack<
+                    HookState<Services, ServicesState>, Services
+                >({
+                    configuration,
+                    data: services,
+                    hook:
+                        'preLoad' +
+                        Tools.stringCapitalize(plugin.internalName) +
                         'Service',
                     plugins,
-                    configuration,
                     services
-                )
+                })
 
+                // TODO
                 let result:null|Service = null
                 try {
-                    result = await plugin.api.call(
+                    result = await plugin.api.call({
+                        pluginAPI
                         PluginAPI,
                         'loadService',
                         servicePromises,

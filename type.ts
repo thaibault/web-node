@@ -91,9 +91,16 @@ export type PackageConfiguration =
         'web-node'?:EvaluateablePartialConfiguration
     }
 
-export type APIFunction =
+export type HookState<Type = unknown, State = BaseState> =
+    State &
+    {
+        data:Type
+        hook:string
+    }
+
+export type APIFunction<Type = unknown, State = BaseState> =
     null |
-    ((_hook:string, _data:unknown, ..._parameters:Array<unknown>) => unknown)
+    ((state:HookState<Type, State>, ...parameters:Array<unknown>) => Type)
 export interface Plugin {
     api:APIFunction
     apiFilePaths:Array<string>
@@ -150,17 +157,13 @@ export interface ServicesState extends BaseState {
     // An object with stored service instances.
     services:Services
 }
-export interface ServicePromisesState extends ServiceState {
+export interface ServicePromisesState extends ServicesState {
     // An intermediate object with yet stored service promise instances.
     servicePromises:ServicePromises
 }
 export interface ChangedAPIFileState extends BaseState {
     // List of plugins which have a changed plugin api file.
     pluginsWithChangedAPIFiles:Array<Plugin>
-}
-export interface ErrorState extends ServiceState {
-    // An object with stored informations why an error occurs.
-    error:object
 }
 /**
  * Starting lifecycle with:
@@ -180,7 +183,7 @@ export interface ErrorState extends ServiceState {
  * 6. shouldExit (async)
  * 7. exit (sync)
  *
- * Lifecycle with "hotReloading" (call "callStack" with "eventName"):
+ * Lifecycle with "hotReloading" (call "callStack" with hook "eventName"):
  * ------------------------------------------------------------------
  *
  * 1. preConfigurationHotLoaded (async)
@@ -188,7 +191,7 @@ export interface ErrorState extends ServiceState {
  * 3. apiFileReloaded (async)
  * 4. eventName (async)
  *
- * Lifecycle without "hotReloading" (call "callStack" with "eventName"):
+ * Lifecycle without "hotReloading" (call "callStack" with hook "eventName"):
  * ---------------------------------------------------------------------
  *
  * 1. eventName (async)
@@ -212,11 +215,29 @@ export interface PluginHandler {
      *
      * @returns Promise resolving to nothing.
      */
-    preConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
+    preConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
     /**
      * Triggered hook when at least one plugin has a new configuration file and
      * configuration object has been changed. Asynchronous tasks are allowed
      * and a returning promise will be respected.
+     * @param state - Application state.
+     *
+     * @returns Promise resolving to nothing.
+     */
+    postConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
+    /**
+     * Triggered hook when at least one plugin has a configuration file and
+     * configuration object has been initialized. Asynchronous tasks are
+     * allowed and a returning promise will be respected.
+     * @param state - Application state.
+     *
+     * @returns Promise resolving to nothing.
+     */
+    preConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
+    /**
+     * Triggered hook when at least one plugin has a configuration file and
+     * configuration object has been initialized. Asynchronous tasks are
+     * allowed and a returning promise will be respected.
      * @param state - Application state.
      *
      * @returns Promise resolving to nothing.
@@ -294,7 +315,7 @@ export interface PluginHandler {
      *
      * @returns Promise resolving to nothing.
      */
-    error?(state:ErrorState):Promise<void>
+    error?(state:ServicesState):Promise<void>
     /**
      * Triggers if application will be closed soon. Asynchronous tasks are
      * allowed and a returning promise will be respected.

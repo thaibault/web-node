@@ -75,14 +75,11 @@ export class PluginAPI {
      * @returns A promise which resolves when all callbacks have resolved their
      * promise holding given potentially modified data.
      */
-    static async callStack<Input = unknown, Result = unknown>(
-        this:void,
-        hook:string,
-        plugins:Array<Plugin>,
-        configuration:Configuration,
-        data:Input = null as unknown as Input,
-        ...parameters:Array<unknown>
-    ):Promise<Result> {
+    static async callStack<
+        State extends HookState = HookState, Output = unknown
+    >(this:void, state:State, ...parameters:Array<unknown>):Promise<Output> {
+        const {configuration, hook, plugins} = state
+
         const isConfigurationHook:boolean =
             hook.endsWith('ConfigurationLoaded') ||
             hook.endsWith('ConfigurationHotLoaded')
@@ -105,24 +102,23 @@ export class PluginAPI {
                             '" has been changed: reloading initialized.'
                         )
 
-                    // TODO provide services here e.g. for ejs plugin
-                    await PluginAPI.callStack<Configuration, void>(
-                        'preConfigurationHotLoaded',
-                        plugins,
-                        configuration,
-                        configuration,
+                    const state = {
+                        ...state,
+                        data: configuration,
                         pluginsWithChangedConfiguration
-                    )
+                    }
+
+                    await PluginAPI.callStack<
+                        HookState<Configuration, ChangedConfigurationState>,
+                        void
+                    >({...state, hook: 'preConfigurationHotLoaded'})
 
                     PluginAPI.loadConfigurations(plugins, configuration)
 
-                    await PluginAPI.callStack<Configuration, void>(
-                        'postConfigurationHotLoaded',
-                        plugins,
-                        configuration,
-                        configuration,
-                        pluginsWithChangedConfiguration
-                    )
+                    await PluginAPI.callStack<
+                        HooksState<Configuration, ChangedConfigurationState>,
+                        void
+                    >({...state, hook: 'postConfigurationHotLoaded'})
                 }
             }
 
@@ -140,11 +136,14 @@ export class PluginAPI {
                             'has been changed: reloading initialized.'
                         )
 
-                    await PluginAPI.callStack<Array<Plugin>, void>(
-                        'apiFileReloaded',
-                        plugins,
-                        configuration,
-                        pluginsWithChangedAPIFiles
+                    await PluginAPI.callStack<
+                        HookState<Array<Plugin>, ChangedAPIFileState>, void
+                    >(
+                        {
+                            ...state,
+                            data: pluginsWithChangedAPIFiles,
+                            hook: 'apiFileReloaded'
+                        }
                     )
                 }
             }
@@ -152,20 +151,9 @@ export class PluginAPI {
 
         for (const plugin of plugins)
             if (plugin.api) {
-                let result:Result
+                let result:Output
                 try {
-                    result = await plugin.api(
-                        hook,
-                        data,
-                        ...parameters.concat(
-                            isConfigurationHook ? [] : configuration,
-                            /*
-                                NOTE: We have to wrap into an array here to
-                                avoid spreading the plugins array.
-                            */
-                            [plugins]
-                        )
-                    ) as Result
+                    result = await plugin.api(state, ...parameters) as Output
                 } catch (error) {
                     if (
                         (error as Error).message?.startsWith('NotImplemented:')
@@ -193,7 +181,7 @@ export class PluginAPI {
                     )
             }
 
-        return data as unknown as Result
+        return data as unknown as Output
     }
     /**
      * Calls all plugin methods for given trigger description synchronous.
@@ -207,23 +195,16 @@ export class PluginAPI {
      *
      * @returns Given potentially modified data.
      */
-    static callStackSynchronous<Input = unknown, Result = unknown>(
-        this:void,
-        hook:string,
-        plugins:Array<Plugin>,
-        configuration:Configuration,
-        data:Input = null as unknown as Input,
-        ...parameters:Array<unknown>
-    ):Result {
+    static callStackSynchronous<
+        State extends HookState = HookState, Output = unknown
+    >(this:void, state:State, ...parameters:Array<unknown>):Output {
+        const {configuration, hook, plugins} = state
+
         for (const plugin of plugins)
             if (plugin.api) {
-                let result:Result
+                let result:Output
                 try {
-                    result = plugin.api(
-                        hook,
-                        data,
-                        ...parameters.concat(configuration, plugins)
-                    ) as Result
+                    result = plugin.api(state, ...parameters) as Output
                 } catch (error) {
                     if ((error as Error).message?.startsWith(
                         'NotImplemented:'
@@ -251,7 +232,7 @@ export class PluginAPI {
                     )
             }
 
-        return data as unknown as Result
+        return data as unknown as Output
     }
     /**
      * Converts given plugin name into the corresponding internal
@@ -578,8 +559,9 @@ export class PluginAPI {
         if (
             configuration &&
             /*
-                NOTE: Check if a webNode or webNode plugin configuration is
-                available indicating a backend responsibility for api file.
+                NOTE: Check if a webNode plugin configuration is available
+                indicating a backend responsibility for api file.
+
                 NOTE: One key is always there representing the whole package
                 configuration.
             */
@@ -592,35 +574,35 @@ export class PluginAPI {
         )
             if (filePath.endsWith('.js')) {
                 nativeAPI = true
-                api = (
-                    hook:string, data:unknown, ...parameters:Array<unknown>
-                ):unknown => {
-                    if (hook in plugins[name].scope!)
+                api = (state, ...parameters:Array<unknown>) => {
+                    if (state.hook in plugins[name].scope!)
                         return (
-                            plugins[name].scope as
-                                Mapping<(
-                                    _data:unknown,
-                                    ..._parameters:Array<unknown>
-                                ) => unknown>
-                        )[hook](data, ...parameters, PluginAPI)
+                            plugins[name].scope as Mapping<APIFunction>
+                        )[state.hook](state, ...parameters, PluginAPI)
 
                     throw new Error(
-                        `NotImplemented: API method "${hook}" is not ` +
+                        `NotImplemented: API method "${state.hook}" is not ` +
                         `implemented in plugin "${name}".`
                     )
                 }
             } else
                 // NOTE: Any executable file can represent an api.
-                api = (data:unknown, ...parameters:Array<unknown>):unknown => {
+                api = ({hook, data}, ...parameters:Array<unknown>) => {
                     const childProcessResult:SpawnSyncReturns<string> =
                         spawnChildProcessSync(
                             filePath,
-                            Tools.arrayMake(parameters),
+                            [
+                                hook,
+                                ...(parameters.map(
+                                    (item:unknown):string =>
+                                        JSON.stringify(item)
+                                ))
+                            ],
                             {
                                 cwd: process.cwd(),
                                 encoding,
                                 env: process.env,
-                                input: Tools.represent(data),
+                                input: JSON.stringify(data),
                                 shell: true,
                                 stdio: 'inherit'
                             }
