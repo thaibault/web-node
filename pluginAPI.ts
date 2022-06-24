@@ -83,61 +83,70 @@ export class PluginAPI {
         data:Input = null as unknown as Input,
         ...parameters:Array<unknown>
     ):Promise<Result> {
-        if (configuration.core.plugin.hotReloading) {
-            const pluginsWithChangedConfiguration:Array<Plugin> =
-                PluginAPI.hotReloadConfigurationFile(
-                    plugins,
-                    configuration.core.plugin.configuration.propertyNames
-                )
+        const isConfigurationHook:boolean =
+            hook.endsWith('ConfigurationLoaded') ||
+            hook.endsWith('ConfigurationHotLoaded')
 
-            if (pluginsWithChangedConfiguration.length) {
-                if (configuration.core.debug)
-                    console.info(
-                        'Configuration for "' +
-                        pluginsWithChangedConfiguration
-                            .map((plugin:Plugin):string => plugin.name)
-                            .join('", "') +
-                        '" has been changed: reloading initialized.'
+        if (configuration.core.plugin.hotReloading) {
+            if (!isConfigurationHook) {
+                const pluginsWithChangedConfiguration:Array<Plugin> =
+                    PluginAPI.hotReloadConfigurationFile(
+                        plugins,
+                        configuration.core.plugin.configuration.propertyNames
                     )
 
-                await PluginAPI.callStack(
-                    'preConfigurationLoaded',
-                    plugins,
-                    configuration,
-                    configuration,
-                    pluginsWithChangedConfiguration
-                )
+                if (pluginsWithChangedConfiguration.length) {
+                    if (configuration.core.debug)
+                        console.info(
+                            'Configuration for "' +
+                            pluginsWithChangedConfiguration
+                                .map((plugin:Plugin):string => plugin.name)
+                                .join('", "') +
+                            '" has been changed: reloading initialized.'
+                        )
 
-                PluginAPI.loadConfigurations(plugins, configuration)
+                    // TODO provide services here e.g. for ejs plugin
+                    await PluginAPI.callStack<Configuration, void>(
+                        'preConfigurationHotLoaded',
+                        plugins,
+                        configuration,
+                        configuration,
+                        pluginsWithChangedConfiguration
+                    )
 
-                await PluginAPI.callStack(
-                    'postConfigurationLoaded',
-                    plugins,
-                    configuration,
-                    configuration,
-                    pluginsWithChangedConfiguration
-                )
+                    PluginAPI.loadConfigurations(plugins, configuration)
+
+                    await PluginAPI.callStack<Configuration, void>(
+                        'postConfigurationHotLoaded',
+                        plugins,
+                        configuration,
+                        configuration,
+                        pluginsWithChangedConfiguration
+                    )
+                }
             }
 
-            const pluginsWithChangedAPIFiles:Array<Plugin> =
-                PluginAPI.hotReloadAPIFile(plugins)
+            if (hook !== 'apiFileReloaded') {
+                const pluginsWithChangedAPIFiles:Array<Plugin> =
+                    PluginAPI.hotReloadAPIFile(plugins)
 
-            if (pluginsWithChangedAPIFiles.length) {
-                if (configuration.core.debug)
-                    console.info(
-                        'API-file for "' +
-                        `${pluginsWithChangedAPIFiles.map((
-                            plugin:Plugin
-                        ):string => plugin.name).join('", "')}" ` +
-                        'has been changed: reloading initialized.'
+                if (pluginsWithChangedAPIFiles.length) {
+                    if (configuration.core.debug)
+                        console.info(
+                            'API-file for "' +
+                            `${pluginsWithChangedAPIFiles.map((
+                                plugin:Plugin
+                            ):string => plugin.name).join('", "')}" ` +
+                            'has been changed: reloading initialized.'
+                        )
+
+                    await PluginAPI.callStack<Array<Plugin>, void>(
+                        'apiFileReloaded',
+                        plugins,
+                        configuration,
+                        pluginsWithChangedAPIFiles
                     )
-
-                await PluginAPI.callStack(
-                    'apiFileReloaded',
-                    plugins,
-                    configuration,
-                    pluginsWithChangedAPIFiles
-                )
+                }
             }
         }
 
@@ -149,9 +158,7 @@ export class PluginAPI {
                         hook,
                         data,
                         ...parameters.concat(
-                            hook.endsWith('ConfigurationLoaded') ?
-                                [] :
-                                configuration,
+                            isConfigurationHook ? [] : configuration,
                             /*
                                 NOTE: We have to wrap into an array here to
                                 avoid spreading the plugins array.

@@ -20,7 +20,6 @@ export * from './configurator'
 export * from './pluginAPI'
 // region imports
 import Tools, {CloseEventNames} from 'clientnode'
-import {ProcedureFunction} from 'clientnode/type'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
@@ -38,7 +37,7 @@ const handleError = async (
     services:Services
 ):Promise<void> => {
     try {
-        await PluginAPI.callStack<Error>(
+        await PluginAPI.callStack<Error, void>(
             'error', plugins, configuration, error, services
         )
     } catch (error) {
@@ -48,14 +47,14 @@ const handleError = async (
             console.error(error)
     }
 }
-export const main:ProcedureFunction = async ():Promise<void> => {
+export const main = async ():Promise<void> => {
     // region load plugins
     const {configuration, plugins}:{
         configuration:Configuration
         plugins:Array<Plugin>
     } = await PluginAPI.loadAll(Tools.copy(baseConfiguration))
 
-    await PluginAPI.callStack<void>('initialize', plugins, configuration)
+    await PluginAPI.callStack<void, void>('initialize', plugins, configuration)
 
     if (plugins.length)
         console.info(
@@ -66,15 +65,17 @@ export const main:ProcedureFunction = async ():Promise<void> => {
             '".'
         )
 
+    const pluginsWithChangedConfiguration:Array<Plugin> =
+        plugins.filter((plugin:Plugin):boolean => Boolean(
+            plugin.configurationFilePaths.length
+        ))
     for (const type of ['pre', 'post'] as const)
-        await PluginAPI.callStack<Configuration>(
+        await PluginAPI.callStack<Configuration, void>(
             `${type}ConfigurationLoaded`,
             plugins,
             configuration,
             configuration,
-            plugins.filter((plugin:Plugin):boolean => Boolean(
-                plugin.configurationFilePaths.length
-            ))
+            pluginsWithChangedConfiguration
         )
     // endregion
     let services:Services = {}
@@ -159,7 +160,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
         let finished = false
         const closeHandler = ():void => {
             if (!finished)
-                PluginAPI.callStackSynchronous<Services>(
+                PluginAPI.callStackSynchronous<Services, void>(
                     'exit',
                     plugins.slice().reverse(),
                     configuration,
@@ -188,7 +189,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
                             ' second request will force to stop ungracefully.'
                         )
 
-                        await PluginAPI.callStack<Services>(
+                        await PluginAPI.callStack<Services, void>(
                             'shouldExit', plugins, configuration, services
                         )
                     }
@@ -212,7 +213,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
 
         exitTriggered = true
 
-        await PluginAPI.callStack<Services>(
+        await PluginAPI.callStack<Services, void>(
             'shouldExit', plugins, configuration, services
         )
 
@@ -222,7 +223,7 @@ export const main:ProcedureFunction = async ():Promise<void> => {
 
         if (!exitTriggered)
             try {
-                await PluginAPI.callStack<Services>(
+                await PluginAPI.callStack<Services, void>(
                     'shouldExit', plugins, configuration, services
                 )
             } catch (error) {
