@@ -91,16 +91,6 @@ export type PackageConfiguration =
         'web-node'?:EvaluateablePartialConfiguration
     }
 
-export type HookState<Type = unknown, State = BaseState> =
-    Omit<State, 'pluginAPI'> &
-    {
-        data:Type
-        hook:string
-    }
-
-export type APIFunction<Type = unknown, State = BaseState> =
-    null |
-    ((state:HookState<Type, State>, ...parameters:Array<unknown>) => Type)
 export interface Plugin {
     api:APIFunction
     apiFilePaths:Array<string>
@@ -144,29 +134,40 @@ export interface BaseState<Type = undefined> {
         configuration.
     */
     configuration:Configuration
-    data:Type
+    data?:Type
     hook:string
     // Topological sorted list of plugins.
     plugins:Array<Plugin>
-    // Plugin api reference.
+    // Plugin api reference?.
     pluginAPI:typeof PluginAPI
 }
 export interface ChangedConfigurationState extends BaseState {
     // List of plugins which have a changed plugin configuration.
     pluginsWithChangedConfiguration:Array<Plugin>
+    triggerHook:string
 }
-export interface ServicesState extends BaseState {
+export interface ServicesState<Type = undefined> extends BaseState<Type> {
     // An object with stored service instances.
     services:Services
 }
-export interface ServicePromisesState extends ServicesState {
+export interface ServicePromisesState<Type = undefined> extends
+    ServicesState<Type>
+{
     // An intermediate object with yet stored service promise instances.
     servicePromises:ServicePromises
 }
 export interface ChangedAPIFileState extends BaseState {
     // List of plugins which have a changed plugin api file.
     pluginsWithChangedAPIFiles:Array<Plugin>
+    triggerHook:string
 }
+
+export type APIFunction<
+    Output = void, State extends BaseState = ServicePromisesState
+> =
+    null |
+    ((state:State, ...parameters:Array<unknown>) => Output)
+
 /**
  * Starting lifecycle with:
  * ------------------------
@@ -254,7 +255,7 @@ export interface PluginHandler {
      * @returns Promise resolving to given and maybe extended object of
      * services.
      */
-    preLoadService?(state:ServicesState):Promise<Services>
+    preLoadService?(state:ServicesState):Promise<void>
     /**
      * Plugins are initialized now and plugins should initialize their
      * continues running services (if they have one). Asynchronous tasks are
@@ -265,7 +266,7 @@ export interface PluginHandler {
      * services.
      */
     /*
-    preLoad**PLUGIN_NAME**Service?(state:ServicesState):Promise<Services>
+    preLoad**PLUGIN_NAME**Service?(state:ServicesState):Promise<void>
     */
     /**
      * Plugins have initialized their continues running service and should
@@ -290,7 +291,7 @@ export interface PluginHandler {
     /*
     postLoad**PLUGIN_NAME**Service?(
         state:ServicePromisesState
-    ):Promise<Services>
+    ):Promise<void>
     */
     /**
      * Plugins have launched their continues running services and returned a
@@ -300,7 +301,7 @@ export interface PluginHandler {
      * @returns A promise which correspond to the plugin specific continues
      * service promises.
      */
-    postLoadService?(state:ServicePromisesState):Promise<ServicePromises>
+    postLoadService?(state:ServicePromisesState):Promise<void>
     /**
      * Triggered hook when at least one plugin has an api file which has been
      * changed and is reloaded. Asynchronous tasks are allowed and a returning
@@ -325,7 +326,7 @@ export interface PluginHandler {
      *
      * @returns Promise resolving to nothing.
      */
-    shouldExit?(state:ServicesState):Promise<void>
+    shouldExit?(state:ServicePromisesState):Promise<void>
     /**
      * Triggers if application will be closed immediately no asynchronous tasks
      * allowed anymore.
@@ -333,7 +334,7 @@ export interface PluginHandler {
      *
      * @returns Nothing.
      */
-    exit?(state:ServicesState):void
+    exit?(state:ServicePromisesState):void
 }
 // endregion
 // region vim modline

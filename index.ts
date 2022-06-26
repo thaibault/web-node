@@ -24,16 +24,26 @@ import Tools, {CloseEventNames} from 'clientnode'
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import {
-    Configuration, Plugin, Service, ServicePromises, Services
+    BaseState,
+    ChangedConfigurationState,
+    Configuration,
+    Plugin,
+    Service,
+    ServicePromises,
+    ServicePromisesState,
+    Services,
+    ServicesState
 } from './type'
 // endregion
 
 declare const ORIGINAL_MAIN_MODULE:object
 
-const handleError = async (state:ServicesState, error:Error):Promise<void> => {
+const handleError = async (
+    state:Omit<ServicePromisesState<Error>, 'hook'|'pluginAPI'>
+):Promise<void> => {
     try {
-        await PluginAPI.callStack<HookState<Error, ServicesState>, void>(
-            {...state, data: error, hook: 'error'}
+        await PluginAPI.callStack<ServicePromisesState<Error>>(
+            {...state, hook: 'error'}
         )
     } catch (error) {
         if (state.configuration.core.debug)
@@ -49,7 +59,7 @@ export const main = async ():Promise<void> => {
         plugins:Array<Plugin>
     } = await PluginAPI.loadAll(Tools.copy(baseConfiguration))
 
-    await PluginAPI.callStack<HookState<void, BaseState>, void>(
+    await PluginAPI.callStack<BaseState>(
         {configuration, hook: 'initialize', plugins}
     )
 
@@ -67,11 +77,8 @@ export const main = async ():Promise<void> => {
             plugin.configurationFilePaths.length
         ))
     for (const type of ['pre', 'post'] as const)
-        await PluginAPI.callStack<
-            HookState<Configuration, ChangedConfigurationState>, void
-        >({
+        await PluginAPI.callStack<ChangedConfigurationState>({
             configuration,
-            data: configuration,
             hook: `${type}ConfigurationLoaded`,
             plugins,
             pluginsWithChangedConfiguration
@@ -82,11 +89,8 @@ export const main = async ():Promise<void> => {
     let exitTriggered = false
     try {
         // region start services
-        services = await PluginAPI.callStack<
-            HookState<Services, ServicesState>, Services
-        >({
+        await PluginAPI.callStack<ServicesState>({
             configuration,
-            data: services,
             hook: 'preLoadService',
             plugins,
             services
@@ -97,11 +101,8 @@ export const main = async ():Promise<void> => {
 
         for (const plugin of plugins)
             if (plugin.api) {
-                services = await PluginAPI.callStack<
-                    HookState<Services, ServicesState>, Services
-                >({
+                await PluginAPI.callStack<ServicesState>({
                     configuration,
-                    data: services,
                     hook:
                         'preLoad' +
                         Tools.stringCapitalize(plugin.internalName) +
@@ -150,9 +151,7 @@ export const main = async ():Promise<void> => {
                     } else
                         console.info(`Service "${result.name}" loaded.`)
 
-                services = await PluginAPI.callStack<
-                    HookState<Services, ServicesState>, Services
-                >({
+                await PluginAPI.callStack<ServicePromisesState>({
                     configuration,
                     hook:
                         'postLoad' +
@@ -164,9 +163,7 @@ export const main = async ():Promise<void> => {
                 })
             }
 
-        servicePromises = await PluginAPI.callStack<
-            HookState<Services, ServicePromisesState>, ServicePromises
-        >({
+        await PluginAPI.callStack({
             configuration,
             hook: 'postLoadService',
             plugins,
@@ -178,14 +175,14 @@ export const main = async ():Promise<void> => {
         let finished = false
         const closeHandler = ():void => {
             if (!finished)
-                PluginAPI.callStackSynchronous<
-                    HookState<Services, ServicesState>, void
-                >({
+                PluginAPI.callStackSynchronous({
                     configuration,
                     hook: 'exit',
                     plugins: plugins.slice().reverse(),
+                    servicePromises,
                     services
                 })
+
             finished = true
         }
         for (const closeEventName of CloseEventNames)
@@ -209,12 +206,11 @@ export const main = async ():Promise<void> => {
                             ' second request will force to stop ungracefully.'
                         )
 
-                        await PluginAPI.callStack<
-                            HookState<Services, ServicesState>, void
-                        >({
+                        await PluginAPI.callStack({
                             configuration,
                             hook: 'shouldExit',
                             plugins,
+                            servicePromises,
                             services
                         })
                     }
@@ -239,31 +235,41 @@ export const main = async ():Promise<void> => {
 
         exitTriggered = true
 
-        await PluginAPI.callStack<HookState<Services, ServicesState>, void>({
+        await PluginAPI.callStack({
             configuration,
             hook: 'shouldExit',
             plugins,
+            servicePromises,
             services
         })
 
         process.exit()
     } catch (error) {
-        await handleError(plugins, configuration, error as Error, services)
+        await handleError({
+            configuration,
+            data: error as Error,
+            plugins,
+            servicePromises,
+            services
+        })
 
         if (!exitTriggered)
             try {
-                await PluginAPI.callStack<
-                    HookState<Services, ServicesState>, void
-                >({
+                await PluginAPI.callStack({
                     configuration,
                     hook: 'shouldExit',
                     plugins,
+                    servicePromises,
                     services
                 })
             } catch (error) {
-                await handleError(
-                    plugins, configuration, error as Error, services
-                )
+                await handleError({
+                    configuration,
+                    data: error as Error,
+                    plugins,
+                    servicePromises,
+                    services
+                })
             }
 
         if (configuration.core.debug)
