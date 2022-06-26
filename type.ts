@@ -91,27 +91,31 @@ export type PackageConfiguration =
         'web-node'?:EvaluateablePartialConfiguration
     }
 
-export type APIFunction =
-    null |
-    ((_hook:string, _data:unknown, ..._parameters:Array<unknown>) => unknown)
 export interface Plugin {
     api:APIFunction
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
+
     configuration:EvaluateablePartialConfiguration
-    configurationFilePaths:Array<string>
     configurationFileLoadTimestamps:Array<number>
+    configurationFilePaths:Array<string>
+    packageConfiguration:PackageConfiguration
+
     dependencies:Array<string>
+
     internalName:string
     name:string
-    packageConfiguration:PackageConfiguration
+
     path:string
+
     scope:null|object
 }
 export interface PluginChange {
     newScope:object
     oldScope:null|object
+
     plugin:Plugin
+
     target:'packageConfiguration'|'scope'
 }
 
@@ -124,97 +128,145 @@ export type Services<PluginServiceType = Mapping<unknown>> =
 export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
     Mapping<Promise<unknown>> & PluginPromiseType
 
+export interface BaseState<Type = undefined> {
+    /*
+        Mutable configuration object. Extended by each plugin specific
+        configuration.
+    */
+    configuration:Configuration
+    data?:Type
+    hook:string
+    // Topological sorted list of plugins.
+    plugins:Array<Plugin>
+    // Plugin api reference?.
+    pluginAPI:typeof PluginAPI
+}
+export interface ChangedConfigurationState extends BaseState {
+    // List of plugins which have a changed plugin configuration.
+    pluginsWithChangedConfiguration:Array<Plugin>
+    triggerHook:string
+}
+export interface ServicesState<Type = undefined> extends BaseState<Type> {
+    // An object with stored service instances.
+    services:Services
+}
+export interface ServicePromisesState<Type = undefined> extends
+    ServicesState<Type>
+{
+    // An intermediate object with yet stored service promise instances.
+    servicePromises:ServicePromises
+}
+export interface ChangedAPIFileState extends BaseState {
+    // List of plugins which have a changed plugin api file.
+    pluginsWithChangedAPIFiles:Array<Plugin>
+    triggerHook:string
+}
+
+export type APIFunction<
+    Output = void, State extends BaseState = ServicePromisesState
+> =
+    null |
+    ((state:State, ...parameters:Array<unknown>) => Output)
+
+/**
+ * Starting lifecycle with:
+ * ------------------------
+ *
+ * 1. initialize (async)
+ * 1. preConfigurationLoaded (async)
+ * 2. postConfigurationLoaded (async)
+ * 3. preLoadService (async)
+ * 3.a preLoad_A_Service (async)
+ * 3.b preLoad_B_Service (async)
+ * ...
+ * 4. loadService (async)
+ * 5.a postLoad_A_Service (async)
+ * 5.b postLoad_B_Service (async)
+ * 5. postLoadService (async)
+ * 6. shouldExit (async)
+ * 7. exit (sync)
+ *
+ * Lifecycle with "hotReloading" (call "callStack" with hook "eventName"):
+ * ------------------------------------------------------------------
+ *
+ * 1. preConfigurationHotLoaded (async)
+ * 2. postConfigurationHotLoaded (async)
+ * 3. apiFileReloaded (async)
+ * 4. eventName (async)
+ *
+ * Lifecycle without "hotReloading" (call "callStack" with hook "eventName"):
+ * ---------------------------------------------------------------------
+ *
+ * 1. eventName (async)
+ */
 export interface PluginHandler {
     /**
      * Application started, static configuration loaded and all available
      * plugins are determined and sorted in there dependency specific
      * typological order. Asynchronous tasks are allowed and a returning
      * promise will be respected.
-     * @param _configuration - Mutable configuration object. Extended by each
-     * plugin specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Will be ignored.
+     * @returns Promise resolving to nothing.
      */
-    initialize?(
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Array<Plugin>>
+    initialize?(state:BaseState):Promise<void>
     /**
      * Triggered hook when at least one plugin has a new configuration file and
      * configuration object has been changed. Asynchronous tasks are allowed
      * and a returning promise will be respected.
-     * @param _configuration - Configuration object to update.
-     * @param _pluginsWithChangedConfiguration - List of plugins which have a
-     * changed plugin configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns New configuration object to use.
+     * @returns Promise resolving to nothing.
      */
-    preConfigurationLoaded?(
-        _configuration:Configuration,
-        _pluginsWithChangedConfiguration:Array<Plugin>,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Configuration>
+    preConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
     /**
      * Triggered hook when at least one plugin has a new configuration file and
      * configuration object has been changed. Asynchronous tasks are allowed
      * and a returning promise will be respected.
-     * @param _configuration - Updated configuration object.
-     * @param _pluginsWithChangedConfiguration - List of plugins which have a
-     * changed plugin configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns New configuration object to use.
+     * @returns Promise resolving to nothing.
      */
-    postConfigurationLoaded?(
-        _configuration:Configuration,
-        _pluginsWithChangedConfiguration:Array<Plugin>,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Configuration>
+    postConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
+    /**
+     * Triggered hook when at least one plugin has a configuration file and
+     * configuration object has been initialized. Asynchronous tasks are
+     * allowed and a returning promise will be respected.
+     * @param state - Application state.
+     *
+     * @returns Promise resolving to nothing.
+     */
+    preConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
+    /**
+     * Triggered hook when at least one plugin has a configuration file and
+     * configuration object has been initialized. Asynchronous tasks are
+     * allowed and a returning promise will be respected.
+     * @param state - Application state.
+     *
+     * @returns Promise resolving to nothing.
+     */
+    postConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
     /**
      * Plugins are initialized now and plugins should initialize their
      * continues running services (if they have one). Asynchronous tasks are
      * allowed and a returning promise will be respected.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe extended object of services.
+     * @returns Promise resolving to given and maybe extended object of
+     * services.
      */
-    preLoadService?(
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Services>
+    preLoadService?(state:ServicesState):Promise<void>
     /**
      * Plugins are initialized now and plugins should initialize their
      * continues running services (if they have one). Asynchronous tasks are
      * allowed and a returning promise will be respected.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe extended object of services.
+     * @returns Promise resolving to given and maybe extended object of
+     * services.
      */
     /*
-    preLoad**PLUGIN_NAME**Service?(
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Services>
+    preLoad**PLUGIN_NAME**Service?(state:ServicesState):Promise<void>
     */
     /**
      * Plugins have initialized their continues running service and should
@@ -222,138 +274,67 @@ export interface PluginHandler {
      * returned. Asynchronous tasks are allowed and a returning promise will be
      * respected NOTE: You have to wrap a promise in a promise if a continues
      * service should be registered.
-     * @param _servicePromises - An intermediate object with yet stored service
-     * promise instances.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
-    loadService?(
-        _servicePromises:ServicePromises,
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<null|Service>
+    loadService?(state:ServicePromisesState):Promise<null|Service>
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
-     * @param _services - An object with stored service instances.
-     * @param _servicePromises - An object with stored service promise
-     * instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe extended object of services.
+     * @returns A promise which correspond to the plugin specific continues
+     * service.
      */
     /*
     postLoad**PLUGIN_NAME**Service?(
-        _services:Services,
-        _servicePromises:ServicePromises,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Services>
+        state:ServicePromisesState
+    ):Promise<void>
     */
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
-     * @param _servicePromises - An object with stored service promise
-     * instances.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe extended object of services.
+     * @returns A promise which correspond to the plugin specific continues
+     * service promises.
      */
-    postLoadSeevice?(
-        _servicePromises:ServicePromises,
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<ServicePromises>
+    postLoadService?(state:ServicePromisesState):Promise<void>
     /**
      * Triggered hook when at least one plugin has an api file which has been
      * changed and is reloaded. Asynchronous tasks are allowed and a returning
      * promise will be respected.
-     * @param _pluginsWithChangedAPIFiles - List of plugins which have a
-     * changed plugin api file.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Will be ignored.
+     * @returns Promise resolving to nothing.
      */
-    apiFileReloaded?(
-        _pluginsWithChangedAPIFiles:Array<Plugin>,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Array<Plugin>>
+    apiFileReloaded?(state:ChangedAPIFileState):Promise<void>
     /**
      * Application has thrown an error and will be closed soon. Asynchronous
      * tasks are allowed and a returning promise will be respected.
-     * @param _error - An object with stored informations why an error occurs.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe changed object of services.
+     * @returns Promise resolving to nothing.
      */
-    error?(
-        _error:object,
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Services>
+    error?(state:ServicesState):Promise<void>
     /**
      * Triggers if application will be closed soon. Asynchronous tasks are
      * allowed and a returning promise will be respected.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe changed object of services.
+     * @returns Promise resolving to nothing.
      */
-    shouldExit?(
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Promise<Services>
+    shouldExit?(state:ServicePromisesState):Promise<void>
     /**
      * Triggers if application will be closed immediately no asynchronous tasks
      * allowed anymore.
-     * @param _services - An object with stored service instances.
-     * @param _configuration - Configuration object extended by each plugin
-     * specific configuration.
-     * @param _plugins - Topological sorted list of plugins.
-     * @param _pluginAPI - Plugin api reference.
+     * @param state - Application state.
      *
-     * @returns Given and maybe changed object of services.
+     * @returns Nothing.
      */
-    exit?(
-        _services:Services,
-        _configuration:Configuration,
-        _plugins:Array<Plugin>,
-        _pluginAPI:typeof PluginAPI
-    ):Services
+    exit?(state:ServicePromisesState):void
 }
 // endregion
 // region vim modline
