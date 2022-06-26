@@ -34,18 +34,50 @@ describe('pluginAPI', ():void => {
         'callStack',
         PluginAPI.callStack,
 
-        [null, 'test', [], testConfiguration],
-        [null, 'test', [], testConfiguration, null],
-        [{}, 'test', [], testConfiguration, {}]
+        [null, {configuration: testConfiguration, hook: 'test', plugins: []}],
+        [
+            null,
+            {
+                configuration: testConfiguration,
+                data: null,
+                hook: 'test',
+                plugins: []
+            }
+        ],
+        [
+            {},
+            {
+                configuration: testConfiguration,
+                data: {},
+                hook: 'test',
+                plugins: []
+            }
+        ]
         // TODO add more tests
     )
     testEach<typeof PluginAPI.callStackSynchronous>(
         'callStackSyncronous',
         PluginAPI.callStackSynchronous,
 
-        [null, 'test', [], testConfiguration],
-        [null, 'test', [], testConfiguration, null],
-        [{}, 'test', [], testConfiguration, {}]
+        [null, {configuration: testConfiguration, hook: 'test', plugins: []}],
+        [
+            null,
+            {
+                configuration: testConfiguration,
+                data: null,
+                hook: 'test',
+                plugins: []
+            }
+        ],
+        [
+            {},
+            {
+                configuration: testConfiguration,
+                data: {},
+                hook: 'test',
+                plugins: []
+            }
+        ]
         // TODO add more tests
     )
     testEach<typeof PluginAPI.determineInternalName>(
@@ -74,15 +106,6 @@ describe('pluginAPI', ():void => {
                 package: {b: {__evaluate__: '2 + 1'}}
             }}
         ]
-    )
-    testEach<typeof PluginAPI.callStackSynchronous>(
-        'callStackSynchronous',
-        PluginAPI.callStackSynchronous,
-
-        [null, 'test', [], testConfiguration],
-        [null, 'test', [], testConfiguration, null],
-        [{}, 'test', [], testConfiguration, {}]
-        // TODO add more tests
     )
     testEach<typeof PluginAPI.hotReloadAPIFile>(
         'hotReloadAPIFile',

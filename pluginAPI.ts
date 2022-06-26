@@ -76,9 +76,15 @@ export class PluginAPI {
      * promise holding given potentially modified data.
      */
     static async callStack<
-        State extends HookState = HookState, Output = unknown
-    >(this:void, state:State, ...parameters:Array<unknown>):Promise<Output> {
+        State extends BaseState = BaseState, Input = undefined, Output = void
+    >(
+        this:void,
+        hookState:HookState<Input, State>,
+        ...parameters:Array<unknown>
+    ):Promise<Output> {
+        const state:HookState & {pluginAPI:PluginAPI} = hookState
         const {configuration, hook, plugins} = state
+        const state.pluginAPI = PluginAPI
 
         const isConfigurationHook:boolean =
             hook.endsWith('ConfigurationLoaded') ||

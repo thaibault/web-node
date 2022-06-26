@@ -92,7 +92,7 @@ export type PackageConfiguration =
     }
 
 export type HookState<Type = unknown, State = BaseState> =
-    State &
+    Omit<State, 'pluginAPI'> &
     {
         data:Type
         hook:string
@@ -138,12 +138,14 @@ export type Services<PluginServiceType = Mapping<unknown>> =
 export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
     Mapping<Promise<unknown>> & PluginPromiseType
 
-export interface BaseState {
+export interface BaseState<Type = undefined> {
     /*
         Mutable configuration object. Extended by each plugin specific
         configuration.
     */
     configuration:Configuration
+    data:Type
+    hook:string
     // Topological sorted list of plugins.
     plugins:Array<Plugin>
     // Plugin api reference.
