@@ -76,13 +76,13 @@ export class PluginAPI {
      * promise holding given potentially modified data.
      */
     static async callStack<
-        State extends BaseState = ServicePromisesState, Output = void
+        State extends BaseState<unknown> = ServicePromisesState, Output = void
     >(
         this:void,
-        givenState:Omit<State, 'pluginAPI'|'triggerHook'>,
+        givenState:Omit<State, 'pluginAPI'>,
         ...parameters:Array<unknown>
     ):Promise<Output> {
-        const state:State = {...givenState, pluginAPI: PluginAPI}
+        const state:State = {...givenState, pluginAPI: PluginAPI} as State
         const {configuration, hook, plugins} = state
 
         const isConfigurationHook:boolean =
@@ -139,7 +139,7 @@ export class PluginAPI {
                             'has been changed: reloading initialized.'
                         )
 
-                    await PluginAPI.callStack<ChangedAPIFileState & State>({
+                    await PluginAPI.callStack<State & ChangedAPIFileState>({
                         ...state,
                         hook: 'apiFileReloaded',
                         pluginsWithChangedAPIFiles,
@@ -154,9 +154,11 @@ export class PluginAPI {
             if (plugin.api) {
                 let result:Output
                 try {
-                    result = await plugin.api<Output, State>(
-                        state, ...parameters
-                    )
+                    result = await (
+                        plugin.api as
+                            unknown as
+                            APIFunction<Promise<Output>, State>
+                    )(state, ...parameters)
                 } catch (error) {
                     if (
                         (error as Error).message?.startsWith('NotImplemented:')
@@ -195,13 +197,13 @@ export class PluginAPI {
      * @returns Given potentially modified data.
      */
     static callStackSynchronous<
-        State extends BaseState = ServicePromisesState, Output = void
+        State extends BaseState<unknown> = ServicePromisesState, Output = void
     >(
         this:void,
         givenState:Omit<State, 'pluginAPI'>,
         ...parameters:Array<unknown>
     ):Output {
-        const state:State = {...givenState, pluginAPI: PluginAPI}
+        const state:State = {...givenState, pluginAPI: PluginAPI} as State
         const {configuration, hook, plugins} = state
 
         let data:Output = givenState.data as unknown as Output
@@ -209,9 +211,9 @@ export class PluginAPI {
             if (plugin.api) {
                 let result:Output
                 try {
-                    result = plugin.api<Output, State>(
-                        state, ...parameters
-                    )
+                    result = (
+                        plugin.api as unknown as APIFunction<Output, State>
+                    )(state, ...parameters)
                 } catch (error) {
                     if ((error as Error).message?.startsWith(
                         'NotImplemented:'
@@ -560,7 +562,7 @@ export class PluginAPI {
                         break
                 }
 
-        let api:APIFunction = null
+        let api:APIFunction|null = null
         let nativeAPI = false
 
         if (
@@ -616,14 +618,18 @@ export class PluginAPI {
                                 stdio: 'inherit'
                             }
                         )
-                    if (
-                        childProcessResult.stdout.startsWith('##') &&
-                        childProcessResult.stdout.endsWith('##')
-                    )
-                        data = JSON.parse(data as string)
 
-                    // TODO check if method wasn't implemented by special
-                    // returnCode
+                    if (childProcessResult.status === 404)
+                        return data
+
+                    const jsonIndicatorPrefix = '##!JSON!##'
+                    if (childProcessResult.stdout.startsWith(
+                        jsonIndicatorPrefix
+                    ))
+                        return JSON.parse(childProcessResult.stdout.substring(
+                            jsonIndicatorPrefix.length
+                        )) as unknown
+
                     return data
                 }
 

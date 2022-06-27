@@ -24,6 +24,7 @@ import Tools, {CloseEventNames} from 'clientnode'
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
 import {
+    APIFunction,
     BaseState,
     ChangedConfigurationState,
     Configuration,
@@ -84,8 +85,8 @@ export const main = async ():Promise<void> => {
             pluginsWithChangedConfiguration
         })
     // endregion
-    let services:Services = {}
-    let servicePromises:ServicePromises = {}
+    const services:Services = {}
+    const servicePromises:ServicePromises = {}
     let exitTriggered = false
     try {
         // region start services
@@ -113,9 +114,9 @@ export const main = async ():Promise<void> => {
 
                 let result:null|Service = null
                 try {
-                    result = await plugin.api<
-                        null|Service, ServicePromisesState
-                    >({
+                    result = await (plugin.api as APIFunction<
+                        Promise<null|Service>, ServicePromisesState
+                    >)({
                         configuration,
                         hook: 'loadService',
                         pluginAPI: PluginAPI,

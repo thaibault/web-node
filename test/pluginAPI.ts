@@ -34,7 +34,9 @@ describe('pluginAPI', ():void => {
         'callStack',
         PluginAPI.callStack,
 
-        [null, {configuration: testConfiguration, hook: 'test', plugins: []}],
+        [
+            undefined,
+            {configuration: testConfiguration, hook: 'test', plugins: []}],
         [
             null,
             {
@@ -59,15 +61,12 @@ describe('pluginAPI', ():void => {
         'callStackSyncronous',
         PluginAPI.callStackSynchronous,
 
-        [null, {configuration: testConfiguration, hook: 'test', plugins: []}],
         [
-            null,
-            {
-                configuration: testConfiguration,
-                data: null,
-                hook: 'test',
-                plugins: []
-            }
+            undefined,
+            {configuration: testConfiguration, hook: 'test', plugins: []}],
+        [
+            undefined,
+            {configuration: testConfiguration, hook: 'test', plugins: []}
         ],
         [
             {},

@@ -92,7 +92,7 @@ export type PackageConfiguration =
     }
 
 export interface Plugin {
-    api:APIFunction
+    api:APIFunction|null
     apiFilePaths:Array<string>
     apiFileLoadTimestamps:Array<number>
 
@@ -141,11 +141,27 @@ export interface BaseState<Type = undefined> {
     // Plugin api reference?.
     pluginAPI:typeof PluginAPI
 }
-export interface ChangedConfigurationState extends BaseState {
+export interface ChangedState<Type = unknown> extends
+    BaseState<Type>
+{
+    triggerHook?:string
+}
+export interface ChangedConfigurationState<Type = unknown> extends
+    ChangedState<Type>
+{
     // List of plugins which have a changed plugin configuration.
     pluginsWithChangedConfiguration:Array<Plugin>
-    triggerHook:string
 }
+export interface ChangedAPIFileState<Type = unknown> extends
+    ChangedState<Type>
+{
+    // List of plugins which have a changed plugin api file.
+    pluginsWithChangedAPIFiles:Array<Plugin>
+}
+export type APIFunction<
+    Output = unknown, State extends BaseState<unknown> = ServicePromisesState
+> = (state:State, ...parameters:Array<unknown>) => Output
+
 export interface ServicesState<Type = undefined> extends BaseState<Type> {
     // An object with stored service instances.
     services:Services
@@ -156,19 +172,10 @@ export interface ServicePromisesState<Type = undefined> extends
     // An intermediate object with yet stored service promise instances.
     servicePromises:ServicePromises
 }
-export interface ChangedAPIFileState extends BaseState {
-    // List of plugins which have a changed plugin api file.
-    pluginsWithChangedAPIFiles:Array<Plugin>
-    triggerHook:string
-}
-
-export type APIFunction<
-    Output = void, State extends BaseState = ServicePromisesState
-> =
-    null |
-    ((state:State, ...parameters:Array<unknown>) => Output)
-
+/* eslint-disable jsdoc/require-description-complete-sentence */
 /**
+ * Plugins can hook into the following life cycle.
+ *
  * Starting lifecycle with:
  * ------------------------
  *
@@ -336,6 +343,7 @@ export interface PluginHandler {
      */
     exit?(state:ServicePromisesState):void
 }
+/* eslint-enable jsdoc/require-description-complete-sentence */
 // endregion
 // region vim modline
 // vim: set tabstop=4 shiftwidth=4 expandtab:
