@@ -128,12 +128,14 @@ export type Services<PluginServiceType = Mapping<unknown>> =
 export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
     Mapping<Promise<unknown>> & PluginPromiseType
 
-export interface BaseState<Type = undefined> {
+export interface BaseState<
+    Type = undefined, ConfigurationType extends Configuration = Configuration
+> {
     /*
         Mutable configuration object. Extended by each plugin specific
         configuration.
     */
-    configuration:Configuration
+    configuration:ConfigurationType
     data?:Type
     hook:string
     // Topological sorted list of plugins.
@@ -141,20 +143,20 @@ export interface BaseState<Type = undefined> {
     // Plugin api reference?.
     pluginAPI:typeof PluginAPI
 }
-export interface ChangedState<Type = unknown> extends
-    BaseState<Type>
-{
+export interface ChangedState<
+    Type = unknown, ConfigurationType extends Configuration = Configuration
+> extends BaseState<Type, ConfigurationType> {
     triggerHook?:string
 }
-export interface ChangedConfigurationState<Type = unknown> extends
-    ChangedState<Type>
-{
+export interface ChangedConfigurationState<
+    Type = unknown, ConfigurationType extends Configuration = Configuration
+> extends ChangedState<Type, ConfigurationType> {
     // List of plugins which have a changed plugin configuration.
     pluginsWithChangedConfiguration:Array<Plugin>
 }
-export interface ChangedAPIFileState<Type = unknown> extends
-    ChangedState<Type>
-{
+export interface ChangedAPIFileState<
+    Type = unknown, ConfigurationType extends Configuration = Configuration
+> extends ChangedState<Type, ConfigurationType> {
     // List of plugins which have a changed plugin api file.
     pluginsWithChangedAPIFiles:Array<Plugin>
 }
@@ -162,15 +164,22 @@ export type APIFunction<
     Output = unknown, State extends BaseState<unknown> = ServicePromisesState
 > = (state:State, ...parameters:Array<unknown>) => Output
 
-export interface ServicesState<Type = undefined> extends BaseState<Type> {
+export interface ServicesState<
+    Type = undefined,
+    ConfigurationType extends Configuration = Configuration,
+    ServicesType extends Services = Services
+> extends BaseState<Type, ConfigurationType> {
     // An object with stored service instances.
-    services:Services
+    services:ServicesType
 }
-export interface ServicePromisesState<Type = undefined> extends
-    ServicesState<Type>
-{
+export interface ServicePromisesState<
+    Type = undefined,
+    ConfigurationType extends Configuration = Configuration,
+    ServicesType extends Services = Services,
+    ServicePromisesType extends ServicePromises = ServicePromises
+> extends ServicesState<Type, ConfigurationType, ServicesType> {
     // An intermediate object with yet stored service promise instances.
-    servicePromises:ServicePromises
+    servicePromises:ServicePromisesType
 }
 /* eslint-disable jsdoc/require-description-complete-sentence */
 /**
