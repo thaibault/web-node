@@ -119,12 +119,13 @@ export interface PluginChange {
     target:'packageConfiguration'|'scope'
 }
 
-export interface Service<Type = unknown> {
-    name:string
-    promise:null|Promise<Type>
-}
+// Holds promises regarding one plugin.
+export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
+    Mapping<null|Type>
+
 export type Services<PluginServiceType = Mapping<unknown>> =
     Mapping<unknown> & PluginServiceType
+// Holds promises regarding all plugins.
 export type ServicePromises<PluginPromiseType = Mapping<unknown>> =
     Mapping<Promise<unknown>> & PluginPromiseType
 
@@ -295,7 +296,7 @@ export interface PluginHandler {
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
-    loadService?(state:ServicePromisesState):Promise<null|Service>
+    loadService?(state:ServicePromisesState):Promise<PluginPromises>
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
@@ -305,9 +306,7 @@ export interface PluginHandler {
      * service.
      */
     /*
-    postLoad**PLUGIN_NAME**Service?(
-        state:ServicePromisesState
-    ):Promise<void>
+    postLoad**PLUGIN_NAME**Service?(state:ServicePromisesState):Promise<void>
     */
     /**
      * Plugins have launched their continues running services and returned a
