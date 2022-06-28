@@ -29,7 +29,7 @@ import {
     ChangedConfigurationState,
     Configuration,
     Plugin,
-    Service,
+    PluginPromises,
     ServicePromises,
     ServicePromisesState,
     Services,
@@ -112,10 +112,10 @@ export const main = async ():Promise<void> => {
                     services
                 })
 
-                let result:null|Service = null
+                let result:null|PluginPromises = null
                 try {
                     result = await (plugin.api as APIFunction<
-                        Promise<null|Service>, ServicePromisesState
+                        Promise<null|PluginPromises>, ServicePromisesState
                     >)({
                         configuration,
                         hook: 'loadService',
@@ -140,17 +140,18 @@ export const main = async ():Promise<void> => {
                         )
                 }
 
-                if (typeof result?.name === 'string')
-                    if (
-                        result.promise !== null &&
-                        typeof result.promise === 'object' &&
-                        'then' in result.promise
-                    ) {
-                        console.info(`Service "${result.name}" started.`)
+                if (result)
+                    for (const [name, promise] of Object.entries(result))
+                        if (
+                            promise !== null &&
+                            typeof promise === 'object' &&
+                            'then' in promise
+                        ) {
+                            console.info(`Service "${name}" started.`)
 
-                        servicePromises[result.name] = result.promise
-                    } else
-                        console.info(`Service "${result.name}" loaded.`)
+                            servicePromises[name] = promise
+                        } else
+                            console.info(`Service "${name}" loaded.`)
 
                 await PluginAPI.callStack<ServicePromisesState>({
                     configuration,

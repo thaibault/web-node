@@ -16,7 +16,13 @@
 // region imports
 import {Tools} from 'clientnode'
 
-import {PluginHandler, Service, ServicePromises, Services} from '../type'
+import {
+    Configuration,
+    PluginHandler,
+    PluginPromises,
+    ServicePromisesState,
+    Services
+} from '../type'
 // endregion
 /**
  * Dummy plugin implementing a test hook.
@@ -25,24 +31,22 @@ export default class Dummy implements PluginHandler {
     /**
      * Loads dummy service.
      * @param this - Nothing.
-     * @param servicePromises - An intermediate object with yet stored service
-     * promise instances.
-     * @param services - An object with stored service instances.
+     * @param state - Application state.
+     * @param state.services - Plugin services.
      *
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
-    static loadService(
-        this:void, servicePromises:ServicePromises, services:Services
-    ):Promise<Service<void>> {
+    static loadService(this:void, {services}:ServicePromisesState):Promise<
+        PluginPromises
+    > {
         services.dummy = {
             hookCalled: false,
             loaded: true
         }
 
         return Promise.resolve({
-            name: 'dummy',
-            promise: new Promise<void>((resolve:() => void):void => {
+            dummy: new Promise<void>((resolve:() => void):void => {
                 void Tools.timeout(resolve)
             })
         })
@@ -50,38 +54,43 @@ export default class Dummy implements PluginHandler {
     /**
      * Asynchronous mock test method.
      * @param this - Nothing.
-     * @param servicePromises - An intermediate object with yet stored service
-     * promise instances.
-     * @param services - An object with stored service instances.
+     * @param state - Application state.
+     * @param state.services - Plugin services.
+     * @param state.services.dummy - Plugin service.
      *
-     * @returns A promise which correspond to the plugin specific continues
-     * service.
+     * @returns A promise resolving to nothing.
      */
     static test(
         this:void,
-        servicePromises:ServicePromises,
-        services:Services<{dummy:{hookCalled:boolean}}>
-    ):Promise<void> {
-        services.dummy.hookCalled = true
+        {services: {dummy}}:ServicePromisesState<
+            undefined,
+            Configuration,
+            Services<{dummy:{hookCalled:boolean}}>
+    >):Promise<
+        void
+    > {
+        dummy.hookCalled = true
 
         return Promise.resolve()
     }
     /**
      * Synchronous mock test method.
      * @param this - Nothing.
-     * @param servicePromises - An intermediate object with yet stored service
-     * promise instances.
-     * @param services - An object with stored service instances.
+     * @param state - Application state.
+     * @param state.services - Plugin services.
+     * @param state.services.dummy - Plugin service.
      *
-     * @returns A promise which correspond to the plugin specific continues
-     * service.
+     * @returns Nothing.
      */
     static testSynchronous(
         this:void,
-        servicePromises:ServicePromises,
-        services:Services<{dummy:{synchronousHookCalled:boolean}}>
+        {services: {dummy}}:ServicePromisesState<
+            undefined,
+            Configuration,
+            Services<{dummy:{synchronousHookCalled:boolean}}>
+        >
     ):void {
-        services.dummy.synchronousHookCalled = true
+        dummy.synchronousHookCalled = true
     }
 }
 // region vim modline
