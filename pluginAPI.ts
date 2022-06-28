@@ -925,22 +925,25 @@ export class PluginAPI {
      * Transform a list of absolute paths respecting the application context.
      * @param this - Nothing.
      * @param configuration - Configuration object.
+     * @param configuration.core - Sub configuration web-node.
+     * @param configuration.core.context - Sub web-node context configurations.
+     * @param configuration.core.context.path - Current web-nodes path.
      * @param locations - Locations to process.
      *
      * @returns Given and processed locations.
      */
     static determineLocations(
         this:void,
-        configuration:Configuration,
+        {core: {context: {path: contextPath}}}:Configuration,
         locations:Array<string>|string = []
     ):Array<string> {
         locations = ([] as Array<string>).concat(locations)
 
         return locations.length ?
             locations.map((location:string):string =>
-                resolve(configuration.core.context.path, location)
+                resolve(contextPath, location)
             ) :
-            [configuration.core.context.path]
+            [contextPath]
     }
     /**
      * Ignore absolute defined locations (relativ to application context) and
