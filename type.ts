@@ -228,24 +228,6 @@ export interface PluginHandler {
      */
     initialize?(state:BaseState):Promise<void>
     /**
-     * Triggered hook when at least one plugin has a new configuration file and
-     * configuration object has been changed. Asynchronous tasks are allowed
-     * and a returning promise will be respected.
-     * @param state - Application state.
-     *
-     * @returns Promise resolving to nothing.
-     */
-    preConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
-    /**
-     * Triggered hook when at least one plugin has a new configuration file and
-     * configuration object has been changed. Asynchronous tasks are allowed
-     * and a returning promise will be respected.
-     * @param state - Application state.
-     *
-     * @returns Promise resolving to nothing.
-     */
-    postConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
-    /**
      * Triggered hook when at least one plugin has a configuration file and
      * configuration object has been initialized. Asynchronous tasks are
      * allowed and a returning promise will be respected.
@@ -296,7 +278,7 @@ export interface PluginHandler {
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
-    loadService?(state:ServicePromisesState):Promise<PluginPromises>
+    loadService?(state:ServicePromisesState):Promise<null|PluginPromises>
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
@@ -317,6 +299,26 @@ export interface PluginHandler {
      * service promises.
      */
     postLoadService?(state:ServicePromisesState):Promise<void>
+
+    /**
+     * Triggered hook when at least one plugin has a new configuration file and
+     * configuration object has been changed. Asynchronous tasks are allowed
+     * and a returning promise will be respected.
+     * @param state - Application state.
+     *
+     * @returns Promise resolving to nothing.
+     */
+    preConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
+    /**
+     * Triggered hook when at least one plugin has a new configuration file and
+     * configuration object has been changed. Asynchronous tasks are allowed
+     * and a returning promise will be respected.
+     * @param state - Application state.
+     *
+     * @returns Promise resolving to nothing.
+     */
+    postConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
+
     /**
      * Triggered hook when at least one plugin has an api file which has been
      * changed and is reloaded. Asynchronous tasks are allowed and a returning
@@ -326,6 +328,7 @@ export interface PluginHandler {
      * @returns Promise resolving to nothing.
      */
     apiFileReloaded?(state:ChangedAPIFileState):Promise<void>
+
     /**
      * Application has thrown an error and will be closed soon. Asynchronous
      * tasks are allowed and a returning promise will be respected.
@@ -334,6 +337,7 @@ export interface PluginHandler {
      * @returns Promise resolving to nothing.
      */
     error?(state:ServicesState):Promise<void>
+
     /**
      * Triggers if application will be closed soon. Asynchronous tasks are
      * allowed and a returning promise will be respected.
