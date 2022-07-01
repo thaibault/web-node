@@ -275,8 +275,8 @@ export interface PluginHandler {
      * service should be registered.
      * @param state - Application state.
      *
-     * @returns A promise which correspond to the plugin specific continues
-     * service.
+     * @returns A mapping to promises which correspond to the plugin specific
+     * continues services.
      */
     loadService?(state:ServicePromisesState):Promise<null|PluginPromises>
     /**
