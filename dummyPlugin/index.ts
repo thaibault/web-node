@@ -34,8 +34,8 @@ export default class Dummy implements PluginHandler {
      * @param state - Application state.
      * @param state.services - Plugin services.
      *
-     * @returns A promise which correspond to the plugin specific continues
-     * service.
+     * @returns A mapping to promises which correspond to the plugin specific
+     * continues services.
      */
     static loadService(this:void, {services}:ServicePromisesState):Promise<
         PluginPromises
