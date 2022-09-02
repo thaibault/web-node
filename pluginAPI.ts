@@ -272,9 +272,9 @@ export class PluginAPI {
      *
      * @returns Resolved configuration.
      */
-    static evaluateConfiguration<Type = Configuration>(
-        this:void, configuration:RecursiveEvaluateable<Type>|Type
-    ):Type {
+    static evaluateConfiguration<
+        Type extends Mapping<unknown> = Configuration
+    >(this:void, configuration:RecursiveEvaluateable<Type>|Type):Type {
         /*
             NOTE: We have to backup, remove and restore all plugin specific
             package configuration to avoid evaluation non web node#
