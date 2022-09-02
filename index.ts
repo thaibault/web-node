@@ -192,7 +192,12 @@ export const main = async ():Promise<void> => {
 
         let cancelTriggered = false
 
-        process.stdin.setRawMode(true)
+        /*
+            NOTE: "setRawMode" is only available when the input is provided by
+            a TTY and not as direct stream from stdin.
+        */
+        if (Tools.isFunction(process.stdin.setRawMode))
+            process.stdin.setRawMode(true)
         process.stdin.resume()
         process.stdin.setEncoding(configuration.core.encoding)
         process.stdin.on('data', (key:string):void => {
