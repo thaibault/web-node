@@ -45,6 +45,7 @@
     "clear": "weboptimizer clear",
     "document": "weboptimizer document",
     "lint": "weboptimizer lint",
+    "postversion": "git push --tags && yarn publish . --tag $npm_package_version && git push",
     "prepare": "yarn build",
     "serve": "weboptimizer build && yarn serve",
     "start": "./index.js '{plugin: {hotReloading: true}}'",
@@ -52,7 +53,7 @@
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
-    "update": "yarn version --patch && yarn publish",
+    "update": "yarn version --patch",
     "update:documentation": "documentation-website",
     "watch": "weboptimizer build --watch"
   },
