@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A dummy web node plugin.",
   "license": "CC-BY-3.0",
-  "main": "index.js",
   "keywords": [
     "dummy",
     "example",
