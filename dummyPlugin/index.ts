@@ -30,7 +30,6 @@ import {
 export default class Dummy implements PluginHandler {
     /**
      * Loads dummy service.
-     * @param this - Nothing.
      * @param state - Application state.
      * @param state.services - Plugin services.
      *
@@ -53,7 +52,6 @@ export default class Dummy implements PluginHandler {
     }
     /**
      * Asynchronous mock test method.
-     * @param this - Nothing.
      * @param state - Application state.
      * @param state.services - Plugin services.
      * @param state.services.dummy - Plugin service.
@@ -75,7 +73,6 @@ export default class Dummy implements PluginHandler {
     }
     /**
      * Synchronous mock test method.
-     * @param this - Nothing.
      * @param state - Application state.
      * @param state.services - Plugin services.
      * @param state.services.dummy - Plugin service.
