@@ -68,7 +68,6 @@ export class PluginAPI {
     /**
      * Calls all plugin methods for given trigger description asynchronous and
      * waits for their resolved promises.
-     * @param this - Nothing.
      * @param givenState - Contains runtime information about current hook.
      * @param parameters - Additional parameters to forward into plugin api.
      *
@@ -190,7 +189,6 @@ export class PluginAPI {
     }
     /**
      * Calls all plugin methods for given trigger description synchronous.
-     * @param this - Nothing.
      * @param givenState - Contains runtime information about current hook.
      * @param parameters - Additional parameters to forward into plugin api.
      *
@@ -246,7 +244,6 @@ export class PluginAPI {
     /**
      * Converts given plugin name into the corresponding internal
      * representation.
-     * @param this - Nothing.
      * @param name - Name to convert.
      * @param regularExpression - Regular expression pattern which extracts
      * relevant name path as first match group.
@@ -267,7 +264,6 @@ export class PluginAPI {
     /**
      * Evaluates given configuration object by letting plugins package sub
      * structure untouched.
-     * @param this - Nothing.
      * @param configuration - Evaluateable configuration structure.
      *
      * @returns Resolved configuration.
@@ -319,7 +315,6 @@ export class PluginAPI {
     /**
      * Checks for changed plugin api file in given plugins and reloads them
      * if necessary (new timestamp).
-     * @param this - Nothing.
      * @param plugins - List of plugins to search for updates in.
      *
      * @returns A list with plugins which have a changed api scope.
@@ -354,7 +349,6 @@ export class PluginAPI {
     /**
      * Checks for changed plugin configurations in given plugins and reloads
      * them if necessary (new timestamp).
-     * @param this - Nothing.
      * @param plugins - List of plugins to search for updates in.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
@@ -385,7 +379,6 @@ export class PluginAPI {
     /**
      * Checks for changed plugin file type in given plugins and reloads them
      * if necessary (timestamp has changed).
-     * @param this - Nothing.
      * @param type - Plugin file type to search for updates.
      * @param target - Property name existing in plugin meta informations
      * objects which should be updated.
@@ -440,7 +433,6 @@ export class PluginAPI {
     /**
      * Extends given configuration object with given plugin specific ones and
      * returns a plugin specific meta information object.
-     * @param this - Nothing.
      * @param name - Name of plugin to extend.
      * @param internalName - Internal name of plugin to extend.
      * @param plugins - List of all yet determined plugin informations.
@@ -517,7 +509,6 @@ export class PluginAPI {
     /**
      * Load given plugin api file in given path and generates a plugin
      * specific data structure with useful meta informations.
-     * @param this - Nothing.
      * @param relativeFilePaths - Paths to file to load relatively from given
      * plugin path.
      * @param pluginPath - Path to plugin directory.
@@ -664,7 +655,6 @@ export class PluginAPI {
     }
     /**
      * Loads plugin specific configuration object.
-     * @param this - Nothing.
      * @param name - Property name where to inject resolved configuration into
      * global one.
      * @param packageConfiguration - Plugin specific package configuration
@@ -713,7 +703,6 @@ export class PluginAPI {
     }
     /**
      * Loads given plugin configurations into global configuration.
-     * @param this - Nothing.
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
      * @param configuration - Global configuration to extend with.
@@ -769,7 +758,6 @@ export class PluginAPI {
     }
     /**
      * Load given api file path and returns exported scope.
-     * @param this - Nothing.
      * @param filePath - Path to file to load.
      * @param name - Plugin name to use for proper error messages.
      * @param fallbackScope - Scope to return if an error occurs during
@@ -825,7 +813,6 @@ export class PluginAPI {
      * Extends given configuration object with all plugin specific ones and
      * returns a topological sorted list of plugins with plugins specific
      * meta informations stored.
-     * @param this - Nothing.
      * @param configuration - Configuration object to extend and use.
      *
      * @returns A topological sorted list of plugins objects.
@@ -923,7 +910,6 @@ export class PluginAPI {
     // TODO test
     /**
      * Transform a list of absolute paths respecting the application context.
-     * @param this - Nothing.
      * @param configuration - Configuration object.
      * @param configuration.core - Sub configuration web-node.
      * @param configuration.core.context - Sub web-node context configurations.
@@ -948,7 +934,6 @@ export class PluginAPI {
     /**
      * Ignore absolute defined locations (relativ to application context) and
      * relative defined in each loaded plugin location.
-     * @param this - Nothing.
      * @param configuration - Configuration object.
      * @param plugins - List of acctive plugins.
      * @param filePath - Path to search for.
