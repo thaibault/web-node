@@ -18,17 +18,12 @@ Project status
 
 [![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/build.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/build.yaml)
 [![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/test.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/test.yaml)
-[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/test:coverage:report.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/test:coverage:report.yaml)
-[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/check:types.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/check:types.yaml)
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/test-coverage-report.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/test-coverage-report.yaml)
+[![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/check-types.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/check-types.yaml)
 [![<LABEL>](https://github.com/thaibault/web-node/actions/workflows/lint.yaml/badge.svg)](https://github.com/thaibault/web-node/actions/workflows/lint.yaml)
 
 [![code coverage](https://coveralls.io/repos/github/thaibault/web-node/badge.svg)](https://coveralls.io/github/thaibault/web-node)
 
-<!-- Too unstable yet
-[![dependencies](https://img.shields.io/david/thaibault/web-node.svg)](https://david-dm.org/thaibault/web-node)
-[![development dependencies](https://img.shields.io/david/dev/thaibault/web-node.svg)](https://david-dm.org/thaibault/web-node?type=dev)
-[![peer dependencies](https://img.shields.io/david/peer/thaibault/web-node.svg)](https://david-dm.org/thaibault/web-node?type=peer)
--->
 [![documentation website](https://img.shields.io/website-up-down-green-red/https/torben.website/web-node.svg?label=documentation-website)](https://torben.website/web-node)
 
 [![Try out](https://badge.runkitcdn.com/clientnode.svg)](https://npm.runkit.com/clientnode)
