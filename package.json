@@ -47,7 +47,7 @@
     "lint": "weboptimizer lint",
     "postversion": "yarn publish --non-interactive; git push --tags && git push",
     "prepare": "yarn build",
-    "serve": "weboptimizer build && yarn serve",
+    "serve": "weboptimizer build && yarn start",
     "start": "./index.js '{plugin: {hotReloading: true}}'",
     "prepare:test": "yarn clear && cd dummyPlugin && yarn build && cd ..",
     "test": "yarn prepare:test && weboptimizer test",
