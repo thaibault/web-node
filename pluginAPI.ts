@@ -949,9 +949,8 @@ export class PluginAPI {
         filePath:string,
         locations:Array<string>|string
     ):boolean {
-        const pluginPaths:Array<string> = plugins.map((plugin:Plugin):string =>
-            plugin.path
-        )
+        const pluginPaths:Array<string> =
+            plugins.map((plugin:Plugin):string => plugin.path)
 
         for (const location of ([] as Array<string>).concat(locations))
             if (location.startsWith('/')) {
@@ -961,9 +960,7 @@ export class PluginAPI {
                     return true
             } else
                 for (const pluginPath of pluginPaths)
-                    if (
-                        filePath.startsWith(resolve(pluginPath, location))
-                    )
+                    if (filePath.startsWith(resolve(pluginPath, location)))
                         return true
 
         return false
