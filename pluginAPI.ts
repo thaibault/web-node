@@ -289,7 +289,7 @@ export class PluginAPI {
         const now = new Date()
 
         configuration = Tools.evaluateDynamicData<Type>(
-            Tools.removeKeysInEvaluation(configuration) as
+            Tools.removeKeysInEvaluation(configuration as Mapping<unknown>) as
                 RecursiveEvaluateable<Type>,
             {
                 currentPath: process.cwd(),
