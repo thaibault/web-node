@@ -17,7 +17,7 @@
 import Tools, {currentRequire} from 'clientnode'
 import {Mapping, RecursiveEvaluateable} from 'clientnode/type'
 import fileSystemSynchronous, {lstatSync} from 'fs'
-import path from 'path'
+import path, {basename, dirname, join, resolve} from 'path'
 
 import {
     Configuration,
@@ -38,11 +38,11 @@ webNodePackageConfiguration.webNode.core.context = {
     path: __dirname, type: 'relative'
 }
 while (true) {
-    webNodePackageConfiguration.webNode.core.context.path = path.resolve(
+    webNodePackageConfiguration.webNode.core.context.path = resolve(
         webNodePackageConfiguration.webNode.core.context.path, '../../'
     )
     if (
-        path.basename(path.dirname(
+        basename(dirname(
             webNodePackageConfiguration.webNode.core.context.path)
         ) !== 'node_modules'
     )
@@ -50,9 +50,9 @@ while (true) {
 }
 if (
     webNodePackageConfiguration.webNode.core.context.path === '/' ||
-    path.basename(path.dirname(process.cwd())) === 'node_modules' ||
-    path.basename(path.dirname(process.cwd())) === '.staging' &&
-    path.basename(path.dirname(path.dirname(process.cwd()))) === 'node_modules'
+    basename(dirname(process.cwd())) === 'node_modules' ||
+    basename(dirname(process.cwd())) === '.staging' &&
+    basename(dirname(dirname(process.cwd()))) === 'node_modules'
 )
     /*
         NOTE: If we are dealing was a dependency project use current directory
@@ -66,10 +66,7 @@ else
         is a better assumption than two folders up the hierarchy.
     */
     try {
-        if (
-            lstatSync(path.join(process.cwd(), 'node_modules'))
-                .isSymbolicLink()
-        )
+        if (lstatSync(join(process.cwd(), 'node_modules')).isSymbolicLink())
             webNodePackageConfiguration.webNode.core.context.path =
                 process.cwd()
     } catch (error) {
@@ -78,7 +75,7 @@ else
 
 let mainPackageConfiguration:PackageConfiguration = {name: 'main'}
 try {
-    mainPackageConfiguration = currentRequire!(path.join(
+    mainPackageConfiguration = currentRequire!(join(
         webNodePackageConfiguration.webNode.core.context.path, 'package'
     )) as PackageConfiguration
 } catch (error) {
