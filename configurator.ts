@@ -126,26 +126,26 @@ Tools.extend<Configuration>(
     applicationConfiguration as Configuration
 )
 
-if (process.argv.length > 2) {
-    const result:null|EvaluateablePartialConfiguration =
+const result = {}
+for (const argument of process.argv.slice(1)) {
+    const subResult:null|EvaluateablePartialConfiguration =
         Tools.stringParseEncodedObject<EvaluateablePartialConfiguration>(
-            process.argv[process.argv.length - 1],
-            configuration,
-            'configuration'
+            argument, configuration, 'configuration'
         )
-
-    if (Tools.isPlainObject(result)) {
-        Tools.extend<RecursiveEvaluateable<Configuration>>(
-            true,
-            /*
-                NOTE: "Tools.modifyObject" removes modifications in "result"
-                in-place before it is used as extending source.
-            */
-            Tools.modifyObject<Configuration>(configuration, result)!,
-            result as RecursiveEvaluateable<Configuration>
-        )
-        configuration.core.runtimeConfiguration = result
-    }
+    if (Tools.isPlainObject(subResult))
+        Tools.extend(true, result, subResult)
+}
+if (Object.keys(result).length > 0) {
+    Tools.extend<RecursiveEvaluateable<Configuration>>(
+        true,
+        /*
+            NOTE: "Tools.modifyObject" removes modifications in "result"
+            in-place before it is used as extending source.
+        */
+        Tools.modifyObject<Configuration>(configuration, result)!,
+        result as RecursiveEvaluateable<Configuration>
+    )
+    configuration.core.runtimeConfiguration = result
 }
 
 configuration = Tools.evaluateDynamicData<Configuration>(
