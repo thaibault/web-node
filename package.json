@@ -53,7 +53,7 @@
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
-    "update": "yarn version patch && git push --tags",
+    "update": "yarn version patch && yarn npm publish",
     "update:documentation": "documentation-website",
     "watch": "weboptimizer build --watch"
   },
