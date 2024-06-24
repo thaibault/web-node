@@ -15,11 +15,11 @@
 */
 // region imports
 import {describe} from '@jest/globals'
-import {testEach} from 'clientnode/testHelper'
+import {testEach} from 'clientnode/dist/test-helper'
 
 import unixCrypt from '../unixCrypt'
 // endregion
-describe('unixCrypt', ():void => {
+describe('unixCrypt', () => {
     testEach<typeof unixCrypt>(
         'unixCrypt',
         unixCrypt,

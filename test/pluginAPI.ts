@@ -15,9 +15,8 @@
 */
 // region imports
 import {describe, expect, test} from '@jest/globals'
-import Tools from 'clientnode'
-import {Encoding, ThenParameter} from 'clientnode/type'
-import {testEach, testEachPromise} from 'clientnode/testHelper'
+import {copy, Encoding, mask, ThenParameter} from 'clientnode'
+import {testEach, testEachPromise} from 'clientnode/dist/test-helper'
 import path from 'path'
 
 import {
@@ -28,7 +27,7 @@ import PluginAPI from '../pluginAPI'
 // endregion
 // region tests
 describe('pluginAPI', ():void => {
-    const testConfiguration:Configuration = Tools.copy(configuration)
+    const testConfiguration:Configuration = copy(configuration)
 
     testEachPromise<typeof PluginAPI.callStack>(
         'callStack',
@@ -140,7 +139,7 @@ describe('pluginAPI', ():void => {
 
                 configuration: {
                     dummy: {
-                        package: Tools.mask(
+                        package: mask(
                             /*
                                 eslint-disable
                                 @typescript-eslint/no-var-requires
@@ -167,7 +166,7 @@ describe('pluginAPI', ():void => {
                 internalName: 'dummy',
                 name: 'dummy',
 
-                packageConfiguration: Tools.mask(
+                packageConfiguration: mask(
                     /* eslint-disable @typescript-eslint/no-var-requires */
                     require('../dummyPlugin/package'),
                     /* eslint-enable @typescript-eslint/no-var-requires */
@@ -374,8 +373,4 @@ describe('pluginAPI', ():void => {
         [{configuration, plugins: []}, configuration]
     )
 })
-// endregion
-// region vim modline
-// vim: set tabstop=4 shiftwidth=4 expandtab:
-// vim: foldmethod=marker foldmarker=region,endregion:
 // endregion

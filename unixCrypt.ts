@@ -335,7 +335,6 @@ const bytesToStr = (bytes:Array<number>):string =>
  * [a-zA-Z0-9./]).
  * @param returnBytes - If "true", return an array of bytes or a string
  * otherwise.
- *
  * @returns Returns crypted or encrypted buffer or string.
  */
 export function unixCrypt(

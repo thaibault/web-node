@@ -14,25 +14,24 @@
     endregion
 */
 // region imports
-import Tools from 'clientnode'
 import {
-    Encoding, Mapping, RecursiveEvaluateable, RecursivePartial
-} from 'clientnode/type'
+    Encoding, Mapping, RecursiveEvaluateable, RecursivePartial, UTILITY_SCOPE
+} from 'clientnode'
 
 import {PluginAPI} from './pluginAPI'
 // endregion
 // region exports
-export interface EvaluateConfigurationScope {
-    currentPath:string
-    fileSystem:typeof import('fs')
-    path:typeof import('path')
-    PluginAPI:PluginAPI
-    require:typeof require
-    Tools:typeof Tools
-    webNodePath:string
-    now:Date
-    nowUTCTimestamp:number
-}
+export type EvaluateConfigurationScope =
+    typeof UTILITY_SCOPE &
+    {
+        currentPath:string
+        fs:typeof import('fs')
+        path:typeof import('path')
+        PluginAPI:PluginAPI
+        webNodePath:string
+        now:Date
+        nowUTCTimestamp:number
+    }
 export interface MetaPluginConfiguration {
     fileNames:Array<string>
     propertyNames:Array<string>
@@ -223,7 +222,6 @@ export interface PluginHandler {
      * typological order. Asynchronous tasks are allowed and a returning
      * promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     initialize?(state:BaseState):Promise<void>
@@ -232,7 +230,6 @@ export interface PluginHandler {
      * configuration object has been initialized. Asynchronous tasks are
      * allowed and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     preConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
@@ -241,7 +238,6 @@ export interface PluginHandler {
      * configuration object has been initialized. Asynchronous tasks are
      * allowed and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     postConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
@@ -250,7 +246,6 @@ export interface PluginHandler {
      * continues running services (if they have one). Asynchronous tasks are
      * allowed and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to given and maybe extended object of
      * services.
      */
@@ -260,7 +255,6 @@ export interface PluginHandler {
      * continues running services (if they have one). Asynchronous tasks are
      * allowed and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to given and maybe extended object of
      * services.
      */
@@ -274,7 +268,6 @@ export interface PluginHandler {
      * respected NOTE: You have to wrap a promise in a promise if a continues
      * service should be registered.
      * @param state - Application state.
-     *
      * @returns A mapping to promises which correspond to the plugin specific
      * continues services.
      */
@@ -283,7 +276,6 @@ export interface PluginHandler {
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
      * @param state - Application state.
-     *
      * @returns A promise which correspond to the plugin specific continues
      * service.
      */
@@ -294,7 +286,6 @@ export interface PluginHandler {
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
      * @param state - Application state.
-     *
      * @returns A promise which correspond to the plugin specific continues
      * service promises.
      */
@@ -305,7 +296,6 @@ export interface PluginHandler {
      * configuration object has been changed. Asynchronous tasks are allowed
      * and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     preConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
@@ -314,7 +304,6 @@ export interface PluginHandler {
      * configuration object has been changed. Asynchronous tasks are allowed
      * and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     postConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
@@ -324,7 +313,6 @@ export interface PluginHandler {
      * changed and is reloaded. Asynchronous tasks are allowed and a returning
      * promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     apiFileReloaded?(state:ChangedAPIFileState):Promise<void>
@@ -333,7 +321,6 @@ export interface PluginHandler {
      * Application has thrown an error and will be closed soon. Asynchronous
      * tasks are allowed and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     error?(state:ServicesState):Promise<void>
@@ -342,7 +329,6 @@ export interface PluginHandler {
      * Triggers if application will be closed soon. Asynchronous tasks are
      * allowed and a returning promise will be respected.
      * @param state - Application state.
-     *
      * @returns Promise resolving to nothing.
      */
     shouldExit?(state:ServicePromisesState):Promise<void>
@@ -350,14 +336,9 @@ export interface PluginHandler {
      * Triggers if application will be closed immediately no asynchronous tasks
      * allowed anymore.
      * @param state - Application state.
-     *
      * @returns Nothing.
      */
     exit?(state:ServicePromisesState):void
 }
 /* eslint-enable jsdoc/require-description-complete-sentence */
-// endregion
-// region vim modline
-// vim: set tabstop=4 shiftwidth=4 expandtab:
-// vim: foldmethod=marker foldmarker=region,endregion:
 // endregion

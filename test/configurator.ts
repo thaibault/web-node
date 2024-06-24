@@ -29,7 +29,3 @@ describe('configurator', ():void => {
 
 // NOTE: Needed to mark this file as module (instead of global script).
 export default {}
-// region vim modline
-// vim: set tabstop=4 shiftwidth=4 expandtab:
-// vim: foldmethod=marker foldmarker=region,endregion:
-// endregion

@@ -19,7 +19,9 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
-import Tools, {CloseEventNames} from 'clientnode'
+import {
+    capitalize, copy, CLOSE_EVENT_NAMES, isFunction, represent
+} from 'clientnode'
 
 import baseConfiguration from './configurator'
 import PluginAPI from './pluginAPI'
@@ -58,7 +60,7 @@ export const main = async ():Promise<void> => {
     const {configuration, plugins}:{
         configuration:Configuration
         plugins:Array<Plugin>
-    } = await PluginAPI.loadAll(Tools.copy(baseConfiguration))
+    } = await PluginAPI.loadAll(copy(baseConfiguration))
 
     await PluginAPI.callStack<BaseState>(
         {configuration, hook: 'initialize', plugins}
@@ -104,10 +106,7 @@ export const main = async ():Promise<void> => {
             if (plugin.api) {
                 await PluginAPI.callStack<ServicesState>({
                     configuration,
-                    hook:
-                        'preLoad' +
-                        Tools.stringCapitalize(plugin.internalName) +
-                        'Service',
+                    hook: `preLoad${capitalize(plugin.internalName)}Service`,
                     plugins,
                     services
                 })
@@ -135,8 +134,8 @@ export const main = async ():Promise<void> => {
                                     '' :
                                     `(${plugin.name}) `
                             ) +
-                            `throws: ${Tools.represent(error)} ` +
-                            'during asynchrone hook "loadService".'
+                            `throws: ${represent(error)} 'during asynchrone ` +
+                            'hook "loadService".'
                         )
                 }
 
@@ -155,10 +154,7 @@ export const main = async ():Promise<void> => {
 
                 await PluginAPI.callStack<ServicePromisesState>({
                     configuration,
-                    hook:
-                        'postLoad' +
-                        Tools.stringCapitalize(plugin.internalName) +
-                        'Service',
+                    hook: `postLoad${capitalize(plugin.internalName)}Service`,
                     plugins,
                     services,
                     servicePromises
@@ -187,7 +183,7 @@ export const main = async ():Promise<void> => {
 
             finished = true
         }
-        for (const closeEventName of CloseEventNames)
+        for (const closeEventName of CLOSE_EVENT_NAMES)
             process.on(closeEventName, closeHandler)
 
         let cancelTriggered = false
@@ -199,7 +195,7 @@ export const main = async ():Promise<void> => {
             NOTE: Access property via string to avoid lint error
             "@typescript-eslint/unbound-method".
         */
-        if (Tools.isFunction(process.stdin['setRawMode']))
+        if (isFunction(process.stdin['setRawMode']))
             process.stdin.setRawMode(true)
         process.stdin.resume()
         process.stdin.setEncoding(configuration.core.encoding)
