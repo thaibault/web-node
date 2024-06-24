@@ -18,10 +18,26 @@
 import {
     spawnSync as spawnChildProcessSync, SpawnSyncReturns
 } from 'child_process'
-import Tools from 'clientnode'
 import {
-    Encoding, Mapping, RecursiveEvaluateable, ValueOf
-} from 'clientnode/type'
+    copy,
+    delimitedToCamelCase,
+    Encoding,
+    evaluateDynamicData,
+    extend,
+    getUTCTimestamp,
+    isDirectory,
+    isFile,
+    isFunction,
+    Mapping,
+    modifyObject,
+    RecursiveEvaluateable,
+    removeKeyPrefixes,
+    removeKeysInEvaluation,
+    represent,
+    sortTopological,
+    UTILITY_SCOPE,
+    ValueOf
+} from 'clientnode'
 import fileSystem, {readdirSync, statSync} from 'fs'
 import {Module} from 'module'
 import path, {basename, extname, join, resolve} from 'path'
@@ -70,7 +86,6 @@ export class PluginAPI {
      * waits for their resolved promises.
      * @param givenState - Contains runtime information about current hook.
      * @param parameters - Additional parameters to forward into plugin api.
-     *
      * @returns A promise which resolves when all callbacks have resolved their
      * promise holding given potentially modified data.
      */
@@ -171,8 +186,8 @@ export class PluginAPI {
                                 '' :
                                 `(${plugin.name}) `
                         ) +
-                        `throws: ${Tools.represent(error)} during ` +
-                        `asynchronous hook "${hook}".`
+                        `throws: ${represent(error)} during asynchronous ` +
+                        `hook "${hook}".`
                     )
                 }
 
@@ -191,7 +206,6 @@ export class PluginAPI {
      * Calls all plugin methods for given trigger description synchronous.
      * @param givenState - Contains runtime information about current hook.
      * @param parameters - Additional parameters to forward into plugin api.
-     *
      * @returns Given potentially modified data.
      */
     static callStackSynchronous<
@@ -225,8 +239,8 @@ export class PluginAPI {
                                 '' :
                                 `(${plugin.name}) `
                         ) +
-                        `throws: ${Tools.represent(error)} during ` +
-                        `synchronous hook "${hook}".`
+                        `throws: ${represent(error)} during synchronous hook` +
+                        `"${hook}".`
                     )
                 }
 
@@ -247,13 +261,12 @@ export class PluginAPI {
      * @param name - Name to convert.
      * @param regularExpression - Regular expression pattern which extracts
      * relevant name path as first match group.
-     *
      * @returns Transformed name.
      */
     static determineInternalName(
         this:void, name:string, regularExpression:RegExp
     ):string {
-        return Tools.stringDelimitedToCamelCase(name.replace(
+        return delimitedToCamelCase(name.replace(
             regularExpression,
             (fullMatch:string, firstMatch:string|number):string =>
                 typeof firstMatch === 'string' ?
@@ -265,7 +278,6 @@ export class PluginAPI {
      * Evaluates given configuration object by letting plugins package sub
      * structure untouched.
      * @param configuration - Evaluateable configuration structure.
-     *
      * @returns Resolved configuration.
      */
     static evaluateConfiguration<
@@ -288,19 +300,18 @@ export class PluginAPI {
 
         const now = new Date()
 
-        configuration = Tools.evaluateDynamicData<Type>(
-            Tools.removeKeysInEvaluation(configuration as Mapping<unknown>) as
+        configuration = evaluateDynamicData<Type>(
+            removeKeysInEvaluation(configuration as Mapping<unknown>) as
                 RecursiveEvaluateable<Type>,
             {
+                ...UTILITY_SCOPE,
                 currentPath: process.cwd(),
-                fileSystem,
+                fs: fileSystem,
                 path,
                 PluginAPI,
-                require: currentRequire,
-                Tools,
                 webNodePath: __dirname,
                 now,
-                nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
+                nowUTCTimestamp: getUTCTimestamp(now)
             }
         )
 
@@ -313,10 +324,9 @@ export class PluginAPI {
         return configuration
     }
     /**
-     * Checks for changed plugin api file in given plugins and reloads them
-     * if necessary (new timestamp).
+     * Checks for changed plugin api file in given plugins and reloads them if
+     * necessary (new timestamp).
      * @param plugins - List of plugins to search for updates in.
-     *
      * @returns A list with plugins which have a changed api scope.
      */
     static hotReloadAPIFile(this:void, plugins:Array<Plugin>):Array<Plugin> {
@@ -334,7 +344,7 @@ export class PluginAPI {
                         Object.prototype.hasOwnProperty.call(
                             pluginChange.newScope, name
                         ) &&
-                        !Tools.isFunction(
+                        !isFunction(
                             (pluginChange.newScope as Mapping<unknown>)[name]
                         )
                     )
@@ -352,7 +362,6 @@ export class PluginAPI {
      * @param plugins - List of plugins to search for updates in.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
-     *
      * @returns A list with plugins which have a changed configurations.
      */
     static hotReloadConfigurationFile(
@@ -383,7 +392,6 @@ export class PluginAPI {
      * @param target - Property name existing in plugin meta informations
      * objects which should be updated.
      * @param plugins - List of plugins to search for updates in.
-     *
      * @returns A list with plugin changes.
      */
     static hotReloadFiles(
@@ -440,7 +448,6 @@ export class PluginAPI {
      * @param pluginPath - Path to given plugin.
      * @param encoding - Encoding to use to read and write from child
      * process's.
-     *
      * @returns An object of plugin specific meta informations.
      */
     static async load(
@@ -458,8 +465,8 @@ export class PluginAPI {
         for (const fileName of metaConfiguration.fileNames) {
             const filePath:string = resolve(pluginPath, fileName)
 
-            if (await Tools.isFile(filePath)) {
-                Tools.extend(
+            if (await isFile(filePath)) {
+                extend(
                     true,
                     packageConfiguration,
                     PluginAPI.loadFile(filePath, name)
@@ -521,7 +528,6 @@ export class PluginAPI {
      * @param configuration - Plugin specific configurations.
      * @param configurationFilePaths - Plugin specific configuration file
      * paths.
-     *
      * @returns Plugin meta informations object.
      */
     static async loadAPI(
@@ -536,14 +542,14 @@ export class PluginAPI {
         configurationFilePaths:Array<string> = []
     ):Promise<Plugin> {
         let filePath:string = resolve(pluginPath, relativeFilePaths[0])
-        if (!(await Tools.isFile(filePath)))
+        if (!(await isFile(filePath)))
             // Determine entry file if given one does not exist.
             for (const fileName of readdirSync(pluginPath))
                 if (
                     !configurationFilePaths.map((filePath:string):string =>
                         basename(filePath)
                     ).includes(fileName) &&
-                    await Tools.isFile(resolve(pluginPath, fileName))
+                    await isFile(resolve(pluginPath, fileName))
                 ) {
                     filePath = resolve(pluginPath, filePath)
 
@@ -570,7 +576,7 @@ export class PluginAPI {
                 configuration[internalName] &&
                 Object.keys(configuration[internalName]).length > 1
             ) &&
-            await Tools.isFile(filePath)
+            await isFile(filePath)
         )
             if (filePath.endsWith('.js')) {
                 nativeAPI = true
@@ -661,7 +667,6 @@ export class PluginAPI {
      * object.
      * @param configurationPropertyNames - Property names to search for to use
      * as entry in plugin configuration file.
-     *
      * @returns Determined configuration object.
      */
     static loadConfiguration(
@@ -676,7 +681,7 @@ export class PluginAPI {
             Removing comments (default key prefix to delete is "#").
         */
         const packageConfigurationCopy:PackageConfiguration =
-            Tools.removeKeyPrefixes(Tools.copy(packageConfiguration))
+            removeKeyPrefixes(copy(packageConfiguration))
 
         const result:EvaluateablePartialConfiguration = {
             [name]: {package: packageConfigurationCopy}
@@ -684,7 +689,7 @@ export class PluginAPI {
 
         for (const propertyName of configurationPropertyNames)
             if (packageConfiguration[propertyName as 'webNode']) {
-                Tools.extend(
+                extend(
                     true,
                     result,
                     packageConfiguration[propertyName as 'webNode']!
@@ -706,7 +711,6 @@ export class PluginAPI {
      * @param plugins - Topological sorted list of plugins to check for
      * configurations.
      * @param configuration - Global configuration to extend with.
-     *
      * @returns Updated given configuration object.
      */
     static loadConfigurations(
@@ -718,16 +722,16 @@ export class PluginAPI {
         */
         for (const key of Object.keys(configuration))
             delete configuration[key]
-        Tools.extend(configuration, Tools.copy(baseConfiguration))
+        extend(configuration, copy(baseConfiguration))
 
         for (const plugin of plugins)
             if (plugin.configuration) {
                 const pluginConfiguration:EvaluateablePartialConfiguration =
-                    Tools.copy(plugin.configuration)
+                    copy(plugin.configuration)
 
-                Tools.extend<Configuration>(
+                extend<Configuration>(
                     true,
-                    Tools.modifyObject<Configuration>(
+                    modifyObject<Configuration>(
                         configuration, pluginConfiguration
                     )!,
                     /*
@@ -744,7 +748,7 @@ export class PluginAPI {
                     intermediate configuration states.
                 */
                 if (configuration.core.runtimeConfiguration)
-                    Tools.extend<Configuration>(
+                    extend<Configuration>(
                         true,
                         configuration,
                         configuration.core.runtimeConfiguration as
@@ -763,7 +767,6 @@ export class PluginAPI {
      * @param fallbackScope - Scope to return if an error occurs during
      * loading. If a "null" is given an error will be thrown.
      * @param log - Enables logging.
-     *
      * @returns Exported api file scope.
      */
     static loadFile(
@@ -794,13 +797,13 @@ export class PluginAPI {
                 if (log)
                     console.warn(
                         `Couln't load new api plugin file "${filePath}" for ` +
-                        `plugin "${name}": ${Tools.represent(error)}. Using ` +
+                        `plugin "${name}": ${represent(error)}. Using ` +
                         'fallback one.'
                     )
             } else
                 throw new Error(
-                    `Couln't load plugin file "${filePath}" for plugin "` +
-                    `${name}": ${Tools.represent(error)}`
+                    `Couldn't load plugin file "${filePath}" for plugin "` +
+                    `${name}": ${represent(error)}`
                 )
         }
 
@@ -812,9 +815,8 @@ export class PluginAPI {
     /**
      * Extends given configuration object with all plugin specific ones and
      * returns a topological sorted list of plugins with plugins specific
-     * meta informations stored.
+     * meta information stored.
      * @param configuration - Configuration object to extend and use.
-     *
      * @returns A topological sorted list of plugins objects.
      */
     static async loadAll(this:void, configuration:Configuration):Promise<{
@@ -846,7 +848,7 @@ export class PluginAPI {
         for (const directory of Object.values(
             configuration.core.plugin.directories
         ))
-            if (await Tools.isDirectory(directory.path)) {
+            if (await isDirectory(directory.path)) {
                 const compiledRegularExpression =
                     new RegExp(directory.nameRegularExpressionPattern)
 
@@ -892,7 +894,7 @@ export class PluginAPI {
 
         const sortedPlugins:Array<Plugin> = []
 
-        for (const pluginName of Tools.arraySortTopological(temporaryPlugins))
+        for (const pluginName of sortTopological(temporaryPlugins))
             for (const [name, plugin] of Object.entries(plugins))
                 if ([plugin.internalName, name].includes(pluginName)) {
                     sortedPlugins.push(plugin)
@@ -915,7 +917,6 @@ export class PluginAPI {
      * @param configuration.core.context - Sub web-node context configurations.
      * @param configuration.core.context.path - Current web-nodes path.
      * @param locations - Locations to process.
-     *
      * @returns Given and processed locations.
      */
     static determineLocations(
@@ -938,7 +939,6 @@ export class PluginAPI {
      * @param plugins - List of acctive plugins.
      * @param filePath - Path to search for.
      * @param locations - Locations to search in.
-     *
      * @returns A boolean indicating whether given file path is in provided
      * locations.
      */

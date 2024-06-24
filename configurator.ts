@@ -14,8 +14,19 @@
     endregion
 */
 // region imports
-import Tools, {currentRequire} from 'clientnode'
-import {Mapping, RecursiveEvaluateable} from 'clientnode/type'
+import {
+    currentRequire,
+    evaluateDynamicData,
+    extend,
+    getUTCTimestamp,
+    isPlainObject,
+    Mapping,
+    modifyObject,
+    parseEncodedObject,
+    RecursiveEvaluateable,
+    removeKeysInEvaluation,
+    UTILITY_SCOPE
+} from 'clientnode'
 import fileSystemSynchronous, {lstatSync} from 'fs'
 import path, {basename, dirname, join, resolve} from 'path'
 
@@ -98,18 +109,17 @@ webNodePackageConfiguration.webNode.core.name =
     webNodePackageConfiguration.documentationWebsite.name
 const now:Date = new Date()
 const scope:EvaluateConfigurationScope = {
+    ...UTILITY_SCOPE,
     currentPath: process.cwd(),
-    fileSystem: fileSystemSynchronous,
+    fs: fileSystemSynchronous,
     path,
     PluginAPI,
-    require: currentRequire!,
-    Tools,
     webNodePath: __dirname,
     now,
-    nowUTCTimestamp: Tools.numberGetUTCTimestamp(now)
+    nowUTCTimestamp: getUTCTimestamp(now)
 }
 export let configuration:Configuration =
-    Tools.evaluateDynamicData<Configuration>(
+    evaluateDynamicData<Configuration>(
         webNodePackageConfiguration.webNode as
             unknown as
             RecursiveEvaluateable<Configuration>,
@@ -118,38 +128,36 @@ export let configuration:Configuration =
 
 delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
 
-Tools.extend<Configuration>(
+extend<Configuration>(
     true,
-    Tools.modifyObject<Configuration>(
-        configuration, applicationConfiguration
-    )!,
+    modifyObject<Configuration>(configuration, applicationConfiguration)!,
     applicationConfiguration as Configuration
 )
 
 const result = {}
 for (const argument of process.argv.slice(1)) {
     const subResult:null|EvaluateablePartialConfiguration =
-        Tools.stringParseEncodedObject<EvaluateablePartialConfiguration>(
+        parseEncodedObject<EvaluateablePartialConfiguration>(
             argument, configuration, 'configuration'
         )
-    if (Tools.isPlainObject(subResult))
-        Tools.extend(true, result, subResult)
+    if (isPlainObject(subResult))
+        extend(true, result, subResult)
 }
 if (Object.keys(result).length > 0) {
-    Tools.extend<RecursiveEvaluateable<Configuration>>(
+    extend<RecursiveEvaluateable<Configuration>>(
         true,
         /*
             NOTE: "Tools.modifyObject" removes modifications in "result"
             in-place before it is used as extending source.
         */
-        Tools.modifyObject<Configuration>(configuration, result)!,
+        modifyObject<Configuration>(configuration, result)!,
         result as RecursiveEvaluateable<Configuration>
     )
     configuration.core.runtimeConfiguration = result
 }
 
-configuration = Tools.evaluateDynamicData<Configuration>(
-    Tools.removeKeysInEvaluation<Configuration>(configuration),
+configuration = evaluateDynamicData<Configuration>(
+    removeKeysInEvaluation<Configuration>(configuration),
     scope as unknown as Mapping<unknown>
 )
 configuration.name = name

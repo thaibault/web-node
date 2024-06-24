@@ -14,7 +14,7 @@
     endregion
 */
 // region imports
-import {Tools} from 'clientnode'
+import {timeout} from 'clientnode'
 
 import {
     Configuration,
@@ -32,7 +32,6 @@ export default class Dummy implements PluginHandler {
      * Loads dummy service.
      * @param state - Application state.
      * @param state.services - Plugin services.
-     *
      * @returns A mapping to promises which correspond to the plugin specific
      * continues services.
      */
@@ -46,7 +45,7 @@ export default class Dummy implements PluginHandler {
 
         return Promise.resolve({
             dummy: new Promise<void>((resolve:() => void):void => {
-                void Tools.timeout(resolve)
+                void timeout(resolve)
             })
         })
     }
@@ -55,7 +54,6 @@ export default class Dummy implements PluginHandler {
      * @param state - Application state.
      * @param state.services - Plugin services.
      * @param state.services.dummy - Plugin service.
-     *
      * @returns A promise resolving to nothing.
      */
     static test(
@@ -64,9 +62,7 @@ export default class Dummy implements PluginHandler {
             undefined,
             Configuration,
             Services<{dummy:{hookCalled:boolean}}>
-    >):Promise<
-        void
-    > {
+    >):Promise<void> {
         dummy.hookCalled = true
 
         return Promise.resolve()
@@ -76,8 +72,6 @@ export default class Dummy implements PluginHandler {
      * @param state - Application state.
      * @param state.services - Plugin services.
      * @param state.services.dummy - Plugin service.
-     *
-     * @returns Nothing.
      */
     static testSynchronous(
         this:void,
@@ -86,7 +80,7 @@ export default class Dummy implements PluginHandler {
             Configuration,
             Services<{dummy:{synchronousHookCalled:boolean}}>
         >
-    ):void {
+    ) {
         dummy.synchronousHookCalled = true
     }
 }
