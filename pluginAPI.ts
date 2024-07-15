@@ -736,7 +736,7 @@ export class PluginAPI {
                     )!,
                     /*
                         NOTE: Should be resolved via preceding
-                        "Tools.modifyObject" call.
+                        "object.modifyObject" call.
                     */
                     pluginConfiguration as Configuration
                 )

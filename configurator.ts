@@ -147,7 +147,7 @@ if (Object.keys(result).length > 0) {
     extend<RecursiveEvaluateable<Configuration>>(
         true,
         /*
-            NOTE: "Tools.modifyObject" removes modifications in "result"
+            NOTE: "object.modifyObject" removes modifications in "result"
             in-place before it is used as extending source.
         */
         modifyObject<Configuration>(configuration, result)!,
