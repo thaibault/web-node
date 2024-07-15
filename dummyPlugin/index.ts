@@ -84,7 +84,3 @@ export default class Dummy implements PluginHandler {
         dummy.synchronousHookCalled = true
     }
 }
-// region vim modline
-// vim: set tabstop=4 shiftwidth=4 expandtab:
-// vim: foldmethod=marker foldmarker=region,endregion:
-// endregion

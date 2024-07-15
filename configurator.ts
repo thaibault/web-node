@@ -165,7 +165,3 @@ configuration.core.package =
     webNodePackageConfiguration as unknown as PackageConfiguration
 
 export default configuration
-// region vim modline
-// vim: set tabstop=4 shiftwidth=4 expandtab:
-// vim: foldmethod=marker foldmarker=region,endregion:
-// endregion

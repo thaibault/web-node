@@ -296,7 +296,3 @@ if (
     void main()
 
 export default main
-// region vim modline
-// vim: set tabstop=4 shiftwidth=4 expandtab:
-// vim: foldmethod=marker foldmarker=region,endregion:
-// endregion
