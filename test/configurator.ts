@@ -17,14 +17,13 @@
 import {describe, expect, test} from '@jest/globals'
 import {Configuration} from '../type'
 // endregion
-describe('configurator', ():void => {
-    test('main', ():void =>
+describe('configurator', () => {
+    test('main', () => {
         expect(typeof (
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             require('../configurator') as {default:Configuration}
-        ).default.core.debug)
-            .toStrictEqual('boolean')
-    )
+        ).default.core.debug).toStrictEqual('boolean')
+    })
 })
 
 // NOTE: Needed to mark this file as module (instead of global script).

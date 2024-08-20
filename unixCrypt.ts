@@ -275,7 +275,7 @@ const encrypt = (block:Array<number>, edflag = false):void => {
         for (let index = 0; index < 8; index++) {
             let t:number = 6 * index
             const k:number = S[index][
-                (preS[t + 0] << 5) +
+                (preS[t/* + 0*/] << 5) +
                 (preS[t + 1] << 3) +
                 (preS[t + 2] << 2) +
                 (preS[t + 3] << 1) +
@@ -283,7 +283,7 @@ const encrypt = (block:Array<number>, edflag = false):void => {
                 (preS[t + 5] << 4)
             ]
             t = 4 * index
-            f[t + 0] = (k >> 3) & 0o1
+            f[t/* + 0*/] = (k >> 3) & 0o1
             f[t + 1] = (k >> 2) & 0o1
             f[t + 2] = (k >> 1) & 0o1
             f[t + 3] = (k >> 0) & 0o1

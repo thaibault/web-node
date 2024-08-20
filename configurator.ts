@@ -21,6 +21,7 @@ import {
     getUTCTimestamp,
     isPlainObject,
     Mapping,
+    MAXIMAL_NUMBER_OF_ITERATIONS,
     modifyObject,
     parseEncodedObject,
     RecursiveEvaluateable,
@@ -36,8 +37,8 @@ import {
     EvaluateablePartialConfiguration,
     PackageConfiguration
 } from './type'
-import PluginAPI from './pluginAPI'
 import webNodePackageConfiguration from './package.json'
+import * as PluginAPIModule from './pluginAPI'
 // endregion
 /*
     To assume to go two folder up from this file until there is no
@@ -48,7 +49,7 @@ import webNodePackageConfiguration from './package.json'
 webNodePackageConfiguration.webNode.core.context = {
     path: __dirname, type: 'relative'
 }
-while (true) {
+for (let index = 0; index < MAXIMAL_NUMBER_OF_ITERATIONS.value; index++) {
     webNodePackageConfiguration.webNode.core.context.path = resolve(
         webNodePackageConfiguration.webNode.core.context.path, '../../'
     )
@@ -80,16 +81,17 @@ else
         if (lstatSync(join(process.cwd(), 'node_modules')).isSymbolicLink())
             webNodePackageConfiguration.webNode.core.context.path =
                 process.cwd()
-    } catch (error) {
+    } catch (_error) {
         // Ignore error.
     }
 
 let mainPackageConfiguration:PackageConfiguration = {name: 'main'}
 try {
-    mainPackageConfiguration = currentRequire!(join(
+    // @ts-expect-error "currentRequire" may not be set.
+    mainPackageConfiguration = currentRequire(join(
         webNodePackageConfiguration.webNode.core.context.path, 'package'
     )) as PackageConfiguration
-} catch (error) {
+} catch (_error) {
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
 
@@ -113,7 +115,7 @@ const scope:EvaluateConfigurationScope = {
     currentPath: process.cwd(),
     fs: fileSystemSynchronous,
     path,
-    PluginAPI,
+    PluginAPI: PluginAPIModule,
     webNodePath: __dirname,
     now,
     nowUTCTimestamp: getUTCTimestamp(now)
@@ -130,7 +132,7 @@ delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
 
 extend<Configuration>(
     true,
-    modifyObject<Configuration>(configuration, applicationConfiguration)!,
+    modifyObject<Configuration>(configuration, applicationConfiguration),
     applicationConfiguration as Configuration
 )
 
@@ -150,7 +152,7 @@ if (Object.keys(result).length > 0) {
             NOTE: "object.modifyObject" removes modifications in "result"
             in-place before it is used as extending source.
         */
-        modifyObject<Configuration>(configuration, result)!,
+        modifyObject<Configuration>(configuration, result),
         result as RecursiveEvaluateable<Configuration>
     )
     configuration.core.runtimeConfiguration = result
