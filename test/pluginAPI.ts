@@ -23,15 +23,29 @@ import {
     Configuration, PackageConfiguration, Plugin, PluginConfiguration
 } from '../type'
 import configuration from '../configurator'
-import PluginAPI from '../pluginAPI'
+import {
+    callStack,
+    callStackSynchronous,
+    determineInternalName,
+    evaluateConfiguration,
+    hotReloadAPIFile,
+    hotReloadConfigurationFile,
+    hotReloadFiles,
+    load,
+    loadAll,
+    loadAPI,
+    loadConfiguration,
+    loadConfigurations,
+    loadFile
+} from '../pluginAPI'
 // endregion
 // region tests
 describe('pluginAPI', ():void => {
     const testConfiguration:Configuration = copy(configuration)
 
-    testEachPromise<typeof PluginAPI.callStack>(
+    testEachPromise<typeof callStack>(
         'callStack',
-        PluginAPI.callStack,
+        callStack,
 
         [
             undefined,
@@ -56,9 +70,9 @@ describe('pluginAPI', ():void => {
         ]
         // TODO add more tests
     )
-    testEach<typeof PluginAPI.callStackSynchronous>(
-        'callStackSyncronous',
-        PluginAPI.callStackSynchronous,
+    testEach<typeof callStackSynchronous>(
+        'callStackSynchronous',
+        callStackSynchronous,
 
         [
             undefined,
@@ -78,16 +92,16 @@ describe('pluginAPI', ():void => {
         ]
         // TODO add more tests
     )
-    testEach<typeof PluginAPI.determineInternalName>(
+    testEach<typeof determineInternalName>(
         'determineInternalName',
-        PluginAPI.determineInternalName,
+        determineInternalName,
 
         ['', '', /^.+$/]
         // TODO add more tests
     )
-    testEach<typeof PluginAPI.evaluateConfiguration>(
+    testEach<typeof evaluateConfiguration>(
         'evaluateConfiguration',
-        PluginAPI.evaluateConfiguration,
+        evaluateConfiguration,
 
         [{}, {}],
         [{a: {package: {}}}, {a: {package: {}}}],
@@ -105,23 +119,23 @@ describe('pluginAPI', ():void => {
             }}
         ]
     )
-    testEach<typeof PluginAPI.hotReloadAPIFile>(
+    testEach<typeof hotReloadAPIFile>(
         'hotReloadAPIFile',
-        PluginAPI.hotReloadAPIFile,
+        hotReloadAPIFile,
 
         [[], []]
         // TODO add more tests
     )
-    testEach<typeof PluginAPI.hotReloadConfigurationFile>(
+    testEach<typeof hotReloadConfigurationFile>(
         'hotReloadConfigurationFile',
-        PluginAPI.hotReloadConfigurationFile,
+        hotReloadConfigurationFile,
 
         [[], [], []]
         // TODO add more tests
     )
-    testEach<typeof PluginAPI.hotReloadFiles>(
+    testEach<typeof hotReloadFiles>(
         'hotReloadFiles',
-        PluginAPI.hotReloadFiles,
+        hotReloadFiles,
 
         [[], 'api', 'scope', []]
         // TODO add more tests
@@ -142,20 +156,25 @@ describe('pluginAPI', ():void => {
                         package: mask(
                             /*
                                 eslint-disable
-                                @typescript-eslint/no-var-requires
+                                @typescript-eslint/no-require-imports
                             */
                             require('../dummyPlugin/package'),
                             /*
                                 eslint-enable
-                                @typescript-eslint/no-var-requires
+                                @typescript-eslint/no-require-imports
                             */
                             {exclude: {webNode: true}}
                         )
                     },
                     ...((
-                        /* eslint-disable @typescript-eslint/no-var-requires */
+                        /*
+                            eslint-disable
+                            @typescript-eslint/no-require-imports
+                        */
                         require('../dummyPlugin/package')
-                        /* eslint-enable @typescript-eslint/no-var-requires */
+                        /*
+                            eslint-enable @typescript-eslint/no-require-imports
+                        */
                     ) as PackageConfiguration).webNode
                 } as unknown as Configuration,
                 configurationFileLoadTimestamps: [],
@@ -167,9 +186,9 @@ describe('pluginAPI', ():void => {
                 name: 'dummy',
 
                 packageConfiguration: mask(
-                    /* eslint-disable @typescript-eslint/no-var-requires */
+                    /* eslint-disable @typescript-eslint/no-require-imports */
                     require('../dummyPlugin/package'),
-                    /* eslint-enable @typescript-eslint/no-var-requires */
+                    /* eslint-enable @typescript-eslint/no-require-imports */
                     {exclude: {webNode: true}}
                 ),
 
@@ -188,12 +207,11 @@ describe('pluginAPI', ():void => {
     ])(
         `%p === load('%s', '%s', %p, %p, '%s')`,
         async (
-            expected:Plugin,
-            ...parameters:Parameters<typeof PluginAPI.load>
+            expected:Plugin, ...parameters:Parameters<typeof load>
         ):Promise<void> => {
             let plugin:Plugin|undefined
             try {
-                plugin = await PluginAPI.load(...parameters)
+                plugin = await load(...parameters)
             } catch (error) {
                 console.error(error)
             }
@@ -205,7 +223,9 @@ describe('pluginAPI', ():void => {
                 plugin.scope = null
 
                 plugin.apiFileLoadTimestamps = []
-                if (plugin.configuration)
+                if (Object.prototype.hasOwnProperty.call(
+                    plugin, 'configuration'
+                ))
                     delete plugin.configuration.package
                 plugin.configurationFilePaths = []
                 plugin.configurationFileLoadTimestamps = []
@@ -269,12 +289,12 @@ describe('pluginAPI', ():void => {
     ])(
         '%p === loadAPI(%p, ...)',
         async (
-            expected:ThenParameter<ReturnType<typeof PluginAPI.loadAPI>>,
-            ...parameters:Parameters<typeof PluginAPI.loadAPI>
+            expected:ThenParameter<ReturnType<typeof loadAPI>>,
+            ...parameters:Parameters<typeof loadAPI>
         ):Promise<void> => {
             let plugin:Plugin|undefined
             try {
-                plugin = await PluginAPI.loadAPI(...parameters)
+                plugin = await loadAPI(...parameters)
             } catch (error) {
                 console.error(error)
             }
@@ -292,9 +312,9 @@ describe('pluginAPI', ():void => {
             }
         }
     )
-    testEach<typeof PluginAPI.loadConfiguration>(
+    testEach<typeof loadConfiguration>(
         'loadConfiguration',
-        PluginAPI.loadConfiguration,
+        loadConfiguration,
 
         // No package or application configuration exists.
         [{a: {package: {}}}, 'a', {}, []],
@@ -339,9 +359,9 @@ describe('pluginAPI', ():void => {
             ['b', 'a']
         ]
     )
-    testEach<typeof PluginAPI.loadConfigurations>(
+    testEach<typeof loadConfigurations>(
         'loadConfigurations',
-        PluginAPI.loadConfigurations,
+        loadConfigurations,
 
         [configuration, [], {} as unknown as Configuration],
         [configuration, [], {a: 2} as unknown as Configuration],
@@ -351,11 +371,12 @@ describe('pluginAPI', ():void => {
             {} as unknown as Configuration
         ]
     )
-    testEach<typeof PluginAPI.loadFile>(
+    testEach<typeof loadFile>(
         'loadFile',
-        PluginAPI.loadFile,
+        loadFile,
 
         [
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             require('../dummyPlugin/package'),
             path.resolve(
                 configuration.core.context.path, 'dummyPlugin/package.json'
@@ -366,9 +387,9 @@ describe('pluginAPI', ():void => {
         ],
         [{a: 2}, 'unknown', 'dummy', {a: 2}, false]
     )
-    testEachPromise<typeof PluginAPI.loadAll>(
+    testEachPromise<typeof loadAll>(
         'loadAll',
-        PluginAPI.loadAll,
+        loadAll,
 
         [{configuration, plugins: []}, configuration]
     )

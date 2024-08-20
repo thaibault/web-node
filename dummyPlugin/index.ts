@@ -25,62 +25,58 @@ import {
 } from '../type'
 // endregion
 /**
- * Dummy plugin implementing a test hook.
+ * Loads dummy service.
+ * @param state - Application state.
+ * @param state.services - Plugin services.
+ * @returns A mapping to promises which correspond to the plugin specific
+ * continues services.
  */
-export default class Dummy implements PluginHandler {
-    /**
-     * Loads dummy service.
-     * @param state - Application state.
-     * @param state.services - Plugin services.
-     * @returns A mapping to promises which correspond to the plugin specific
-     * continues services.
-     */
-    static loadService(this:void, {services}:ServicePromisesState):Promise<
-        PluginPromises
-    > {
-        services.dummy = {
-            hookCalled: false,
-            loaded: true
-        }
+export const loadService = ({services}:ServicePromisesState):Promise<
+    PluginPromises
+> => {
+    services.dummy = {
+        hookCalled: false,
+        loaded: true
+    }
 
-        return Promise.resolve({
-            dummy: new Promise<void>((resolve:() => void):void => {
-                void timeout(resolve)
-            })
+    return Promise.resolve({
+        dummy: new Promise<void>((resolve:() => void) => {
+            void timeout(resolve)
         })
-    }
-    /**
-     * Asynchronous mock test method.
-     * @param state - Application state.
-     * @param state.services - Plugin services.
-     * @param state.services.dummy - Plugin service.
-     * @returns A promise resolving to nothing.
-     */
-    static test(
-        this:void,
-        {services: {dummy}}:ServicePromisesState<
-            undefined,
-            Configuration,
-            Services<{dummy:{hookCalled:boolean}}>
-    >):Promise<void> {
-        dummy.hookCalled = true
-
-        return Promise.resolve()
-    }
-    /**
-     * Synchronous mock test method.
-     * @param state - Application state.
-     * @param state.services - Plugin services.
-     * @param state.services.dummy - Plugin service.
-     */
-    static testSynchronous(
-        this:void,
-        {services: {dummy}}:ServicePromisesState<
-            undefined,
-            Configuration,
-            Services<{dummy:{synchronousHookCalled:boolean}}>
-        >
-    ) {
-        dummy.synchronousHookCalled = true
-    }
+    })
 }
+/**
+ * Asynchronous mock test method.
+ * @param state - Application state.
+ * @param state.services - Plugin services.
+ * @param state.services.dummy - Plugin service.
+ * @returns A promise resolving to nothing.
+ */
+export const test = (
+    {services: {dummy}}:ServicePromisesState<
+        undefined,
+        Configuration,
+        Services<{dummy:{hookCalled:boolean}}>
+>):Promise<void> => {
+    dummy.hookCalled = true
+
+    return Promise.resolve()
+}
+/**
+ * Synchronous mock test method.
+ * @param state - Application state.
+ * @param state.services - Plugin services.
+ * @param state.services.dummy - Plugin service.
+ */
+export const testSynchronous = (
+    {services: {dummy}}:ServicePromisesState<
+        undefined,
+        Configuration,
+        Services<{dummy:{synchronousHookCalled:boolean}}>
+    >
+) => {
+    dummy.synchronousHookCalled = true
+}
+
+export const Dummy:PluginHandler = module.exports
+export default Dummy
