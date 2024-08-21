@@ -54,17 +54,17 @@
     "update:documentation": "documentation-website",
     "watch": "weboptimizer build --watch"
   },
-  "runkitExample": "require('@babel/runtime/package.json')\nrequire('clientnode/package.json')\n\nconst {PluginAPI} = require('web-node')\n\nPluginAPI.loadFile('./unixCrypt.js', 'crypt')('test')",
+  "runkitExample": "require('@babel/runtime/package.json')\nrequire('clientnode/package.json')\n\nconst {pluginAPI} = require('web-node')\n\nPluginAPI.loadFile('./unixCrypt.js', 'crypt')('test')",
   "devDependencies": {
     "@babel/cli": "^7.24.8",
     "@babel/eslint-parser": "^7.25.1",
     "@babel/runtime": "^7.25.0",
     "@stylistic/eslint-plugin": "^2.6.4",
-    "@types/node": "^22.4.1",
+    "@types/node": "^22.4.2",
     "@typescript-eslint/eslint-plugin": "^8.2.0",
     "@typescript-eslint/parser": "^8.2.0",
-    "clientnode": "^3.0.1172",
-    "documentation-website": "^1.0.330",
+    "clientnode": "^3.0.1178",
+    "documentation-website": "^1.0.331",
     "eslint": "^9.9.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^50.2.2",
@@ -72,7 +72,7 @@
     "jsdoc": "^4.0.3",
     "shx": "^0.3.4",
     "typescript-eslint": "^8.2.0",
-    "weboptimizer": "^2.0.1495"
+    "weboptimizer": "^2.0.1498"
   },
   "peerDependencies": {
     "@babel/runtime": "*",

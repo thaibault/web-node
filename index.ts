@@ -25,7 +25,7 @@ import {
 
 import baseConfiguration from './configurator'
 import {callStack, callStackSynchronous, loadAll} from './pluginAPI'
-import * as PluginAPIModule from './pluginAPI'
+import pluginAPI from './pluginAPI'
 import {
     APIFunction,
     BaseState,
@@ -117,7 +117,7 @@ export const main = async ():Promise<void> => {
                     >)({
                         configuration,
                         hook: 'loadService',
-                        pluginAPI: PluginAPIModule,
+                        pluginAPI,
                         plugins,
                         servicePromises,
                         services

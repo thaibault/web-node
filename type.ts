@@ -17,7 +17,7 @@
 import {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial, UTILITY_SCOPE
 } from 'clientnode'
-import * as PluginAPIModule from './pluginAPI'
+import pluginAPI from './pluginAPI'
 // endregion
 // region exports
 export type EvaluateConfigurationScope =
@@ -26,7 +26,7 @@ export type EvaluateConfigurationScope =
         currentPath:string
         fs:typeof import('fs')
         path:typeof import('path')
-        PluginAPI:typeof PluginAPIModule
+        pluginAPI:typeof pluginAPI
         webNodePath:string
         now:Date
         nowUTCTimestamp:number
@@ -140,7 +140,7 @@ export interface BaseState<
     // Topological sorted list of plugins.
     plugins:Array<Plugin>
     // Plugin api reference?.
-    pluginAPI:typeof PluginAPIModule
+    pluginAPI:typeof pluginAPI
 }
 export interface ChangedState<
     Type = unknown, ConfigurationType extends Configuration = Configuration
