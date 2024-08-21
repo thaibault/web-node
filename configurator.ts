@@ -38,7 +38,7 @@ import {
     PackageConfiguration
 } from './type'
 import webNodePackageConfiguration from './package.json'
-import * as PluginAPIModule from './pluginAPI'
+import pluginAPI from './pluginAPI'
 // endregion
 /*
     To assume to go two folder up from this file until there is no
@@ -115,7 +115,7 @@ const scope:EvaluateConfigurationScope = {
     currentPath: process.cwd(),
     fs: fileSystemSynchronous,
     path,
-    PluginAPI: PluginAPIModule,
+    pluginAPI,
     webNodePath: __dirname,
     now,
     nowUTCTimestamp: getUTCTimestamp(now)

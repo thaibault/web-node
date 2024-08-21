@@ -62,10 +62,8 @@ export const currentRequire = eval('require') as typeof require
 // region allow plugins to import "web-node" as already loaded main module
 type ModuleType =
     typeof Module &
-    {
-        _resolveFilename:(
-            _request:string, _module:typeof Module, _isMain:boolean
-        ) => string
+    {_resolveFilename:(request:string, module:typeof Module, isMain:boolean) =>
+        string
     }
 const oldResolveFilename = (Module as ModuleType)._resolveFilename
 ;(Module as ModuleType)._resolveFilename = (
@@ -934,3 +932,6 @@ export const isInLocations = (
 
     return false
 }
+
+export const pluginAPI = module.exports
+export default pluginAPI
