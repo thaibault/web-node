@@ -933,5 +933,31 @@ export const isInLocations = (
     return false
 }
 
-export const pluginAPI = module.exports
-export default pluginAPI
+/*
+    NOTE: "module.exports" is types as "any" so we need to list all methods
+    explicitly.
+*/
+export const pluginAPI = {
+    callStack,
+    callStackSynchronous,
+
+    determineInternalName,
+    determineLocations,
+
+    evaluateConfiguration,
+
+    hotReloadAPIFile,
+    hotReloadConfigurationFile,
+    hotReloadFiles,
+
+    isInLocations,
+
+    load,
+    loadAll,
+    loadAPI,
+    loadConfiguration,
+    loadConfigurations,
+    loadFile
+} as const
+
+export default module.exports
