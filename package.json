@@ -54,7 +54,7 @@
     "update:documentation": "documentation-website",
     "watch": "weboptimizer build --watch"
   },
-  "runkitExample": "require('@babel/runtime/package.json')\nrequire('clientnode/package.json')\n\nconst {pluginAPI} = require('web-node')\n\nPluginAPI.loadFile('./unixCrypt.js', 'crypt')('test')",
+  "runkitExample": "require('@babel/runtime/package.json')\nrequire('clientnode/package.json')\n\nconst {loadFile} = require('web-node')\n\nloadFile('./unixCrypt.js', 'crypt')('test')",
   "devDependencies": {
     "@babel/cli": "^7.24.8",
     "@babel/eslint-parser": "^7.25.1",

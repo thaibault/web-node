@@ -17,7 +17,28 @@
 import {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial, UTILITY_SCOPE
 } from 'clientnode'
-import pluginAPI from './pluginAPI'
+import pluginAPI, {
+    callStack,
+    callStackSynchronous,
+
+    determineInternalName,
+    determineLocations,
+
+    evaluateConfiguration,
+
+    hotReloadAPIFile,
+    hotReloadConfigurationFile,
+    hotReloadFiles,
+
+    isInLocations,
+
+    load,
+    loadAll,
+    loadAPI,
+    loadConfiguration,
+    loadConfigurations,
+    loadFile
+} from './pluginAPI'
 // endregion
 // region exports
 export type EvaluateConfigurationScope =
@@ -139,8 +160,33 @@ export interface BaseState<
     hook:string
     // Topological sorted list of plugins.
     plugins:Array<Plugin>
-    // Plugin api reference?.
-    pluginAPI:typeof pluginAPI
+    // Plugin api reference.
+    pluginAPI:{
+        /*
+            NOTE: We need to list any exported member explicitly to break a
+            dependency circle.
+        */
+        callStack:typeof callStack
+        callStackSynchronous:typeof callStackSynchronous
+
+        determineInternalName:typeof determineInternalName
+        determineLocations:typeof determineLocations
+
+        evaluateConfiguration:typeof evaluateConfiguration
+
+        hotReloadAPIFile:typeof hotReloadAPIFile
+        hotReloadConfigurationFile:typeof hotReloadConfigurationFile
+        hotReloadFiles:typeof hotReloadFiles
+
+        isInLocations:typeof isInLocations
+
+        load:typeof load
+        loadAll:typeof loadAll
+        loadAPI:typeof loadAPI
+        loadConfiguration:typeof loadConfiguration
+        loadConfigurations:typeof loadConfigurations
+        loadFile:typeof loadFile
+    }
 }
 export interface ChangedState<
     Type = unknown, ConfigurationType extends Configuration = Configuration
