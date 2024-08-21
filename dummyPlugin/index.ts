@@ -78,5 +78,5 @@ export const testSynchronous = (
     dummy.synchronousHookCalled = true
 }
 
-export const Dummy:PluginHandler = module.exports
+export const Dummy = module.exports satisfies PluginHandler
 export default Dummy
