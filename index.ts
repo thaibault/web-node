@@ -24,8 +24,7 @@ import {
 } from 'clientnode'
 
 import baseConfiguration from './configurator'
-import {callStack, callStackSynchronous, loadAll} from './pluginAPI'
-import pluginAPI from './pluginAPI'
+import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
 import {
     APIFunction,
     BaseState,

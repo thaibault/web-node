@@ -88,7 +88,7 @@ export const callStack = async <
 >(
     givenState:Omit<State, 'pluginAPI'>, ...parameters:Array<unknown>
 ):Promise<Output> => {
-    const state = {...givenState, pluginAPI: module.exports} as State
+    const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 
     const isConfigurationHook:boolean =
@@ -205,7 +205,7 @@ export const callStackSynchronous = <
 >(
         givenState:Omit<State, 'pluginAPI'>, ...parameters:Array<unknown>
     ):Output => {
-    const state = {...givenState, pluginAPI: module.exports} as State
+    const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 
     let data:Output = givenState.data as unknown as Output
@@ -960,4 +960,4 @@ export const pluginAPI = {
     loadFile
 } as const
 
-export default module.exports
+export default pluginAPI
