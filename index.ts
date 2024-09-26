@@ -77,6 +77,7 @@ export const main = async (): Promise<void> => {
         plugins.filter((plugin: Plugin): boolean => Boolean(
             plugin.configurationFilePaths.length
         ))
+
     for (const type of ['pre', 'post'] as const)
         await callStack<ChangedConfigurationState>({
             configuration,

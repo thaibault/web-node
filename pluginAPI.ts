@@ -771,7 +771,7 @@ export const loadFile = (
 
             if (log)
                 console.warn(
-                    `Couln't load new api plugin file "${filePath}" for ` +
+                    `Couldn't load new api plugin file "${filePath}" for ` +
                     `plugin "${name}": ${represent(error)}. Using ` +
                     'fallback one.'
                 )
@@ -782,7 +782,10 @@ export const loadFile = (
             )
     }
 
-    if (Object.prototype.hasOwnProperty.call(scope, 'default'))
+    if (
+        Object.prototype.hasOwnProperty.call(scope, 'default') &&
+        (scope as {default?: object}).default
+    )
         return (scope as {default: object}).default
 
     return scope
