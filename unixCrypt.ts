@@ -24,7 +24,7 @@
  * caldera systems under a BSD-style license.
  */
 // Initial permutation:
-const IP:Array<number> = [
+const IP: Array<number> = [
     58, 50, 42, 34, 26, 18, 10, 2,
     60, 52, 44, 36, 28, 20, 12, 4,
     62, 54, 46, 38, 30, 22, 14, 6,
@@ -37,7 +37,7 @@ const IP:Array<number> = [
     63, 55, 47, 39, 31, 23, 15, 7
 ]
 // Final permutation, FP = IP^(-1)
-const FP:Array<number> = [
+const FP: Array<number> = [
     40, 8, 48, 16, 56, 24, 64, 32,
     39, 7, 47, 15, 55, 23, 63, 31,
     38, 6, 46, 14, 54, 22, 62, 30,
@@ -53,7 +53,7 @@ const FP:Array<number> = [
  * Permuted-choice 1 from the key bits to yield C and D.
  * NOTE: that bits 8,16... are left out: They are intended for a parity check.
  */
-const PC1_C:Array<number> = [
+const PC1_C: Array<number> = [
     57, 49, 41, 33, 25, 17, 9,
     /* eslint-disable indent */
      1, 58, 50, 42, 34, 26, 18,
@@ -62,7 +62,7 @@ const PC1_C:Array<number> = [
     19, 11,  3, 60, 52, 44, 36
     /* eslint-enable indent,no-multi-spaces */
 ]
-const PC1_D:Array<number> = [
+const PC1_D: Array<number> = [
     63, 55, 47, 39, 31, 23, 15,
     /* eslint-disable indent */
      7, 62, 54, 46, 38, 30, 22,
@@ -72,14 +72,14 @@ const PC1_D:Array<number> = [
     /* eslint-enable indent,no-multi-spaces */
 ]
 // Sequence of shifts used for the key schedule.
-const shifts:Array<number> = [
+const shifts: Array<number> = [
     1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
 ]
 /*
  * Permuted-choice 2, to pick out the bits from the CD array that generate the
  * key schedule.
  */
-const PC2_C:Array<number> = [
+const PC2_C: Array<number> = [
     /* eslint-disable indent,no-multi-spaces */
     14, 17, 11, 24,  1,  5,
      3, 28, 15,  6, 21, 10,
@@ -87,21 +87,21 @@ const PC2_C:Array<number> = [
     16,  7, 27, 20, 13,  2
     /* eslint-enable indent,no-multi-spaces */
 ]
-const PC2_D:Array<number> = [
+const PC2_D: Array<number> = [
     41, 52, 31, 37, 47, 55,
     30, 40, 51, 45, 33, 48,
     44, 49, 39, 56, 34, 53,
     46, 42, 50, 36, 29, 32
 ]
 // The C and D arrays used to calculate the key schedule.
-const C:Array<number> = []
-const D:Array<number> = []
+const C: Array<number> = []
+const D: Array<number> = []
 // The key schedule. Generated from the key.
-const keySchedule:Array<Array<number>> = []
+const keySchedule: Array<Array<number>> = []
 for (let index = 0; index < 16; index++)
     keySchedule[index] = []
 // Set up the key schedule from the key.
-const setKey = (key:Array<number>):void => {
+const setKey = (key: Array<number>): void => {
     /*
      * First, generate C and D by permuting the key. The low order bit of each
      * 8-bit char is not used, so C and D are only 28 bits apiece.
@@ -117,7 +117,7 @@ const setKey = (key:Array<number>):void => {
     for (let index = 0; index < 16; index++) {
         // Rotate
         for (let subIndex = 0; subIndex < shifts[index]; subIndex++) {
-            let t:number = C[0]
+            let t: number = C[0]
             for (let subSubIndex = 0; subSubIndex < 28 - 1; subSubIndex++)
                 C[subSubIndex] = C[subSubIndex + 1]
 
@@ -138,8 +138,8 @@ const setKey = (key:Array<number>):void => {
     }
 }
 // The E bit-selection table.
-const E:Array<number> = []
-const e:Array<number> = [
+const E: Array<number> = []
+const e: Array<number> = [
     /* eslint-disable indent,no-multi-spaces */
     32,  1,  2,  3,  4,  5,
      4,  5,  6,  7,  8,  9,
@@ -155,7 +155,7 @@ const e:Array<number> = [
  * The 8 selection functions. For some reason, they give a 0-origin index,
  * unlike everything else.
  */
-const S:Array<Array<number>> = [
+const S: Array<Array<number>> = [
     [
         /* eslint-disable indent,no-multi-spaces */
         14,  4, 13, 1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9, 0,  7,
@@ -222,7 +222,7 @@ const S:Array<Array<number>> = [
     ]
 ]
 // P is a permutation on the selected combination of the current L and key.
-const P:Array<number> = [
+const P: Array<number> = [
     /* eslint-disable indent,no-multi-spaces */
     16,  7, 20, 21,
     29, 12, 28, 17,
@@ -235,16 +235,16 @@ const P:Array<number> = [
     /* eslint-enable indent,no-multi-spaces */
 ]
 // The current block, divided into 2 halves.
-const L:Array<number> = []
-const R:Array<number> = []
-const tempL:Array<number> = []
-const f:Array<number> = []
+const L: Array<number> = []
+const R: Array<number> = []
+const tempL: Array<number> = []
+const f: Array<number> = []
 // The combination of the key and the input, before selection.
-const preS:Array<number> = []
+const preS: Array<number> = []
 // The payoff: encrypt a block.
-const encrypt = (block:Array<number>, edflag = false):void => {
+const encrypt = (block: Array<number>, edflag = false): void => {
     // First, permute the bits in the input.
-    const perm:Array<number> = []
+    const perm: Array<number> = []
     for (let index = 0; index < 64; index++)
         perm[index] = block[IP[index] - 1]
 
@@ -255,7 +255,7 @@ const encrypt = (block:Array<number>, edflag = false):void => {
     // Perform an encryption operation 16 times.
     for (let index = 0; index < 16; index++) {
         // Set direction
-        const direction:number = edflag ? 15 - index : index
+        const direction: number = edflag ? 15 - index : index
         // Save the R array, which will be the new L.
         for (let index = 0; index < 32; index++)
             tempL[index] = R[index]
@@ -273,8 +273,8 @@ const encrypt = (block:Array<number>, edflag = false):void => {
          * simplified by rewriting the tables.
          */
         for (let index = 0; index < 8; index++) {
-            let t:number = 6 * index
-            const k:number = S[index][
+            let t: number = 6 * index
+            const k: number = S[index][
                 (preS[t/* + 0*/] << 5) +
                 (preS[t + 1] << 3) +
                 (preS[t + 2] << 2) +
@@ -303,7 +303,7 @@ const encrypt = (block:Array<number>, edflag = false):void => {
 
     // The output L and R are reversed.
     for (let index = 0; index < 32; index++) {
-        const t:number = L[index]
+        const t: number = L[index]
         L[index] = R[index]
         R[index] = t
     }
@@ -318,15 +318,15 @@ const encrypt = (block:Array<number>, edflag = false):void => {
         block[index] = perm[FP[index] - 1]
 }
 // Transform a string to an array of bytes.
-const stringToBytes = (string:string):Array<number> => {
-    const result:Array<number> = []
+const stringToBytes = (string: string): Array<number> => {
+    const result: Array<number> = []
 
     for (let index = 0; index < string.length; index++)
         result[index] = string.charCodeAt(index)
 
     return result
 }
-const bytesToStr = (bytes:Array<number>):string =>
+const bytesToStr = (bytes: Array<number>): string =>
     String.fromCharCode(...bytes)
 /**
  * Implements the Unix crypt(3) DES-based hash.
@@ -338,15 +338,15 @@ const bytesToStr = (bytes:Array<number>):string =>
  * @returns Returns crypted or encrypted buffer or string.
  */
 export function unixCrypt(
-    givenPassword:Array<number>|string,
-    givenSalt:Array<number>|string = 'aa',
+    givenPassword: Array<number>|string,
+    givenSalt: Array<number>|string = 'aa',
     returnBytes = false
-):Array<number>|string {
-    const password:Array<number> = typeof givenPassword === 'string' ?
+): Array<number>|string {
+    const password: Array<number> = typeof givenPassword === 'string' ?
         stringToBytes(givenPassword) :
         givenPassword
 
-    let salt:Array<number> = givenSalt as Array<number>
+    let salt: Array<number> = givenSalt as Array<number>
     if (typeof givenSalt === 'string') {
         if (givenSalt === '')
             givenSalt = 'aa'
@@ -354,13 +354,13 @@ export function unixCrypt(
         salt = stringToBytes(givenSalt)
     }
 
-    const block:Array<number> = []
-    const iobuf:Array<number> = []
+    const block: Array<number> = []
+    const iobuf: Array<number> = []
 
     for (let index = 0; index < 66; index++)
         block[index] = 0
 
-    let c:number
+    let c: number
 
     for (
         let index = 0, otherIndex = 0;
@@ -382,7 +382,7 @@ export function unixCrypt(
         E[index] = e[index]
 
     for (let index = 0, otherIndex = 0; index < 2; index++, otherIndex++) {
-        let c:number = salt[otherIndex]
+        let c: number = salt[otherIndex]
         iobuf[index] = c
 
         if (c > 'Z'.charCodeAt(0))
@@ -394,7 +394,7 @@ export function unixCrypt(
 
         for (let subIndex = 0; subIndex < 6; subIndex++)
             if ((c >> subIndex) & 0o1) {
-                const temp:number = E[6 * index + subIndex]
+                const temp: number = E[6 * index + subIndex]
                 E[6 * index + subIndex] = E[6 * index + subIndex + 24]
                 E[6 * index + subIndex + 24] = temp
             }

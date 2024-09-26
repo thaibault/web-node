@@ -39,11 +39,11 @@ import {
 } from './type'
 // endregion
 
-declare const ORIGINAL_MAIN_MODULE:object
+declare const ORIGINAL_MAIN_MODULE: object
 
 const handleError = async (
-    state:Omit<ServicePromisesState<Error>, 'hook'|'pluginAPI'>
-):Promise<void> => {
+    state: Omit<ServicePromisesState<Error>, 'hook'|'pluginAPI'>
+): Promise<void> => {
     try {
         await callStack<ServicePromisesState<Error>>(
             {...state, hook: 'error'}
@@ -55,11 +55,11 @@ const handleError = async (
             console.error(error)
     }
 }
-export const main = async ():Promise<void> => {
+export const main = async (): Promise<void> => {
     // region load plugins
-    const {configuration, plugins}:{
-        configuration:Configuration
-        plugins:Array<Plugin>
+    const {configuration, plugins}: {
+        configuration: Configuration
+        plugins: Array<Plugin>
     } = await loadAll(copy(baseConfiguration))
 
     await callStack<BaseState>({configuration, hook: 'initialize', plugins})
@@ -68,13 +68,13 @@ export const main = async ():Promise<void> => {
         console.info(
             'Loaded plugins: "' +
             plugins
-                .map((plugin:Plugin):string => plugin.internalName)
+                .map((plugin: Plugin): string => plugin.internalName)
                 .join('", "') +
             '".'
         )
 
-    const pluginsWithChangedConfiguration:Array<Plugin> =
-        plugins.filter((plugin:Plugin):boolean => Boolean(
+    const pluginsWithChangedConfiguration: Array<Plugin> =
+        plugins.filter((plugin: Plugin): boolean => Boolean(
             plugin.configurationFilePaths.length
         ))
     for (const type of ['pre', 'post'] as const)
@@ -85,8 +85,8 @@ export const main = async ():Promise<void> => {
             pluginsWithChangedConfiguration
         })
     // endregion
-    const services:Services = {}
-    const servicePromises:ServicePromises = {}
+    const services: Services = {}
+    const servicePromises: ServicePromises = {}
     let exitTriggered = false
     try {
         // region start services
@@ -109,7 +109,7 @@ export const main = async ():Promise<void> => {
                     services
                 })
 
-                let result:null|PluginPromises = null
+                let result: null|PluginPromises = null
                 try {
                     result = await (plugin.api as APIFunction<
                         Promise<null|PluginPromises>
@@ -122,9 +122,13 @@ export const main = async ():Promise<void> => {
                         services
                     })
                 } catch (error) {
-                    if (!(error as {message?:string}|null)?.message?.startsWith(
-                        'NotImplemented:'
-                    ))
+                    if (
+                        !(
+                            error as {message?: string}|null
+                        )?.message?.startsWith(
+                            'NotImplemented:'
+                        )
+                    )
                         throw new Error(
                             `Plugin "${plugin.internalName}" ` +
                             (
@@ -169,7 +173,7 @@ export const main = async ():Promise<void> => {
         // endregion
         // region register close handler
         let finished = false
-        const closeHandler = ():void => {
+        const closeHandler = (): void => {
             if (!finished)
                 callStackSynchronous({
                     configuration,
@@ -197,8 +201,8 @@ export const main = async ():Promise<void> => {
             process.stdin.setRawMode(true)
         process.stdin.resume()
         process.stdin.setEncoding(configuration.core.encoding)
-        process.stdin.on('data', (key:string):void => {
-            void (async ():Promise<void> => {
+        process.stdin.on('data', (key: string): void => {
+            void (async (): Promise<void> => {
                 if (key === '\u0003') {
                     if (cancelTriggered)
                         console.warn('Stopping ungracefully.')
@@ -229,7 +233,7 @@ export const main = async ():Promise<void> => {
         try {
             await Promise.all(
                 Object.keys(servicePromises)
-                    .map((name:string):Promise<unknown> =>
+                    .map((name: string): Promise<unknown> =>
                         servicePromises[name]
                     )
             )

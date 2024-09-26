@@ -21,7 +21,7 @@ describe('configurator', () => {
     test('main', () => {
         expect(typeof (
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            require('../configurator') as {default:Configuration}
+            require('../configurator') as {default: Configuration}
         ).default.core.debug).toStrictEqual('boolean')
     })
 })

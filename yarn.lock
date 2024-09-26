@@ -10248,7 +10248,7 @@ __metadata:
     jsdoc: "npm:^4.0.3"
     shx: "npm:^0.3.4"
     typescript-eslint: "npm:^8.7.0"
-    weboptimizer: "npm:^2.0.1512"
+    weboptimizer: "npm:^2.0.1515"
   peerDependencies:
     "@babel/runtime": "*"
     clientnode: "*"
@@ -10267,9 +10267,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"weboptimizer@npm:^2.0.1512":
-  version: 2.0.1512
-  resolution: "weboptimizer@npm:2.0.1512"
+"weboptimizer@npm:^2.0.1515":
+  version: 2.0.1515
+  resolution: "weboptimizer@npm:2.0.1515"
   dependencies:
     "@babel/core": "npm:^7.25.2"
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
@@ -10408,7 +10408,7 @@ __metadata:
       optional: true
   bin:
     weboptimizer: index.js
-  checksum: 10c0/739925f570a85197086315690477ca09a5377d6ce0cc2ee61993f98617291227f022f0dca637899e3cbdd7f35893c259a04bbec9f5b122516dbd6213e0defce3
+  checksum: 10c0/d88c67870a34d88fd9c300f26f201a2597d130769472e174f779f1524686189360f1b32d244cf1110b950b5d34424a29d9f6ac9fcd4589cf60f4b7637a2750ed
   languageName: node
   linkType: hard
 

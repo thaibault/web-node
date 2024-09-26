@@ -44,17 +44,17 @@ import pluginAPI, {
 export type EvaluateConfigurationScope =
     typeof UTILITY_SCOPE &
     {
-        currentPath:string
-        fs:typeof import('fs')
-        path:typeof import('path')
-        pluginAPI:typeof pluginAPI
-        webNodePath:string
-        now:Date
-        nowUTCTimestamp:number
+        currentPath: string
+        fs: typeof import('fs')
+        path: typeof import('path')
+        pluginAPI: typeof pluginAPI
+        webNodePath: string
+        now: Date
+        nowUTCTimestamp: number
     }
 export interface MetaPluginConfiguration {
-    fileNames:Array<string>
-    propertyNames:Array<string>
+    fileNames: Array<string>
+    propertyNames: Array<string>
 }
 /**
  * NOTE: This interface should be extended by plugins to specify their
@@ -62,80 +62,80 @@ export interface MetaPluginConfiguration {
  * Can be recursive evaluateable.
  */
 export interface PluginConfiguration {
-    dependencies?:Array<string>
-    name?:string
-    package:PackageConfiguration
+    dependencies?: Array<string>
+    name?: string
+    package: PackageConfiguration
 }
 export interface WebNodeConfiguration extends PluginConfiguration {
-    context:{
-        path:string
-        type:string
+    context: {
+        path: string
+        type: string
     }
-    debug:boolean
-    encoding:Encoding
-    interDependencies:Mapping<Array<string>|string>
-    name:string
-    plugin:{
-        configuration:MetaPluginConfiguration
-        directories:Mapping<{
-            nameRegularExpressionPattern:string
-            path:string
+    debug: boolean
+    encoding: Encoding
+    interDependencies: Mapping<Array<string>|string>
+    name: string
+    plugin: {
+        configuration: MetaPluginConfiguration
+        directories: Mapping<{
+            nameRegularExpressionPattern: string
+            path: string
         }>
-        hotReloading:boolean
+        hotReloading: boolean
     }
-    runtimeConfiguration?:EvaluateablePartialConfiguration
+    runtimeConfiguration?: EvaluateablePartialConfiguration
 }
 export type Configuration<PluginConfigurationType = Mapping<unknown>> =
     {
-        core:WebNodeConfiguration
-        name:string
+        core: WebNodeConfiguration
+        name: string
     } &
     PluginConfigurationType &
     Mapping<PluginConfiguration>
 export type EvaluateablePartialConfiguration =
     {
-        core?:RecursiveEvaluateable<RecursivePartial<WebNodeConfiguration>>
-        name?:string
+        core?: RecursiveEvaluateable<RecursivePartial<WebNodeConfiguration>>
+        name?: string
     } &
     Mapping<PluginConfiguration>
 export type PackageConfiguration =
     Mapping<unknown> &
     {
-        documentationWebsite?:{name?:string}
-        main?:string
-        name?:string
-        webnode?:EvaluateablePartialConfiguration
-        webNode?:EvaluateablePartialConfiguration
-        webNodeInternalName?:string
-        'web-node'?:EvaluateablePartialConfiguration
+        documentationWebsite?: {name?: string}
+        main?: string
+        name?: string
+        webnode?: EvaluateablePartialConfiguration
+        webNode?: EvaluateablePartialConfiguration
+        webNodeInternalName?: string
+        'web-node'?: EvaluateablePartialConfiguration
     }
 
 export interface Plugin {
-    api:APIFunction|null
-    apiFilePaths:Array<string>
-    apiFileLoadTimestamps:Array<number>
+    api: APIFunction|null
+    apiFilePaths: Array<string>
+    apiFileLoadTimestamps: Array<number>
 
-    configuration:EvaluateablePartialConfiguration
-    configurationFileLoadTimestamps:Array<number>
-    configurationFilePaths:Array<string>
-    packageConfiguration:PackageConfiguration
+    configuration: EvaluateablePartialConfiguration
+    configurationFileLoadTimestamps: Array<number>
+    configurationFilePaths: Array<string>
+    packageConfiguration: PackageConfiguration
 
-    dependencies:Array<string>
+    dependencies: Array<string>
 
-    internalName:string
-    name:string
+    internalName: string
+    name: string
 
-    path:string
+    path: string
 
-    scope:null|object
+    scope: null|object
 }
 export interface PluginChange {
-    newScope:object
-    oldScope:null|object
+    newScope: object
+    oldScope: null|object
 
-    plugin:Plugin
+    plugin: Plugin
 
-    target:'packageConfiguration'|'scope'
+    target: 'packageConfiguration'|'scope'
 }
 
 // Holds promises regarding one plugin.
@@ -155,59 +155,59 @@ export interface BaseState<
         Mutable configuration object. Extended by each plugin specific
         configuration.
     */
-    configuration:ConfigurationType
-    data?:Type
-    hook:string
+    configuration: ConfigurationType
+    data?: Type
+    hook: string
     // Topological sorted list of plugins.
-    plugins:Array<Plugin>
+    plugins: Array<Plugin>
     // Plugin api reference.
-    pluginAPI:{
+    pluginAPI: {
         /*
             NOTE: We need to list any exported member explicitly to break a
             dependency circle.
         */
-        callStack:typeof callStack
-        callStackSynchronous:typeof callStackSynchronous
+        callStack: typeof callStack
+        callStackSynchronous: typeof callStackSynchronous
 
-        determineInternalName:typeof determineInternalName
-        determineLocations:typeof determineLocations
+        determineInternalName: typeof determineInternalName
+        determineLocations: typeof determineLocations
 
-        evaluateConfiguration:typeof evaluateConfiguration
+        evaluateConfiguration: typeof evaluateConfiguration
 
-        hotReloadAPIFile:typeof hotReloadAPIFile
-        hotReloadConfigurationFile:typeof hotReloadConfigurationFile
-        hotReloadFiles:typeof hotReloadFiles
+        hotReloadAPIFile: typeof hotReloadAPIFile
+        hotReloadConfigurationFile: typeof hotReloadConfigurationFile
+        hotReloadFiles: typeof hotReloadFiles
 
-        isInLocations:typeof isInLocations
+        isInLocations: typeof isInLocations
 
-        load:typeof load
-        loadAll:typeof loadAll
-        loadAPI:typeof loadAPI
-        loadConfiguration:typeof loadConfiguration
-        loadConfigurations:typeof loadConfigurations
-        loadFile:typeof loadFile
+        load: typeof load
+        loadAll: typeof loadAll
+        loadAPI: typeof loadAPI
+        loadConfiguration: typeof loadConfiguration
+        loadConfigurations: typeof loadConfigurations
+        loadFile: typeof loadFile
     }
 }
 export interface ChangedState<
     Type = unknown, ConfigurationType extends Configuration = Configuration
 > extends BaseState<Type, ConfigurationType> {
-    triggerHook?:string
+    triggerHook?: string
 }
 export interface ChangedConfigurationState<
     Type = unknown, ConfigurationType extends Configuration = Configuration
 > extends ChangedState<Type, ConfigurationType> {
     // List of plugins which have a changed plugin configuration.
-    pluginsWithChangedConfiguration:Array<Plugin>
+    pluginsWithChangedConfiguration: Array<Plugin>
 }
 export interface ChangedAPIFileState<
     Type = unknown, ConfigurationType extends Configuration = Configuration
 > extends ChangedState<Type, ConfigurationType> {
     // List of plugins which have a changed plugin api file.
-    pluginsWithChangedAPIFiles:Array<Plugin>
+    pluginsWithChangedAPIFiles: Array<Plugin>
 }
 export type APIFunction<
     Output = unknown, State extends BaseState<unknown> = ServicePromisesState
-> = (state:State, ...parameters:Array<unknown>) => Output
+> = (state: State, ...parameters: Array<unknown>) => Output
 
 export interface ServicesState<
     Type = undefined,
@@ -215,7 +215,7 @@ export interface ServicesState<
     ServicesType extends Services = Services
 > extends BaseState<Type, ConfigurationType> {
     // An object with stored service instances.
-    services:ServicesType
+    services: ServicesType
 }
 export interface ServicePromisesState<
     Type = undefined,
@@ -224,7 +224,7 @@ export interface ServicePromisesState<
     ServicePromisesType extends ServicePromises = ServicePromises
 > extends ServicesState<Type, ConfigurationType, ServicesType> {
     // An intermediate object with yet stored service promise instances.
-    servicePromises:ServicePromisesType
+    servicePromises: ServicePromisesType
 }
 /* eslint-disable jsdoc/require-description-complete-sentence */
 /**
@@ -269,7 +269,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    initialize?(state:BaseState):Promise<void>
+    initialize?(state: BaseState): Promise<void>
     /**
      * Triggered hook when at least one plugin has a configuration file and
      * configuration object has been initialized. Asynchronous tasks are
@@ -277,7 +277,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    preConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
+    preConfigurationLoaded?(state: ChangedConfigurationState): Promise<void>
     /**
      * Triggered hook when at least one plugin has a configuration file and
      * configuration object has been initialized. Asynchronous tasks are
@@ -285,7 +285,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    postConfigurationLoaded?(state:ChangedConfigurationState):Promise<void>
+    postConfigurationLoaded?(state: ChangedConfigurationState): Promise<void>
     /**
      * Plugins are initialized now and plugins should initialize their
      * continues running services (if they have one). Asynchronous tasks are
@@ -294,7 +294,7 @@ export interface PluginHandler {
      * @returns Promise resolving to given and maybe extended object of
      * services.
      */
-    preLoadService?(state:ServicesState):Promise<void>
+    preLoadService?(state: ServicesState): Promise<void>
     /**
      * Plugins are initialized now and plugins should initialize their
      * continues running services (if they have one). Asynchronous tasks are
@@ -304,7 +304,7 @@ export interface PluginHandler {
      * services.
      */
     /*
-    preLoad**PLUGIN_NAME**Service?(state:ServicesState):Promise<void>
+    preLoad**PLUGIN_NAME**Service?(state: ServicesState): Promise<void>
     */
     /**
      * Plugins have initialized their continues running service and should
@@ -316,7 +316,7 @@ export interface PluginHandler {
      * @returns A mapping to promises which correspond to the plugin specific
      * continues services.
      */
-    loadService?(state:ServicePromisesState):Promise<null|PluginPromises>
+    loadService?(state: ServicePromisesState): Promise<null|PluginPromises>
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.
@@ -325,7 +325,7 @@ export interface PluginHandler {
      * service.
      */
     /*
-    postLoad**PLUGIN_NAME**Service?(state:ServicePromisesState):Promise<void>
+    postLoad**PLUGIN_NAME**Service?(state: ServicePromisesState): Promise<void>
     */
     /**
      * Plugins have launched their continues running services and returned a
@@ -334,7 +334,7 @@ export interface PluginHandler {
      * @returns A promise which correspond to the plugin specific continues
      * service promises.
      */
-    postLoadService?(state:ServicePromisesState):Promise<void>
+    postLoadService?(state: ServicePromisesState): Promise<void>
 
     /**
      * Triggered hook when at least one plugin has a new configuration file and
@@ -343,7 +343,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    preConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
+    preConfigurationHotLoaded?(state: ChangedConfigurationState): Promise<void>
     /**
      * Triggered hook when at least one plugin has a new configuration file and
      * configuration object has been changed. Asynchronous tasks are allowed
@@ -351,7 +351,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    postConfigurationHotLoaded?(state:ChangedConfigurationState):Promise<void>
+    postConfigurationHotLoaded?(state: ChangedConfigurationState): Promise<void>
 
     /**
      * Triggered hook when at least one plugin has an api file which has been
@@ -360,7 +360,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    apiFileReloaded?(state:ChangedAPIFileState):Promise<void>
+    apiFileReloaded?(state: ChangedAPIFileState): Promise<void>
 
     /**
      * Application has thrown an error and will be closed soon. Asynchronous
@@ -368,7 +368,7 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    error?(state:ServicesState):Promise<void>
+    error?(state: ServicesState): Promise<void>
 
     /**
      * Triggers if application will be closed soon. Asynchronous tasks are
@@ -376,14 +376,14 @@ export interface PluginHandler {
      * @param state - Application state.
      * @returns Promise resolving to nothing.
      */
-    shouldExit?(state:ServicePromisesState):Promise<void>
+    shouldExit?(state: ServicePromisesState): Promise<void>
     /**
      * Triggers if application will be closed immediately no asynchronous tasks
      * allowed anymore.
      * @param state - Application state.
      * @returns Nothing.
      */
-    exit?(state:ServicePromisesState):void
+    exit?(state: ServicePromisesState): void
 }
 /* eslint-enable jsdoc/require-description-complete-sentence */
 // endregion

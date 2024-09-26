@@ -85,7 +85,7 @@ else
         // Ignore error.
     }
 
-let mainPackageConfiguration:PackageConfiguration = {name: 'main'}
+let mainPackageConfiguration: PackageConfiguration = {name: 'main'}
 try {
     // @ts-expect-error "currentRequire" may not be set.
     mainPackageConfiguration = currentRequire(join(
@@ -95,12 +95,12 @@ try {
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
 
-const name:string =
+const name: string =
     mainPackageConfiguration.documentationWebsite?.name ||
     mainPackageConfiguration.name ||
     'main'
 
-const applicationConfiguration:EvaluateablePartialConfiguration =
+const applicationConfiguration: EvaluateablePartialConfiguration =
     mainPackageConfiguration.webNode ||
     {[name]: {
         name,
@@ -109,8 +109,8 @@ const applicationConfiguration:EvaluateablePartialConfiguration =
 // endregion
 webNodePackageConfiguration.webNode.core.name =
     webNodePackageConfiguration.documentationWebsite.name
-const now:Date = new Date()
-const scope:EvaluateConfigurationScope = {
+const now: Date = new Date()
+const scope: EvaluateConfigurationScope = {
     ...UTILITY_SCOPE,
     currentPath: process.cwd(),
     fs: fileSystemSynchronous,
@@ -120,7 +120,7 @@ const scope:EvaluateConfigurationScope = {
     now,
     nowUTCTimestamp: getUTCTimestamp(now)
 }
-export let configuration:Configuration =
+export let configuration: Configuration =
     evaluateDynamicData<Configuration>(
         webNodePackageConfiguration.webNode as
             unknown as
@@ -138,7 +138,7 @@ extend<Configuration>(
 
 const result = {}
 for (const argument of process.argv.slice(1)) {
-    const subResult:null|EvaluateablePartialConfiguration =
+    const subResult: null|EvaluateablePartialConfiguration =
         parseEncodedObject<EvaluateablePartialConfiguration>(
             argument, configuration, 'configuration'
         )

@@ -62,13 +62,13 @@ export const currentRequire = eval('require') as typeof require
 // region allow plugins to import "web-node" as already loaded main module
 type ModuleType =
     typeof Module &
-    {_resolveFilename:(request:string, module:typeof Module, isMain:boolean) =>
-        string
-    }
+    {_resolveFilename: (
+        request: string, module: typeof Module, isMain: boolean
+    ) => string}
 const oldResolveFilename = (Module as ModuleType)._resolveFilename
 ;(Module as ModuleType)._resolveFilename = (
-    request:string, parent:typeof Module, isMain:boolean
-):string => {
+    request: string, parent: typeof Module, isMain: boolean
+): string => {
     if (request === 'web-node' && currentRequire.main?.id)
         return oldResolveFilename(currentRequire.main.id, parent, isMain)
 
@@ -86,18 +86,18 @@ const oldResolveFilename = (Module as ModuleType)._resolveFilename
 export const callStack = async <
     State extends BaseState<unknown> = ServicePromisesState, Output = void
 >(
-    givenState:Omit<State, 'pluginAPI'>, ...parameters:Array<unknown>
-):Promise<Output> => {
+    givenState: Omit<State, 'pluginAPI'>, ...parameters: Array<unknown>
+): Promise<Output> => {
     const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 
-    const isConfigurationHook:boolean =
+    const isConfigurationHook: boolean =
         hook.endsWith('ConfigurationLoaded') ||
         hook.endsWith('ConfigurationHotLoaded')
 
     if (configuration.core.plugin.hotReloading) {
         if (!isConfigurationHook) {
-            const pluginsWithChangedConfiguration:Array<Plugin> =
+            const pluginsWithChangedConfiguration: Array<Plugin> =
                 hotReloadConfigurationFile(
                     plugins,
                     configuration.core.plugin.configuration.propertyNames
@@ -108,12 +108,12 @@ export const callStack = async <
                     console.info(
                         'Configuration for "' +
                         pluginsWithChangedConfiguration
-                            .map((plugin:Plugin):string => plugin.name)
+                            .map((plugin: Plugin): string => plugin.name)
                             .join('", "') +
                         '" has been changed: reloading initialized.'
                     )
 
-                const localState:State & ChangedConfigurationState = {
+                const localState: State & ChangedConfigurationState = {
                     ...state,
                     triggerHook: state.hook,
                     pluginsWithChangedConfiguration
@@ -132,7 +132,7 @@ export const callStack = async <
         }
 
         if (hook !== 'apiFileReloaded') {
-            const pluginsWithChangedAPIFiles:Array<Plugin> =
+            const pluginsWithChangedAPIFiles: Array<Plugin> =
                 hotReloadAPIFile(plugins)
 
             if (pluginsWithChangedAPIFiles.length) {
@@ -140,8 +140,8 @@ export const callStack = async <
                     console.info(
                         'API-file for "' +
                         `${pluginsWithChangedAPIFiles.map((
-                            plugin:Plugin
-                        ):string => plugin.name).join('", "')}" ` +
+                            plugin: Plugin
+                        ): string => plugin.name).join('", "')}" ` +
                         'has been changed: reloading initialized.'
                     )
 
@@ -155,10 +155,10 @@ export const callStack = async <
         }
     }
 
-    let data:Output = givenState.data as unknown as Output
+    let data: Output = givenState.data as unknown as Output
     for (const plugin of plugins)
         if (plugin.api) {
-            let result:Output
+            let result: Output
             try {
                 result = await (
                     plugin.api as
@@ -166,7 +166,7 @@ export const callStack = async <
                         APIFunction<Promise<Output>, State>
                 )(state, ...parameters)
             } catch (error) {
-                if ((error as {message?:string}).message?.startsWith(
+                if ((error as {message?: string}).message?.startsWith(
                     'NotImplemented:'
                 ))
                     continue
@@ -203,21 +203,21 @@ export const callStack = async <
 export const callStackSynchronous = <
     State extends BaseState<unknown> = ServicePromisesState, Output = void
 >(
-        givenState:Omit<State, 'pluginAPI'>, ...parameters:Array<unknown>
-    ):Output => {
+        givenState: Omit<State, 'pluginAPI'>, ...parameters: Array<unknown>
+    ): Output => {
     const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 
-    let data:Output = givenState.data as unknown as Output
+    let data: Output = givenState.data as unknown as Output
     for (const plugin of plugins)
         if (plugin.api) {
-            let result:Output
+            let result: Output
             try {
                 result = (plugin.api as unknown as APIFunction<Output, State>)(
                     state, ...parameters
                 )
             } catch (error) {
-                if ((error as {message?:string}).message?.startsWith(
+                if ((error as {message?: string}).message?.startsWith(
                     'NotImplemented:'
                 ))
                     continue
@@ -253,11 +253,11 @@ export const callStackSynchronous = <
  * @returns Transformed name.
  */
 export const determineInternalName = (
-    name:string, regularExpression:RegExp
-):string => {
+    name: string, regularExpression: RegExp
+): string => {
     return delimitedToCamelCase(name.replace(
         regularExpression,
-        (fullMatch:string, firstMatch:string|number):string =>
+        (fullMatch: string, firstMatch: string|number): string =>
             typeof firstMatch === 'string' ? firstMatch : fullMatch
     ))
 }
@@ -269,13 +269,13 @@ export const determineInternalName = (
  */
 export const evaluateConfiguration = <
     Type extends Mapping<unknown> = Configuration
->(configuration:RecursiveEvaluateable<Type>|Type):Type => {
+>(configuration: RecursiveEvaluateable<Type>|Type): Type => {
     /*
         NOTE: We have to back up, remove and restore all plugin specific
         package configuration to avoid evaluation non web node#
         configuration structures.
     */
-    const pluginPackageConfigurationBackup:Mapping<PackageConfiguration> = {}
+    const pluginPackageConfigurationBackup: Mapping<PackageConfiguration> = {}
     for (const [name, subConfiguration] of Object.entries(configuration))
         if ((subConfiguration as Partial<PluginConfiguration>).package) {
             pluginPackageConfigurationBackup[name] =
@@ -314,9 +314,9 @@ export const evaluateConfiguration = <
  * @param plugins - List of plugins to search for updates in.
  * @returns A list with plugins which have a changed api scope.
  */
-export const hotReloadAPIFile = (plugins:Array<Plugin>):Array<Plugin> => {
-    const pluginsWithChangedFiles:Array<Plugin> = []
-    const pluginChanges:Array<PluginChange> =
+export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
+    const pluginsWithChangedFiles: Array<Plugin> = []
+    const pluginChanges: Array<PluginChange> =
         hotReloadFiles('api', 'scope', plugins)
 
     for (const pluginChange of pluginChanges)
@@ -347,10 +347,10 @@ export const hotReloadAPIFile = (plugins:Array<Plugin>):Array<Plugin> => {
  * @returns A list with plugins which have a changed configurations.
  */
 export const hotReloadConfigurationFile = (
-    plugins:Array<Plugin>, configurationPropertyNames:Array<string>
-):Array<Plugin> => {
-    const pluginsWithChangedFiles:Array<Plugin> = []
-    const pluginChanges:Array<PluginChange> = hotReloadFiles(
+    plugins: Array<Plugin>, configurationPropertyNames: Array<string>
+): Array<Plugin> => {
+    const pluginsWithChangedFiles: Array<Plugin> = []
+    const pluginChanges: Array<PluginChange> = hotReloadFiles(
         'configuration', 'packageConfiguration', plugins
     )
 
@@ -375,17 +375,17 @@ export const hotReloadConfigurationFile = (
  * @returns A list with plugin changes.
  */
 export const hotReloadFiles = (
-    type:'api'|'configuration',
-    target:'packageConfiguration'|'scope',
-    plugins:Array<Plugin>
-):Array<PluginChange> => {
-    const pluginChanges:Array<PluginChange> = []
+    type: 'api'|'configuration',
+    target: 'packageConfiguration'|'scope',
+    plugins: Array<Plugin>
+): Array<PluginChange> => {
+    const pluginChanges: Array<PluginChange> = []
     for (const plugin of plugins)
         if (plugin[target]) {
             let index = 0
 
             for (const filePath of plugin[`${type}FilePaths`]) {
-                const timestamp:number = statSync(filePath).mtime.getTime()
+                const timestamp: number = statSync(filePath).mtime.getTime()
 
                 if (
                     plugin[`${type}FileLoadTimestamps`][index] < timestamp
@@ -395,7 +395,7 @@ export const hotReloadFiles = (
                         currentRequire.resolve(filePath)
                     ]
 
-                    const oldScope:ValueOf<Plugin> = plugin[target]
+                    const oldScope: ValueOf<Plugin> = plugin[target]
 
                     plugin[target] = loadFile(
                         filePath, plugin.name, plugin[target]
@@ -429,18 +429,18 @@ export const hotReloadFiles = (
  * @returns An object of plugin specific meta information.
  */
 export const load = async (
-    name:string,
-    internalName:string,
-    plugins:Mapping<Plugin>,
-    metaConfiguration:MetaPluginConfiguration,
-    pluginPath:string,
-    encoding:Encoding = 'utf8'
-):Promise<Plugin> => {
-    const configurationFilePaths:Array<string> = []
-    const packageConfiguration:PackageConfiguration = {}
+    name: string,
+    internalName: string,
+    plugins: Mapping<Plugin>,
+    metaConfiguration: MetaPluginConfiguration,
+    pluginPath: string,
+    encoding: Encoding = 'utf8'
+): Promise<Plugin> => {
+    const configurationFilePaths: Array<string> = []
+    const packageConfiguration: PackageConfiguration = {}
 
     for (const fileName of metaConfiguration.fileNames) {
-        const filePath:string = resolve(pluginPath, fileName)
+        const filePath: string = resolve(pluginPath, fileName)
 
         if (await isFile(filePath)) {
             extend(true, packageConfiguration, loadFile(filePath, name))
@@ -449,13 +449,13 @@ export const load = async (
         }
     }
 
-    const apiFilePaths:Array<string> = ['index.js']
+    const apiFilePaths: Array<string> = ['index.js']
 
     if (Object.keys(packageConfiguration).length) {
         internalName =
             packageConfiguration.webNodeInternalName || internalName
 
-        const configuration:EvaluateablePartialConfiguration =
+        const configuration: EvaluateablePartialConfiguration =
             loadConfiguration(
                 internalName,
                 packageConfiguration,
@@ -502,21 +502,21 @@ export const load = async (
  * @returns Plugin meta information object.
  */
 export const loadAPI = async (
-    relativeFilePaths:Array<string>,
-    pluginPath:string,
-    name:string,
-    internalName:string,
-    plugins:Mapping<Plugin>,
-    encoding:Encoding = 'utf8',
-    configuration:null|EvaluateablePartialConfiguration = null,
-    configurationFilePaths:Array<string> = []
-):Promise<Plugin> => {
-    let filePath:string = resolve(pluginPath, relativeFilePaths[0])
+    relativeFilePaths: Array<string>,
+    pluginPath: string,
+    name: string,
+    internalName: string,
+    plugins: Mapping<Plugin>,
+    encoding: Encoding = 'utf8',
+    configuration: null|EvaluateablePartialConfiguration = null,
+    configurationFilePaths: Array<string> = []
+): Promise<Plugin> => {
+    let filePath: string = resolve(pluginPath, relativeFilePaths[0])
     if (!(await isFile(filePath)))
         // Determine entry file if given one does not exist.
         for (const fileName of readdirSync(pluginPath))
             if (
-                !configurationFilePaths.map((filePath:string):string =>
+                !configurationFilePaths.map((filePath: string): string =>
                     basename(filePath)
                 ).includes(fileName) &&
                 await isFile(resolve(pluginPath, fileName))
@@ -529,7 +529,7 @@ export const loadAPI = async (
                     break
             }
 
-    let api:APIFunction|null = null
+    let api: APIFunction|null = null
     let nativeAPI = false
 
     if (
@@ -552,7 +552,7 @@ export const loadAPI = async (
     )
         if (filePath.endsWith('.js')) {
             nativeAPI = true
-            api = (state, ...parameters:Array<unknown>) => {
+            api = (state, ...parameters: Array<unknown>) => {
                 if (plugins[name].scope && state.hook in plugins[name].scope)
                     return (
                         plugins[name].scope as
@@ -567,14 +567,14 @@ export const loadAPI = async (
             }
         } else
             // NOTE: Any executable file can represent an api.
-            api = ({hook, data}, ...parameters:Array<unknown>) => {
-                const childProcessResult:SpawnSyncReturns<string> =
+            api = ({hook, data}, ...parameters: Array<unknown>) => {
+                const childProcessResult: SpawnSyncReturns<string> =
                     spawnChildProcessSync(
                         filePath,
                         [
                             hook,
                             ...(parameters.map(
-                                (item:unknown):string =>
+                                (item: unknown): string =>
                                     JSON.stringify(item)
                             ))
                         ],
@@ -602,7 +602,7 @@ export const loadAPI = async (
                 return data
             }
 
-    const pluginConfiguration:EvaluateablePartialConfiguration =
+    const pluginConfiguration: EvaluateablePartialConfiguration =
         configuration ?? {[internalName]: {package: {}}}
 
     return {
@@ -614,7 +614,7 @@ export const loadAPI = async (
         configuration: pluginConfiguration,
         configurationFilePaths,
         configurationFileLoadTimestamps:
-            configurationFilePaths.map((filePath:string):number =>
+            configurationFilePaths.map((filePath: string): number =>
                 statSync(filePath).mtime.getTime()
             ),
 
@@ -646,19 +646,19 @@ export const loadAPI = async (
  * @returns Determined configuration object.
  */
 export const loadConfiguration = (
-    name:string,
-    packageConfiguration:PackageConfiguration,
-    configurationPropertyNames:Array<string>
-):EvaluateablePartialConfiguration => {
+    name: string,
+    packageConfiguration: PackageConfiguration,
+    configurationPropertyNames: Array<string>
+): EvaluateablePartialConfiguration => {
     /*
         No plugin specific configuration found. Only provide package
         configuration.
         Removing comments (default key prefix to delete is "#").
     */
-    const packageConfigurationCopy:PackageConfiguration =
+    const packageConfigurationCopy: PackageConfiguration =
         removeKeyPrefixes(copy(packageConfiguration))
 
-    const result:EvaluateablePartialConfiguration = {
+    const result: EvaluateablePartialConfiguration = {
         [name]: {package: packageConfigurationCopy}
     }
 
@@ -690,8 +690,8 @@ export const loadConfiguration = (
  * @returns Updated given configuration object.
  */
 export const loadConfigurations = (
-    plugins:Array<Plugin>, configuration:Configuration
-):Configuration => {
+    plugins: Array<Plugin>, configuration: Configuration
+): Configuration => {
     /*
         First clear current configuration content key by key to let old top
         level configuration reference in usable.
@@ -702,7 +702,7 @@ export const loadConfigurations = (
 
     for (const plugin of plugins)
         if (Object.prototype.hasOwnProperty.call(plugin, 'configuration')) {
-            const pluginConfiguration:EvaluateablePartialConfiguration =
+            const pluginConfiguration: EvaluateablePartialConfiguration =
                 copy(plugin.configuration)
 
             extend<Configuration>(
@@ -746,9 +746,12 @@ export const loadConfigurations = (
  * @returns Exported api file scope.
  */
 export const loadFile = (
-    filePath:string, name:string, fallbackScope:null|object = null, log = true
-):object => {
-    let reference:string|undefined
+    filePath: string,
+    name: string,
+    fallbackScope: null|object = null,
+    log = true
+): object => {
+    let reference: string|undefined
     try {
         reference = currentRequire.resolve(filePath)
     } catch (_error) {
@@ -759,7 +762,7 @@ export const loadFile = (
     if (reference && reference in currentRequire.cache)
         delete currentRequire.cache[reference]
 
-    let scope:object
+    let scope: object
     try {
         scope = currentRequire(filePath) as object
     } catch (error) {
@@ -780,7 +783,7 @@ export const loadFile = (
     }
 
     if (Object.prototype.hasOwnProperty.call(scope, 'default'))
-        return (scope as {default:object}).default
+        return (scope as {default: object}).default
 
     return scope
 }
@@ -791,11 +794,11 @@ export const loadFile = (
  * @param configuration - Configuration object to extend and use.
  * @returns A topological sorted list of plugins objects.
  */
-export const loadAll = async (configuration:Configuration):Promise<{
-    configuration:Configuration
-    plugins:Array<Plugin>
+export const loadAll = async (configuration: Configuration): Promise<{
+    configuration: Configuration
+    plugins: Array<Plugin>
 }> => {
-    const plugins:Mapping<Plugin> = {}
+    const plugins: Mapping<Plugin> = {}
     /*
         Load main plugin configuration at first.
 
@@ -828,10 +831,10 @@ export const loadAll = async (configuration:Configuration):Promise<{
                 if (!(compiledRegularExpression).test(pluginName))
                     continue
 
-                const currentPluginPath:string = resolve(
+                const currentPluginPath: string = resolve(
                     directory.path, pluginName
                 )
-                const internalName:string = determineInternalName(
+                const internalName: string = determineInternalName(
                     pluginName, compiledRegularExpression
                 )
 
@@ -846,7 +849,7 @@ export const loadAll = async (configuration:Configuration):Promise<{
             }
         }
 
-    const temporaryPlugins:Mapping<Array<string>> = {}
+    const temporaryPlugins: Mapping<Array<string>> = {}
 
     for (const plugin of Object.values(plugins)) {
         temporaryPlugins[plugin.internalName] = plugin.dependencies
@@ -863,7 +866,7 @@ export const loadAll = async (configuration:Configuration):Promise<{
                     temporaryPlugins[plugin.internalName].push(name)
     }
 
-    const sortedPlugins:Array<Plugin> = []
+    const sortedPlugins: Array<Plugin> = []
 
     for (const pluginName of sortTopological(temporaryPlugins))
         for (const [name, plugin] of Object.entries(plugins))
@@ -889,13 +892,13 @@ export const loadAll = async (configuration:Configuration):Promise<{
  * @returns Given and processed locations.
  */
 export const determineLocations = (
-    {core: {context: {path: contextPath}}}:Configuration,
-    locations:Array<string>|string = []
-):Array<string> => {
+    {core: {context: {path: contextPath}}}: Configuration,
+    locations: Array<string>|string = []
+): Array<string> => {
     locations = ([] as Array<string>).concat(locations)
 
     return locations.length ?
-        locations.map((location:string):string =>
+        locations.map((location: string): string =>
             resolve(contextPath, location)
         ) :
         [contextPath]
@@ -911,13 +914,13 @@ export const determineLocations = (
  * locations.
  */
 export const isInLocations = (
-    configuration:Configuration,
-    plugins:Array<Plugin>,
-    filePath:string,
-    locations:Array<string>|string
-):boolean => {
-    const pluginPaths:Array<string> =
-        plugins.map((plugin:Plugin):string => plugin.path)
+    configuration: Configuration,
+    plugins: Array<Plugin>,
+    filePath: string,
+    locations: Array<string>|string
+): boolean => {
+    const pluginPaths: Array<string> =
+        plugins.map((plugin: Plugin): string => plugin.path)
 
     for (const location of ([] as Array<string>).concat(locations))
         if (location.startsWith('/')) {

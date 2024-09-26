@@ -31,7 +31,7 @@ import {
  * @returns A mapping to promises which correspond to the plugin specific
  * continues services.
  */
-export const loadService = ({services}:ServicePromisesState):Promise<
+export const loadService = ({services}: ServicePromisesState): Promise<
     PluginPromises
 > => {
     services.dummy = {
@@ -40,7 +40,7 @@ export const loadService = ({services}:ServicePromisesState):Promise<
     }
 
     return Promise.resolve({
-        dummy: new Promise<void>((resolve:() => void) => {
+        dummy: new Promise<void>((resolve: () => void) => {
             void timeout(resolve)
         })
     })
@@ -53,11 +53,11 @@ export const loadService = ({services}:ServicePromisesState):Promise<
  * @returns A promise resolving to nothing.
  */
 export const test = (
-    {services: {dummy}}:ServicePromisesState<
+    {services: {dummy}}: ServicePromisesState<
         undefined,
         Configuration,
-        Services<{dummy:{hookCalled:boolean}}>
->):Promise<void> => {
+        Services<{dummy: {hookCalled: boolean}}>
+>): Promise<void> => {
     dummy.hookCalled = true
 
     return Promise.resolve()
@@ -69,10 +69,10 @@ export const test = (
  * @param state.services.dummy - Plugin service.
  */
 export const testSynchronous = (
-    {services: {dummy}}:ServicePromisesState<
+    {services: {dummy}}: ServicePromisesState<
         undefined,
         Configuration,
-        Services<{dummy:{synchronousHookCalled:boolean}}>
+        Services<{dummy: {synchronousHookCalled: boolean}}>
     >
 ) => {
     dummy.synchronousHookCalled = true
