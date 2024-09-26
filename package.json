@@ -72,7 +72,7 @@
     "jsdoc": "^4.0.3",
     "shx": "^0.3.4",
     "typescript-eslint": "^8.7.0",
-    "weboptimizer": "^2.0.1512"
+    "weboptimizer": "^2.0.1515"
   },
   "peerDependencies": {
     "@babel/runtime": "*",

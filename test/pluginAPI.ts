@@ -40,8 +40,8 @@ import {
 } from '../pluginAPI'
 // endregion
 // region tests
-describe('pluginAPI', ():void => {
-    const testConfiguration:Configuration = copy(configuration)
+describe('pluginAPI', (): void => {
+    const testConfiguration: Configuration = copy(configuration)
 
     testEachPromise<typeof callStack>(
         'callStack',
@@ -207,9 +207,9 @@ describe('pluginAPI', ():void => {
     ])(
         `%p === load('%s', '%s', %p, %p, '%s')`,
         async (
-            expected:Plugin, ...parameters:Parameters<typeof load>
-        ):Promise<void> => {
-            let plugin:Plugin|undefined
+            expected: Plugin, ...parameters: Parameters<typeof load>
+        ): Promise<void> => {
+            let plugin: Plugin|undefined
             try {
                 plugin = await load(...parameters)
             } catch (error) {
@@ -289,10 +289,10 @@ describe('pluginAPI', ():void => {
     ])(
         '%p === loadAPI(%p, ...)',
         async (
-            expected:ThenParameter<ReturnType<typeof loadAPI>>,
-            ...parameters:Parameters<typeof loadAPI>
-        ):Promise<void> => {
-            let plugin:Plugin|undefined
+            expected: ThenParameter<ReturnType<typeof loadAPI>>,
+            ...parameters: Parameters<typeof loadAPI>
+        ): Promise<void> => {
+            let plugin: Plugin|undefined
             try {
                 plugin = await loadAPI(...parameters)
             } catch (error) {
