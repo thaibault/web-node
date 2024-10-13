@@ -49,7 +49,13 @@ describe('pluginAPI', (): void => {
 
         [
             undefined,
-            {configuration: testConfiguration, hook: 'test', plugins: []}],
+            {
+                configuration: testConfiguration,
+                data: undefined,
+                hook: 'test',
+                plugins: []
+            }
+        ],
         [
             null,
             {
@@ -76,10 +82,21 @@ describe('pluginAPI', (): void => {
 
         [
             undefined,
-            {configuration: testConfiguration, hook: 'test', plugins: []}],
+            {
+                configuration: testConfiguration,
+                data: undefined,
+                hook: 'test',
+                plugins: []
+            }
+        ],
         [
             undefined,
-            {configuration: testConfiguration, hook: 'test', plugins: []}
+            {
+                configuration: testConfiguration,
+                data: undefined,
+                hook: 'test',
+                plugins: []
+            }
         ],
         [
             {},
