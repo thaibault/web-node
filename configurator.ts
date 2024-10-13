@@ -49,7 +49,11 @@ import pluginAPI from './pluginAPI'
 webNodePackageConfiguration.webNode.core.context = {
     path: __dirname, type: 'relative'
 }
-for (let index = 0; index < MAXIMAL_NUMBER_OF_ITERATIONS.value; index++) {
+for (
+    let iteration = 0;
+    iteration < MAXIMAL_NUMBER_OF_ITERATIONS.value;
+    iteration++
+) {
     webNodePackageConfiguration.webNode.core.context.path = resolve(
         webNodePackageConfiguration.webNode.core.context.path, '../../'
     )
