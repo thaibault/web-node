@@ -156,7 +156,7 @@ export interface BaseState<
         configuration.
     */
     configuration: ConfigurationType
-    data?: Type
+    data: Type
     hook: string
     // Topological sorted list of plugins.
     plugins: Array<Plugin>
@@ -207,7 +207,10 @@ export interface ChangedAPIFileState<
 }
 export type APIFunction<
     Output = unknown, State extends BaseState<unknown> = ServicePromisesState
-> = (state: State, ...parameters: Array<unknown>) => Output
+> = (
+    state: Omit<State, 'data'> & {data?: State['data']},
+    ...parameters: Array<unknown>
+) => Output
 
 export interface ServicesState<
     Type = undefined,

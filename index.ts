@@ -62,7 +62,9 @@ export const main = async (): Promise<void> => {
         plugins: Array<Plugin>
     } = await loadAll(copy(baseConfiguration))
 
-    await callStack<BaseState>({configuration, hook: 'initialize', plugins})
+    await callStack<BaseState>({
+        configuration, data: undefined, hook: 'initialize', plugins
+    })
 
     if (plugins.length)
         console.info(
@@ -81,6 +83,7 @@ export const main = async (): Promise<void> => {
     for (const type of ['pre', 'post'] as const)
         await callStack<ChangedConfigurationState>({
             configuration,
+            data: undefined,
             hook: `${type}ConfigurationLoaded`,
             plugins,
             pluginsWithChangedConfiguration
@@ -93,6 +96,7 @@ export const main = async (): Promise<void> => {
         // region start services
         await callStack<ServicesState>({
             configuration,
+            data: undefined,
             hook: 'preLoadService',
             plugins,
             services
@@ -105,6 +109,7 @@ export const main = async (): Promise<void> => {
             if (plugin.api) {
                 await callStack<ServicesState>({
                     configuration,
+                    data: undefined,
                     hook: `preLoad${capitalize(plugin.internalName)}Service`,
                     plugins,
                     services
@@ -157,15 +162,17 @@ export const main = async (): Promise<void> => {
 
                 await callStack({
                     configuration,
+                    data: undefined,
                     hook: `postLoad${capitalize(plugin.internalName)}Service`,
                     plugins,
-                    services,
-                    servicePromises
+                    servicePromises,
+                    services
                 })
             }
 
         await callStack({
             configuration,
+            data: undefined,
             hook: 'postLoadService',
             plugins,
             servicePromises,
@@ -178,6 +185,7 @@ export const main = async (): Promise<void> => {
             if (!finished)
                 callStackSynchronous({
                     configuration,
+                    data: undefined,
                     hook: 'exit',
                     plugins: plugins.slice().reverse(),
                     servicePromises,
@@ -217,6 +225,7 @@ export const main = async (): Promise<void> => {
 
                         await callStack({
                             configuration,
+                            data: undefined,
                             hook: 'shouldExit',
                             plugins,
                             servicePromises,
@@ -246,6 +255,7 @@ export const main = async (): Promise<void> => {
 
         await callStack({
             configuration,
+            data: undefined,
             hook: 'shouldExit',
             plugins,
             servicePromises,
@@ -266,6 +276,7 @@ export const main = async (): Promise<void> => {
             try {
                 await callStack({
                     configuration,
+                    data: undefined,
                     hook: 'shouldExit',
                     plugins,
                     servicePromises,
