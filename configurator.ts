@@ -142,7 +142,7 @@ extend<Configuration>(
 
 const result = {}
 for (const argument of process.argv.slice(1)) {
-    const subResult: null|EvaluateablePartialConfiguration =
+    const subResult: EvaluateablePartialConfiguration | null =
         parseEncodedObject<EvaluateablePartialConfiguration>(
             argument, configuration, 'configuration'
         )
