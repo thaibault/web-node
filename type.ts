@@ -73,7 +73,7 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     }
     debug: boolean
     encoding: Encoding
-    interDependencies: Mapping<Array<string>|string>
+    interDependencies: Mapping<Array<string> | string>
     name: string
     plugin: {
         configuration: MetaPluginConfiguration
@@ -111,7 +111,7 @@ export type PackageConfiguration =
     }
 
 export interface Plugin {
-    api: APIFunction|null
+    api: APIFunction | null
     apiFilePaths: Array<string>
     apiFileLoadTimestamps: Array<number>
 
@@ -127,20 +127,20 @@ export interface Plugin {
 
     path: string
 
-    scope: null|object
+    scope: null | object
 }
 export interface PluginChange {
     newScope: object
-    oldScope: null|object
+    oldScope: null | object
 
     plugin: Plugin
 
-    target: 'packageConfiguration'|'scope'
+    target: 'packageConfiguration' | 'scope'
 }
 
 // Holds promises regarding one plugin.
 export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
-    Mapping<null|Type>
+    Mapping<null | Type>
 
 export type Services<PluginServiceType = Mapping<unknown>> =
     Mapping<unknown> & PluginServiceType
@@ -319,7 +319,7 @@ export interface PluginHandler {
      * @returns A mapping to promises which correspond to the plugin specific
      * continues services.
      */
-    loadService?(state: ServicePromisesState): Promise<null|PluginPromises>
+    loadService?(state: ServicePromisesState): Promise<null | PluginPromises>
     /**
      * Plugins have launched their continues running services and returned a
      * corresponding promise which can be observed here.

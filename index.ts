@@ -42,7 +42,7 @@ import {
 declare const ORIGINAL_MAIN_MODULE: object
 
 const handleError = async (
-    state: Omit<ServicePromisesState<Error>, 'hook'|'pluginAPI'>
+    state: Omit<ServicePromisesState<Error>, 'hook' | 'pluginAPI'>
 ): Promise<void> => {
     try {
         await callStack<ServicePromisesState<Error>>(
@@ -115,10 +115,10 @@ export const main = async (): Promise<void> => {
                     services
                 })
 
-                let result: null|PluginPromises = null
+                let result: null | PluginPromises = null
                 try {
                     result = await (plugin.api as APIFunction<
-                        Promise<null|PluginPromises>
+                        Promise<null | PluginPromises>
                     >)({
                         configuration,
                         hook: 'loadService',
@@ -130,7 +130,7 @@ export const main = async (): Promise<void> => {
                 } catch (error) {
                     if (
                         !(
-                            error as {message?: string}|null
+                            error as {message?: string} | null
                         )?.message?.startsWith(
                             'NotImplemented:'
                         )

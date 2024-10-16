@@ -338,10 +338,10 @@ const bytesToStr = (bytes: Array<number>): string =>
  * @returns Returns crypted or encrypted buffer or string.
  */
 export function unixCrypt(
-    givenPassword: Array<number>|string,
-    givenSalt: Array<number>|string = 'aa',
+    givenPassword: Array<number> | string,
+    givenSalt: Array<number> | string = 'aa',
     returnBytes = false
-): Array<number>|string {
+): Array<number> | string {
     const password: Array<number> = typeof givenPassword === 'string' ?
         stringToBytes(givenPassword) :
         givenPassword

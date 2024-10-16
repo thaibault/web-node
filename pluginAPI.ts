@@ -257,7 +257,7 @@ export const determineInternalName = (
 ): string => {
     return delimitedToCamelCase(name.replace(
         regularExpression,
-        (fullMatch: string, firstMatch: string|number): string =>
+        (fullMatch: string, firstMatch: string | number): string =>
             typeof firstMatch === 'string' ? firstMatch : fullMatch
     ))
 }
@@ -269,7 +269,7 @@ export const determineInternalName = (
  */
 export const evaluateConfiguration = <
     Type extends Mapping<unknown> = Configuration
->(configuration: RecursiveEvaluateable<Type>|Type): Type => {
+>(configuration: RecursiveEvaluateable<Type> | Type): Type => {
     /*
         NOTE: We have to back up, remove and restore all plugin specific
         package configuration to avoid evaluation non web node#
@@ -375,8 +375,8 @@ export const hotReloadConfigurationFile = (
  * @returns A list with plugin changes.
  */
 export const hotReloadFiles = (
-    type: 'api'|'configuration',
-    target: 'packageConfiguration'|'scope',
+    type: 'api' | 'configuration',
+    target: 'packageConfiguration' | 'scope',
     plugins: Array<Plugin>
 ): Array<PluginChange> => {
     const pluginChanges: Array<PluginChange> = []
@@ -508,7 +508,7 @@ export const loadAPI = async (
     internalName: string,
     plugins: Mapping<Plugin>,
     encoding: Encoding = 'utf8',
-    configuration: null|EvaluateablePartialConfiguration = null,
+    configuration: EvaluateablePartialConfiguration | null = null,
     configurationFilePaths: Array<string> = []
 ): Promise<Plugin> => {
     let filePath: string = resolve(pluginPath, relativeFilePaths[0])
@@ -529,7 +529,7 @@ export const loadAPI = async (
                     break
             }
 
-    let api: APIFunction|null = null
+    let api: APIFunction | null = null
     let nativeAPI = false
 
     if (
@@ -748,10 +748,10 @@ export const loadConfigurations = (
 export const loadFile = (
     filePath: string,
     name: string,
-    fallbackScope: null|object = null,
+    fallbackScope: null | object = null,
     log = true
 ): object => {
-    let reference: string|undefined
+    let reference: string | undefined
     try {
         reference = currentRequire.resolve(filePath)
     } catch (_error) {
@@ -896,7 +896,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
  */
 export const determineLocations = (
     {core: {context: {path: contextPath}}}: Configuration,
-    locations: Array<string>|string = []
+    locations: Array<string> | string = []
 ): Array<string> => {
     locations = ([] as Array<string>).concat(locations)
 
@@ -920,7 +920,7 @@ export const isInLocations = (
     configuration: Configuration,
     plugins: Array<Plugin>,
     filePath: string,
-    locations: Array<string>|string
+    locations: Array<string> | string
 ): boolean => {
     const pluginPaths: Array<string> =
         plugins.map((plugin: Plugin): string => plugin.path)

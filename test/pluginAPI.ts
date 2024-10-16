@@ -226,7 +226,7 @@ describe('pluginAPI', (): void => {
         async (
             expected: Plugin, ...parameters: Parameters<typeof load>
         ): Promise<void> => {
-            let plugin: Plugin|undefined
+            let plugin: Plugin | undefined
             try {
                 plugin = await load(...parameters)
             } catch (error) {
@@ -309,7 +309,7 @@ describe('pluginAPI', (): void => {
             expected: ThenParameter<ReturnType<typeof loadAPI>>,
             ...parameters: Parameters<typeof loadAPI>
         ): Promise<void> => {
-            let plugin: Plugin|undefined
+            let plugin: Plugin | undefined
             try {
                 plugin = await loadAPI(...parameters)
             } catch (error) {
@@ -339,7 +339,7 @@ describe('pluginAPI', (): void => {
         [{a: {package: {a: 2}}}, 'a', {a: 2}, []],
         /*
             Application and package configuration exists but application
-            configuration is not object and will be interpret as package
+            configuration is not object and will be interpreted as package
             configuration either.
         */
         [{a: {package: {a: 2, b: 3}}}, 'a', {a: 2, b: 3}, []],
