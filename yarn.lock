@@ -2591,12 +2591,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.7.5":
-  version: 22.7.5
-  resolution: "@types/node@npm:22.7.5"
+"@types/node@npm:^22.7.6":
+  version: 22.7.6
+  resolution: "@types/node@npm:22.7.6"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10c0/cf11f74f1a26053ec58066616e3a8685b6bcd7259bc569738b8f752009f9f0f7f85a1b2d24908e5b0f752482d1e8b6babdf1fbb25758711ec7bb9500bfcd6e60
+  checksum: 10c0/d4406a63afce981c363fb1d1954aaf1759ad2d487c0833ebf667565ea4e45ff217d6fab4b5343badbdeccdf9d2e4a0841d633e0c929ceabcb33c288663dd0c73
   languageName: node
   linkType: hard
 
@@ -5109,12 +5109,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"documentation-website@npm:^1.0.335":
-  version: 1.0.335
-  resolution: "documentation-website@npm:1.0.335"
+"documentation-website@npm:^1.0.336":
+  version: 1.0.336
+  resolution: "documentation-website@npm:1.0.336"
   bin:
     documentation-website: build/deploy.js
-  checksum: 10c0/64aaad4ce028a21f6181f56b0b8273f65df2f66a78ac1d9db28399a312ba55ee04680cfc8de1c93ae7f94b6ed9b8637fd46aee86bad4c8bd0c66ef18d2353289
+  checksum: 10c0/8a75188f74f47355b02cf300cf6dc08c7f6f34b9d8c38e39fd0defff1102cabaf49fda41f879e3bab9a28110960b3abf8875203bc392f7789e4e5f9a09b52217
   languageName: node
   linkType: hard
 
@@ -5385,9 +5385,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jsdoc@npm:^50.4.1":
-  version: 50.4.1
-  resolution: "eslint-plugin-jsdoc@npm:50.4.1"
+"eslint-plugin-jsdoc@npm:^50.4.3":
+  version: 50.4.3
+  resolution: "eslint-plugin-jsdoc@npm:50.4.3"
   dependencies:
     "@es-joy/jsdoccomment": "npm:~0.49.0"
     are-docs-informative: "npm:^0.0.2"
@@ -5402,7 +5402,7 @@ __metadata:
     synckit: "npm:^0.9.1"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
-  checksum: 10c0/d3b3947fc71acac2a790774729d96da4bd61dfc783558a998fca0b581b4dec059b5cdb048cd5873a8f188c5da1929307643909dd4f51063d2d6a00487b8b8940
+  checksum: 10c0/96067f8fc3553371e9afdc6d03c166228bfd3cb004fcd70c4357d49185732f384351e20f44c21b0a13ea318c8aabbd584b627804f62a2a80376507646708a786
   languageName: node
   linkType: hard
 
@@ -9839,14 +9839,14 @@ __metadata:
     "@babel/eslint-parser": "npm:^7.25.8"
     "@babel/runtime": "npm:^7.25.7"
     "@stylistic/eslint-plugin-ts": "npm:^2.9.0"
-    "@types/node": "npm:^22.7.5"
+    "@types/node": "npm:^22.7.6"
     "@typescript-eslint/eslint-plugin": "npm:^8.9.0"
     "@typescript-eslint/parser": "npm:^8.9.0"
     clientnode: "npm:^3.0.1205"
-    documentation-website: "npm:^1.0.335"
+    documentation-website: "npm:^1.0.336"
     eslint: "npm:^9.12.0"
     eslint-config-google: "npm:^0.14.0"
-    eslint-plugin-jsdoc: "npm:^50.4.1"
+    eslint-plugin-jsdoc: "npm:^50.4.3"
     jest: "npm:^29.7.0"
     jsdoc: "npm:^4.0.3"
     shx: "npm:^0.3.4"
