@@ -20,7 +20,7 @@ export * from './configurator'
 export * from './pluginAPI'
 // region imports
 import {
-    capitalize, copy, CLOSE_EVENT_NAMES, isFunction, represent
+    capitalize, copy, CLOSE_EVENT_NAMES, isFunction, isObject, represent
 } from 'clientnode'
 
 import baseConfiguration from './configurator'
@@ -149,11 +149,7 @@ export const main = async (): Promise<void> => {
 
                 if (result)
                     for (const [name, promise] of Object.entries(result))
-                        if (
-                            promise !== null &&
-                            typeof promise === 'object' &&
-                            'then' in promise
-                        ) {
+                        if (isObject(promise) && 'then' in promise) {
                             console.info(`Service "${name}" started.`)
 
                             servicePromises[name] = promise
