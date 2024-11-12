@@ -243,7 +243,7 @@ export const main = async (): Promise<void> => {
                         servicePromises[name]
                     )
             )
-        } catch (_error) {
+        } catch {
             // Ignore error.
         }
 

@@ -130,8 +130,8 @@ export interface Plugin {
     scope: null | object
 }
 export interface PluginChange {
-    newScope: object
-    oldScope: null | object
+    newScope: Mapping<unknown>
+    oldScope: null | Mapping<unknown>
 
     plugin: Plugin
 

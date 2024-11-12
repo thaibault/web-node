@@ -35,8 +35,7 @@ import {
     removeKeysInEvaluation,
     represent,
     sortTopological,
-    UTILITY_SCOPE,
-    ValueOf
+    UTILITY_SCOPE
 } from 'clientnode'
 import fileSystem, {readdirSync, statSync} from 'fs'
 import {Module} from 'module'
@@ -104,14 +103,13 @@ export const callStack = async <
                 )
 
             if (pluginsWithChangedConfiguration.length) {
-                if (configuration.core.debug)
-                    console.info(
-                        'Configuration for "' +
-                        pluginsWithChangedConfiguration
-                            .map((plugin: Plugin): string => plugin.name)
-                            .join('", "') +
-                        '" has been changed: reloading initialized.'
-                    )
+                console.info(
+                    'Configuration for "' +
+                    pluginsWithChangedConfiguration
+                        .map((plugin: Plugin): string => plugin.name)
+                        .join('", "') +
+                    '" has been changed: reloading initialized.'
+                )
 
                 const localState: State & ChangedConfigurationState = {
                     ...state,
@@ -135,15 +133,16 @@ export const callStack = async <
             const pluginsWithChangedAPIFiles: Array<Plugin> =
                 hotReloadAPIFile(plugins)
 
+            console.log('TODO 2', pluginsWithChangedAPIFiles)
+
             if (pluginsWithChangedAPIFiles.length) {
-                if (configuration.core.debug)
-                    console.info(
-                        'API-file for "' +
-                        `${pluginsWithChangedAPIFiles.map((
-                            plugin: Plugin
-                        ): string => plugin.name).join('", "')}" ` +
-                        'has been changed: reloading initialized.'
-                    )
+                console.info(
+                    'API-file for "' +
+                    `${pluginsWithChangedAPIFiles.map((
+                        plugin: Plugin
+                    ): string => plugin.name).join('", "')}" ` +
+                    'has been changed: reloading initialized.'
+                )
 
                 await callStack<State & ChangedAPIFileState>({
                     ...state,
@@ -264,7 +263,7 @@ export const determineInternalName = (
 /**
  * Evaluates given configuration object by letting plugins package sub
  * structure untouched.
- * @param configuration - Evaluateable configuration structure.
+ * @param configuration - Evaluable configuration structure.
  * @returns Resolved configuration.
  */
 export const evaluateConfiguration = <
@@ -327,11 +326,33 @@ export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
                     Object.prototype.hasOwnProperty.call(
                         pluginChange.newScope, name
                     ) &&
-                    !isFunction(
-                        (pluginChange.newScope as Mapping<unknown>)[name]
+                    !isFunction(pluginChange.newScope[name])
+                ) {
+                    const propertyDescriptor = Object.getOwnPropertyDescriptor(
+                        pluginChange.newScope, name
                     )
-                )
-                    (pluginChange.newScope as Mapping<unknown>)[name] = value
+                    let isWritable = true
+                    if (propertyDescriptor)
+                        isWritable = propertyDescriptor.writable !== false
+                    if (!isWritable)
+                        Object.defineProperties(
+                            pluginChange.newScope, {[name]: {writable: true}}
+                        )
+
+                    try {
+                        pluginChange.newScope[name] = value
+                    } catch {
+                        console.warn(
+                            'Could not update new constant value for',
+                            `variable "${name}".`
+                        )
+                    }
+
+                    if (!isWritable)
+                        Object.defineProperties(
+                            pluginChange.newScope, {[name]: {writable: false}}
+                        )
+                }
 
             pluginsWithChangedFiles.push(pluginChange.plugin)
         }
@@ -390,19 +411,25 @@ export const hotReloadFiles = (
                 if (
                     plugin[`${type}FileLoadTimestamps`][index] < timestamp
                 ) {
+                    console.info(
+                        `Determined updated file "${filePath}".`,
+                        'Doing a reload.'
+                    )
                     // Enforce to reload new file version.
                     delete (currentRequire.cache as Mapping<unknown>)[
                         currentRequire.resolve(filePath)
                     ]
 
-                    const oldScope: ValueOf<Plugin> = plugin[target]
+                    const oldScope = plugin[target] as Mapping<unknown>
 
                     plugin[target] = loadFile(
                         filePath, plugin.name, plugin[target]
                     ) as PackageConfiguration
 
+                    console.info(`File "${filePath}" reloaded.`)
+
                     pluginChanges.push({
-                        newScope: plugin[target] as object,
+                        newScope: plugin[target] as Mapping<unknown>,
                         oldScope,
                         plugin,
                         target
@@ -754,7 +781,7 @@ export const loadFile = (
     let reference: string | undefined
     try {
         reference = currentRequire.resolve(filePath)
-    } catch (_error) {
+    } catch {
         // Ignore error.
     }
 

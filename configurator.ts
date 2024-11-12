@@ -85,7 +85,7 @@ else
         if (lstatSync(join(process.cwd(), 'node_modules')).isSymbolicLink())
             webNodePackageConfiguration.webNode.core.context.path =
                 process.cwd()
-    } catch (_error) {
+    } catch {
         // Ignore error.
     }
 
@@ -95,7 +95,7 @@ try {
     mainPackageConfiguration = currentRequire(join(
         webNodePackageConfiguration.webNode.core.context.path, 'package'
     )) as PackageConfiguration
-} catch (_error) {
+} catch {
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
 
