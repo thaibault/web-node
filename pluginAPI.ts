@@ -133,8 +133,6 @@ export const callStack = async <
             const pluginsWithChangedAPIFiles: Array<Plugin> =
                 hotReloadAPIFile(plugins)
 
-            console.log('TODO 2', pluginsWithChangedAPIFiles)
-
             if (pluginsWithChangedAPIFiles.length) {
                 console.info(
                     'API-file for "' +
