@@ -330,12 +330,14 @@ export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
                         pluginChange.newScope, name
                     )
                     let isWritable = true
-                    if (propertyDescriptor)
+                    if (propertyDescriptor) {
                         isWritable = propertyDescriptor.writable !== false
-                    if (!isWritable)
-                        Object.defineProperties(
-                            pluginChange.newScope, {[name]: {writable: true}}
-                        )
+                        if (propertyDescriptor.configurable && !isWritable)
+                            Object.defineProperties(
+                                pluginChange.newScope,
+                                {[name]: {writable: true}}
+                            )
+                    }
 
                     try {
                         pluginChange.newScope[name] = value
@@ -346,7 +348,7 @@ export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
                         )
                     }
 
-                    if (!isWritable)
+                    if (!isWritable && propertyDescriptor?.configurable)
                         Object.defineProperties(
                             pluginChange.newScope, {[name]: {writable: false}}
                         )
