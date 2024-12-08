@@ -63,7 +63,7 @@
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
-    "clientnode": "^3.0.1237",
+    "clientnode": "^3.0.1249",
     "documentation-website": "^1.0.340",
     "eslint": "^9.16.0",
     "eslint-config-google": "^0.14.0",
@@ -72,7 +72,7 @@
     "jsdoc": "^4.0.4",
     "shx": "^0.3.4",
     "typescript-eslint": "^8.17.0",
-    "weboptimizer": "^2.0.1544"
+    "weboptimizer": "^2.0.1547"
   },
   "peerDependencies": {
     "@babel/runtime": "*",
