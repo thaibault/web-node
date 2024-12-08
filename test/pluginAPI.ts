@@ -16,7 +16,7 @@
 // region imports
 import {describe, expect, test} from '@jest/globals'
 import {copy, Encoding, mask, ThenParameter} from 'clientnode'
-import {testEach, testEachPromise} from 'clientnode/dist/test-helper'
+import {testEach, testEachPromise} from 'clientnode/test-helper'
 import path from 'path'
 
 import {
