@@ -71,7 +71,7 @@ if (
     basename(dirname(dirname(process.cwd()))) === 'node_modules'
 )
     /*
-        NOTE: If we are dealing was a dependency project use current directory
+        NOTE: If we are dealing was a dependent project use current directory
         as context.
     */
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
