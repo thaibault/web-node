@@ -86,7 +86,7 @@ export const callStack = async <
     State extends BaseState<unknown> = ServicePromisesState, Output = void
 >(
     givenState: Omit<State, 'pluginAPI'>, ...parameters: Array<unknown>
-): Promise<Output> => {
+): Promise<Output | {promise: Output}> => {
     const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 
@@ -182,12 +182,15 @@ export const callStack = async <
 
             data = result
 
-            if (configuration.core.debug)
-                console.info(
-                    `Ran asynchronous hook "${hook}" for plugin ` +
-                    `"${plugin.name}".`
-                )
+            console.info(
+                `Ran asynchronous hook "${hook}" for plugin "${plugin.name}".`
+            )
         }
+
+    // NOTE: If payload is a promise, we need to wrap to avoid waiting for that
+    // as well when calling a call stack with the "await" syntax.
+    if (data !== null && typeof data === 'object' && 'then' in data)
+        return {promise: data}
 
     return data
 }
