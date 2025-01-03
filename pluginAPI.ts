@@ -48,7 +48,7 @@ import {
     ChangedAPIFileState,
     ChangedConfigurationState,
     Configuration,
-    EvaluateablePartialConfiguration,
+    EvaluateablePartialConfiguration, HookPromiseResult,
     MetaPluginConfiguration,
     PackageConfiguration,
     Plugin,
@@ -83,10 +83,10 @@ const oldResolveFilename = (Module as ModuleType)._resolveFilename
  * promise holding given potentially modified data.
  */
 export const callStack = async <
-    State extends BaseState<unknown> = ServicePromisesState, Output = void
+    State extends BaseState<unknown> = ServicePromisesState, Output = undefined
 >(
     givenState: Omit<State, 'pluginAPI'>, ...parameters: Array<unknown>
-): Promise<Output | {promise: Output}> => {
+): HookPromiseResult<Output> => {
     const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 

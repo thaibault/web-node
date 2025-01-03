@@ -138,6 +138,8 @@ export interface PluginChange {
     target: 'packageConfiguration' | 'scope'
 }
 
+export type HookPromiseResult<Type> = Promise<Type | {promise: Type}>
+
 // Holds promises regarding one plugin.
 export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
