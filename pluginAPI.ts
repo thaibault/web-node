@@ -155,11 +155,6 @@ export const callStack = async <
     let data: Output = givenState.data as unknown as Output
     for (const plugin of plugins)
         if (plugin.api) {
-            console.debug(
-                `Check asynchronous hook "${hook}" for plugin ` +
-                `"${plugin.name}".`
-            )
-
             let result: Output
             try {
                 result = await (
