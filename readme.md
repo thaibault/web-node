@@ -17,6 +17,7 @@ Project status
 [![npm downloads](https://img.shields.io/npm/dy/web-node.svg?style=for-the-badge)](https://www.npmjs.com/package/web-node)
 
 [![build](https://img.shields.io/github/actions/workflow/status/thaibault/web-node/build.yaml?style=for-the-badge)](https://github.com/thaibault/web-node/actions/workflows/build.yaml)
+[![build push package](https://img.shields.io/github/actions/workflow/status/thaibault/web-node/build-package-and-push.yaml?label=build%20push%20package&style=for-the-badge)](https://github.com/thaibault/web-node/actions/workflows/build-package-and-push.yaml)
 
 [![check types](https://img.shields.io/github/actions/workflow/status/thaibault/web-node/check-types.yaml?label=check%20types&style=for-the-badge)](https://github.com/thaibault/web-node/actions/workflows/check-types.yaml)
 [![lint](https://img.shields.io/github/actions/workflow/status/thaibault/web-node/lint.yaml?label=lint&style=for-the-badge)](https://github.com/thaibault/web-node/actions/workflows/lint.yaml)
