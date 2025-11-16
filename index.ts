@@ -20,13 +20,17 @@ export * from './configurator'
 export * from './pluginAPI'
 // region imports
 import {
-    capitalize, copy, CLOSE_EVENT_NAMES, isFunction, isObject, represent
+    capitalize,
+    copy,
+    CLOSE_EVENT_NAMES,
+    isFunction,
+    isObject,
+    Logger,
+    represent
 } from 'clientnode'
 
 import baseConfiguration from './configurator'
-import pluginAPI, {
-    callStack, callStackSynchronous, loadAll, log
-} from './pluginAPI'
+import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
 import {
     APIFunction,
     BaseState,
@@ -40,8 +44,13 @@ import {
     ServicesState
 } from './type'
 // endregion
-
 declare const ORIGINAL_MAIN_MODULE: object
+
+Logger.defaultName = 'web-node'
+Logger.defaultLevel = 'error'
+Logger.configureAllInstances()
+
+export const log = new Logger()
 
 const handleError = async (
     state: Omit<ServicePromisesState<Error>, 'hook' | 'pluginAPI'>
