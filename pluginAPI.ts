@@ -57,6 +57,18 @@ import {
     ServicePromisesState
 } from './type'
 // endregion
+// region logging
+export const logFactory = (level: string) => (...messages: Array<unknown>) => {
+    console.info(`${level}: webapp - ${new Date().toISOString()}`, ...messages)
+}
+export const log = {
+    debug: logFactory('debug'),
+    info: logFactory('info'),
+    warn: logFactory('warn'),
+    critical: logFactory('critical'),
+    error: logFactory('error')
+} as const
+// endregion
 export const currentRequire = eval('require') as typeof require
 // region allow plugins to import "web-node" as already loaded main module
 type ModuleType =
@@ -103,7 +115,7 @@ export const callStack = async <
                 )
 
             if (pluginsWithChangedConfiguration.length) {
-                console.info(
+                log.info(
                     'Configuration for "' +
                     pluginsWithChangedConfiguration
                         .map((plugin: Plugin): string => plugin.name)
@@ -134,7 +146,7 @@ export const callStack = async <
                 hotReloadAPIFile(plugins)
 
             if (pluginsWithChangedAPIFiles.length) {
-                console.info(
+                log.info(
                     'API-file for "' +
                     `${pluginsWithChangedAPIFiles.map((
                         plugin: Plugin
@@ -182,7 +194,7 @@ export const callStack = async <
 
             data = result
 
-            console.info(
+            log.info(
                 `Ran asynchronous hook "${hook}" for plugin "${plugin.name}".`
             )
         }
@@ -237,7 +249,7 @@ export const callStackSynchronous = <
             data = result
 
             if (configuration.core.debug)
-                console.info(
+                log.info(
                     `Ran synchronous hook "${hook}" for plugin ` +
                     `"${plugin.name}".`
                 )
@@ -345,7 +357,7 @@ export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
                     try {
                         pluginChange.newScope[name] = value
                     } catch {
-                        console.warn(
+                        log.warn(
                             'Could not update new constant value for',
                             `variable "${name}".`
                         )
@@ -414,7 +426,7 @@ export const hotReloadFiles = (
                 if (
                     plugin[`${type}FileLoadTimestamps`][index] < timestamp
                 ) {
-                    console.info(
+                    log.info(
                         `Determined updated file "${filePath}".`,
                         'Doing a reload.'
                     )
@@ -429,7 +441,7 @@ export const hotReloadFiles = (
                         filePath, plugin.name, plugin[target]
                     ) as PackageConfiguration
 
-                    console.info(`File "${filePath}" reloaded.`)
+                    log.info(`File "${filePath}" reloaded.`)
 
                     pluginChanges.push({
                         newScope: plugin[target] as Mapping<unknown>,
@@ -772,14 +784,14 @@ export const loadConfigurations = (
  * @param name - Plugin name to use for proper error messages.
  * @param fallbackScope - Scope to return if an error occurs during loading.
  * If a "null" is given an error will be thrown.
- * @param log - Enables logging.
+ * @param dologging - Enables logging.
  * @returns Exported api file scope.
  */
 export const loadFile = (
     filePath: string,
     name: string,
     fallbackScope: null | object = null,
-    log = true
+    dologging = true
 ): object => {
     let reference: string | undefined
     try {
@@ -799,8 +811,8 @@ export const loadFile = (
         if (fallbackScope) {
             scope = fallbackScope
 
-            if (log)
-                console.warn(
+            if (dologging)
+                log.warn(
                     `Couldn't load new api plugin file "${filePath}" for ` +
                     `plugin "${name}": ${represent(error)}. Using ` +
                     'fallback one.'
