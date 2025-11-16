@@ -24,7 +24,9 @@ import {
 } from 'clientnode'
 
 import baseConfiguration from './configurator'
-import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
+import pluginAPI, {
+    callStack, callStackSynchronous, loadAll, log
+} from './pluginAPI'
 import {
     APIFunction,
     BaseState,
@@ -52,7 +54,7 @@ const handleError = async (
         if (state.configuration.core.debug)
             throw error
         else
-            console.error(error)
+            log.error(error)
     }
 }
 export const main = async (): Promise<void> => {
@@ -67,7 +69,7 @@ export const main = async (): Promise<void> => {
     })
 
     if (plugins.length)
-        console.info(
+        log.info(
             'Loaded plugins: "' +
             plugins
                 .map((plugin: Plugin): string => plugin.internalName)
@@ -103,7 +105,7 @@ export const main = async (): Promise<void> => {
         })
 
         for (const name of Object.keys(services))
-            console.info(`Service "${name}" initialized.`)
+            log.info(`Service "${name}" initialized.`)
 
         for (const plugin of plugins)
             if (plugin.api) {
@@ -150,11 +152,11 @@ export const main = async (): Promise<void> => {
                 if (result)
                     for (const [name, promise] of Object.entries(result))
                         if (isObject(promise) && 'then' in promise) {
-                            console.info(`Service "${name}" started.`)
+                            log.info(`Service "${name}" started.`)
 
                             servicePromises[name] = promise
                         } else
-                            console.info(`Service "${name}" loaded.`)
+                            log.info(`Service "${name}" loaded.`)
 
                 await callStack({
                     configuration,
@@ -210,11 +212,11 @@ export const main = async (): Promise<void> => {
             void (async (): Promise<void> => {
                 if (key === '\u0003') {
                     if (cancelTriggered)
-                        console.warn('Stopping ungracefully.')
+                        log.warn('Stopping ungracefully.')
                     else {
                         cancelTriggered = true
 
-                        console.info(
+                        log.info(
                             'You have requested to shut down all services. A' +
                             ' second request will force to stop ungracefully.'
                         )
@@ -291,7 +293,7 @@ export const main = async (): Promise<void> => {
         if (configuration.core.debug)
             throw error
         else
-            console.error(error)
+            log.error(error)
 
         process.exit(1)
     }
