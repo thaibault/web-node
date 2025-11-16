@@ -28,6 +28,7 @@ import {
     isDirectory,
     isFile,
     isFunction,
+    Logger,
     Mapping,
     modifyObject,
     RecursiveEvaluateable,
@@ -48,7 +49,8 @@ import {
     ChangedAPIFileState,
     ChangedConfigurationState,
     Configuration,
-    EvaluateablePartialConfiguration, HookPromiseResult,
+    EvaluateablePartialConfiguration,
+    HookPromiseResult,
     MetaPluginConfiguration,
     PackageConfiguration,
     Plugin,
@@ -57,18 +59,8 @@ import {
     ServicePromisesState
 } from './type'
 // endregion
-// region logging
-export const logFactory = (level: string) => (...messages: Array<unknown>) => {
-    console.info(`${level}: webapp - ${new Date().toISOString()}`, ...messages)
-}
-export const log = {
-    debug: logFactory('debug'),
-    info: logFactory('info'),
-    warn: logFactory('warn'),
-    critical: logFactory('critical'),
-    error: logFactory('error')
-} as const
-// endregion
+export const log = new Logger({name: 'web-node.plugin-api'})
+
 export const currentRequire = eval('require') as typeof require
 // region allow plugins to import "web-node" as already loaded main module
 type ModuleType =
