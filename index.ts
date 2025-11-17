@@ -46,7 +46,7 @@ import {
 // endregion
 declare const ORIGINAL_MAIN_MODULE: object
 
-Logger.configureAllInstances({name: 'web-node', level: 'error'})
+Logger.configureAllInstances({name: 'web-node'})
 
 export const log = new Logger()
 
