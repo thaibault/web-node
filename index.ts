@@ -47,6 +47,7 @@ import {
 declare const ORIGINAL_MAIN_MODULE: object
 
 Logger.configureAllInstances({name: 'web-node'})
+export const WebNodeLogger = Logger
 
 export const log = new Logger()
 
