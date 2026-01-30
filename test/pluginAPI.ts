@@ -17,7 +17,7 @@
 import {describe, expect, test} from '@jest/globals'
 import {copy, Encoding, mask, ThenParameter} from 'clientnode'
 import {testEach, testEachPromise} from 'clientnode/test-helper'
-import path from 'path'
+import {resolve} from 'path'
 
 import {
     Configuration, PackageConfiguration, Plugin, PluginConfiguration
@@ -26,13 +26,13 @@ import configuration from '../configurator'
 import {
     callStack,
     callStackSynchronous,
-    determineInternalName,
+    determineInternalName, determineLocations,
     evaluateConfiguration,
     hotReloadAPIFile,
     hotReloadConfigurationFile,
     hotReloadFiles,
+    isInLocations,
     load,
-    loadAll,
     loadAPI,
     loadConfiguration,
     loadConfigurations,
@@ -73,8 +73,18 @@ describe('pluginAPI', (): void => {
                 hook: 'test',
                 plugins: []
             }
+        ],
+        [
+            ['some data'],
+            {
+                configuration: testConfiguration,
+                data: {},
+                hook: 'test',
+                plugins: [{
+                    api: () => Promise.resolve(['some data'])
+                } as unknown as Plugin]
+            }
         ]
-        // TODO add more tests
     )
     testEach<typeof callStackSynchronous>(
         'callStackSynchronous',
@@ -106,15 +116,27 @@ describe('pluginAPI', (): void => {
                 hook: 'test',
                 plugins: []
             }
+        ],
+        [
+            ['some data'],
+            {
+                configuration: testConfiguration,
+                data: {},
+                hook: 'test',
+                plugins: [{
+                    api: () => ['some data']
+                } as unknown as Plugin]
+            }
         ]
-        // TODO add more tests
     )
     testEach<typeof determineInternalName>(
         'determineInternalName',
         determineInternalName,
 
-        ['', '', /^.+$/]
-        // TODO add more tests
+        ['', '', /^.+$/],
+        ['hans', 'hans', /^.+$/],
+        ['haNs', 'ha-ns', /^.+$/],
+        ['ha', 'ha-ns', /^([a-z][a-z]).+$/]
     )
     testEach<typeof evaluateConfiguration>(
         'evaluateConfiguration',
@@ -141,21 +163,18 @@ describe('pluginAPI', (): void => {
         hotReloadAPIFile,
 
         [[], []]
-        // TODO add more tests
     )
     testEach<typeof hotReloadConfigurationFile>(
         'hotReloadConfigurationFile',
         hotReloadConfigurationFile,
 
         [[], [], []]
-        // TODO add more tests
     )
     testEach<typeof hotReloadFiles>(
         'hotReloadFiles',
         hotReloadFiles,
 
         [[], 'api', 'scope', []]
-        // TODO add more tests
     )
     test.each([
         [
@@ -163,7 +182,7 @@ describe('pluginAPI', (): void => {
                 api: null,
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
-                    path.resolve(
+                    resolve(
                         configuration.core.context.path, 'dummyPlugin/index.js'
                     )
                 ],
@@ -209,7 +228,7 @@ describe('pluginAPI', (): void => {
                     {exclude: {webNode: true}}
                 ),
 
-                path: path.resolve(
+                path: resolve(
                     configuration.core.context.path, 'dummyPlugin'
                 ),
 
@@ -219,7 +238,7 @@ describe('pluginAPI', (): void => {
             'dummy',
             {},
             {fileNames: ['package.json'], propertyNames: ['webNode']},
-            path.resolve(configuration.core.context.path, 'dummyPlugin')
+            resolve(configuration.core.context.path, 'dummyPlugin')
         ]
     ])(
         `%p === load('%s', '%s', %p, %p, '%s')`,
@@ -257,7 +276,7 @@ describe('pluginAPI', (): void => {
                 api: null,
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
-                    path.resolve(
+                    resolve(
                         configuration.core.context.path, 'dummyPlugin/index.js'
                     )
                 ],
@@ -268,7 +287,7 @@ describe('pluginAPI', (): void => {
                 },
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [
-                    path.resolve(
+                    resolve(
                         configuration.core.context.path,
                         'dummyPlugin/package.json'
                     )
@@ -281,14 +300,12 @@ describe('pluginAPI', (): void => {
 
                 packageConfiguration: {b: 3},
 
-                path: path.resolve(
-                    configuration.core.context.path, 'dummyPlugin'
-                ),
+                path: resolve(configuration.core.context.path, 'dummyPlugin'),
 
                 scope: null
             },
             ['index.js'],
-            path.resolve(configuration.core.context.path, 'dummyPlugin'),
+            resolve(configuration.core.context.path, 'dummyPlugin'),
             'dummyPlugin',
             'dummy',
             {},
@@ -298,7 +315,7 @@ describe('pluginAPI', (): void => {
                 dummy: {package: {b: 3}}
             },
             [
-                path.resolve(
+                resolve(
                     configuration.core.context.path, 'dummyPlugin/package.json'
                 )
             ]
@@ -395,7 +412,7 @@ describe('pluginAPI', (): void => {
         [
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             require('../dummyPlugin/package'),
-            path.resolve(
+            resolve(
                 configuration.core.context.path, 'dummyPlugin/package.json'
             ),
             'dummy',
@@ -404,11 +421,56 @@ describe('pluginAPI', (): void => {
         ],
         [{a: 2}, 'unknown', 'dummy', {a: 2}, false]
     )
-    testEachPromise<typeof loadAll>(
-        'loadAll',
-        loadAll,
+    testEach<typeof determineLocations>(
+        'determineLocations',
+        determineLocations,
 
-        [{configuration, plugins: []}, configuration]
+        [[''], {core: {context: {path: ''}}} as Configuration, []],
+        [
+            ['path/to/context'],
+            {core: {context: {path: 'path/to/context'}}} as Configuration,
+            []
+        ],
+        [['/a'], {core: {context: {path: ''}}} as Configuration, ['/a']],
+        [
+            [resolve(__dirname, '/a')],
+            {core: {context: {path: __dirname}}} as Configuration,
+            ['/a']
+        ]
+    )
+    testEach<typeof isInLocations>(
+        'isInLocations',
+        isInLocations,
+
+        [false, {core: {context: {path: ''}}} as Configuration, [], '', []],
+        [
+            true,
+            {core: {context: {path: ''}}} as Configuration,
+            [],
+            '/a',
+            ['/a']
+        ],
+        [
+            true,
+            {core: {context: {path: ''}}} as Configuration,
+            [{path: '/a'} as Plugin],
+            '/a',
+            ['/a']
+        ],
+        [
+            false,
+            {core: {context: {path: ''}}} as Configuration,
+            [{path: '/b'} as Plugin],
+            '',
+            ['/a']
+        ],
+        [
+            true,
+            {core: {context: {path: ''}}} as Configuration,
+            [{path: ''} as Plugin],
+            '/b/a/c',
+            ['/b/a']
+        ]
     )
 })
 // endregion
