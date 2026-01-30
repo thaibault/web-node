@@ -918,7 +918,6 @@ export const loadAll = async (configuration: Configuration): Promise<{
         plugins: sortedPlugins
     }
 }
-// TODO test
 /**
  * Transform a list of absolute paths respecting the application context.
  * @param configuration - Configuration object.
@@ -941,8 +940,7 @@ export const determineLocations = (
         [contextPath]
 }
 /**
- * Ignore absolute defined locations (relativ to application context) and
- * relative defined in each loaded plugin location.
+ * Checks whether given file path is in provided locations.
  * @param configuration - Configuration object.
  * @param plugins - List of active plugins.
  * @param filePath - Path to search for.
