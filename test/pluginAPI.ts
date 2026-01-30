@@ -73,8 +73,18 @@ describe('pluginAPI', (): void => {
                 hook: 'test',
                 plugins: []
             }
+        ],
+        [
+            ['some data'],
+            {
+                configuration: testConfiguration,
+                data: {},
+                hook: 'test',
+                plugins: [{
+                    api: () => Promise.resolve(['some data'])
+                } as unknown as Plugin]
+            }
         ]
-        // TODO add more tests
     )
     testEach<typeof callStackSynchronous>(
         'callStackSynchronous',
@@ -106,15 +116,27 @@ describe('pluginAPI', (): void => {
                 hook: 'test',
                 plugins: []
             }
+        ],
+        [
+            ['some data'],
+            {
+                configuration: testConfiguration,
+                data: {},
+                hook: 'test',
+                plugins: [{
+                    api: () => ['some data']
+                } as unknown as Plugin]
+            }
         ]
-        // TODO add more tests
     )
     testEach<typeof determineInternalName>(
         'determineInternalName',
         determineInternalName,
 
-        ['', '', /^.+$/]
-        // TODO add more tests
+        ['', '', /^.+$/],
+        ['hans', 'hans', /^.+$/],
+        ['haNs', 'ha-ns', /^.+$/],
+        ['ha', 'ha-ns', /^([a-z][a-z]).+$/]
     )
     testEach<typeof evaluateConfiguration>(
         'evaluateConfiguration',
@@ -141,21 +163,18 @@ describe('pluginAPI', (): void => {
         hotReloadAPIFile,
 
         [[], []]
-        // TODO add more tests
     )
     testEach<typeof hotReloadConfigurationFile>(
         'hotReloadConfigurationFile',
         hotReloadConfigurationFile,
 
         [[], [], []]
-        // TODO add more tests
     )
     testEach<typeof hotReloadFiles>(
         'hotReloadFiles',
         hotReloadFiles,
 
         [[], 'api', 'scope', []]
-        // TODO add more tests
     )
     test.each([
         [
