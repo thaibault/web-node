@@ -151,7 +151,8 @@ export const main = async (): Promise<void> => {
                                     `(${plugin.name}) `
                             ) +
                             `throws: ${represent(error)} 'during asynchrone ` +
-                            'hook "loadService".'
+                            'hook "loadService".',
+                            {cause: error}
                         )
                 }
 
@@ -223,8 +224,8 @@ export const main = async (): Promise<void> => {
                         cancelTriggered = true
 
                         log.info(
-                            'You have requested to shut down all services. A' +
-                            ' second request will force to stop ungracefully.'
+                            'You have requested to shut down all services. A',
+                            'second request will force to stop ungracefully.'
                         )
 
                         await callStack({
