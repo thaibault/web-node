@@ -142,7 +142,7 @@ export const callStack = async <
                     'API-file for "' +
                     `${pluginsWithChangedAPIFiles.map((
                         plugin: Plugin
-                    ): string => plugin.name).join('", "')}" ` +
+                    ): string => plugin.name).join('", "')}"`,
                     'has been changed: reloading initialized.'
                 )
 
@@ -180,7 +180,8 @@ export const callStack = async <
                             `(${plugin.name}) `
                     ) +
                     `throws: ${represent(error)} during asynchronous ` +
-                    `hook "${hook}".`
+                    `hook "${hook}".`,
+                    {cause: error}
                 )
             }
 
@@ -234,7 +235,8 @@ export const callStackSynchronous = <
                             `(${plugin.name}) `
                     ) +
                     `throws: ${represent(error)} during synchronous hook` +
-                    `"${hook}".`
+                    `"${hook}".`,
+                    {cause: error}
                 )
             }
 
@@ -242,7 +244,7 @@ export const callStackSynchronous = <
 
             if (configuration.core.debug)
                 log.info(
-                    `Ran synchronous hook "${hook}" for plugin ` +
+                    `Ran synchronous hook "${hook}" for plugin`,
                     `"${plugin.name}".`
                 )
         }
@@ -477,7 +479,12 @@ export const load = async (
         const filePath: string = resolve(pluginPath, fileName)
 
         if (await isFile(filePath)) {
-            extend(true, packageConfiguration, loadFile(filePath, name))
+            const sourceConfiguration = loadFile(filePath, name)
+            extend(
+                true,
+                modifyObject(packageConfiguration, sourceConfiguration),
+                sourceConfiguration
+            )
 
             configurationFilePaths.push(filePath)
         }
@@ -805,14 +812,15 @@ export const loadFile = (
 
             if (dologging)
                 log.warn(
-                    `Couldn't load new api plugin file "${filePath}" for ` +
-                    `plugin "${name}": ${represent(error)}. Using ` +
+                    `Couldn't load new api plugin file "${filePath}" for`,
+                    `plugin "${name}": ${represent(error)}. Using`,
                     'fallback one.'
                 )
         } else
             throw new Error(
-                `Couldn't load plugin file "${filePath}" for plugin "` +
-                `${name}": ${represent(error)}`
+                `Couldn't load plugin file "${filePath}" for plugin ` +
+                `"${name}": ${represent(error)}`,
+                {cause: error}
             )
     }
 
