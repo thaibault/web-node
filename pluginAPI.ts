@@ -746,11 +746,9 @@ export const loadConfigurations = (
             const pluginConfiguration: EvaluateablePartialConfiguration =
                 copy(plugin.configuration)
 
-            extend<Configuration>(
+            extend(
                 true,
-                modifyObject<Configuration>(
-                    configuration, pluginConfiguration
-                ),
+                modifyObject(configuration, pluginConfiguration),
                 /*
                     NOTE: Should be resolved via preceding
                     "object.modifyObject" call.
@@ -765,7 +763,7 @@ export const loadConfigurations = (
                 states.
             */
             if (configuration.core.runtimeConfiguration)
-                extend<Configuration>(
+                extend(
                     true,
                     configuration,
                     configuration.core.runtimeConfiguration as
