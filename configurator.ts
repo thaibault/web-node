@@ -134,9 +134,9 @@ export let configuration: Configuration =
 
 delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
 
-extend<Configuration>(
+extend(
     true,
-    modifyObject<Configuration>(configuration, applicationConfiguration),
+    modifyObject(configuration, applicationConfiguration),
     applicationConfiguration as Configuration
 )
 
@@ -156,14 +156,14 @@ if (Object.keys(result).length > 0) {
             NOTE: "object.modifyObject" removes modifications in "result"
             in-place before it is used as extending source.
         */
-        modifyObject<Configuration>(configuration, result),
+        modifyObject(configuration, result),
         result as RecursiveEvaluateable<Configuration>
     )
     configuration.core.runtimeConfiguration = result
 }
 
 configuration = evaluateDynamicData<Configuration>(
-    removeKeysInEvaluation<Configuration>(configuration),
+    removeKeysInEvaluation(configuration),
     scope as unknown as Mapping<unknown>
 )
 configuration.name = name
