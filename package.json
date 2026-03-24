@@ -61,6 +61,7 @@
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^25.5.0",
+    "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
     "clientnode": "^4.0.1363",
@@ -72,7 +73,7 @@
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.57.2",
-    "weboptimizer": "^3.0.14"
+    "weboptimizer": "^3.0.15"
   },
   "peerDependencies": {
     "@babel/runtime": "*",
