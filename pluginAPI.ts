@@ -480,8 +480,16 @@ export const load = async (
 
         if (await isFile(filePath)) {
             const sourceConfiguration = loadFile(filePath, name)
+
             extend(
                 true,
+                /*
+                    NOTE: Source and target configuration got modified.
+                    While the target configuration receives the modifications
+                    the source configuration will lose their modification
+                    expressions therefore we can use the source configuration
+                    afterward to extend the target configuration.
+                */
                 modifyObject(packageConfiguration, sourceConfiguration),
                 sourceConfiguration
             )
@@ -735,7 +743,7 @@ export const loadConfigurations = (
 ): Configuration => {
     /*
         First clear current configuration content key by key to let old top
-        level configuration reference in usable.
+        level configuration object instance untouched.
     */
     for (const key of Object.keys(configuration))
         delete configuration[key]
