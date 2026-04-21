@@ -156,7 +156,7 @@ export const callStack = async <
         }
     }
 
-    let data: Output = givenState.data as unknown as Output
+    let data: Output = givenState.data
     for (const plugin of plugins)
         if (plugin.api) {
             let result: Output
@@ -213,7 +213,7 @@ export const callStackSynchronous = <
     const state = {...givenState, pluginAPI} as State
     const {configuration, hook, plugins} = state
 
-    let data: Output = givenState.data as unknown as Output
+    let data: Output = givenState.data
     for (const plugin of plugins)
         if (plugin.api) {
             let result: Output

@@ -20,7 +20,6 @@ import {
     extend,
     getUTCTimestamp,
     isPlainObject,
-    Mapping,
     MAXIMAL_NUMBER_OF_ITERATIONS,
     modifyObject,
     parseEncodedObject,
@@ -129,7 +128,7 @@ export let configuration: Configuration =
         webNodePackageConfiguration.webNode as
             unknown as
             RecursiveEvaluateable<Configuration>,
-        scope as unknown as Mapping<unknown>
+        scope
     )
 
 delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
@@ -157,14 +156,13 @@ if (Object.keys(result).length > 0) {
             in-place before it is used as extending source.
         */
         modifyObject(configuration, result),
-        result as RecursiveEvaluateable<Configuration>
+        result
     )
     configuration.core.runtimeConfiguration = result
 }
 
 configuration = evaluateDynamicData<Configuration>(
-    removeKeysInEvaluation(configuration),
-    scope as unknown as Mapping<unknown>
+    removeKeysInEvaluation(configuration), scope
 )
 configuration.name = name
 configuration.core.package =
