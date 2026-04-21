@@ -5609,12 +5609,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"documentation-website@npm:^1.0.403":
-  version: 1.0.403
-  resolution: "documentation-website@npm:1.0.403"
+"documentation-website@npm:^1.0.404":
+  version: 1.0.404
+  resolution: "documentation-website@npm:1.0.404"
   bin:
     documentation-website: build/deploy.js
-  checksum: 10c0/90bc3705c3c42858f585d7daacba61fa74eb3cbf671ab5c89c7d114641571533295b46934e8ccd3546f1e1c87abdf6a2aa34105207aff71632ce1e7f9b56342d
+  checksum: 10c0/952f3a4d2f53eae02f6a4334140e0a504bb71f1ba3aea7e9673c7fe54c01945bda64c64395cadca9995505d5a29423fe9b759f995e2a6f1231db91450b38fcd2
   languageName: node
   linkType: hard
 
@@ -10294,7 +10294,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.59.0"
     "@typescript-eslint/parser": "npm:^8.59.0"
     clientnode: "npm:^4.0.1387"
-    documentation-website: "npm:^1.0.403"
+    documentation-website: "npm:^1.0.404"
     eslint: "npm:^10.2.1"
     eslint-config-google: "npm:^0.14.0"
     eslint-plugin-jsdoc: "npm:^62.9.0"
