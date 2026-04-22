@@ -50,7 +50,7 @@
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
-    "update:documentation": "documentation-website",
+    "update:documentation": "web-documentation",
     "watch": "weboptimizer build --watch"
   },
   "runkitExample": "require('@babel/runtime/package.json')\nrequire('clientnode/package.json')\n\nconst {loadFile} = require('web-node')\n\nloadFile('./unixCrypt.js', 'crypt')('test')",
@@ -65,7 +65,7 @@
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
     "clientnode": "^4.0.1387",
-    "documentation-website": "^1.0.405",
+    "web-documentation": "^1.0.0",
     "eslint": "^10.2.1",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^62.9.0",
