@@ -5609,15 +5609,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"documentation-website@npm:^1.0.405":
-  version: 1.0.405
-  resolution: "documentation-website@npm:1.0.405"
-  bin:
-    documentation-website: build/deploy.js
-  checksum: 10c0/0c17e86699a8466ceecb66f7e9e3867812c8f7a5471da00c0d803bc4f3e6bc0da8c1b1aafb1bd439b957957c5ce09bd11e56fe85378bb4c018dc348a4a831682
-  languageName: node
-  linkType: hard
-
 "dom-converter@npm:^0.2.0":
   version: 0.2.0
   resolution: "dom-converter@npm:0.2.0"
@@ -10280,6 +10271,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web-documentation@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "web-documentation@npm:1.0.0"
+  bin:
+    web-documentation: build/deploy.js
+  checksum: 10c0/91be8d9e2b37e48c389d5a1d9f94c502dff7ec38972911489c821660876829c6538c48c975bce4ac236a1fc36f059cd5ed68121ff718057bca5a09e635a4f2ff
+  languageName: node
+  linkType: hard
+
 "web-node@workspace:.":
   version: 0.0.0-use.local
   resolution: "web-node@workspace:."
@@ -10294,7 +10294,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.59.0"
     "@typescript-eslint/parser": "npm:^8.59.0"
     clientnode: "npm:^4.0.1387"
-    documentation-website: "npm:^1.0.405"
     eslint: "npm:^10.2.1"
     eslint-config-google: "npm:^0.14.0"
     eslint-plugin-jsdoc: "npm:^62.9.0"
@@ -10302,6 +10301,7 @@ __metadata:
     jsdoc: "npm:^4.0.5"
     shx: "npm:^0.4.0"
     typescript-eslint: "npm:^8.59.0"
+    web-documentation: "npm:^1.0.0"
     weboptimizer: "npm:^3.0.21"
   peerDependencies:
     "@babel/runtime": "*"
