@@ -99,7 +99,7 @@ try {
 }
 
 const name: string =
-    mainPackageConfiguration.documentationWebsite?.name ||
+    mainPackageConfiguration.webDocumentation?.name ||
     mainPackageConfiguration.name ||
     'main'
 
@@ -111,7 +111,8 @@ const applicationConfiguration: EvaluateablePartialConfiguration =
     }}
 // endregion
 webNodePackageConfiguration.webNode.core.name =
-    webNodePackageConfiguration.documentationWebsite.name
+    webNodePackageConfiguration.webDocumentation.name ||
+    webNodePackageConfiguration.name
 const now: Date = new Date()
 const scope: EvaluateConfigurationScope = {
     ...UTILITY_SCOPE,

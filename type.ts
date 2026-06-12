@@ -17,6 +17,7 @@
 import {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial, UTILITY_SCOPE
 } from 'clientnode'
+import {WebDocumentationConfiguration} from 'web-documentation/build/deploy'
 import pluginAPI, {
     callStack,
     callStackSynchronous,
@@ -101,7 +102,7 @@ export type EvaluateablePartialConfiguration =
 export type PackageConfiguration =
     Mapping<unknown> &
     {
-        documentationWebsite?: {name?: string}
+        webDocumentation?: WebDocumentationConfiguration
         main?: string
         name?: string
         webnode?: EvaluateablePartialConfiguration

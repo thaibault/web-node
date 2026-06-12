@@ -54,25 +54,25 @@
     "watch": "weboptimizer build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^7.28.6",
-    "@babel/eslint-parser": "^7.28.6",
-    "@babel/runtime": "^7.29.2",
+    "@babel/cli": "^7.29.7",
+    "@babel/eslint-parser": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/node": "^25.6.0",
+    "@types/node": "^25.9.3",
     "@types/webpack-env": "^1.18.8",
-    "@typescript-eslint/eslint-plugin": "^8.59.0",
-    "@typescript-eslint/parser": "^8.59.0",
-    "clientnode": "^4.0.1388",
-    "eslint": "^10.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "clientnode": "^4.0.1422",
+    "eslint": "^10.4.1",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-jsdoc": "^62.9.0",
-    "jest": "^30.3.0",
+    "eslint-plugin-jsdoc": "^63.0.2",
+    "jest": "^30.4.2",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
-    "typescript-eslint": "^8.59.0",
-    "web-documentation": "^1.0.3",
-    "weboptimizer": "^3.0.22"
+    "typescript-eslint": "^8.61.0",
+    "web-documentation": "^1.0.37",
+    "weboptimizer": "^3.0.24"
   },
   "peerDependencies": {
     "@babel/runtime": "*",
@@ -95,8 +95,7 @@
     "globals@npm:^9.18.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch"
   },
   "sideEffects": true,
-  "documentationWebsite": {
-    "name": "web-node",
+  "webDocumentation": {
     "trackingCode": "UA-40192634-9"
   },
   "webNode": {
