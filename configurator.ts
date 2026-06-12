@@ -111,7 +111,7 @@ const applicationConfiguration: EvaluateablePartialConfiguration =
     }}
 // endregion
 webNodePackageConfiguration.webNode.core.name =
-    webNodePackageConfiguration.webDocumentation.name ||
+    (webNodePackageConfiguration.webDocumentation as {name?: string}).name ||
     webNodePackageConfiguration.name
 const now: Date = new Date()
 const scope: EvaluateConfigurationScope = {
