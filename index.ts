@@ -46,8 +46,8 @@ import {
 // endregion
 declare const ORIGINAL_MAIN_MODULE: object
 
-Logger.configureAllInstances({name: 'web-node'})
-export const log = new Logger()
+export const log = new Logger({name: 'web-node'})
+Logger.configureAllInstances()
 
 const handleError = async (
     state: Omit<ServicePromisesState<Error>, 'hook' | 'pluginAPI'>
