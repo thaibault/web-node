@@ -273,9 +273,9 @@ export const determineInternalName = (
  * @param configuration - Evaluable configuration structure.
  * @returns Resolved configuration.
  */
-export const evaluateConfiguration = <
+export const evaluateConfiguration = async <
     Type extends Mapping<unknown> = Configuration
->(configuration: RecursiveEvaluateable<Type> | Type): Type => {
+>(configuration: RecursiveEvaluateable<Type> | Type): Promise<Type> => {
     /*
         NOTE: We have to back up, remove and restore all plugin specific
         package configuration to avoid evaluation non web node#
@@ -291,18 +291,20 @@ export const evaluateConfiguration = <
 
     const now = new Date()
 
-    configuration = evaluateDynamicData<Type>(
+    configuration = await evaluateDynamicData<Type>(
         removeKeysInEvaluation(configuration as Mapping<unknown>) as
             RecursiveEvaluateable<Type>,
         {
-            ...UTILITY_SCOPE,
-            currentPath: process.cwd(),
-            fs: fileSystem,
-            path,
-            module,
-            webNodePath: __dirname,
-            now,
-            nowUTCTimestamp: getUTCTimestamp(now)
+            scope: {
+                ...UTILITY_SCOPE,
+                currentPath: process.cwd(),
+                fs: fileSystem,
+                path,
+                module,
+                webNodePath: __dirname,
+                now,
+                nowUTCTimestamp: getUTCTimestamp(now)
+            }
         }
     )
 

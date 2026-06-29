@@ -129,7 +129,7 @@ export let configuration: Configuration =
         webNodePackageConfiguration.webNode as
             unknown as
             RecursiveEvaluateable<Configuration>,
-        scope
+        {scope}
     )
 
 delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
@@ -163,7 +163,7 @@ if (Object.keys(result).length > 0) {
 }
 
 configuration = evaluateDynamicData<Configuration>(
-    removeKeysInEvaluation(configuration), scope
+    removeKeysInEvaluation(configuration), {scope}
 )
 configuration.name = name
 configuration.core.package =
