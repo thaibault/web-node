@@ -159,9 +159,18 @@
     },
     "module": {
       "optimizer": {
-        "babelMinify": {
-          "#": "To provide a logging output we need to exclude this feature.",
-          "__evaluate__": "self.debug ? {bundle: null, module: null} : {bundle: {transform: {removeConsole: false}}, module: {removeConsole: false}}"
+        "terser": {
+          "terserOptions": {
+            "compress": {
+              "#": "To provide a logging output we need to exclude this feature.",
+              "drop_console": {
+                "__evaluate__": "false"
+              },
+              "drop_debugger": {
+                "__evaluate__": "false"
+              }
+            }
+          }
         }
       }
     },
