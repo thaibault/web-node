@@ -44,8 +44,6 @@ import {
     ServicesState
 } from './type'
 // endregion
-declare const ORIGINAL_MAIN_MODULE: object
-
 export const log = new Logger({name: 'web-node'})
 Logger.configureAllInstances()
 
@@ -306,12 +304,7 @@ export const main = async (): Promise<void> => {
     }
 }
 
-if (
-    require.main === module ||
-    eval('require.main') !== require.main &&
-    typeof ORIGINAL_MAIN_MODULE !== 'undefined' &&
-    ORIGINAL_MAIN_MODULE === eval('require.main')
-)
+if (import.meta.main)
     void main()
 
 export default main
