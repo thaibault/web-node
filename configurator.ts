@@ -15,9 +15,9 @@
 */
 // region imports
 import {
-    currentRequire,
     evaluateDynamicData,
     extend,
+    getCurrentRequire,
     getUTCTimestamp,
     isPlainObject,
     MAXIMAL_NUMBER_OF_ITERATIONS,
@@ -39,6 +39,7 @@ import {
 import webNodePackageConfiguration from './package.json'
 import pluginAPI from './pluginAPI'
 // endregion
+export const currentRequire = await getCurrentRequire()
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with

@@ -22,6 +22,7 @@ import {
     copy,
     delimitedToCamelCase,
     Encoding,
+    evaluateAsyncDynamicData,
     evaluateDynamicData,
     extend,
     getUTCTimestamp,
@@ -42,7 +43,7 @@ import fileSystem, {readdirSync, statSync} from 'fs'
 import {Module} from 'module'
 import path, {basename, extname, join, resolve} from 'path'
 
-import baseConfiguration from './configurator'
+import baseConfiguration, {currentRequire} from './configurator'
 import {
     APIFunction,
     BaseState,
@@ -61,7 +62,6 @@ import {
 // endregion
 export const log = new Logger({name: 'web-node.plugin-api'})
 
-export const currentRequire = eval('require') as typeof require
 // region allow plugins to import "web-node" as already loaded main module
 type ModuleType =
     typeof Module &
@@ -291,21 +291,25 @@ export const evaluateConfiguration = async <
 
     const now = new Date()
 
-    configuration = await evaluateDynamicData<Type>(
-        removeKeysInEvaluation(configuration as Mapping<unknown>) as
-            RecursiveEvaluateable<Type>,
-        {
-            scope: {
-                ...UTILITY_SCOPE,
-                currentPath: process.cwd(),
-                fs: fileSystem,
-                path,
-                module,
-                webNodePath: __dirname,
-                now,
-                nowUTCTimestamp: getUTCTimestamp(now)
-            }
+    const evaluationOptions = {
+        scope: {
+            ...UTILITY_SCOPE,
+            currentPath: process.cwd(),
+            fs: fileSystem,
+            path,
+            module,
+            webNodePath: __dirname,
+            now,
+            nowUTCTimestamp: getUTCTimestamp(now)
         }
+    }
+    configuration = await evaluateAsyncDynamicData(
+        evaluateDynamicData<Type>(
+            removeKeysInEvaluation(configuration as Mapping<unknown>) as
+                RecursiveEvaluateable<Type>,
+            evaluationOptions
+        ),
+        evaluationOptions
     )
 
     for (const [name, pluginPackageConfiguration] of Object.entries(
