@@ -15,36 +15,11 @@
     endregion
 */
 // region imports
-import {
-    spawnSync as spawnChildProcessSync, SpawnSyncReturns
-} from 'child_process'
-import {
-    copy,
-    delimitedToCamelCase,
-    Encoding,
-    evaluateAsyncDynamicData,
-    evaluateDynamicData,
-    extend,
-    getUTCTimestamp,
-    isDirectory,
-    isFile,
-    isFunction,
-    Logger,
-    Mapping,
-    modifyObject,
-    RecursiveEvaluateable,
-    removeKeyPrefixes,
-    removeKeysInEvaluation,
-    represent,
-    sortTopological,
-    UTILITY_SCOPE
+import type {
+    Encoding, Mapping, RecursiveAsyncEvaluateable, RecursiveEvaluateable
 } from 'clientnode'
-import fileSystem, {readdirSync, statSync} from 'fs'
-import {Module} from 'module'
-import path, {basename, extname, join, resolve} from 'path'
-
-import baseConfiguration, {currentRequire} from './configurator'
-import {
+import type {SpawnSyncReturns} from 'child_process'
+import type {
     APIFunction,
     BaseState,
     ChangedAPIFileState,
@@ -59,7 +34,36 @@ import {
     PluginConfiguration,
     ServicePromisesState
 } from './type'
+
+import {spawnSync as spawnChildProcessSync} from 'child_process'
+import {
+    copy,
+    delimitedToCamelCase,
+    evaluateAsyncDynamicData,
+    evaluateDynamicData,
+    extend,
+    getUTCTimestamp,
+    isDirectory,
+    isFile,
+    isFunction,
+    Logger,
+    modifyObject,
+    removeKeyPrefixes,
+    removeKeysInEvaluation,
+    represent,
+    sortTopological,
+    UTILITY_SCOPE
+} from 'clientnode'
+import fileSystem, {readdirSync, statSync} from 'fs'
+import {Module} from 'module'
+import path, {basename, extname, join, resolve} from 'path'
+
+import baseConfiguration, {
+    currentRequire as internalCurrentRequire
+} from './configurator'
 // endregion
+const currentRequire = internalCurrentRequire as typeof require
+
 export const log = new Logger({name: 'web-node.plugin-api'})
 
 // region allow plugins to import "web-node" as already loaded main module
@@ -303,10 +307,10 @@ export const evaluateConfiguration = async <
             nowUTCTimestamp: getUTCTimestamp(now)
         }
     }
-    configuration = await evaluateAsyncDynamicData(
-        evaluateDynamicData<Type>(
+    configuration = await evaluateAsyncDynamicData<Type>(
+        evaluateDynamicData<RecursiveAsyncEvaluateable<Type>>(
             removeKeysInEvaluation(configuration as Mapping<unknown>) as
-                RecursiveEvaluateable<Type>,
+                RecursiveEvaluateable<RecursiveAsyncEvaluateable<Type>>,
             evaluationOptions
         ),
         evaluationOptions
@@ -787,7 +791,7 @@ export const loadConfigurations = (
 
     return evaluateConfiguration(
         configuration as RecursiveEvaluateable<Configuration>
-    ) as Configuration
+    ) as unknown as Configuration
 }
 /**
  * Load given api file path and returns exported scope.

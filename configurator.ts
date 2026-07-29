@@ -40,6 +40,10 @@ import webNodePackageConfiguration from './package.json'
 import pluginAPI from './pluginAPI'
 // endregion
 export const currentRequire = await getCurrentRequire()
+if (currentRequire === null)
+    throw new Error(
+        'Missing synchronous module loading mechanism (require method).'
+    )
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -91,7 +95,6 @@ else
 
 let mainPackageConfiguration: PackageConfiguration = {name: 'main'}
 try {
-    // @ts-expect-error "currentRequire" may not be set.
     mainPackageConfiguration = currentRequire(join(
         webNodePackageConfiguration.webNode.core.context.path, 'package'
     )) as PackageConfiguration

@@ -209,6 +209,7 @@ export const main = async (): Promise<void> => {
             NOTE: Access property via string to avoid lint error
             "@typescript-eslint/unbound-method".
         */
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         if (isFunction(process.stdin['setRawMode']))
             process.stdin.setRawMode(true)
         process.stdin.resume()

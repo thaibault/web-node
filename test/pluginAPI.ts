@@ -14,14 +14,17 @@
     endregion
 */
 // region imports
+import type {Encoding, ThenParameter} from 'clientnode'
+
+import type {
+    Configuration, PackageConfiguration, Plugin, PluginConfiguration
+} from '../type'
+
 import {describe, expect, test} from '@jest/globals'
-import {copy, Encoding, mask, ThenParameter} from 'clientnode'
+import {copy, mask} from 'clientnode'
 import {testEach, testEachPromise} from 'clientnode/test-helper'
 import {resolve} from 'path'
 
-import {
-    Configuration, PackageConfiguration, Plugin, PluginConfiguration
-} from '../type'
 import configuration from '../configurator'
 import {
     callStack,
@@ -138,7 +141,7 @@ describe('pluginAPI', (): void => {
         ['haNs', 'ha-ns', /^.+$/],
         ['ha', 'ha-ns', /^([a-z][a-z]).+$/]
     )
-    testEach<typeof evaluateConfiguration>(
+    testEachPromise<typeof evaluateConfiguration>(
         'evaluateConfiguration',
         evaluateConfiguration,
 
@@ -309,7 +312,13 @@ describe('pluginAPI', (): void => {
             'dummyPlugin',
             'dummy',
             {},
+            /*
+                eslint-disable @typescript-eslint/no-unnecessary-type-assertion
+            */
             'utf8' as Encoding,
+            /*
+                eslint-enable @typescript-eslint/no-unnecessary-type-assertion
+            */
             {
                 a: {a: 2} as unknown as PluginConfiguration,
                 dummy: {package: {b: 3}}
