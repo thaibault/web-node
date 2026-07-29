@@ -10,7 +10,7 @@
     "plugin"
   ],
   "scripts": {
-    "build": "babel --plugins @babel/plugin-transform-runtime --presets @babel/env,@babel/preset-typescript --source-maps inline --out-file index.js index.ts",
+    "build": "babel --presets @babel/env,@babel/preset-typescript --source-maps inline --out-file index.js index.ts",
     "start": "index.js"
   },
   "webNode": {

@@ -19,6 +19,19 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
+import type {
+    APIFunction,
+    BaseState,
+    ChangedConfigurationState,
+    Configuration,
+    Plugin,
+    PluginPromises,
+    ServicePromises,
+    ServicePromisesState,
+    Services,
+    ServicesState
+} from './type'
+
 import {
     capitalize,
     copy,
@@ -31,18 +44,6 @@ import {
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
-import {
-    APIFunction,
-    BaseState,
-    ChangedConfigurationState,
-    Configuration,
-    Plugin,
-    PluginPromises,
-    ServicePromises,
-    ServicePromisesState,
-    Services,
-    ServicesState
-} from './type'
 // endregion
 export const log = new Logger({name: 'web-node'})
 Logger.configureAllInstances()

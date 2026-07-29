@@ -14,6 +14,13 @@
     endregion
 */
 // region imports
+import type {
+    Configuration,
+    EvaluateConfigurationScope,
+    EvaluateablePartialConfiguration,
+    PackageConfiguration
+} from './type'
+
 import {
     evaluateDynamicData,
     extend,
@@ -30,12 +37,6 @@ import {
 import fileSystemSynchronous, {lstatSync} from 'fs'
 import path, {basename, dirname, join, resolve} from 'path'
 
-import {
-    Configuration,
-    EvaluateConfigurationScope,
-    EvaluateablePartialConfiguration,
-    PackageConfiguration
-} from './type'
 import webNodePackageConfiguration from './package.json'
 import pluginAPI from './pluginAPI'
 // endregion

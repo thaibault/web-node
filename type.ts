@@ -14,13 +14,17 @@
     endregion
 */
 // region imports
-import {
+import type {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial, UTILITY_SCOPE
 } from 'clientnode'
-import {WebDocumentationConfiguration} from 'web-documentation/build/deploy'
-import pluginAPI, {
+import type {
+    WebDocumentationConfiguration
+} from 'web-documentation/build/deploy'
+import type {
     callStack,
     callStackSynchronous,
+
+    default as pluginAPI,
 
     determineInternalName,
     determineLocations,

@@ -14,15 +14,15 @@
     endregion
 */
 // region imports
-import {timeout} from 'clientnode'
-
-import {
+import type {
     Configuration,
     PluginHandler,
     PluginPromises,
     ServicePromisesState,
     Services
 } from '../type'
+
+import {timeout} from 'clientnode'
 // endregion
 /**
  * Loads dummy service.

@@ -17,19 +17,25 @@
 import type {Encoding, ThenParameter} from 'clientnode'
 
 import type {
-    Configuration, PackageConfiguration, Plugin, PluginConfiguration
+    Configuration,
+    EvaluateablePartialConfiguration,
+    PackageConfiguration,
+    Plugin,
+    PluginConfiguration
 } from '../type'
 
-import {describe, expect, test} from '@jest/globals'
 import {copy, mask} from 'clientnode'
 import {testEach, testEachPromise} from 'clientnode/test-helper'
 import {resolve} from 'path'
+
+import {describe, expect, test} from '@jest/globals'
 
 import configuration from '../configurator'
 import {
     callStack,
     callStackSynchronous,
-    determineInternalName, determineLocations,
+    determineInternalName,
+    determineLocations,
     evaluateConfiguration,
     hotReloadAPIFile,
     hotReloadConfigurationFile,
@@ -190,32 +196,6 @@ describe('pluginAPI', (): void => {
                     )
                 ],
 
-                configuration: {
-                    dummy: {
-                        package: mask(
-                            /*
-                                eslint-disable
-                                @typescript-eslint/no-require-imports
-                            */
-                            require('../dummyPlugin/package'),
-                            /*
-                                eslint-enable
-                                @typescript-eslint/no-require-imports
-                            */
-                            {exclude: {webNode: true}}
-                        )
-                    },
-                    ...((
-                        /*
-                            eslint-disable
-                            @typescript-eslint/no-require-imports
-                        */
-                        require('../dummyPlugin/package')
-                        /*
-                            eslint-enable @typescript-eslint/no-require-imports
-                        */
-                    ) as PackageConfiguration).webNode
-                } as unknown as Configuration,
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [],
 
@@ -224,19 +204,10 @@ describe('pluginAPI', (): void => {
                 internalName: 'dummy',
                 name: 'dummy',
 
-                packageConfiguration: mask(
-                    /* eslint-disable @typescript-eslint/no-require-imports */
-                    require('../dummyPlugin/package'),
-                    /* eslint-enable @typescript-eslint/no-require-imports */
-                    {exclude: {webNode: true}}
-                ),
-
-                path: resolve(
-                    configuration.core.context.path, 'dummyPlugin'
-                ),
+                path: resolve(configuration.core.context.path, 'dummyPlugin'),
 
                 scope: null
-            },
+            } as unknown as Plugin,
             'dummy',
             'dummy',
             {},
@@ -248,6 +219,19 @@ describe('pluginAPI', (): void => {
         async (
             expected: Plugin, ...parameters: Parameters<typeof load>
         ): Promise<void> => {
+            const packageConfiguration =
+                await import('../dummyPlugin/package.json')
+
+            expected.configuration.dummy.package = mask(
+                packageConfiguration, {exclude: {webNode: true}}
+            ) as PackageConfiguration
+            expected.configuration =
+                {...expected.configuration, ...packageConfiguration.webNode} as
+                    unknown as
+                    EvaluateablePartialConfiguration
+            expected.packageConfiguration =
+                expected.configuration.dummy.package
+
             let plugin: Plugin | undefined
             try {
                 plugin = await load(...parameters)
@@ -414,6 +398,7 @@ describe('pluginAPI', (): void => {
             {} as unknown as Configuration
         ]
     )
+    // TODO introduce "testEach*AgainstResolvedPromise"
     testEach<typeof loadFile>(
         'loadFile',
         loadFile,
