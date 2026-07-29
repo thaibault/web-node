@@ -25,7 +25,9 @@ import type {
 } from '../type'
 
 import {copy, mask} from 'clientnode'
-import {testEach, testEachPromise} from 'clientnode/test-helper'
+import {
+    testEach, testEachAgainstResolvedPromise, testEachResolvedPromise
+} from 'clientnode/test-helper'
 import {resolve} from 'path'
 
 import {describe, expect, test} from '@jest/globals'
@@ -52,7 +54,7 @@ import {
 describe('pluginAPI', (): void => {
     const testConfiguration: Configuration = copy(configuration)
 
-    testEachPromise<typeof callStack>(
+    testEachResolvedPromise<typeof callStack>(
         'callStack',
         callStack,
 
@@ -147,7 +149,7 @@ describe('pluginAPI', (): void => {
         ['haNs', 'ha-ns', /^.+$/],
         ['ha', 'ha-ns', /^([a-z][a-z]).+$/]
     )
-    testEachPromise<typeof evaluateConfiguration>(
+    testEachResolvedPromise<typeof evaluateConfiguration>(
         'evaluateConfiguration',
         evaluateConfiguration,
 
@@ -398,14 +400,13 @@ describe('pluginAPI', (): void => {
             {} as unknown as Configuration
         ]
     )
-    // TODO introduce "testEach*AgainstResolvedPromise"
-    testEach<typeof loadFile>(
+    testEachAgainstResolvedPromise<typeof loadFile>(
         'loadFile',
         loadFile,
 
         [
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            require('../dummyPlugin/package'),
+            import('../dummyPlugin/package.json', {with: {type: 'json'}})
+                .then((module) => module.default),
             resolve(
                 configuration.core.context.path, 'dummyPlugin/package.json'
             ),
@@ -413,7 +414,7 @@ describe('pluginAPI', (): void => {
             null,
             false
         ],
-        [{a: 2}, 'unknown', 'dummy', {a: 2}, false]
+        [Promise.resolve({a: 2}), 'unknown', 'dummy', {a: 2}, false]
     )
     testEach<typeof determineLocations>(
         'determineLocations',
