@@ -222,15 +222,18 @@ describe('pluginAPI', (): void => {
             expected: Plugin, ...parameters: Parameters<typeof load>
         ): Promise<void> => {
             const packageConfiguration =
-                await import('../dummyPlugin/package.json')
+                (await import('../dummyPlugin/package.json')).default
 
-            expected.configuration.dummy.package = mask(
-                packageConfiguration, {exclude: {webNode: true}}
-            ) as PackageConfiguration
-            expected.configuration =
-                {...expected.configuration, ...packageConfiguration.webNode} as
-                    unknown as
-                    EvaluateablePartialConfiguration
+            expected.configuration = {
+                dummy: {
+                    package: mask(
+                        packageConfiguration, {exclude: {webNode: true}}
+                    ) as PackageConfiguration
+                },
+                ...packageConfiguration.webNode
+            } as
+                unknown as
+                EvaluateablePartialConfiguration
             expected.packageConfiguration =
                 expected.configuration.dummy.package
 
@@ -388,7 +391,7 @@ describe('pluginAPI', (): void => {
             ['b', 'a']
         ]
     )
-    testEach<typeof loadConfigurations>(
+    testEachResolvedPromise<typeof loadConfigurations>(
         'loadConfigurations',
         loadConfigurations,
 

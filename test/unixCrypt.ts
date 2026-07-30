@@ -16,21 +16,17 @@
 // region imports
 import {testEach} from 'clientnode/test-helper'
 
-import {describe} from '@jest/globals'
-
 import unixCrypt from '../unixCrypt'
 // endregion
-describe('unixCrypt', () => {
-    testEach<typeof unixCrypt>(
-        'unixCrypt',
-        unixCrypt,
+testEach<typeof unixCrypt>(
+    'unixCrypt',
+    unixCrypt,
 
-        ['baJyGvzMWSid.', '', 'ba'],
-        ['aayPdtR3JLIkk', 'ba', ''],
-        ['aaQSqAReePlq6', '', ''],
-        ['ba4TuD1iozTxw', 'foo', 'ba'],
-        ['hib8W/d4WOlU.', 'random long string', 'hi'],
-        ['arlEKn0OzVJn.', 'foob', 'ar'],
-        ['uxNS5oJDUz4Sc', 'Hello World! This is Unix crypt(3)!', 'ux']
-    )
-})
+    ['baJyGvzMWSid.', '', 'ba'],
+    ['aayPdtR3JLIkk', 'ba', ''],
+    ['aaQSqAReePlq6', '', ''],
+    ['ba4TuD1iozTxw', 'foo', 'ba'],
+    ['hib8W/d4WOlU.', 'random long string', 'hi'],
+    ['arlEKn0OzVJn.', 'foob', 'ar'],
+    ['uxNS5oJDUz4Sc', 'Hello World! This is Unix crypt(3)!', 'ux']
+)

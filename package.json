@@ -64,7 +64,7 @@
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
-    "clientnode": "^4.0.1479",
+    "clientnode": "^4.0.1480",
     "eslint": "^10.8.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^63.3.2",
@@ -73,7 +73,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.65.0",
     "web-documentation": "^1.0.44",
-    "weboptimizer": "^4.0.44"
+    "weboptimizer": "^4.0.45"
   },
   "peerDependencies": {
     "@babel/runtime": "*",
@@ -149,13 +149,9 @@
         }
       }
     },
-    "exportFormat": {
-      "external": "commonjs2",
-      "self": "commonjs2"
-    },
     "injection": {
       "entry": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2].startsWith('test') ? {testBundle: 'test'} : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2].startsWith('test') ? {testBundle: './test/index.ts'} : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
       }
     },
     "module": {

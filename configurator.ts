@@ -14,6 +14,7 @@
     endregion
 */
 // region imports
+import type {RecursiveEvaluateable} from 'clientnode'
 import type {
     Configuration,
     EvaluateConfigurationScope,
@@ -30,7 +31,6 @@ import {
     MAXIMAL_NUMBER_OF_ITERATIONS,
     modifyObject,
     parseEncodedObject,
-    RecursiveEvaluateable,
     removeKeysInEvaluation,
     UTILITY_SCOPE
 } from 'clientnode'

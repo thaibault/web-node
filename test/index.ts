@@ -13,9 +13,8 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
-import {expect, test} from '@jest/globals'
-
-test('configurator', async () => {
-    expect(typeof (await import('../configurator')).default.core.debug)
-        .toStrictEqual('boolean')
-})
+// region imports
+import './configurator'
+import './pluginAPI'
+import './unixCrypt'
+// endregion
