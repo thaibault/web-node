@@ -11,7 +11,7 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
+    This library written by Torben Sickert stands under a creative commons
     naming 3.0 unported license.
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
@@ -19,6 +19,19 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
+import type {
+    APIFunction,
+    BaseState,
+    ChangedConfigurationState,
+    Configuration,
+    Plugin,
+    PluginPromises,
+    ServicePromises,
+    ServicePromisesState,
+    Services,
+    ServicesState
+} from './type'
+
 import {
     capitalize,
     copy,
@@ -31,23 +44,9 @@ import {
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
-import {
-    APIFunction,
-    BaseState,
-    ChangedConfigurationState,
-    Configuration,
-    Plugin,
-    PluginPromises,
-    ServicePromises,
-    ServicePromisesState,
-    Services,
-    ServicesState
-} from './type'
 // endregion
-declare const ORIGINAL_MAIN_MODULE: object
-
-Logger.configureAllInstances({name: 'web-node'})
-export const log = new Logger()
+export const log = new Logger({name: 'web-node'})
+Logger.configureAllInstances()
 
 const handleError = async (
     state: Omit<ServicePromisesState<Error>, 'hook' | 'pluginAPI'>
@@ -211,6 +210,7 @@ export const main = async (): Promise<void> => {
             NOTE: Access property via string to avoid lint error
             "@typescript-eslint/unbound-method".
         */
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         if (isFunction(process.stdin['setRawMode']))
             process.stdin.setRawMode(true)
         process.stdin.resume()
@@ -306,12 +306,7 @@ export const main = async (): Promise<void> => {
     }
 }
 
-if (
-    require.main === module ||
-    eval('require.main') !== require.main &&
-    typeof ORIGINAL_MAIN_MODULE !== 'undefined' &&
-    ORIGINAL_MAIN_MODULE === eval('require.main')
-)
+if (import.meta.main)
     void main()
 
 export default main

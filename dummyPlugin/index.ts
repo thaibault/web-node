@@ -8,22 +8,26 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
+    This library written by Torben Sickert stands under a creative commons
     naming 3.0 unported license.
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
 // region imports
-import {timeout} from 'clientnode'
-
-import {
+import type {
     Configuration,
-    PluginHandler,
+    PluginHandler as BasePluginHandler,
     PluginPromises,
     ServicePromisesState,
     Services
 } from '../type'
+
+import {timeout} from 'clientnode'
 // endregion
+export interface PluginHandler extends BasePluginHandler {
+    test: typeof test
+    testSynchronous: typeof testSynchronous
+}
 /**
  * Loads dummy service.
  * @param state - Application state.
@@ -78,5 +82,8 @@ export const testSynchronous = (
     dummy.synchronousHookCalled = true
 }
 
-export const Dummy = module.exports satisfies PluginHandler
-export default Dummy
+export default {
+    loadService,
+    test,
+    testSynchronous
+} satisfies PluginHandler

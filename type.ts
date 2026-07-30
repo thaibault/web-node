@@ -8,18 +8,23 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
+    This library written by Torben Sickert stands under a creative commons
     naming 3.0 unported license.
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
 // region imports
-import {
+import type {
     Encoding, Mapping, RecursiveEvaluateable, RecursivePartial, UTILITY_SCOPE
 } from 'clientnode'
-import pluginAPI, {
+import type {
+    WebDocumentationConfiguration
+} from 'web-documentation/build/deploy'
+import type {
     callStack,
     callStackSynchronous,
+
+    default as pluginAPI,
 
     determineInternalName,
     determineLocations,
@@ -101,7 +106,7 @@ export type EvaluateablePartialConfiguration =
 export type PackageConfiguration =
     Mapping<unknown> &
     {
-        documentationWebsite?: {name?: string}
+        webDocumentation?: WebDocumentationConfiguration
         main?: string
         name?: string
         webnode?: EvaluateablePartialConfiguration

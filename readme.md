@@ -6,7 +6,7 @@ Copyright Torben Sickert (info["~at~"]torben.website) 16.12.2012
 License
 -------
 
-This library written by Torben Sickert stand under a creative commons naming
+This library written by Torben Sickert stands under a creative commons naming
 3.0 unported license. See https://creativecommons.org/licenses/by/3.0/deed.de
 endregion -->
 
@@ -26,12 +26,12 @@ Project status
 [![code coverage](https://img.shields.io/coverallsCoverage/github/thaibault/web-node?label=code%20coverage&style=for-the-badge)](https://coveralls.io/github/thaibault/web-node)
 
 [![deploy web documentation](https://img.shields.io/github/actions/workflow/status/thaibault/web-node/deploy-web-documentation.yaml?label=deploy%20web%20documentation&style=for-the-badge)](https://github.com/thaibault/web-node/actions/workflows/deploy-web-documentation.yaml)
-[![documentation website](https://img.shields.io/website-up-down-green-red/https/torben.website/web-node.svg?label=web-documentation&style=for-the-badge)](https://torben.website/web-node)
+[![web documentation](https://img.shields.io/website-up-down-green-red/https/torben.website/web-node.svg?label=web-documentation&style=for-the-badge)](https://torben.website/web-node)
 
 [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=for-the-badge&logo=codesandbox)](https://githubbox.com/thaibault/web-node)
 
 Use case
 --------
 
-webNode is a high level javaScript backend plugin system and configuration
+WebNode is a high-level JavaScript backend plugin system and configuration
 merger.

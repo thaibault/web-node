@@ -9,41 +9,17 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
+    This library written by Torben Sickert stands under a creative commons
     naming 3.0 unported license.
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
 // region imports
-import {
-    spawnSync as spawnChildProcessSync, SpawnSyncReturns
-} from 'child_process'
-import {
-    copy,
-    delimitedToCamelCase,
-    Encoding,
-    evaluateDynamicData,
-    extend,
-    getUTCTimestamp,
-    isDirectory,
-    isFile,
-    isFunction,
-    Logger,
-    Mapping,
-    modifyObject,
-    RecursiveEvaluateable,
-    removeKeyPrefixes,
-    removeKeysInEvaluation,
-    represent,
-    sortTopological,
-    UTILITY_SCOPE
+import type {
+    Encoding, Mapping, RecursiveAsyncEvaluateable, RecursiveEvaluateable
 } from 'clientnode'
-import fileSystem, {readdirSync, statSync} from 'fs'
-import {Module} from 'module'
-import path, {basename, extname, join, resolve} from 'path'
-
-import baseConfiguration from './configurator'
-import {
+import type {SpawnSyncReturns} from 'child_process'
+import type {
     APIFunction,
     BaseState,
     ChangedAPIFileState,
@@ -58,11 +34,49 @@ import {
     PluginConfiguration,
     ServicePromisesState
 } from './type'
+
+import {spawnSync as spawnChildProcessSync} from 'child_process'
+import {
+    copy,
+    delimitedToCamelCase,
+    evaluateAsyncDynamicData,
+    evaluateDynamicData,
+    extend,
+    getCurrentRequire,
+    getUTCTimestamp,
+    importFilesystemAPI,
+    isDirectory,
+    isFile,
+    isFunction,
+    Logger,
+    modifyObject,
+    removeKeyPrefixes,
+    removeKeysInEvaluation,
+    represent,
+    sortTopological,
+    UTILITY_SCOPE
+} from 'clientnode'
+import fileSystem, {readdirSync, statSync} from 'fs'
+import path, {basename, extname, join, resolve} from 'path'
+
+import baseConfiguration from './configurator'
 // endregion
 export const log = new Logger({name: 'web-node.plugin-api'})
 
-export const currentRequire = eval('require') as typeof require
+await importFilesystemAPI()
+const currentRequire = await getCurrentRequire()
+if (currentRequire === null)
+    throw new Error(
+        'Missing synchronous module loading mechanism (require method).'
+    )
 // region allow plugins to import "web-node" as already loaded main module
+/*
+    Commonjs specific logic to deduplicate the main module's scope for plugins
+    to avoid loading it twice and therefore having two different scopes of the
+    same module in memory:
+
+import {Module} from 'module'
+
 type ModuleType =
     typeof Module &
     {_resolveFilename: (
@@ -72,11 +86,48 @@ const oldResolveFilename = (Module as ModuleType)._resolveFilename
 ;(Module as ModuleType)._resolveFilename = (
     request: string, parent: typeof Module, isMain: boolean
 ): string => {
-    if (request === 'web-node' && currentRequire.main?.id)
+    if (request === 'main-module' && currentRequire.main?.id)
         return oldResolveFilename(currentRequire.main.id, parent, isMain)
 
     return oldResolveFilename(request, parent, isMain)
 }
+*/
+/*
+    Esmodule specific logic to deduplicate the main module's scope for plugins
+    to avoid loading it twice and therefore having two different scopes of the
+    same module in memory:
+
+// main-module-hook.ts  (must compile/run as a standalone module)
+import type {ResolveHook, InitializeHook} from 'node:module'
+
+let mainModuleURL: string | undefined
+
+export const initialize: InitializeHook = (
+    data: {mainModuleURL?: string}
+): void => {
+    mainModuleURL = data.mainModuleURL
+}
+
+export const resolve: ResolveHook = (specifier, context, nextResolve) => {
+    if (specifier === 'main-module' && mainModuleURL)
+        // Redirect to the entry module's URL; the ESM cache is keyed by
+        // resolved URL, so every importer shares that one instance.
+        return nextResolve(mainModuleURL, context)
+
+    return nextResolve(specifier, context)
+}
+
+Registering it
+
+// setup.ts  (imported first, before anything does import 'main-module')
+import {register} from 'node:module'
+import {pathToFileURL} from 'node:url'
+
+register('./main-module-hook.js', {
+    parentURL: import.meta.url,
+    data: {mainModuleURL: pathToFileURL(process.argv[1]).href}
+})
+*/
 // endregion
 /**
  * Calls all plugin methods for given trigger description asynchronous and
@@ -125,7 +176,7 @@ export const callStack = async <
                     {...localState, hook: 'preConfigurationHotLoaded'}
                 )
 
-                loadConfigurations(plugins, configuration)
+                await loadConfigurations(plugins, configuration)
 
                 await callStack<State & ChangedConfigurationState>(
                     {...localState, hook: 'postConfigurationHotLoaded'}
@@ -273,9 +324,9 @@ export const determineInternalName = (
  * @param configuration - Evaluable configuration structure.
  * @returns Resolved configuration.
  */
-export const evaluateConfiguration = <
+export const evaluateConfiguration = async <
     Type extends Mapping<unknown> = Configuration
->(configuration: RecursiveEvaluateable<Type> | Type): Type => {
+>(configuration: RecursiveEvaluateable<Type> | Type): Promise<Type> => {
     /*
         NOTE: We have to back up, remove and restore all plugin specific
         package configuration to avoid evaluation non web node#
@@ -291,10 +342,8 @@ export const evaluateConfiguration = <
 
     const now = new Date()
 
-    configuration = evaluateDynamicData<Type>(
-        removeKeysInEvaluation(configuration as Mapping<unknown>) as
-            RecursiveEvaluateable<Type>,
-        {
+    const evaluationOptions = {
+        scope: {
             ...UTILITY_SCOPE,
             currentPath: process.cwd(),
             fs: fileSystem,
@@ -304,6 +353,14 @@ export const evaluateConfiguration = <
             now,
             nowUTCTimestamp: getUTCTimestamp(now)
         }
+    }
+    configuration = await evaluateAsyncDynamicData<Type>(
+        evaluateDynamicData<RecursiveAsyncEvaluateable<Type>>(
+            removeKeysInEvaluation(configuration as Mapping<unknown>) as
+                RecursiveEvaluateable<RecursiveAsyncEvaluateable<Type>>,
+            evaluationOptions
+        ),
+        evaluationOptions
     )
 
     for (const [name, pluginPackageConfiguration] of Object.entries(
@@ -740,7 +797,7 @@ export const loadConfiguration = (
  */
 export const loadConfigurations = (
     plugins: Array<Plugin>, configuration: Configuration
-): Configuration => {
+): Promise<Configuration> => {
     /*
         First clear current configuration content key by key to let old top
         level configuration object instance untouched.
@@ -781,7 +838,7 @@ export const loadConfigurations = (
 
     return evaluateConfiguration(
         configuration as RecursiveEvaluateable<Configuration>
-    ) as Configuration
+    ) as Promise<Configuration>
 }
 /**
  * Load given api file path and returns exported scope.
@@ -789,14 +846,14 @@ export const loadConfigurations = (
  * @param name - Plugin name to use for proper error messages.
  * @param fallbackScope - Scope to return if an error occurs during loading.
  * If a "null" is given an error will be thrown.
- * @param dologging - Enables logging.
+ * @param doLogging - Enables logging.
  * @returns Exported api file scope.
  */
 export const loadFile = (
     filePath: string,
     name: string,
     fallbackScope: null | object = null,
-    dologging = true
+    doLogging = true
 ): object => {
     let reference: string | undefined
     try {
@@ -816,7 +873,7 @@ export const loadFile = (
         if (fallbackScope) {
             scope = fallbackScope
 
-            if (dologging)
+            if (doLogging)
                 log.warn(
                     `Couldn't load new api plugin file "${filePath}" for`,
                     `plugin "${name}": ${represent(error)}. Using`,
@@ -928,7 +985,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
             }
 
     return {
-        configuration: loadConfigurations(sortedPlugins, configuration),
+        configuration: await loadConfigurations(sortedPlugins, configuration),
         plugins: sortedPlugins
     }
 }
@@ -985,10 +1042,6 @@ export const isInLocations = (
     return false
 }
 
-/*
-    NOTE: "module.exports" is types as "any" so we need to list all methods
-    explicitly.
-*/
 export const pluginAPI = {
     callStack,
     callStackSynchronous,

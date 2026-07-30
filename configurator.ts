@@ -8,37 +8,43 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
+    This library written by Torben Sickert stands under a creative commons
     naming 3.0 unported license.
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
 // region imports
+import type {RecursiveEvaluateable} from 'clientnode'
+import type {
+    Configuration,
+    EvaluateConfigurationScope,
+    EvaluateablePartialConfiguration,
+    PackageConfiguration
+} from './type'
+
 import {
-    currentRequire,
     evaluateDynamicData,
     extend,
+    getCurrentRequire,
     getUTCTimestamp,
     isPlainObject,
     MAXIMAL_NUMBER_OF_ITERATIONS,
     modifyObject,
     parseEncodedObject,
-    RecursiveEvaluateable,
     removeKeysInEvaluation,
     UTILITY_SCOPE
 } from 'clientnode'
 import fileSystemSynchronous, {lstatSync} from 'fs'
 import path, {basename, dirname, join, resolve} from 'path'
 
-import {
-    Configuration,
-    EvaluateConfigurationScope,
-    EvaluateablePartialConfiguration,
-    PackageConfiguration
-} from './type'
 import webNodePackageConfiguration from './package.json'
 import pluginAPI from './pluginAPI'
 // endregion
+export const currentRequire = await getCurrentRequire()
+if (currentRequire === null)
+    throw new Error(
+        'Missing synchronous module loading mechanism (require method).'
+    )
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -90,7 +96,6 @@ else
 
 let mainPackageConfiguration: PackageConfiguration = {name: 'main'}
 try {
-    // @ts-expect-error "currentRequire" may not be set.
     mainPackageConfiguration = currentRequire(join(
         webNodePackageConfiguration.webNode.core.context.path, 'package'
     )) as PackageConfiguration
@@ -99,7 +104,7 @@ try {
 }
 
 const name: string =
-    mainPackageConfiguration.documentationWebsite?.name ||
+    mainPackageConfiguration.webDocumentation?.name ||
     mainPackageConfiguration.name ||
     'main'
 
@@ -111,7 +116,8 @@ const applicationConfiguration: EvaluateablePartialConfiguration =
     }}
 // endregion
 webNodePackageConfiguration.webNode.core.name =
-    webNodePackageConfiguration.documentationWebsite.name
+    (webNodePackageConfiguration.webDocumentation as {name?: string}).name ||
+    webNodePackageConfiguration.name
 const now: Date = new Date()
 const scope: EvaluateConfigurationScope = {
     ...UTILITY_SCOPE,
@@ -128,7 +134,7 @@ export let configuration: Configuration =
         webNodePackageConfiguration.webNode as
             unknown as
             RecursiveEvaluateable<Configuration>,
-        scope
+        {scope}
     )
 
 delete (webNodePackageConfiguration as unknown as PackageConfiguration).webNode
@@ -162,7 +168,7 @@ if (Object.keys(result).length > 0) {
 }
 
 configuration = evaluateDynamicData<Configuration>(
-    removeKeysInEvaluation(configuration), scope
+    removeKeysInEvaluation(configuration), {scope}
 )
 configuration.name = name
 configuration.core.package =

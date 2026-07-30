@@ -8,25 +8,36 @@
     License
     -------
 
-    This library written by Torben Sickert stand under a creative commons
+    This library written by Torben Sickert stands under a creative commons
     naming 3.0 unported license.
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
 // region imports
-import {describe, expect, test} from '@jest/globals'
-import {copy, Encoding, mask, ThenParameter} from 'clientnode'
-import {testEach, testEachPromise} from 'clientnode/test-helper'
+import type {Encoding, ThenParameter} from 'clientnode'
+
+import type {
+    Configuration,
+    EvaluateablePartialConfiguration,
+    PackageConfiguration,
+    Plugin,
+    PluginConfiguration
+} from '../type'
+
+import {copy, mask} from 'clientnode'
+import {
+    testEach, testEachAgainstResolvedPromise, testEachResolvedPromise
+} from 'clientnode/test-helper'
 import {resolve} from 'path'
 
-import {
-    Configuration, PackageConfiguration, Plugin, PluginConfiguration
-} from '../type'
+import {describe, expect, test} from '@jest/globals'
+
 import configuration from '../configurator'
 import {
     callStack,
     callStackSynchronous,
-    determineInternalName, determineLocations,
+    determineInternalName,
+    determineLocations,
     evaluateConfiguration,
     hotReloadAPIFile,
     hotReloadConfigurationFile,
@@ -43,7 +54,7 @@ import {
 describe('pluginAPI', (): void => {
     const testConfiguration: Configuration = copy(configuration)
 
-    testEachPromise<typeof callStack>(
+    testEachResolvedPromise<typeof callStack>(
         'callStack',
         callStack,
 
@@ -138,7 +149,7 @@ describe('pluginAPI', (): void => {
         ['haNs', 'ha-ns', /^.+$/],
         ['ha', 'ha-ns', /^([a-z][a-z]).+$/]
     )
-    testEach<typeof evaluateConfiguration>(
+    testEachResolvedPromise<typeof evaluateConfiguration>(
         'evaluateConfiguration',
         evaluateConfiguration,
 
@@ -187,32 +198,6 @@ describe('pluginAPI', (): void => {
                     )
                 ],
 
-                configuration: {
-                    dummy: {
-                        package: mask(
-                            /*
-                                eslint-disable
-                                @typescript-eslint/no-require-imports
-                            */
-                            require('../dummyPlugin/package'),
-                            /*
-                                eslint-enable
-                                @typescript-eslint/no-require-imports
-                            */
-                            {exclude: {webNode: true}}
-                        )
-                    },
-                    ...((
-                        /*
-                            eslint-disable
-                            @typescript-eslint/no-require-imports
-                        */
-                        require('../dummyPlugin/package')
-                        /*
-                            eslint-enable @typescript-eslint/no-require-imports
-                        */
-                    ) as PackageConfiguration).webNode
-                } as unknown as Configuration,
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [],
 
@@ -221,19 +206,10 @@ describe('pluginAPI', (): void => {
                 internalName: 'dummy',
                 name: 'dummy',
 
-                packageConfiguration: mask(
-                    /* eslint-disable @typescript-eslint/no-require-imports */
-                    require('../dummyPlugin/package'),
-                    /* eslint-enable @typescript-eslint/no-require-imports */
-                    {exclude: {webNode: true}}
-                ),
-
-                path: resolve(
-                    configuration.core.context.path, 'dummyPlugin'
-                ),
+                path: resolve(configuration.core.context.path, 'dummyPlugin'),
 
                 scope: null
-            },
+            } as unknown as Plugin,
             'dummy',
             'dummy',
             {},
@@ -245,6 +221,22 @@ describe('pluginAPI', (): void => {
         async (
             expected: Plugin, ...parameters: Parameters<typeof load>
         ): Promise<void> => {
+            const packageConfiguration =
+                (await import('../dummyPlugin/package.json')).default
+
+            expected.configuration = {
+                dummy: {
+                    package: mask(
+                        packageConfiguration, {exclude: {webNode: true}}
+                    ) as PackageConfiguration
+                },
+                ...packageConfiguration.webNode
+            } as
+                unknown as
+                EvaluateablePartialConfiguration
+            expected.packageConfiguration =
+                expected.configuration.dummy.package
+
             let plugin: Plugin | undefined
             try {
                 plugin = await load(...parameters)
@@ -309,7 +301,13 @@ describe('pluginAPI', (): void => {
             'dummyPlugin',
             'dummy',
             {},
+            /*
+                eslint-disable @typescript-eslint/no-unnecessary-type-assertion
+            */
             'utf8' as Encoding,
+            /*
+                eslint-enable @typescript-eslint/no-unnecessary-type-assertion
+            */
             {
                 a: {a: 2} as unknown as PluginConfiguration,
                 dummy: {package: {b: 3}}
@@ -393,7 +391,7 @@ describe('pluginAPI', (): void => {
             ['b', 'a']
         ]
     )
-    testEach<typeof loadConfigurations>(
+    testEachResolvedPromise<typeof loadConfigurations>(
         'loadConfigurations',
         loadConfigurations,
 
@@ -405,13 +403,13 @@ describe('pluginAPI', (): void => {
             {} as unknown as Configuration
         ]
     )
-    testEach<typeof loadFile>(
+    testEachAgainstResolvedPromise<typeof loadFile>(
         'loadFile',
         loadFile,
 
         [
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            require('../dummyPlugin/package'),
+            import('../dummyPlugin/package.json', {with: {type: 'json'}})
+                .then((module) => module.default),
             resolve(
                 configuration.core.context.path, 'dummyPlugin/package.json'
             ),
@@ -419,7 +417,7 @@ describe('pluginAPI', (): void => {
             null,
             false
         ],
-        [{a: 2}, 'unknown', 'dummy', {a: 2}, false]
+        [Promise.resolve({a: 2}), 'unknown', 'dummy', {a: 2}, false]
     )
     testEach<typeof determineLocations>(
         'determineLocations',
