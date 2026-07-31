@@ -57,7 +57,6 @@
   "devDependencies": {
     "@babel/cli": "^8.0.4",
     "@babel/eslint-parser": "^8.0.1",
-    "@babel/runtime": "^8.0.0",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^26.1.2",
@@ -76,13 +75,7 @@
     "weboptimizer": "^4.0.48"
   },
   "peerDependencies": {
-    "@babel/runtime": "*",
     "clientnode": "*"
-  },
-  "peerDependenciesMeta": {
-    "@babel/runtime": {
-      "optional": true
-    }
   },
   "engines": {
     "node": ">=24",
