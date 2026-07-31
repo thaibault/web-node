@@ -41,6 +41,7 @@ import {
     Logger,
     represent
 } from 'clientnode'
+import {pathToFileURL} from 'node:url'
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
@@ -306,7 +307,11 @@ export const main = async (): Promise<void> => {
     }
 }
 
-if (import.meta.main)
+/*
+    NOTE: "if (import.meta.main)" cannot be used since it will be modified by
+    bundler's during compile time.
+*/
+if (import.meta.url === pathToFileURL(process.argv[1]).href)
     void main()
 
 export default main
