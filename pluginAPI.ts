@@ -868,6 +868,7 @@ export const loadFile = (
 
     let scope: object
     try {
+        // TODO: Will not work for esmodules i guess.
         scope = currentRequire(filePath) as object
     } catch (error) {
         if (fallbackScope) {
