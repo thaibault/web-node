@@ -16,10 +16,16 @@
   },
   "license": "CC-BY-3.0",
   "author": {
-    "name": "Torben Sickert",
     "email": "info@torben.website",
+    "name": "Torben Sickert",
     "url": "https://torben.website"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thaibault/web-node.git"
+  },
+  "type": "module",
+  "bin": "index.js",
   "files": [
     "configurator.d.ts",
     "index.d.ts",
@@ -29,12 +35,7 @@
     "unixCrypt.d.ts",
     "unixCrypt.js"
   ],
-  "bin": "index.js",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/thaibault/web-node.git"
-  },
+  "sideEffects": true,
   "scripts": {
     "build": "yarn build:types; yarn build:plain",
     "build:plain": "weboptimizer build",
@@ -45,9 +46,9 @@
     "document": "weboptimizer document",
     "lint": "weboptimizer lint",
     "prepare": "yarn build",
+    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn build && cd ..",
     "serve": "yarn build:plain && yarn start",
     "start": "./index.js '{plugin: {hotReloading: true}}'",
-    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn build && cd ..",
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
@@ -77,18 +78,17 @@
   "peerDependencies": {
     "clientnode": "*"
   },
+  "resolutions": {
+    "colors": "1.4.0",
+    "globals@npm:^11.1.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
+    "globals@npm:^14.0.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
+    "globals@npm:^9.18.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch"
+  },
   "engines": {
     "node": ">=24",
     "npm": ">=11",
     "yarn": ">=4"
   },
-  "resolutions": {
-    "colors": "1.4.0",
-    "globals@npm:^14.0.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
-    "globals@npm:^11.1.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
-    "globals@npm:^9.18.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch"
-  },
-  "sideEffects": true,
   "webDocumentation": {
     "trackingCode": "UA-40192634-9"
   },
