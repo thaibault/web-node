@@ -42,7 +42,6 @@ import {
     evaluateAsyncDynamicData,
     evaluateDynamicData,
     extend,
-    getCurrentRequire,
     getUTCTimestamp,
     importFilesystemAPI,
     isDirectory,
@@ -64,34 +63,7 @@ import baseConfiguration from './configurator'
 export const log = new Logger({name: 'web-node.plugin-api'})
 
 await importFilesystemAPI()
-const currentRequire = await getCurrentRequire()
-if (currentRequire === null)
-    throw new Error(
-        'Missing synchronous module loading mechanism (require method).'
-    )
 // region allow plugins to import "web-node" as already loaded main module
-/*
-    Commonjs specific logic to deduplicate the main module's scope for plugins
-    to avoid loading it twice and therefore having two different scopes of the
-    same module in memory:
-
-import {Module} from 'module'
-
-type ModuleType =
-    typeof Module &
-    {_resolveFilename: (
-        request: string, module: typeof Module, isMain: boolean
-    ) => string}
-const oldResolveFilename = (Module as ModuleType)._resolveFilename
-;(Module as ModuleType)._resolveFilename = (
-    request: string, parent: typeof Module, isMain: boolean
-): string => {
-    if (request === 'main-module' && currentRequire.main?.id)
-        return oldResolveFilename(currentRequire.main.id, parent, isMain)
-
-    return oldResolveFilename(request, parent, isMain)
-}
-*/
 /*
     Esmodule specific logic to deduplicate the main module's scope for plugins
     to avoid loading it twice and therefore having two different scopes of the
@@ -152,7 +124,7 @@ export const callStack = async <
     if (configuration.core.plugin.hotReloading) {
         if (!isConfigurationHook) {
             const pluginsWithChangedConfiguration: Array<Plugin> =
-                hotReloadConfigurationFile(
+                await hotReloadConfigurationFile(
                     plugins,
                     configuration.core.plugin.configuration.propertyNames
                 )
@@ -186,7 +158,7 @@ export const callStack = async <
 
         if (hook !== 'apiFileReloaded') {
             const pluginsWithChangedAPIFiles: Array<Plugin> =
-                hotReloadAPIFile(plugins)
+                await hotReloadAPIFile(plugins)
 
             if (pluginsWithChangedAPIFiles.length) {
                 log.info(
@@ -377,10 +349,12 @@ export const evaluateConfiguration = async <
  * @param plugins - List of plugins to search for updates in.
  * @returns A list with plugins which have a changed api scope.
  */
-export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
+export const hotReloadAPIFile = async (
+    plugins: Array<Plugin>
+): Promise<Array<Plugin>> => {
     const pluginsWithChangedFiles: Array<Plugin> = []
     const pluginChanges: Array<PluginChange> =
-        hotReloadFiles('api', 'scope', plugins)
+        await hotReloadFiles('api', 'scope', plugins)
 
     for (const pluginChange of pluginChanges)
         if (pluginChange.oldScope) {
@@ -433,11 +407,11 @@ export const hotReloadAPIFile = (plugins: Array<Plugin>): Array<Plugin> => {
  * entry in plugin configuration file.
  * @returns A list with plugins which have a changed configurations.
  */
-export const hotReloadConfigurationFile = (
+export const hotReloadConfigurationFile = async (
     plugins: Array<Plugin>, configurationPropertyNames: Array<string>
-): Array<Plugin> => {
+): Promise<Array<Plugin>> => {
     const pluginsWithChangedFiles: Array<Plugin> = []
-    const pluginChanges: Array<PluginChange> = hotReloadFiles(
+    const pluginChanges: Array<PluginChange> = await hotReloadFiles(
         'configuration', 'packageConfiguration', plugins
     )
 
@@ -461,11 +435,11 @@ export const hotReloadConfigurationFile = (
  * @param plugins - List of plugins to search for updates in.
  * @returns A list with plugin changes.
  */
-export const hotReloadFiles = (
+export const hotReloadFiles = async (
     type: 'api' | 'configuration',
     target: 'packageConfiguration' | 'scope',
     plugins: Array<Plugin>
-): Array<PluginChange> => {
+): Promise<Array<PluginChange>> => {
     const pluginChanges: Array<PluginChange> = []
     for (const plugin of plugins)
         if (plugin[target]) {
@@ -481,14 +455,10 @@ export const hotReloadFiles = (
                         `Determined updated file "${filePath}".`,
                         'Doing a reload.'
                     )
-                    // Enforce to reload new file version.
-                    delete (currentRequire.cache as Mapping<unknown>)[
-                        currentRequire.resolve(filePath)
-                    ]
 
                     const oldScope = plugin[target] as Mapping<unknown>
 
-                    plugin[target] = loadFile(
+                    plugin[target] = await loadFile(
                         filePath, plugin.name, plugin[target]
                     ) as PackageConfiguration
 
@@ -536,7 +506,7 @@ export const load = async (
         const filePath: string = resolve(pluginPath, fileName)
 
         if (await isFile(filePath)) {
-            const sourceConfiguration = loadFile(filePath, name)
+            const sourceConfiguration = await loadFile(filePath, name)
 
             extend(
                 true,
@@ -739,7 +709,7 @@ export const loadAPI = async (
 
         path: pluginPath,
 
-        scope: nativeAPI ? loadFile(filePath, name) : null
+        scope: nativeAPI ? await loadFile(filePath, name) : null
     }
 }
 /**
@@ -849,27 +819,34 @@ export const loadConfigurations = (
  * @param doLogging - Enables logging.
  * @returns Exported api file scope.
  */
-export const loadFile = (
+export const loadFile = async (
     filePath: string,
     name: string,
     fallbackScope: null | object = null,
     doLogging = true
-): object => {
+): Promise<object> => {
+    // Clear module cache if possible in the future.
+    /*
     let reference: string | undefined
     try {
-        reference = currentRequire.resolve(filePath)
+        reference = import.meta.resolve(filePath)
     } catch {
         // Ignore error.
     }
 
-    // Clear module cache to get actual new module scope.
-    if (reference && reference in currentRequire.cache)
-        delete currentRequire.cache[reference]
+    if (reference)
+        // Clear the module cache.
+    */
+    const options: {with?: {type: string}} = {}
+    if (extname(filePath) === '.json')
+        options.with = {type: 'json'}
 
     let scope: object
     try {
-        // TODO: Will not work for esmodules i guess.
-        scope = currentRequire(filePath) as object
+        scope = await import(
+            /* webpackIgnore: true */
+            `${filePath}?timestamp=${String(Date.now())}`, options
+        ) as object
     } catch (error) {
         if (fallbackScope) {
             scope = fallbackScope
