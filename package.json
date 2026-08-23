@@ -16,10 +16,16 @@
   },
   "license": "CC-BY-3.0",
   "author": {
-    "name": "Torben Sickert",
     "email": "info@torben.website",
+    "name": "Torben Sickert",
     "url": "https://torben.website"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thaibault/web-node.git"
+  },
+  "type": "module",
+  "bin": "index.js",
   "files": [
     "configurator.d.ts",
     "index.d.ts",
@@ -29,12 +35,7 @@
     "unixCrypt.d.ts",
     "unixCrypt.js"
   ],
-  "bin": "index.js",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/thaibault/web-node.git"
-  },
+  "sideEffects": true,
   "scripts": {
     "build": "yarn build:types; yarn build:plain",
     "build:plain": "weboptimizer build",
@@ -45,9 +46,9 @@
     "document": "weboptimizer document",
     "lint": "weboptimizer lint",
     "prepare": "yarn build",
+    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn build && cd ..",
     "serve": "yarn build:plain && yarn start",
     "start": "./index.js '{plugin: {hotReloading: true}}'",
-    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn build && cd ..",
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
@@ -59,36 +60,35 @@
     "@babel/eslint-parser": "^8.0.1",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "@types/webpack-env": "^1.18.8",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
-    "@typescript-eslint/parser": "^8.65.0",
-    "clientnode": "^4.0.1482",
-    "eslint": "^10.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "clientnode": "^4.0.1488",
+    "eslint": "^10.9.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-jsdoc": "^63.3.2",
+    "eslint-plugin-jsdoc": "^64.2.1",
     "jest": "^30.4.2",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
-    "typescript-eslint": "^8.65.0",
-    "web-documentation": "^1.0.45",
-    "weboptimizer": "^4.0.48"
+    "typescript-eslint": "^8.67.0",
+    "web-documentation": "^1.0.49",
+    "weboptimizer": "^4.0.57"
   },
   "peerDependencies": {
     "clientnode": "*"
   },
-  "engines": {
-    "node": ">=24",
-    "npm": ">=11",
-    "yarn": ">=4"
-  },
   "resolutions": {
     "colors": "1.4.0",
-    "globals@npm:^14.0.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
     "globals@npm:^11.1.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
+    "globals@npm:^14.0.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
     "globals@npm:^9.18.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch"
   },
-  "sideEffects": true,
+  "engines": {
+    "node": ">=26",
+    "npm": ">=12",
+    "yarn": ">=4"
+  },
   "webDocumentation": {
     "trackingCode": "UA-40192634-9"
   },

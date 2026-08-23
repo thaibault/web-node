@@ -26,7 +26,9 @@ import type {
 
 import {copy, mask} from 'clientnode'
 import {
-    testEach, testEachAgainstResolvedPromise, testEachResolvedPromise
+    testEach,
+    testEachResolvedPromise,
+    testEachResolvedPromiseAgainstResolvedPromise
 } from 'clientnode/test-helper'
 import {resolve} from 'path'
 
@@ -169,19 +171,19 @@ describe('pluginAPI', (): void => {
             }}
         ]
     )
-    testEach<typeof hotReloadAPIFile>(
+    testEachResolvedPromise<typeof hotReloadAPIFile>(
         'hotReloadAPIFile',
         hotReloadAPIFile,
 
         [[], []]
     )
-    testEach<typeof hotReloadConfigurationFile>(
+    testEachResolvedPromise<typeof hotReloadConfigurationFile>(
         'hotReloadConfigurationFile',
         hotReloadConfigurationFile,
 
         [[], [], []]
     )
-    testEach<typeof hotReloadFiles>(
+    testEachResolvedPromise<typeof hotReloadFiles>(
         'hotReloadFiles',
         hotReloadFiles,
 
@@ -403,7 +405,7 @@ describe('pluginAPI', (): void => {
             {} as unknown as Configuration
         ]
     )
-    testEachAgainstResolvedPromise<typeof loadFile>(
+    testEachResolvedPromiseAgainstResolvedPromise<typeof loadFile>(
         'loadFile',
         loadFile,
 

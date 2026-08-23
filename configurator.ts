@@ -25,7 +25,6 @@ import type {
 import {
     evaluateDynamicData,
     extend,
-    getCurrentRequire,
     getUTCTimestamp,
     isPlainObject,
     MAXIMAL_NUMBER_OF_ITERATIONS,
@@ -40,11 +39,6 @@ import path, {basename, dirname, join, resolve} from 'path'
 import webNodePackageConfiguration from './package.json'
 import pluginAPI from './pluginAPI'
 // endregion
-export const currentRequire = await getCurrentRequire()
-if (currentRequire === null)
-    throw new Error(
-        'Missing synchronous module loading mechanism (require method).'
-    )
 /*
     To assume to go two folder up from this file until there is no
     "node_modules" parent folder is usually resilient again dealing with
@@ -96,9 +90,13 @@ else
 
 let mainPackageConfiguration: PackageConfiguration = {name: 'main'}
 try {
-    mainPackageConfiguration = currentRequire(join(
-        webNodePackageConfiguration.webNode.core.context.path, 'package'
-    )) as PackageConfiguration
+    mainPackageConfiguration = (await import(
+        /* webpackIgnore: true */
+        join(
+            webNodePackageConfiguration.webNode.core.context.path, 'package'
+        ),
+        {with: {type: 'json'}}
+    )).default as PackageConfiguration
 } catch {
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
