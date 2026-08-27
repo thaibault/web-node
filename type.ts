@@ -50,7 +50,7 @@ export type EvaluateConfigurationScope =
     typeof UTILITY_SCOPE &
     {
         currentPath: string
-        fs: typeof import('fs')
+        fs: typeof import('fs/promises')
         path: typeof import('path')
         pluginAPI: typeof pluginAPI
         webNodePath: string

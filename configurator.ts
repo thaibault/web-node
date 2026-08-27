@@ -23,6 +23,7 @@ import type {
 } from './type'
 
 import {
+    evaluateAsyncDynamicData,
     evaluateDynamicData,
     extend,
     getUTCTimestamp,
@@ -33,7 +34,8 @@ import {
     removeKeysInEvaluation,
     UTILITY_SCOPE
 } from 'clientnode'
-import fileSystemSynchronous, {lstatSync} from 'fs'
+import fileSystemSynchronous from 'fs'
+import fileSystem, {lstat} from 'fs/promises'
 import path, {basename, dirname, join, resolve} from 'path'
 
 import webNodePackageConfiguration from './package.json'
@@ -81,7 +83,9 @@ else
         is a better assumption than two folders up the hierarchy.
     */
     try {
-        if (lstatSync(join(process.cwd(), 'node_modules')).isSymbolicLink())
+        if ((
+            await lstat(join(process.cwd(), 'node_modules'))).isSymbolicLink()
+        )
             webNodePackageConfiguration.webNode.core.context.path =
                 process.cwd()
     } catch {
@@ -120,7 +124,7 @@ const now: Date = new Date()
 const scope: EvaluateConfigurationScope = {
     ...UTILITY_SCOPE,
     currentPath: process.cwd(),
-    fs: fileSystemSynchronous,
+    fs: fileSystem,
     path,
     pluginAPI,
     webNodePath: __dirname,
@@ -128,10 +132,16 @@ const scope: EvaluateConfigurationScope = {
     nowUTCTimestamp: getUTCTimestamp(now)
 }
 export let configuration: Configuration =
-    evaluateDynamicData<Configuration>(
-        webNodePackageConfiguration.webNode as
-            unknown as
-            RecursiveEvaluateable<Configuration>,
+    await evaluateAsyncDynamicData<Configuration>(
+        evaluateDynamicData<Configuration>(
+            webNodePackageConfiguration.webNode as
+                unknown as
+                RecursiveEvaluateable<Configuration>,
+            {scope: {
+                ...scope,
+                fs: fileSystemSynchronous
+            }}
+        ),
         {scope}
     )
 
@@ -165,8 +175,15 @@ if (Object.keys(result).length > 0) {
     configuration.core.runtimeConfiguration = result
 }
 
-configuration = evaluateDynamicData<Configuration>(
-    removeKeysInEvaluation(configuration), {scope}
+configuration = await evaluateAsyncDynamicData<Configuration>(
+    evaluateDynamicData<Configuration>(
+        removeKeysInEvaluation(configuration),
+        {scope: {
+            ...scope,
+            fs: fileSystemSynchronous
+        }}
+    ),
+    {scope}
 )
 configuration.name = name
 configuration.core.package =
