@@ -55,7 +55,8 @@ import {
     sortTopological,
     UTILITY_SCOPE
 } from 'clientnode'
-import fileSystem, {readdirSync, statSync} from 'fs'
+import fileSystemSynchronous from 'fs'
+import fileSystem, {readdir, stat} from 'fs/promises'
 import path, {basename, extname, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
@@ -330,7 +331,13 @@ export const evaluateConfiguration = async <
         evaluateDynamicData<RecursiveAsyncEvaluateable<Type>>(
             removeKeysInEvaluation(configuration as Mapping<unknown>) as
                 RecursiveEvaluateable<RecursiveAsyncEvaluateable<Type>>,
-            evaluationOptions
+            {
+                ...evaluationOptions,
+                scope: {
+                    ...evaluationOptions.scope,
+                    fs: fileSystemSynchronous
+                }
+            }
         ),
         evaluationOptions
     )
@@ -446,7 +453,8 @@ export const hotReloadFiles = async (
             let index = 0
 
             for (const filePath of plugin[`${type}FilePaths`]) {
-                const timestamp: number = statSync(filePath).mtime.getTime()
+                const timestamp: number =
+                    (await stat(filePath)).mtime.getTime()
 
                 if (
                     plugin[`${type}FileLoadTimestamps`][index] < timestamp
@@ -590,7 +598,7 @@ export const loadAPI = async (
     let filePath: string = resolve(pluginPath, relativeFilePaths[0])
     if (!(await isFile(filePath)))
         // Determine entry file if given one does not exist.
-        for (const fileName of readdirSync(pluginPath))
+        for (const fileName of await readdir(pluginPath))
             if (
                 !configurationFilePaths.map((filePath: string): string =>
                     basename(filePath)
@@ -684,15 +692,17 @@ export const loadAPI = async (
     return {
         api,
         apiFileLoadTimestamps:
-            api ? [statSync(filePath).mtime.getTime()] : [],
+            api ? [(await stat(filePath)).mtime.getTime()] : [],
         apiFilePaths: api ? [filePath] : [],
 
         configuration: pluginConfiguration,
         configurationFilePaths,
-        configurationFileLoadTimestamps:
-            configurationFilePaths.map((filePath: string): number =>
-                statSync(filePath).mtime.getTime()
-            ),
+        configurationFileLoadTimestamps: await Promise.all(
+            configurationFilePaths.map(
+                async (filePath: string): Promise<number> =>
+                    (await stat(filePath)).mtime.getTime()
+            )
+        ),
 
         dependencies:
             Object.prototype.hasOwnProperty.call(
@@ -913,7 +923,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
             const compiledRegularExpression =
                 new RegExp(directory.nameRegularExpressionPattern)
 
-            for (const pluginName of readdirSync(directory.path)) {
+            for (const pluginName of await readdir(directory.path)) {
                 if (!(compiledRegularExpression).test(pluginName))
                     continue
 
