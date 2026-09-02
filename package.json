@@ -60,20 +60,20 @@
     "@babel/eslint-parser": "^8.0.1",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/node": "^26.3.0",
+    "@types/node": "^26.4.1",
     "@types/webpack-env": "^1.18.8",
-    "@typescript-eslint/eslint-plugin": "^8.68.0",
-    "@typescript-eslint/parser": "^8.68.0",
-    "clientnode": "^4.0.1500",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
+    "clientnode": "^4.0.1502",
     "eslint": "^10.9.1",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-jsdoc": "^64.2.1",
-    "jest": "^30.4.2",
+    "eslint-plugin-jsdoc": "^64.3.4",
+    "jest": "^30.5.1",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
-    "typescript-eslint": "^8.68.0",
-    "web-documentation": "^1.0.51",
-    "weboptimizer": "^4.0.65"
+    "typescript-eslint": "^8.69.0",
+    "web-documentation": "^1.0.52",
+    "weboptimizer": "^4.0.72"
   },
   "peerDependencies": {
     "clientnode": "*"
@@ -138,7 +138,7 @@
         "includeFilePathRegularExpression": "^(.+/)?index\\.js$",
         "pattern": {
           "#": "This is how we can make our main exported artefact executable.",
-          "__evaluate__": "`#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n${self.generic.assetPattern?.javaScript?.pattern ?? ''}\nif(import.meta.main)module.paths.unshift('/application/node_modules');{1}`"
+          "__evaluate__": "`#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n${self.generic.assetPattern?.javaScript?.pattern ?? ''}\n{1}`"
         }
       }
     },
