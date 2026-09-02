@@ -41,7 +41,7 @@ import {
     Logger,
     represent
 } from 'clientnode'
-import {pathToFileURL} from 'node:url'
+import {realpath} from 'node:fs/promises'
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
@@ -308,10 +308,29 @@ export const main = async (): Promise<void> => {
 }
 
 /*
-    NOTE: "if (import.meta.main)" cannot be used since it will be modified by
-    bundler's during compile time.
+    NOTE: Neither "import.meta.main" nor "import.meta.url" can be used here
+    since bundler's replace them with a compile time constant referencing the
+    build environments file location. "__filename" is substituted with a
+    runtime evaluated value instead.
 */
-if (import.meta.url === pathToFileURL(process.argv[1]).href)
+const isMainModule = async (): Promise<boolean> => {
+    if (process.argv.length < 2)
+        return false
+
+    /*
+        NOTE: Both locations have to be resolved since the executable is
+        usually linked into a package managers binary folder.
+    */
+    try {
+        return (
+            (await realpath(process.argv[1])) === (await realpath(__filename))
+        )
+    } catch {
+        return false
+    }
+}
+
+if (await isMainModule())
     void main()
 
 export default main
