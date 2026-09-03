@@ -26,6 +26,10 @@
   },
   "type": "module",
   "bin": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./unixCrypt": "./unixCrypt.js"
+  },
   "files": [
     "configurator.d.ts",
     "index.d.ts",
@@ -64,7 +68,7 @@
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.69.0",
-    "clientnode": "^4.0.1502",
+    "clientnode": "^4.0.1504",
     "eslint": "^10.9.1",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^64.3.4",
@@ -73,7 +77,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.69.0",
     "web-documentation": "^1.0.52",
-    "weboptimizer": "^4.0.72"
+    "weboptimizer": "^4.0.75"
   },
   "peerDependencies": {
     "clientnode": "*"
