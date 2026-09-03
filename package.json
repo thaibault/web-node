@@ -28,7 +28,8 @@
   "bin": "index.js",
   "exports": {
     ".": "./index.js",
-    "./unixCrypt": "./unixCrypt.js"
+    "./unixCrypt": "./unixCrypt.js",
+    "./type": "./type.d.ts"
   },
   "files": [
     "configurator.d.ts",
