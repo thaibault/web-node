@@ -4629,7 +4629,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clientnode@npm:4.0.1502, clientnode@npm:^4.0.1502":
+"clientnode@npm:4.0.1502":
   version: 4.0.1502
   resolution: "clientnode@npm:4.0.1502"
   peerDependencies:
@@ -4644,6 +4644,24 @@ __metadata:
     prop-types:
       optional: true
   checksum: 10c0/ae5690fc9e05ca4ccfc312ebdc2d8ad529c35b684449a2bb32d1cc51356df4156faf0042bd258a6a285460db7d2e76b730293f5e6dd36277dc3da8de7e57381b
+  languageName: node
+  linkType: hard
+
+"clientnode@npm:^4.0.1504":
+  version: 4.0.1504
+  resolution: "clientnode@npm:4.0.1504"
+  peerDependencies:
+    "@types/prop-types": "*"
+    node-fetch: "*"
+    prop-types: "*"
+  peerDependenciesMeta:
+    "@types/prop-types":
+      optional: true
+    node-fetch:
+      optional: true
+    prop-types:
+      optional: true
+  checksum: 10c0/9ab4ae510bae1ca623a99cd1ffffaa1212f202e4ed2ed1742467b577322ccd7025aea8024d2614e941bf3e6a1a4dc8168a66c5d3afd4fe33db1bab3dcb56a91e
   languageName: node
   linkType: hard
 
@@ -8875,7 +8893,7 @@ __metadata:
     "@types/webpack-env": "npm:^1.18.8"
     "@typescript-eslint/eslint-plugin": "npm:^8.69.0"
     "@typescript-eslint/parser": "npm:^8.69.0"
-    clientnode: "npm:^4.0.1502"
+    clientnode: "npm:^4.0.1504"
     eslint: "npm:^10.9.1"
     eslint-config-google: "npm:^0.14.0"
     eslint-plugin-jsdoc: "npm:^64.3.4"
@@ -8884,7 +8902,7 @@ __metadata:
     shx: "npm:^0.4.0"
     typescript-eslint: "npm:^8.69.0"
     web-documentation: "npm:^1.0.52"
-    weboptimizer: "npm:^4.0.72"
+    weboptimizer: "npm:^4.0.75"
   peerDependencies:
     clientnode: "*"
   bin:
@@ -8899,9 +8917,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"weboptimizer@npm:^4.0.72":
-  version: 4.0.72
-  resolution: "weboptimizer@npm:4.0.72"
+"weboptimizer@npm:^4.0.75":
+  version: 4.0.75
+  resolution: "weboptimizer@npm:4.0.75"
   dependencies:
     "@babel/core": "npm:^8.0.1"
     "@babel/plugin-proposal-decorators": "npm:^8.0.2"
@@ -8927,7 +8945,7 @@ __metadata:
     rimraf: "npm:^6.1.3"
     script-loader: "npm:^0.7.2"
     typescript: "npm:@typescript/typescript6@^6.0.2"
-    webpack: "npm:^5.110.2"
+    webpack: "npm:^5.110.3"
     webpack-cli: "npm:^7.2.3"
     webpack-sources: "npm:^3.5.1"
   peerDependencies:
@@ -9047,7 +9065,7 @@ __metadata:
       optional: true
   bin:
     weboptimizer: index.js
-  checksum: 10c0/3c2b528c571afa9a442852b68a380a6583bb1b6ba34396f5541ebc8c6f32696de8dcb49230706e8d35acc1c4c8a46c1cdef611a2649a003e92a7e50e23291928
+  checksum: 10c0/b2448637ff23d279515721ad47ab3aa97760e81e9735a92e0fc03a393f5b973f131f70b86aebb0b97d30b84013621d61a0d0d739b3441c4010ccc69d6bdf8e0e
   languageName: node
   linkType: hard
 
@@ -9105,7 +9123,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.110.2":
+"webpack@npm:^5.110.3":
   version: 5.110.3
   resolution: "webpack@npm:5.110.3"
   dependencies:
