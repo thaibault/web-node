@@ -29,6 +29,7 @@
   "exports": {
     ".": "./index.js",
     "./unixCrypt": "./unixCrypt.js",
+    "./unixCrypt.js": "./unixCrypt.js",
     "./type": "./type.d.ts"
   },
   "files": [
