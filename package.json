@@ -28,6 +28,7 @@
   "bin": "index.js",
   "exports": {
     ".": "./index.js",
+    "./package.json": "./package.json",
     "./unixCrypt": "./unixCrypt.js",
     "./unixCrypt.js": "./unixCrypt.js",
     "./type": "./type.d.ts"
@@ -70,10 +71,10 @@
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.69.0",
-    "clientnode": "^4.0.1504",
+    "clientnode": "^4.0.1506",
     "eslint": "^10.9.1",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-jsdoc": "^64.3.4",
+    "eslint-plugin-jsdoc": "^64.3.5",
     "jest": "^30.5.1",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
