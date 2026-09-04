@@ -41,7 +41,7 @@ import {
     Logger,
     represent
 } from 'clientnode'
-import {realpath} from 'node:fs/promises'
+import {realpath} from 'fs/promises'
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
@@ -307,13 +307,16 @@ export const main = async (): Promise<void> => {
     }
 }
 
+const defaultFilename = await realpath(__filename)
 /*
     NOTE: Neither "import.meta.main" nor "import.meta.url" can be used here
     since bundlers replace them with a compile time constant referencing the
     build environments file location. "__filename" is substituted with a
     runtime evaluated value instead.
 */
-export const isMainModule = async (): Promise<boolean> => {
+export const isMainModule = async (
+    filename = defaultFilename
+): Promise<boolean> => {
     if (process.argv.length < 2)
         return false
 
@@ -321,10 +324,14 @@ export const isMainModule = async (): Promise<boolean> => {
         NOTE: Both locations have to be resolved since the executable is
         usually linked into a package managers binary folder.
     */
+    console.log(
+        'A',
+        (await realpath(process.argv[1])),
+        defaultFilename,
+        filename
+    )
     try {
-        return (
-            (await realpath(process.argv[1])) === (await realpath(__filename))
-        )
+        return (await realpath(process.argv[1])) === filename
     } catch {
         return false
     }
