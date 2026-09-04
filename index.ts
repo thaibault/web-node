@@ -41,7 +41,7 @@ import {
     Logger,
     represent
 } from 'clientnode'
-import {realpath} from 'fs/promises'
+import {realpath} from 'node:fs/promises'
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
