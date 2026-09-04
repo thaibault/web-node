@@ -72,7 +72,7 @@
     "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.69.0",
     "clientnode": "^4.0.1506",
-    "eslint": "^10.9.1",
+    "eslint": "^10.10.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^64.3.5",
     "jest": "^30.5.1",

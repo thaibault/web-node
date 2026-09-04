@@ -309,11 +309,11 @@ export const main = async (): Promise<void> => {
 
 /*
     NOTE: Neither "import.meta.main" nor "import.meta.url" can be used here
-    since bundler's replace them with a compile time constant referencing the
+    since bundlers replace them with a compile time constant referencing the
     build environments file location. "__filename" is substituted with a
     runtime evaluated value instead.
 */
-const isMainModule = async (): Promise<boolean> => {
+export const isMainModule = async (): Promise<boolean> => {
     if (process.argv.length < 2)
         return false
 
@@ -330,7 +330,7 @@ const isMainModule = async (): Promise<boolean> => {
     }
 }
 
+export default main
+
 if (await isMainModule())
     void main()
-
-export default main
