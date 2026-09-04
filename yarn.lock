@@ -1709,16 +1709,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@es-joy/jsdoccomment@npm:~0.95.1":
-  version: 0.95.1
-  resolution: "@es-joy/jsdoccomment@npm:0.95.1"
+"@es-joy/jsdoccomment@npm:~0.96.0":
+  version: 0.96.0
+  resolution: "@es-joy/jsdoccomment@npm:0.96.0"
   dependencies:
     "@types/estree": "npm:^1.0.9"
     "@typescript-eslint/types": "npm:^8.67.0"
     comment-parser: "npm:1.4.8"
     esquery: "npm:^1.7.0"
-    jsdoc-type-pratt-parser: "npm:~9.1.2"
-  checksum: 10c0/421b3649496b9e4d3a27ecfe6531e0b846366afba308ae440fd5c9fcaba8748e398e99ff1b3ad1d2d68c91cc962f30f6fa4b501d1d898b9017a709d7fd49799b
+    jsdoc-type-pratt-parser: "npm:~9.2.0"
+  checksum: 10c0/53cfcfbc0985b4e7b52d36b9b6a12768dbaa1555a22ff01a77fea40ebec2c8985e7303709ef675e9b80115e08ab38ffa42433a0179ff6742bc5deaf5c12e21cb
   languageName: node
   linkType: hard
 
@@ -2672,7 +2672,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^26.4.1":
+"@types/node@npm:^26.4.0, @types/node@npm:^26.4.1":
   version: 26.4.1
   resolution: "@types/node@npm:26.4.1"
   dependencies:
@@ -2842,7 +2842,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.69.0, @typescript-eslint/utils@npm:^8.68.0":
+"@typescript-eslint/utils@npm:8.69.0, @typescript-eslint/utils@npm:^8.69.0":
   version: 8.69.0
   resolution: "@typescript-eslint/utils@npm:8.69.0"
   dependencies:
@@ -4647,9 +4647,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clientnode@npm:^4.0.1504":
-  version: 4.0.1504
-  resolution: "clientnode@npm:4.0.1504"
+"clientnode@npm:^4.0.1506":
+  version: 4.0.1506
+  resolution: "clientnode@npm:4.0.1506"
   peerDependencies:
     "@types/prop-types": "*"
     node-fetch: "*"
@@ -4661,7 +4661,7 @@ __metadata:
       optional: true
     prop-types:
       optional: true
-  checksum: 10c0/9ab4ae510bae1ca623a99cd1ffffaa1212f202e4ed2ed1742467b577322ccd7025aea8024d2614e941bf3e6a1a4dc8168a66c5d3afd4fe33db1bab3dcb56a91e
+  checksum: 10c0/3e24b32707a036e3ed816839cb3d78294684378f27c763d7a3fd56f490bc28d6aca52b177abfe6329921a9c24ddb16c79165933a2ab2a3ce63c968e017deaf49
   languageName: node
   linkType: hard
 
@@ -5200,13 +5200,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jsdoc@npm:^64.3.4":
-  version: 64.3.4
-  resolution: "eslint-plugin-jsdoc@npm:64.3.4"
+"eslint-plugin-jsdoc@npm:^64.3.5":
+  version: 64.3.5
+  resolution: "eslint-plugin-jsdoc@npm:64.3.5"
   dependencies:
-    "@es-joy/jsdoccomment": "npm:~0.95.1"
+    "@es-joy/jsdoccomment": "npm:~0.96.0"
     "@es-joy/resolve.exports": "npm:1.2.0"
-    "@typescript-eslint/utils": "npm:^8.68.0"
+    "@typescript-eslint/utils": "npm:^8.69.0"
     are-docs-informative: "npm:^0.1.1"
     comment-parser: "npm:1.4.8"
     debug: "npm:^4.4.3"
@@ -5221,7 +5221,7 @@ __metadata:
     to-valid-identifier: "npm:^1.0.0"
   peerDependencies:
     eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
-  checksum: 10c0/49b983bef00e6f310c7bc1c5d120efcfafee221f2a37d42b40d8d739934401e480d2b0ec67392582b839a24dab6c7762f938bcf997ad3382b9c5c66d31728bcc
+  checksum: 10c0/b2eb0640de909f65442638e15979f04f65c21380b8a6d7be570eb770842392af069a3c3dde4af95c023735fe947ca69b4412e2f0bbf278580717c935830c6f5c
   languageName: node
   linkType: hard
 
@@ -6716,12 +6716,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsdoc-type-pratt-parser@npm:~9.1.2":
-  version: 9.1.2
-  resolution: "jsdoc-type-pratt-parser@npm:9.1.2"
+"jsdoc-type-pratt-parser@npm:~9.2.0":
+  version: 9.2.1
+  resolution: "jsdoc-type-pratt-parser@npm:9.2.1"
   dependencies:
     "@types/estree": "npm:^1.0.9"
-  checksum: 10c0/fa9d23c502c7a7139d5b9c87482dabed8ff94ec15819c306f25b48046c4dc90d761a58366c92be9ae2d7b00306b90fd2e89b830dfe5d9b6ee27f1d2c77a9095d
+    "@types/node": "npm:^26.4.0"
+  checksum: 10c0/0324581fae46d6e31237ab39b74e6228e02a60400b84054ed348dafce62622ebf57feaa9cff8d2dc7113d163976898ea4175c49d1ca69d7686be64628ba4d580
   languageName: node
   linkType: hard
 
@@ -8893,10 +8894,10 @@ __metadata:
     "@types/webpack-env": "npm:^1.18.8"
     "@typescript-eslint/eslint-plugin": "npm:^8.69.0"
     "@typescript-eslint/parser": "npm:^8.69.0"
-    clientnode: "npm:^4.0.1504"
+    clientnode: "npm:^4.0.1506"
     eslint: "npm:^10.9.1"
     eslint-config-google: "npm:^0.14.0"
-    eslint-plugin-jsdoc: "npm:^64.3.4"
+    eslint-plugin-jsdoc: "npm:^64.3.5"
     jest: "npm:^30.5.1"
     jsdoc: "npm:^4.0.5"
     shx: "npm:^0.4.0"
