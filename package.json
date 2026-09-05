@@ -25,9 +25,11 @@
     "url": "https://github.com/thaibault/web-node.git"
   },
   "type": "module",
-  "bin": "index.js",
+  "bin": "main.js",
   "exports": {
     ".": "./index.js",
+    "./main": "./main.js",
+    "./main.js": "./main.js",
     "./package.json": "./package.json",
     "./unixCrypt": "./unixCrypt.js",
     "./unixCrypt.js": "./unixCrypt.js",
@@ -37,6 +39,7 @@
     "configurator.d.ts",
     "index.d.ts",
     "index.js",
+    "main.js",
     "pluginAPI.d.ts",
     "type.d.ts",
     "unixCrypt.d.ts",
@@ -55,7 +58,7 @@
     "prepare": "yarn build",
     "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn build && cd ..",
     "serve": "yarn build:plain && yarn start",
-    "start": "./index.js '{plugin: {hotReloading: true}}'",
+    "start": "./main.js '{plugin: {hotReloading: true}}'",
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
@@ -80,7 +83,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.69.0",
     "web-documentation": "^1.0.52",
-    "weboptimizer": "^4.0.75"
+    "weboptimizer": "^4.0.76"
   },
   "peerDependencies": {
     "clientnode": "*"
@@ -142,7 +145,7 @@
   "webOptimizer": {
     "assetPattern": {
       "javaScript": {
-        "includeFilePathRegularExpression": "^(.+/)?index\\.js$",
+        "includeFilePathRegularExpression": "^(.+/)?main\\.js$",
         "pattern": {
           "#": "This is how we can make our main exported artefact executable.",
           "__evaluate__": "`#!/usr/bin/env node\n// -*- coding: utf-8 -*-\n${self.generic.assetPattern?.javaScript?.pattern ?? ''}\n{1}`"
@@ -151,7 +154,7 @@
     },
     "injection": {
       "entry": {
-        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2].startsWith('test') ? {testBundle: 'test'} : {index: './index.ts', unixCrypt: './unixCrypt.ts'}"
+        "__evaluate__": "2 < self.givenCommandLineArguments.length && self.givenCommandLineArguments[2].startsWith('test') ? {testBundle: 'test'} : {index: './index.ts', main: './main.ts', unixCrypt: './unixCrypt.ts'}"
       }
     },
     "module": {
