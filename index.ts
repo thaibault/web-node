@@ -19,12 +19,12 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
-import type {
+import {
     APIFunction,
     BaseState,
     ChangedConfigurationState,
     Configuration,
-    Plugin,
+    Plugin, PluginLoaderMapping,
     PluginPromises,
     ServicePromises,
     ServicePromisesState,
@@ -36,6 +36,7 @@ import {
     capitalize,
     copy,
     CLOSE_EVENT_NAMES,
+    extend,
     isFunction,
     isObject,
     Logger,
@@ -45,7 +46,9 @@ import {realpath} from 'node:fs/promises'
 import {fileURLToPath} from 'node:url'
 
 import baseConfiguration from './configurator'
-import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
+import pluginAPI, {
+    callStack, callStackSynchronous, loadAll, PLUGIN_LOADER
+} from './pluginAPI'
 // endregion
 export const log = new Logger({name: 'web-node'})
 Logger.configureAllInstances()
@@ -64,7 +67,17 @@ const handleError = async (
             log.error(error)
     }
 }
-export const main = async (): Promise<void> => {
+let mainCalls = 0
+export const main = async (
+    pluginLoaderMapping: PluginLoaderMapping = {}
+): Promise<void> => {
+    extend(PLUGIN_LOADER, pluginLoaderMapping)
+
+    mainCalls += 1
+    console.log()
+    console.log('JAAAU', mainCalls)
+    console.trace()
+    console.log()
     // region load plugins
     const {configuration, plugins}: {
         configuration: Configuration
@@ -308,15 +321,16 @@ export const main = async (): Promise<void> => {
     }
 }
 
+export let isMainModulePositiveCalls = 0
 /*
     NOTE: Neither "import.meta.main" nor "import.meta.url" cannot be used
     directly since bundlers replace them with a compile time constant
     referencing the build environments file location.
 */
 export const isMainModule = async (
-    filename?: string
+    filename?: string, onlyOnce = true
 ): Promise<boolean> => {
-    if (process.argv.length < 2)
+    if (onlyOnce && isMainModulePositiveCalls > 0 || process.argv.length < 2)
         return false
 
     if (!filename)
@@ -328,10 +342,15 @@ export const isMainModule = async (
     */
 
     try {
-        return (await realpath(process.argv[1])) === (await realpath(filename))
+        if ((await realpath(process.argv[1])) === (await realpath(filename))) {
+            isMainModulePositiveCalls += 1
+            return true
+        }
     } catch {
-        return false
+        // Ignore error.
     }
+
+    return false
 }
 
 export default main

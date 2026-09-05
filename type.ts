@@ -71,6 +71,8 @@ export interface PluginConfiguration {
     name?: string
     package: PackageConfiguration
 }
+export type PluginLoaderMapping =
+    Mapping<(filePath: string) => Promise<object>>
 export interface WebNodeConfiguration extends PluginConfiguration {
     context: {
         path: string
