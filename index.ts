@@ -19,7 +19,7 @@
 export * from './configurator'
 export * from './pluginAPI'
 // region imports
-import {
+import type {
     APIFunction,
     BaseState,
     ChangedConfigurationState,
