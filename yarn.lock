@@ -8969,7 +8969,7 @@ __metadata:
   peerDependencies:
     clientnode: "*"
   bin:
-    web-node: index.js
+    web-node: main.js
   languageName: unknown
   linkType: soft
 
