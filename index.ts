@@ -42,6 +42,7 @@ import {
     represent
 } from 'clientnode'
 import {realpath} from 'node:fs/promises'
+import {fileURLToPath} from 'node:url'
 
 import baseConfiguration from './configurator'
 import pluginAPI, {callStack, callStackSynchronous, loadAll} from './pluginAPI'
@@ -308,10 +309,9 @@ export const main = async (): Promise<void> => {
 }
 
 /*
-    NOTE: Neither "import.meta.main" nor "import.meta.url" can be used here
-    since bundlers replace them with a compile time constant referencing the
-    build environments file location. "__filename" is substituted with a
-    runtime evaluated value instead.
+    NOTE: Neither "import.meta.main" nor "import.meta.url" cannot be used
+    directly since bundlers replace them with a compile time constant
+    referencing the build environments file location.
 */
 export const isMainModule = async (
     filename?: string
@@ -320,7 +320,7 @@ export const isMainModule = async (
         return false
 
     if (!filename)
-        filename = await realpath(__filename)
+        filename = fileURLToPath(import.meta.url)
 
     /*
         NOTE: Both locations have to be resolved since the executable is
@@ -328,13 +328,10 @@ export const isMainModule = async (
     */
 
     try {
-        return (await realpath(process.argv[1])) === filename
+        return (await realpath(process.argv[1])) === (await realpath(filename))
     } catch {
         return false
     }
 }
 
 export default main
-
-if (await isMainModule())
-    void main()
