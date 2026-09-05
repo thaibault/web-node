@@ -32,6 +32,7 @@ import type {
     Plugin,
     PluginChange,
     PluginConfiguration,
+    PluginLoaderMapping,
     ServicePromisesState
 } from './type'
 
@@ -62,6 +63,8 @@ import path, {basename, extname, join, resolve} from 'path'
 import baseConfiguration from './configurator'
 // endregion
 export const log = new Logger({name: 'web-node.plugin-api'})
+
+export const PLUGIN_LOADER: PluginLoaderMapping = {}
 
 await importFilesystemAPI()
 // region allow plugins to import "web-node" as already loaded main module
@@ -851,29 +854,36 @@ export const loadFile = async (
     if (extname(filePath) === '.json')
         options.with = {type: 'json'}
 
-    let scope: object
-    try {
-        scope = await import(
-            /* webpackIgnore: true */
-            `${filePath}?timestamp=${String(Date.now())}`, options
-        ) as object
-    } catch (error) {
-        if (fallbackScope) {
-            scope = fallbackScope
+    let scope: object | undefined
+    if (Object.prototype.hasOwnProperty.call(PLUGIN_LOADER, name))
+        scope = await PLUGIN_LOADER[name](filePath)
 
-            if (doLogging)
-                log.warn(
-                    `Couldn't load new api plugin file "${filePath}" for`,
-                    `plugin "${name}": ${represent(error)}. Using`,
-                    'fallback one.'
+    if (typeof scope === 'undefined')
+        try {
+            console.log()
+            console.log('TODO LOAD', name, filePath)
+            console.log()
+            scope = await import(
+                /* webpackIgnore: true */
+                `${filePath}?timestamp=${String(Date.now())}`, options
+            ) as object
+        } catch (error) {
+            if (fallbackScope) {
+                scope = fallbackScope
+
+                if (doLogging)
+                    log.warn(
+                        `Couldn't load new api plugin file "${filePath}" for`,
+                        `plugin "${name}": ${represent(error)}. Using`,
+                        'fallback one.'
+                    )
+            } else
+                throw new Error(
+                    `Couldn't load plugin file "${filePath}" for plugin ` +
+                    `"${name}": ${represent(error)}`,
+                    {cause: error}
                 )
-        } else
-            throw new Error(
-                `Couldn't load plugin file "${filePath}" for plugin ` +
-                `"${name}": ${represent(error)}`,
-                {cause: error}
-            )
-    }
+        }
 
     if (
         Object.prototype.hasOwnProperty.call(scope, 'default') &&
