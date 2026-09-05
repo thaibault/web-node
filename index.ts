@@ -307,7 +307,6 @@ export const main = async (): Promise<void> => {
     }
 }
 
-const defaultFilename = await realpath(__filename)
 /*
     NOTE: Neither "import.meta.main" nor "import.meta.url" can be used here
     since bundlers replace them with a compile time constant referencing the
@@ -315,21 +314,19 @@ const defaultFilename = await realpath(__filename)
     runtime evaluated value instead.
 */
 export const isMainModule = async (
-    filename = defaultFilename
+    filename?: string
 ): Promise<boolean> => {
     if (process.argv.length < 2)
         return false
+
+    if (!filename)
+        filename = await realpath(__filename)
 
     /*
         NOTE: Both locations have to be resolved since the executable is
         usually linked into a package managers binary folder.
     */
-    console.log(
-        'A',
-        (await realpath(process.argv[1])),
-        defaultFilename,
-        filename
-    )
+
     try {
         return (await realpath(process.argv[1])) === filename
     } catch {
