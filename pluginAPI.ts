@@ -16,7 +16,11 @@
 */
 // region imports
 import type {
-    Encoding, Mapping, RecursiveAsyncEvaluateable, RecursiveEvaluateable
+    Encoding,
+    FirstParameter,
+    Mapping,
+    RecursiveAsyncEvaluateable,
+    RecursiveEvaluateable
 } from 'clientnode'
 import type {SpawnSyncReturns} from 'child_process'
 import type {
@@ -575,6 +579,29 @@ export const load = async (
     )
 }
 /**
+ * Creates a function callable by plugin api which calls the corresponding
+ * plugin scope method.
+ * @param plugins - To search for plugin scope in.
+ * @param name - Name of plugin to search for.
+ * @returns A function which calls the corresponding plugin scope method.
+ */
+export const createNativeAPIFactory = (
+    plugins: Mapping<Plugin>, name: string
+) =>
+    (state: FirstParameter<APIFunction>, ...parameters: Array<unknown>) => {
+        if (plugins[name].scope && state.hook in plugins[name].scope)
+            return (
+                plugins[name].scope as
+                    unknown as
+                    Mapping<APIFunction>
+            )[state.hook](state, ...parameters, module)
+
+        throw new Error(
+            `NotImplemented: API method "${state.hook}" is not ` +
+            `implemented in plugin "${name}".`
+        )
+    }
+/**
  * Load given plugin api file in given path and generates a plugin specific
  * data structure with useful meta information.
  * @param relativeFilePaths - Paths to file to load relatively from given
@@ -639,19 +666,7 @@ export const loadAPI = async (
     )
         if (filePath.endsWith('.js')) {
             nativeAPI = true
-            api = (state, ...parameters: Array<unknown>) => {
-                if (plugins[name].scope && state.hook in plugins[name].scope)
-                    return (
-                        plugins[name].scope as
-                            unknown as
-                            Mapping<APIFunction>
-                    )[state.hook](state, ...parameters, module)
-
-                throw new Error(
-                    `NotImplemented: API method "${state.hook}" is not ` +
-                    `implemented in plugin "${name}".`
-                )
-            }
+            api = createNativeAPIFactory(plugins, name)
         } else
             // NOTE: Any executable file can represent an api.
             api = ({hook, data}, ...parameters: Array<unknown>) => {
@@ -855,35 +870,28 @@ export const loadFile = async (
         options.with = {type: 'json'}
 
     let scope: object | undefined
-    if (Object.prototype.hasOwnProperty.call(PLUGIN_LOADER, name))
-        scope = await PLUGIN_LOADER[name](filePath)
+    try {
+        scope = await import(
+            /* webpackIgnore: true */
+            `${filePath}?timestamp=${String(Date.now())}`, options
+        ) as object
+    } catch (error) {
+        if (fallbackScope) {
+            scope = fallbackScope
 
-    if (typeof scope === 'undefined')
-        try {
-            console.log()
-            console.log('TODO LOAD', name, filePath)
-            console.log()
-            scope = await import(
-                /* webpackIgnore: true */
-                `${filePath}?timestamp=${String(Date.now())}`, options
-            ) as object
-        } catch (error) {
-            if (fallbackScope) {
-                scope = fallbackScope
-
-                if (doLogging)
-                    log.warn(
-                        `Couldn't load new api plugin file "${filePath}" for`,
-                        `plugin "${name}": ${represent(error)}. Using`,
-                        'fallback one.'
-                    )
-            } else
-                throw new Error(
-                    `Couldn't load plugin file "${filePath}" for plugin ` +
-                    `"${name}": ${represent(error)}`,
-                    {cause: error}
+            if (doLogging)
+                log.warn(
+                    `Couldn't load new api plugin file "${filePath}" for`,
+                    `plugin "${name}": ${represent(error)}. Using`,
+                    'fallback one.'
                 )
-        }
+        } else
+            throw new Error(
+                `Couldn't load plugin file "${filePath}" for plugin ` +
+                `"${name}": ${represent(error)}`,
+                {cause: error}
+            )
+    }
 
     if (
         Object.prototype.hasOwnProperty.call(scope, 'default') &&
@@ -954,6 +962,41 @@ export const loadAll = async (configuration: Configuration): Promise<{
                 )
             }
         }
+
+    for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
+        const pluginConfiguration: EvaluateablePartialConfiguration =
+            await plugin.loadConfiguration()
+        const scope = await plugin.loadScope()
+
+        plugins[name] = {
+            api: createNativeAPIFactory(plugins, name),
+            apiFileLoadTimestamps: [],
+            apiFilePaths: [],
+
+            configuration: pluginConfiguration,
+            configurationFilePaths: [],
+            configurationFileLoadTimestamps: [],
+
+            dependencies:
+                Object.prototype.hasOwnProperty.call(
+                    pluginConfiguration, plugin.internalName
+                ) &&
+                pluginConfiguration[plugin.internalName].dependencies ?
+                    pluginConfiguration[plugin.internalName].dependencies as
+                        Array<string> :
+                    [],
+
+            internalName: plugin.internalName,
+            name,
+
+            packageConfiguration:
+                pluginConfiguration[plugin.internalName].package,
+
+            path: '',
+
+            scope
+        }
+    }
 
     const temporaryPlugins: Mapping<Array<string>> = {}
 
