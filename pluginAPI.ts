@@ -495,6 +495,15 @@ export const hotReloadFiles = async (
 
     return pluginChanges
 }
+/**
+ * Combines given plugin configurations into one and returns a plugin specific
+ * meta information object.
+ * @param name - Name of the plugin.
+ * @param configurations - Array of plugin configurations to combine.
+ * @param propertyNames - Array of property names to consider in the
+ * configuration.
+ * @returns An object of plugin specific meta information.
+ */
 export const combinePluginConfigurations = (
     name: string,
     configurations: Array<object>,
