@@ -495,6 +495,41 @@ export const hotReloadFiles = async (
 
     return pluginChanges
 }
+export const combinePluginConfigurations = (
+    name: string,
+    configurations: Array<object>,
+    propertyNames: Array<string> = ['webNode']
+): {
+    name: string
+    configuration: EvaluateablePartialConfiguration
+} => {
+    const packageConfiguration: PackageConfiguration = {}
+
+    for (const configuration of configurations)
+        extend(
+            true,
+            /*
+                NOTE: Source and target configuration got modified. While the
+                target configuration receives the modifications the source
+                configuration will lose their modification  expressions
+                therefore we can use the source configuration afterward to
+                extend the target configuration.
+            */
+            modifyObject(packageConfiguration, configuration),
+            configuration
+        )
+
+    name = packageConfiguration.webNodeInternalName || name
+    return {
+        name,
+        configuration: loadConfiguration(
+            packageConfiguration.webNodeInternalName || name,
+            packageConfiguration,
+            propertyNames
+        )
+    }
+
+}
 /**
  * Extends given configuration object with given plugin specific ones and
  * returns a plugin specific meta information object.
@@ -515,44 +550,27 @@ export const load = async (
     encoding: Encoding = 'utf8'
 ): Promise<Plugin> => {
     const configurationFilePaths: Array<string> = []
-    const packageConfiguration: PackageConfiguration = {}
-
+    const sourceConfigurations: Array<object> = []
     for (const fileName of metaConfiguration.fileNames) {
         const filePath: string = resolve(pluginPath, fileName)
 
         if (await isFile(filePath)) {
-            const sourceConfiguration = await loadFile(filePath, name)
-
-            extend(
-                true,
-                /*
-                    NOTE: Source and target configuration got modified.
-                    While the target configuration receives the modifications
-                    the source configuration will lose their modification
-                    expressions therefore we can use the source configuration
-                    afterward to extend the target configuration.
-                */
-                modifyObject(packageConfiguration, sourceConfiguration),
-                sourceConfiguration
-            )
+            sourceConfigurations.push(await loadFile(filePath, name))
 
             configurationFilePaths.push(filePath)
         }
     }
 
+    const {
+        name: resolvedInternalName,
+        configuration
+    } = combinePluginConfigurations(
+        internalName, sourceConfigurations, metaConfiguration.propertyNames
+    )
+
     const apiFilePaths: Array<string> = ['index.js']
 
-    if (Object.keys(packageConfiguration).length) {
-        internalName =
-            packageConfiguration.webNodeInternalName || internalName
-
-        const configuration: EvaluateablePartialConfiguration =
-            loadConfiguration(
-                internalName,
-                packageConfiguration,
-                metaConfiguration.propertyNames
-            )
-
+    if (Object.keys(configuration.package).length) {
         if (configuration[internalName].package.main)
             apiFilePaths[0] =
                 configuration[internalName].package.main as string
@@ -561,7 +579,7 @@ export const load = async (
             apiFilePaths,
             pluginPath,
             name,
-            internalName,
+            resolvedInternalName,
             plugins,
             encoding,
             configuration,
@@ -573,7 +591,7 @@ export const load = async (
         apiFilePaths,
         pluginPath,
         name,
-        internalName,
+        resolvedInternalName,
         plugins,
         encoding
     )
