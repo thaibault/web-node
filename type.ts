@@ -82,8 +82,9 @@ export interface WebNodeConfiguration extends PluginConfiguration {
     name: string
     plugin: {
         configuration: MetaPluginConfiguration
+        nameRegularExpressionPattern: string
         directories: Mapping<{
-            nameRegularExpressionPattern: string
+            nameRegularExpressionPattern?: string
             path: string
         }>
         hotReloading: boolean
@@ -150,7 +151,6 @@ export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
 
 export type PluginLoaderMapping = Mapping<{
-    name?: string
     loadConfiguration: () => Promise<EvaluateablePartialConfiguration>
     loadScope: () => Promise<object>
 }>

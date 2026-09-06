@@ -925,7 +925,8 @@ export const loadAll = async (configuration: Configuration): Promise<{
                 configuration.name,
                 new RegExp(
                     configuration.core.plugin.directories.external
-                        .nameRegularExpressionPattern
+                        .nameRegularExpressionPattern ??
+                    configuration.core.plugin.nameRegularExpressionPattern
                 )
             ),
             plugins,
@@ -938,8 +939,10 @@ export const loadAll = async (configuration: Configuration): Promise<{
         configuration.core.plugin.directories
     ))
         if (await isDirectory(directory.path)) {
-            const compiledRegularExpression =
-                new RegExp(directory.nameRegularExpressionPattern)
+            const compiledRegularExpression = new RegExp(
+                directory.nameRegularExpressionPattern ??
+                configuration.core.plugin.nameRegularExpressionPattern
+            )
 
             for (const pluginName of await readdir(directory.path)) {
                 if (!(compiledRegularExpression).test(pluginName))
@@ -967,7 +970,10 @@ export const loadAll = async (configuration: Configuration): Promise<{
         const pluginConfiguration: EvaluateablePartialConfiguration =
             await plugin.loadConfiguration()
         const scope = await plugin.loadScope()
-        const pluginName = plugin.name || name
+        const internalName: string = determineInternalName(
+            name,
+            new RegExp(configuration.core.plugin.nameRegularExpressionPattern)
+        )
 
         plugins[name] = {
             api: createNativeAPIFactory(plugins, name),
@@ -980,17 +986,16 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
             dependencies:
                 Object.prototype.hasOwnProperty.call(
-                    pluginConfiguration, pluginName
+                    pluginConfiguration, internalName
                 ) &&
-                pluginConfiguration[pluginName].dependencies ?
-                    pluginConfiguration[pluginName].dependencies as
-                        Array<string> :
+                pluginConfiguration[internalName].dependencies ?
+                    pluginConfiguration[internalName].dependencies :
                     [],
 
-            internalName: pluginName,
+            internalName,
             name,
 
-            packageConfiguration: pluginConfiguration[pluginName].package,
+            packageConfiguration: pluginConfiguration[internalName].package,
 
             path: '',
 
