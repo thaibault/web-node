@@ -979,18 +979,17 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
             dependencies:
                 Object.prototype.hasOwnProperty.call(
-                    pluginConfiguration, plugin.internalName
+                    pluginConfiguration, plugin.name
                 ) &&
-                pluginConfiguration[plugin.internalName].dependencies ?
-                    pluginConfiguration[plugin.internalName].dependencies as
+                pluginConfiguration[plugin.name].dependencies ?
+                    pluginConfiguration[plugin.name].dependencies as
                         Array<string> :
                     [],
 
-            internalName: plugin.internalName,
+            internalName: plugin.name,
             name,
 
-            packageConfiguration:
-                pluginConfiguration[plugin.internalName].package,
+            packageConfiguration: pluginConfiguration[plugin.name].package,
 
             path: '',
 
