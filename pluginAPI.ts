@@ -69,7 +69,7 @@ export const PLUGIN_LOADER: PluginLoaderMapping = {}
 await importFilesystemAPI()
 // region allow plugins to import "web-node" as already loaded main module
 /*
-    Esmodule specific logic to deduplicate the main module's scope for plugins
+    ES module specific logic to deduplicate the main module's scope for plugins
     to avoid loading it twice and therefore having two different scopes of the
     same module in memory:
 
