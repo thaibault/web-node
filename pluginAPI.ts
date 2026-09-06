@@ -520,6 +520,7 @@ export const combinePluginConfigurations = (
         )
 
     name = packageConfiguration.webNodeInternalName || name
+
     return {
         name,
         configuration: loadConfiguration(
@@ -528,7 +529,6 @@ export const combinePluginConfigurations = (
             propertyNames
         )
     }
-
 }
 /**
  * Extends given configuration object with given plugin specific ones and
@@ -570,10 +570,9 @@ export const load = async (
 
     const apiFilePaths: Array<string> = ['index.js']
 
-    if (Object.keys(configuration.package).length) {
-        if (configuration[internalName].package.main)
-            apiFilePaths[0] =
-                configuration[internalName].package.main as string
+    if (Object.keys(configuration[resolvedInternalName].package).length) {
+        if (configuration[resolvedInternalName].package.main)
+            apiFilePaths[0] = configuration[resolvedInternalName].package.main
 
         return await loadAPI(
             apiFilePaths,
