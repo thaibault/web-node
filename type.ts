@@ -150,7 +150,7 @@ export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
 
 export type PluginLoaderMapping = Mapping<{
-    name: string
+    name?: string
     loadConfiguration: () => Promise<EvaluateablePartialConfiguration>
     loadScope: () => Promise<object>
 }>

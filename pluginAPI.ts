@@ -967,6 +967,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
         const pluginConfiguration: EvaluateablePartialConfiguration =
             await plugin.loadConfiguration()
         const scope = await plugin.loadScope()
+        const pluginName = plugin.name || name
 
         plugins[name] = {
             api: createNativeAPIFactory(plugins, name),
@@ -979,17 +980,17 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
             dependencies:
                 Object.prototype.hasOwnProperty.call(
-                    pluginConfiguration, plugin.name
+                    pluginConfiguration, pluginName
                 ) &&
-                pluginConfiguration[plugin.name].dependencies ?
-                    pluginConfiguration[plugin.name].dependencies as
+                pluginConfiguration[pluginName].dependencies ?
+                    pluginConfiguration[pluginName].dependencies as
                         Array<string> :
                     [],
 
-            internalName: plugin.name,
+            internalName: pluginName,
             name,
 
-            packageConfiguration: pluginConfiguration[plugin.name].package,
+            packageConfiguration: pluginConfiguration[pluginName].package,
 
             path: '',
 
