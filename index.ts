@@ -67,17 +67,11 @@ const handleError = async (
             log.error(error)
     }
 }
-let mainCalls = 0
 export const main = async (
     pluginLoaderMapping: PluginLoaderMapping = {}
 ): Promise<void> => {
     extend(PLUGIN_LOADER, pluginLoaderMapping)
 
-    mainCalls += 1
-    console.log()
-    console.log('JAAAU', mainCalls)
-    console.trace()
-    console.log()
     // region load plugins
     const {configuration, plugins}: {
         configuration: Configuration
@@ -344,6 +338,7 @@ export const isMainModule = async (
     try {
         if ((await realpath(process.argv[1])) === (await realpath(filename))) {
             isMainModulePositiveCalls += 1
+
             return true
         }
     } catch {

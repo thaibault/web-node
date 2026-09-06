@@ -150,7 +150,7 @@ export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
 
 export type PluginLoaderMapping =
-    Mapping<(filePath: string) => Promise<object>>
+    Mapping<(filePath: string) => Promise<object | undefined>>
 
 export type Services<PluginServiceType = Mapping<unknown>> =
     Mapping<unknown> & PluginServiceType
