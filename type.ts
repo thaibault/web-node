@@ -149,8 +149,11 @@ export type HookPromiseResult<Type> = Promise<Type | {promise: Type}>
 export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
 
-export type PluginLoaderMapping =
-    Mapping<(filePath: string) => Promise<object | undefined>>
+export type PluginLoaderMapping = Mapping<{
+    internalName: string
+    loadConfiguration: () => Promise<EvaluateablePartialConfiguration>
+    loadScope: () => Promise<object>
+}>
 
 export type Services<PluginServiceType = Mapping<unknown>> =
     Mapping<unknown> & PluginServiceType
