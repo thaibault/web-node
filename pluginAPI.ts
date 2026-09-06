@@ -520,7 +520,7 @@ export const combinePluginConfigurations = (
             /*
                 NOTE: Source and target configuration got modified. While the
                 target configuration receives the modifications the source
-                configuration will lose their modification  expressions
+                configuration will lose their modification expressions
                 therefore we can use the source configuration afterward to
                 extend the target configuration.
             */
@@ -533,11 +533,45 @@ export const combinePluginConfigurations = (
     return {
         name,
         configuration: loadConfiguration(
-            packageConfiguration.webNodeInternalName || name,
+            name,
             packageConfiguration,
             propertyNames
         )
     }
+}
+/**
+ * Determines a plugins internal name from its already loaded configuration.
+ * NOTE: Plugins can specify an internal name deviating from their name via
+ * their "webNodeInternalName" package configuration property. Since only the
+ * plugin specific configuration section carries the corresponding package
+ * configuration we can use it to identify the plugin specific section.
+ * @param configuration - Already loaded plugin configuration.
+ * @param fallbackName - Internal name to use if given configuration does not
+ * provide any hint.
+ * @returns Determined internal name.
+ */
+export const determineInternalNameFromConfiguration = (
+    configuration: EvaluateablePartialConfiguration, fallbackName: string
+): string => {
+    const hasPackageConfiguration = (name: string): boolean => {
+        const subConfiguration: unknown =
+            (configuration as Mapping<unknown>)[name]
+
+        return (
+            typeof subConfiguration === 'object' &&
+            subConfiguration !== null &&
+            Object.prototype.hasOwnProperty.call(subConfiguration, 'package')
+        )
+    }
+
+    if (hasPackageConfiguration(fallbackName))
+        return fallbackName
+
+    for (const name of Object.keys(configuration))
+        if (hasPackageConfiguration(name))
+            return name
+
+    return fallbackName
 }
 /**
  * Extends given configuration object with given plugin specific ones and
@@ -939,12 +973,67 @@ export const loadAll = async (configuration: Configuration): Promise<{
     plugins: Array<Plugin>
 }> => {
     const plugins: Mapping<Plugin> = {}
+
+    for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
+        const pluginConfiguration: EvaluateablePartialConfiguration =
+            await plugin.loadConfiguration()
+        const scope = await plugin.loadScope()
+        /*
+            NOTE: Plugins can specify an internal name deviating from their
+            name. Therefore, we cannot derive it from given plugin loader name
+            only (as the "load()" function does not either).
+        */
+        const internalName: string = determineInternalNameFromConfiguration(
+            pluginConfiguration,
+            determineInternalName(
+                name,
+                new RegExp(
+                    configuration.core.plugin.nameRegularExpressionPattern
+                )
+            )
+        )
+        const hasPluginConfiguration: boolean =
+            Object.prototype.hasOwnProperty.call(
+                pluginConfiguration, internalName
+            )
+
+        plugins[name] = {
+            api: createNativeAPIFactory(plugins, name),
+            apiFileLoadTimestamps: [],
+            apiFilePaths: [],
+
+            configuration: pluginConfiguration,
+            configurationFilePaths: [],
+            configurationFileLoadTimestamps: [],
+
+            dependencies:
+                hasPluginConfiguration &&
+                pluginConfiguration[internalName].dependencies ?
+                    pluginConfiguration[internalName].dependencies :
+                    [],
+
+            internalName,
+            name,
+
+            packageConfiguration:
+                hasPluginConfiguration ?
+                    pluginConfiguration[internalName].package :
+                    {},
+
+            path: '',
+
+            scope
+        }
+    }
     /*
         Load main plugin configuration at first.
 
         NOTE: If application's main is this itself avoid loading it twice.
     */
-    if (configuration.name !== 'web-node')
+    if (
+        configuration.name !== 'web-node' &&
+        Object.prototype.hasOwnProperty.call(plugins, configuration.name)
+    )
         plugins[configuration.name] = await load(
             configuration.name,
             determineInternalName(
@@ -971,7 +1060,10 @@ export const loadAll = async (configuration: Configuration): Promise<{
             )
 
             for (const pluginName of await readdir(directory.path)) {
-                if (!(compiledRegularExpression).test(pluginName))
+                if (
+                    Object.prototype.hasOwnProperty.call(plugins, pluginName) ||
+                    !(compiledRegularExpression).test(pluginName)
+                )
                     continue
 
                 const currentPluginPath: string = resolve(
@@ -991,43 +1083,6 @@ export const loadAll = async (configuration: Configuration): Promise<{
                 )
             }
         }
-
-    for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
-        const pluginConfiguration: EvaluateablePartialConfiguration =
-            await plugin.loadConfiguration()
-        const scope = await plugin.loadScope()
-        const internalName: string = determineInternalName(
-            name,
-            new RegExp(configuration.core.plugin.nameRegularExpressionPattern)
-        )
-
-        plugins[name] = {
-            api: createNativeAPIFactory(plugins, name),
-            apiFileLoadTimestamps: [],
-            apiFilePaths: [],
-
-            configuration: pluginConfiguration,
-            configurationFilePaths: [],
-            configurationFileLoadTimestamps: [],
-
-            dependencies:
-                Object.prototype.hasOwnProperty.call(
-                    pluginConfiguration, internalName
-                ) &&
-                pluginConfiguration[internalName].dependencies ?
-                    pluginConfiguration[internalName].dependencies :
-                    [],
-
-            internalName,
-            name,
-
-            packageConfiguration: pluginConfiguration[internalName].package,
-
-            path: '',
-
-            scope
-        }
-    }
 
     const temporaryPlugins: Mapping<Array<string>> = {}
 
