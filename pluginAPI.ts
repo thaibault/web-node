@@ -992,24 +992,26 @@ export const loadAll = async (configuration: Configuration): Promise<{
         NOTE: If application's main is this itself avoid loading it twice.
     */
     if (
-        configuration.name !== 'web-node' &&
-        Object.prototype.hasOwnProperty.call(plugins, configuration.name)
+        configuration.name !== 'web-node'
     )
-        plugins[configuration.name] = await load(
-            configuration.name,
-            determineInternalName(
+        if (Object.prototype.hasOwnProperty.call(plugins, configuration.name))
+            plugins[configuration.name].path = configuration.core.context.path
+        else
+            plugins[configuration.name] = await load(
                 configuration.name,
-                new RegExp(
-                    configuration.core.plugin.directories.external
-                        .nameRegularExpressionPattern ??
-                    configuration.core.plugin.nameRegularExpressionPattern
-                )
-            ),
-            plugins,
-            configuration.core.plugin.configuration,
-            configuration.core.context.path,
-            configuration.core.encoding
-        )
+                determineInternalName(
+                    configuration.name,
+                    new RegExp(
+                        configuration.core.plugin.directories.external
+                            .nameRegularExpressionPattern ??
+                        configuration.core.plugin.nameRegularExpressionPattern
+                    )
+                ),
+                plugins,
+                configuration.core.plugin.configuration,
+                configuration.core.context.path,
+                configuration.core.encoding
+            )
 
     for (const directory of Object.values(
         configuration.core.plugin.directories
@@ -1021,15 +1023,17 @@ export const loadAll = async (configuration: Configuration): Promise<{
             )
 
             for (const pluginName of await readdir(directory.path)) {
-                if (
-                    Object.prototype.hasOwnProperty.call(plugins, pluginName) ||
-                    !(compiledRegularExpression).test(pluginName)
-                )
+                if (!(compiledRegularExpression).test(pluginName))
                     continue
 
-                const currentPluginPath: string = resolve(
-                    directory.path, pluginName
-                )
+                const currentPluginPath: string =
+                    resolve(directory.path, pluginName)
+                if (Object.prototype.hasOwnProperty.call(plugins, pluginName)) {
+                    plugins[pluginName].path = currentPluginPath
+
+                    continue
+                }
+
                 const internalName: string = determineInternalName(
                     pluginName, compiledRegularExpression
                 )
