@@ -97,7 +97,8 @@ try {
     mainPackageConfiguration = (await import(
         /* webpackIgnore: true */
         join(
-            webNodePackageConfiguration.webNode.core.context.path, 'package'
+            webNodePackageConfiguration.webNode.core.context.path,
+            'package.json'
         ),
         {with: {type: 'json'}}
     )).default as PackageConfiguration
@@ -105,7 +106,10 @@ try {
     webNodePackageConfiguration.webNode.core.context.path = process.cwd()
 }
 
+const configName = mainPackageConfiguration.webNodeInternalName
 const name: string =
+    configName && mainPackageConfiguration.webNode?.[configName]?.name ||
+    configName ||
     mainPackageConfiguration.webDocumentation?.name ||
     mainPackageConfiguration.name ||
     'main'

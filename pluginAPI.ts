@@ -558,17 +558,14 @@ export const load = async (
     pluginPath: string,
     encoding: Encoding = 'utf8'
 ): Promise<Plugin> => {
-    const configurationFilePaths: Array<string> = []
+    const configurationFilePaths: Array<string> =
+        await gatherConfigurationFilePaths(
+            pluginPath, metaConfiguration.fileNames
+        )
+
     const sourceConfigurations: Array<object> = []
-    for (const fileName of metaConfiguration.fileNames) {
-        const filePath: string = resolve(pluginPath, fileName)
-
-        if (await isFile(filePath)) {
-            sourceConfigurations.push(await loadFile(filePath, name))
-
-            configurationFilePaths.push(filePath)
-        }
-    }
+    for (const filePath of configurationFilePaths)
+        sourceConfigurations.push(await loadFile(filePath, name))
 
     const {
         name: resolvedInternalName,
@@ -869,6 +866,26 @@ export const loadConfigurations = (
     ) as Promise<Configuration>
 }
 /**
+ * Gathers all existing configuration file paths for given plugin path and
+ * file names.
+ * @param pluginPath - Path to the plugin directory.
+ * @param fileNames - List of configuration file names to check.
+ * @returns A list of existing configuration file paths.
+ */
+export const gatherConfigurationFilePaths = async (
+    pluginPath: string, fileNames: Array<string>
+) => {
+    const result: Array<string> = []
+    for (const fileName of fileNames) {
+        const filePath: string = resolve(pluginPath, fileName)
+
+        if (await isFile(filePath))
+            result.push(filePath)
+    }
+
+    return result
+}
+/**
  * Load given api file path and returns exported scope.
  * @param filePath - Path to file to load.
  * @param name - Plugin name to use for proper error messages.
@@ -991,12 +1008,15 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
         NOTE: If application's main is this itself avoid loading it twice.
     */
-    if (
-        configuration.name !== 'web-node'
-    )
-        if (Object.prototype.hasOwnProperty.call(plugins, configuration.name))
+    if (configuration.name !== 'web-node')
+        if (Object.prototype.hasOwnProperty.call(plugins, configuration.name)) {
             plugins[configuration.name].path = configuration.core.context.path
-        else
+            plugins[configuration.name].configurationFilePaths =
+                await gatherConfigurationFilePaths(
+                    configuration.core.context.path,
+                    configuration.core.plugin.configuration.fileNames
+                )
+        } else
             plugins[configuration.name] = await load(
                 configuration.name,
                 determineInternalName(
@@ -1030,6 +1050,11 @@ export const loadAll = async (configuration: Configuration): Promise<{
                     resolve(directory.path, pluginName)
                 if (Object.prototype.hasOwnProperty.call(plugins, pluginName)) {
                     plugins[pluginName].path = currentPluginPath
+                    plugins[pluginName].configurationFilePaths =
+                        await gatherConfigurationFilePaths(
+                            currentPluginPath,
+                            configuration.core.plugin.configuration.fileNames
+                        )
 
                     continue
                 }
