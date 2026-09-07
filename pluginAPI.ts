@@ -426,9 +426,7 @@ export const hotReloadFiles = async (
                 const timestamp: number =
                     (await stat(filePath)).mtime.getTime()
 
-                if (
-                    plugin[`${type}FileLoadTimestamps`][index] < timestamp
-                ) {
+                if (plugin[`${type}FileLoadTimestamps`][index] < timestamp) {
                     log.info(
                         `Determined updated file "${filePath}".`,
                         'Doing a reload.'
@@ -697,6 +695,11 @@ export const loadAPI = async (
             pluginConfiguration, internalName
         )
 
+    const scope =
+        (plugins[name] as Plugin | undefined) ?
+            plugins[name].scope :
+            (nativeAPI ? await loadFile(filePath, name) : null)
+
     return {
         api,
         apiFileLoadTimestamps:
@@ -727,9 +730,7 @@ export const loadAPI = async (
 
         path: pluginPath,
 
-        scope:
-            (plugins[name] as Plugin | undefined) ??
-            nativeAPI ? await loadFile(filePath, name) : null
+        scope
     }
 }
 /**
