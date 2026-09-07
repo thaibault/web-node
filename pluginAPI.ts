@@ -947,9 +947,9 @@ export const loadAll = async (configuration: Configuration): Promise<{
     for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
         const {name: internalName, configuration: pluginConfiguration} =
             combinePluginConfigurations(
-                plugin.name,
+                plugin.name || name,
                 ([] as Array<EvaluateablePartialConfiguration>).concat(
-                    plugin.configurations
+                    plugin.configurations || []
                 )
             )
 
@@ -983,7 +983,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
             path: '',
 
-            scope: plugin.scope
+            scope: plugin.scope || {}
         }
     }
     /*

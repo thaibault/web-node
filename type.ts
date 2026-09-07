@@ -151,12 +151,12 @@ export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
 
 export type PluginLoaderMapping = Mapping<{
-    name: string
-    configurations: (
+    name?: string
+    configurations?: (
         Array<EvaluateablePartialConfiguration> |
         EvaluateablePartialConfiguration
     )
-    scope: object
+    scope?: object
 }>
 
 export type Services<PluginServiceType = Mapping<unknown>> =
