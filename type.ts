@@ -151,14 +151,15 @@ export type HookPromiseResult<Type> = Promise<Type | {promise: Type}>
 export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
     Mapping<null | Type>
 
-export type PluginLoaderMapping = Mapping<{
+export interface PluginPreload {
     name?: string
     configurations?: (
         Array<EvaluateablePartialConfiguration> |
         EvaluateablePartialConfiguration
-    )
+        )
     scope?: object
-}>
+}
+export type PluginPreloader = Mapping<PluginPreload>
 
 export type Services<PluginServiceType = Mapping<unknown>> =
     Mapping<unknown> & PluginServiceType

@@ -24,7 +24,7 @@ import type {
     BaseState,
     ChangedConfigurationState,
     Configuration,
-    Plugin, PluginLoaderMapping,
+    Plugin, PluginPreloader,
     PluginPromises,
     ServicePromises,
     ServicePromisesState,
@@ -47,7 +47,7 @@ import {fileURLToPath} from 'node:url'
 
 import baseConfiguration from './configurator'
 import pluginAPI, {
-    callStack, callStackSynchronous, loadAll, PLUGIN_LOADER
+    callStack, callStackSynchronous, loadAll, PLUGIN_PRELOADER
 } from './pluginAPI'
 // endregion
 export const log = new Logger({name: 'web-node'})
@@ -68,9 +68,9 @@ const handleError = async (
     }
 }
 export const main = async (
-    pluginLoaderMapping: PluginLoaderMapping = {}
+    pluginLoaderMapping: PluginPreloader = {}
 ): Promise<void> => {
-    extend(PLUGIN_LOADER, pluginLoaderMapping)
+    extend(PLUGIN_PRELOADER, pluginLoaderMapping)
 
     // region load plugins
     const {configuration, plugins}: {
