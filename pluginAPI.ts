@@ -540,40 +540,6 @@ export const combinePluginConfigurations = (
     }
 }
 /**
- * Determines a plugins internal name from its already loaded configuration.
- * NOTE: Plugins can specify an internal name deviating from their name via
- * their "webNodeInternalName" package configuration property. Since only the
- * plugin specific configuration section carries the corresponding package
- * configuration we can use it to identify the plugin specific section.
- * @param configuration - Already loaded plugin configuration.
- * @param fallbackName - Internal name to use if given configuration does not
- * provide any hint.
- * @returns Determined internal name.
- */
-export const determineInternalNameFromConfiguration = (
-    configuration: EvaluateablePartialConfiguration, fallbackName: string
-): string => {
-    const hasPackageConfiguration = (name: string): boolean => {
-        const subConfiguration: unknown =
-            (configuration as Mapping<unknown>)[name]
-
-        return (
-            typeof subConfiguration === 'object' &&
-            subConfiguration !== null &&
-            Object.prototype.hasOwnProperty.call(subConfiguration, 'package')
-        )
-    }
-
-    if (hasPackageConfiguration(fallbackName))
-        return fallbackName
-
-    for (const name of Object.keys(configuration))
-        if (hasPackageConfiguration(name))
-            return name
-
-    return fallbackName
-}
-/**
  * Extends given configuration object with given plugin specific ones and
  * returns a plugin specific meta information object.
  * @param name - Name of plugin to extend.
@@ -766,6 +732,10 @@ export const loadAPI = async (
 
     const pluginConfiguration: EvaluateablePartialConfiguration =
         configuration ?? {[internalName]: {package: {}}}
+    const hasPluginConfiguration: boolean =
+        Object.prototype.hasOwnProperty.call(
+            pluginConfiguration, internalName
+        )
 
     return {
         api,
@@ -783,9 +753,7 @@ export const loadAPI = async (
         ),
 
         dependencies:
-            Object.prototype.hasOwnProperty.call(
-                pluginConfiguration, internalName
-            ) &&
+            hasPluginConfiguration &&
             pluginConfiguration[internalName].dependencies ?
                 pluginConfiguration[internalName].dependencies :
                 [],
@@ -793,7 +761,9 @@ export const loadAPI = async (
         internalName,
         name,
 
-        packageConfiguration: pluginConfiguration[internalName].package,
+        packageConfiguration: hasPluginConfiguration ?
+            pluginConfiguration[internalName].package :
+            {},
 
         path: pluginPath,
 
@@ -975,23 +945,14 @@ export const loadAll = async (configuration: Configuration): Promise<{
     const plugins: Mapping<Plugin> = {}
 
     for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
-        const pluginConfiguration: EvaluateablePartialConfiguration =
-            await plugin.loadConfiguration()
-        const scope = await plugin.loadScope()
-        /*
-            NOTE: Plugins can specify an internal name deviating from their
-            name. Therefore, we cannot derive it from given plugin loader name
-            only (as the "load()" function does not either).
-        */
-        const internalName: string = determineInternalNameFromConfiguration(
-            pluginConfiguration,
-            determineInternalName(
-                name,
-                new RegExp(
-                    configuration.core.plugin.nameRegularExpressionPattern
+        const {name: internalName, configuration: pluginConfiguration} =
+            combinePluginConfigurations(
+                plugin.name,
+                ([] as Array<EvaluateablePartialConfiguration>).concat(
+                    plugin.configurations
                 )
             )
-        )
+
         const hasPluginConfiguration: boolean =
             Object.prototype.hasOwnProperty.call(
                 pluginConfiguration, internalName
@@ -1022,7 +983,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
             path: '',
 
-            scope
+            scope: plugin.scope
         }
     }
     /*

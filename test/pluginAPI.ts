@@ -39,7 +39,6 @@ import {
     callStack,
     callStackSynchronous,
     determineInternalName,
-    determineInternalNameFromConfiguration,
     determineLocations,
     evaluateConfiguration,
     hotReloadAPIFile,
@@ -151,25 +150,6 @@ describe('pluginAPI', (): void => {
         ['hans', 'hans', /^.+$/],
         ['haNs', 'ha-ns', /^.+$/],
         ['ha', 'ha-ns', /^([a-z][a-z]).+$/]
-    )
-    testEach<typeof determineInternalNameFromConfiguration>(
-        'determineInternalNameFromConfiguration',
-        determineInternalNameFromConfiguration,
-
-        ['a', {}, 'a'],
-        ['a', {a: {package: {}}}, 'a'],
-        // Plugins can specify a deviating internal name.
-        ['b', {b: {package: {webNodeInternalName: 'b'}}}, 'a'],
-        // Sections without package configuration should be ignored.
-        [
-            'b',
-            {a: {dependencies: []}, b: {package: {}}} as
-                unknown as
-                EvaluateablePartialConfiguration,
-            'a'
-        ],
-        // Given name has always precedence.
-        ['a', {a: {package: {}}, b: {package: {}}}, 'a']
     )
     testEachResolvedPromise<typeof evaluateConfiguration>(
         'evaluateConfiguration',
