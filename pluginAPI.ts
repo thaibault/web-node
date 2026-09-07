@@ -36,7 +36,7 @@ import type {
     Plugin,
     PluginChange,
     PluginConfiguration,
-    PluginLoaderMapping,
+    PluginPreloader,
     ServicePromisesState
 } from './type'
 
@@ -68,7 +68,7 @@ import baseConfiguration from './configurator'
 // endregion
 export const log = new Logger({name: 'web-node.plugin-api'})
 
-export const PLUGIN_LOADER: PluginLoaderMapping = {}
+export const PLUGIN_PRELOADER: PluginPreloader = {}
 
 await importFilesystemAPI()
 
@@ -727,7 +727,9 @@ export const loadAPI = async (
 
         path: pluginPath,
 
-        scope: nativeAPI ? await loadFile(filePath, name) : null
+        scope:
+            (plugins[name] as Plugin | undefined) ??
+            nativeAPI ? await loadFile(filePath, name) : null
     }
 }
 /**
@@ -846,7 +848,7 @@ export const gatherConfigurationFilePaths = async (
             result.push(filePath)
     }
 
-    return result
+    return result.sort()
 }
 /**
  * Load given api file path and returns exported scope.
@@ -912,7 +914,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
 }> => {
     const plugins: Mapping<Plugin> = {}
 
-    for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
+    for (const [name, plugin] of Object.entries(PLUGIN_PRELOADER)) {
         const pluginConfigurations =
             ([] as Array<EvaluateablePartialConfiguration>).concat(
                 plugin.configurations || []
@@ -929,8 +931,8 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
         plugins[name] = {
             api: createNativeAPIFactory(plugins, name),
-            apiFileLoadTimestamps: plugins[name].scope ? [0] : [],
-            apiFilePaths: plugins[name].scope ? [''] : [],
+            apiFileLoadTimestamps: plugin.scope ? [0] : [],
+            apiFilePaths: plugin.scope ? [''] : [],
 
             configuration: pluginConfiguration,
             configurationFilePaths:
@@ -962,30 +964,26 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
         NOTE: If application's main is this itself avoid loading it twice.
     */
-    if (configuration.name !== 'web-node')
-        if (Object.prototype.hasOwnProperty.call(plugins, configuration.name)) {
-            plugins[configuration.name].path = configuration.core.context.path
-            plugins[configuration.name].configurationFilePaths =
-                await gatherConfigurationFilePaths(
-                    configuration.core.context.path,
-                    configuration.core.plugin.configuration.fileNames
-                )
-        } else
-            plugins[configuration.name] = await load(
-                configuration.name,
-                determineInternalName(
-                    configuration.name,
-                    new RegExp(
-                        configuration.core.plugin.directories.external
-                            .nameRegularExpressionPattern ??
-                        configuration.core.plugin.nameRegularExpressionPattern
-                    )
-                ),
-                plugins,
-                configuration.core.plugin.configuration,
-                configuration.core.context.path,
-                configuration.core.encoding
+    if (configuration.name !== 'web-node') {
+        const {name} = configuration
+        const internalName = determineInternalName(
+            name,
+            new RegExp(
+                configuration.core.plugin.directories.external
+                    .nameRegularExpressionPattern ??
+                configuration.core.plugin.nameRegularExpressionPattern
             )
+        )
+
+        plugins[name] = await load(
+            name,
+            internalName,
+            plugins,
+            configuration.core.plugin.configuration,
+            configuration.core.context.path,
+            configuration.core.encoding
+        )
+    }
 
     for (const directory of Object.values(
         configuration.core.plugin.directories
