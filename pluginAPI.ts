@@ -71,44 +71,7 @@ export const log = new Logger({name: 'web-node.plugin-api'})
 export const PLUGIN_LOADER: PluginLoaderMapping = {}
 
 await importFilesystemAPI()
-// region allow plugins to import "web-node" as already loaded main module
-/*
-    ES module specific logic to deduplicate the main module's scope for plugins
-    to avoid loading it twice and therefore having two different scopes of the
-    same module in memory:
 
-// main-module-hook.ts  (must compile/run as a standalone module)
-import type {ResolveHook, InitializeHook} from 'node:module'
-
-let mainModuleURL: string | undefined
-
-export const initialize: InitializeHook = (
-    data: {mainModuleURL?: string}
-): void => {
-    mainModuleURL = data.mainModuleURL
-}
-
-export const resolve: ResolveHook = (specifier, context, nextResolve) => {
-    if (specifier === 'main-module' && mainModuleURL)
-        // Redirect to the entry module's URL; the ESM cache is keyed by
-        // resolved URL, so every importer shares that one instance.
-        return nextResolve(mainModuleURL, context)
-
-    return nextResolve(specifier, context)
-}
-
-Registering it
-
-// setup.ts  (imported first, before anything does import 'main-module')
-import {register} from 'node:module'
-import {pathToFileURL} from 'node:url'
-
-register('./main-module-hook.js', {
-    parentURL: import.meta.url,
-    data: {mainModuleURL: pathToFileURL(process.argv[1]).href}
-})
-*/
-// endregion
 /**
  * Calls all plugin methods for given trigger description asynchronous and
  * waits for their resolved promises.
@@ -900,18 +863,6 @@ export const loadFile = async (
     fallbackScope: null | object = null,
     doLogging = true
 ): Promise<object> => {
-    // Clear module cache if possible in the future.
-    /*
-    let reference: string | undefined
-    try {
-        reference = import.meta.resolve(filePath)
-    } catch {
-        // Ignore error.
-    }
-
-    if (reference)
-        // Clear the module cache.
-    */
     const options: {with?: {type: string}} = {}
     if (extname(filePath) === '.json')
         options.with = {type: 'json'}
@@ -962,12 +913,13 @@ export const loadAll = async (configuration: Configuration): Promise<{
     const plugins: Mapping<Plugin> = {}
 
     for (const [name, plugin] of Object.entries(PLUGIN_LOADER)) {
+        const pluginConfigurations =
+            ([] as Array<EvaluateablePartialConfiguration>).concat(
+                plugin.configurations || []
+            )
         const {name: internalName, configuration: pluginConfiguration} =
             combinePluginConfigurations(
-                plugin.name || name,
-                ([] as Array<EvaluateablePartialConfiguration>).concat(
-                    plugin.configurations || []
-                )
+                plugin.name || name, pluginConfigurations
             )
 
         const hasPluginConfiguration: boolean =
@@ -977,12 +929,14 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
         plugins[name] = {
             api: createNativeAPIFactory(plugins, name),
-            apiFileLoadTimestamps: [],
-            apiFilePaths: [],
+            apiFileLoadTimestamps: plugins[name].scope ? [0] : [],
+            apiFilePaths: plugins[name].scope ? [''] : [],
 
             configuration: pluginConfiguration,
-            configurationFilePaths: [],
-            configurationFileLoadTimestamps: [],
+            configurationFilePaths:
+                pluginConfigurations.map(() => ''),
+            configurationFileLoadTimestamps:
+                pluginConfigurations.map(() => 0),
 
             dependencies:
                 hasPluginConfiguration &&
