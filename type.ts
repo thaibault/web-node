@@ -20,6 +20,7 @@ import type {
 import type {
     WebDocumentationConfiguration
 } from 'web-documentation/build/deploy'
+
 import type {
     callStack,
     callStackSynchronous,
