@@ -16,6 +16,7 @@
     See https://creativecommons.org/licenses/by/3.0/deed.de
     endregion
 */
+import {fileURLToPath} from 'node:url'
 /*
     NOTE: We use dynamic import here, so that we can load the module at
     runtime.
@@ -25,8 +26,5 @@
 const {default: main, isMainModule} =
     await import(/* webpackIgnore: true */'./index.js')
 
-if (await isMainModule())
+if (await isMainModule(fileURLToPath(import.meta.url)))
     void main()
-
-// NOTE: Marks this as a module, so that the `import` statement above works.
-export {}
