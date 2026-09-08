@@ -315,7 +315,7 @@ export const main = async (
     }
 }
 
-export let isMainModulePositiveCalls = 0
+export const isMainModulePositiveCalls = {value: 0}
 /*
     NOTE: Neither "import.meta.main" nor "import.meta.url" cannot be used
     directly since bundlers replace them with a compile time constant
@@ -324,7 +324,10 @@ export let isMainModulePositiveCalls = 0
 export const isMainModule = async (
     filename?: string, onlyOnce = true
 ): Promise<boolean> => {
-    if (onlyOnce && isMainModulePositiveCalls > 0 || process.argv.length < 2)
+    if (
+        onlyOnce && isMainModulePositiveCalls.value > 0 ||
+        process.argv.length < 2
+    )
         return false
 
     if (!filename)
@@ -337,7 +340,7 @@ export const isMainModule = async (
 
     try {
         if ((await realpath(process.argv[1])) === (await realpath(filename))) {
-            isMainModulePositiveCalls += 1
+            isMainModulePositiveCalls.value += 1
 
             return true
         }
