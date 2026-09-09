@@ -114,12 +114,8 @@ const name: string =
     mainPackageConfiguration.name ||
     'main'
 
-const applicationConfiguration: EvaluateablePartialConfiguration =
-    mainPackageConfiguration.webNode ||
-    {[name]: {
-        name,
-        package: mainPackageConfiguration
-    }}
+const applicationConfiguration =
+    mainPackageConfiguration.webNode ?? {[name]: {name}}
 // endregion
 webNodePackageConfiguration.webNode.core.name =
     (webNodePackageConfiguration.webDocumentation as {name?: string}).name ||
@@ -192,5 +188,6 @@ configuration = await evaluateAsyncDynamicData<Configuration>(
 configuration.name = name
 configuration.core.package =
     webNodePackageConfiguration as unknown as PackageConfiguration
+configuration[name].package = mainPackageConfiguration
 
 export default configuration
