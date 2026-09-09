@@ -977,7 +977,7 @@ export const loadAll = async (configuration: Configuration): Promise<{
         )
 
         plugins[name] = await load(
-            name,
+            configuration[internalName].package.name || name,
             internalName,
             plugins,
             configuration.core.plugin.configuration,
