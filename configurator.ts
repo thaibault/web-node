@@ -188,7 +188,15 @@ configuration = await evaluateAsyncDynamicData<Configuration>(
 configuration.name = name
 configuration.core.package =
     webNodePackageConfiguration as unknown as PackageConfiguration
-if (Object.prototype.hasOwnProperty.call(configuration, name))
-    configuration[name].package = mainPackageConfiguration
+
+const configurationName = pluginAPI.determineInternalName(
+    name,
+    new RegExp(
+        configuration.core.plugin.directories.external
+            .nameRegularExpressionPattern ??
+        configuration.core.plugin.nameRegularExpressionPattern
+    )
+)
+configuration[configurationName].package = mainPackageConfiguration
 
 export default configuration
