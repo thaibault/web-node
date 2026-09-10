@@ -188,6 +188,7 @@ configuration = await evaluateAsyncDynamicData<Configuration>(
 configuration.name = name
 configuration.core.package =
     webNodePackageConfiguration as unknown as PackageConfiguration
-configuration[name].package = mainPackageConfiguration
+if (Object.prototype.hasOwnProperty.call(configuration, name))
+    configuration[name].package = mainPackageConfiguration
 
 export default configuration

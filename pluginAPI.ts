@@ -1055,10 +1055,6 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
     configuration = await loadConfigurations(sortedPlugins, configuration)
 
-    console.log()
-    console.log('A', Object.keys(configuration))
-    console.log()
-
     return {configuration, plugins: sortedPlugins}
 }
 /**
