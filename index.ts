@@ -51,7 +51,6 @@ import pluginAPI, {
 } from './pluginAPI'
 // endregion
 export const log = new Logger({name: 'web-node'})
-Logger.configureAllInstances()
 
 const handleError = async (
     state: Omit<ServicePromisesState<Error>, 'hook' | 'pluginAPI'>

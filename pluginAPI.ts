@@ -536,7 +536,6 @@ export const load = async (
     )
 
     const apiFilePaths: Array<string> = ['index.js']
-
     if (Object.keys(configuration[resolvedInternalName].package).length) {
         if (configuration[resolvedInternalName].package.main)
             apiFilePaths[0] = configuration[resolvedInternalName].package.main
@@ -629,7 +628,6 @@ export const loadAPI = async (
 
     let api: APIFunction | null = null
     let nativeAPI = false
-
     if (
         configuration &&
         /*
@@ -975,11 +973,12 @@ export const loadAll = async (configuration: Configuration): Promise<{
                 configuration.core.plugin.nameRegularExpressionPattern
             )
         )
+        const pluginName = (
+            configuration[internalName] as PluginConfiguration | undefined
+        )?.package.name || name
 
-        plugins[name] = await load(
-            (
-                configuration[internalName] as PluginConfiguration | undefined
-            )?.package.name || name,
+        plugins[pluginName] = await load(
+            pluginName,
             internalName,
             plugins,
             configuration.core.plugin.configuration,
