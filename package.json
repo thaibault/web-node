@@ -70,14 +70,14 @@
     "@babel/eslint-parser": "^8.0.1",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/node": "^26.5.1",
+    "@types/node": "^22.20.2",
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
     "clientnode": "^4.0.1514",
     "eslint": "^10.10.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-jsdoc": "^64.3.8",
+    "eslint-plugin-jsdoc": "^64.3.9",
     "jest": "^30.5.1",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
@@ -177,6 +177,18 @@
     "targetTechnology": {
       "boilerplate": "node",
       "payload": "node"
+    },
+    "webpack": {
+      "module": {
+        "parser": {
+          "javascript": {
+            "importMeta": {
+              "#": "NOTE: This allows as to access node's native \"import.meta.url\" runtime value for determining the main module.",
+              "url": false
+            }
+          }
+        }
+      }
     }
   },
   "packageManager": "yarn@4.18.0"

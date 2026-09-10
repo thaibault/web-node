@@ -1045,7 +1045,6 @@ export const loadAll = async (configuration: Configuration): Promise<{
     }
 
     const sortedPlugins: Array<Plugin> = []
-
     for (const pluginName of sortTopological(temporaryPlugins))
         for (const [name, plugin] of Object.entries(plugins))
             if ([plugin.internalName, name].includes(pluginName)) {
@@ -1054,10 +1053,13 @@ export const loadAll = async (configuration: Configuration): Promise<{
                 break
             }
 
-    return {
-        configuration: await loadConfigurations(sortedPlugins, configuration),
-        plugins: sortedPlugins
-    }
+    configuration = await loadConfigurations(sortedPlugins, configuration)
+
+    console.log()
+    console.log('A', Object.keys(configuration))
+    console.log()
+
+    return {configuration, plugins: sortedPlugins}
 }
 /**
  * Transform a list of absolute paths respecting the application context.
