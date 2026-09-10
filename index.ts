@@ -337,7 +337,6 @@ export const isMainModule = async (
         NOTE: Both locations have to be resolved since the executable is
         usually linked into a package managers binary folder.
     */
-
     try {
         if ((await realpath(process.argv[1])) === (await realpath(filename))) {
             isMainModulePositiveCalls.value += 1
