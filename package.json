@@ -66,15 +66,15 @@
     "watch": "weboptimizer build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^8.0.4",
-    "@babel/eslint-parser": "^8.0.1",
+    "@babel/cli": "^8.0.5",
+    "@babel/eslint-parser": "^8.0.5",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^26.5.1",
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
-    "clientnode": "^4.0.1515",
+    "clientnode": "^4.0.1516",
     "eslint": "^10.10.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^64.3.9",
@@ -83,7 +83,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.70.0",
     "web-documentation": "^1.0.52",
-    "weboptimizer": "^4.0.80"
+    "weboptimizer": "^4.0.81"
   },
   "peerDependencies": {
     "clientnode": "*"
