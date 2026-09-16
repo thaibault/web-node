@@ -2650,12 +2650,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^26.4.0, @types/node@npm:^26.5.1":
+"@types/node@npm:*, @types/node@npm:^26.4.0":
   version: 26.5.1
   resolution: "@types/node@npm:26.5.1"
   dependencies:
     undici-types: "npm:~8.9.0"
   checksum: 10c0/40aa7aa4c099c8a08bf39b5bcb15eaf2cc073666c2191b1d9ac8243ce6b68b23ace904a044c521f6d310b70e94514b531be5f4fc184f141a7ce7f0679ebc7bb3
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^26.6.0":
+  version: 26.6.0
+  resolution: "@types/node@npm:26.6.0"
+  dependencies:
+    undici-types: "npm:~8.9.0"
+  checksum: 10c0/147a3ad48c8deab7ba55b323be868b5ff9df950803a7a61662f70a50e703739c98041b68142363a7eef7a1e4b61b5d5c3d802cf2d9982125eecebe768d677bb9
   languageName: node
   linkType: hard
 
@@ -4597,7 +4606,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clientnode@npm:4.0.1517, clientnode@npm:^4.0.1517":
+"clientnode@npm:4.0.1517":
   version: 4.0.1517
   resolution: "clientnode@npm:4.0.1517"
   peerDependencies:
@@ -4612,6 +4621,24 @@ __metadata:
     prop-types:
       optional: true
   checksum: 10c0/c3cacc62b1e34c9dd83b1329a1fdc60d21c2aa37ffe5637d201a1b195fc8bdba56a6af7a70dfb5ec1c421f5b7b4459f3d4b71043407130911056b502b183e5d1
+  languageName: node
+  linkType: hard
+
+"clientnode@npm:^4.0.1518":
+  version: 4.0.1518
+  resolution: "clientnode@npm:4.0.1518"
+  peerDependencies:
+    "@types/prop-types": "*"
+    node-fetch: "*"
+    prop-types: "*"
+  peerDependenciesMeta:
+    "@types/prop-types":
+      optional: true
+    node-fetch:
+      optional: true
+    prop-types:
+      optional: true
+  checksum: 10c0/dd8fc5277dc57c2bd333e3590c01e3db7c02b77a40fe64e5869e758267dc350369dd1195709040edc7e304778394e1ecc250f79a0a89302956a5011f544a94b6
   languageName: node
   linkType: hard
 
@@ -8811,12 +8838,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-documentation@npm:^1.0.59":
-  version: 1.0.59
-  resolution: "web-documentation@npm:1.0.59"
+"web-documentation@npm:^1.0.60":
+  version: 1.0.60
+  resolution: "web-documentation@npm:1.0.60"
   bin:
     web-documentation: build/deploy.js
-  checksum: 10c0/3e9b80ba2263a8916e50b303540471903823f171726784833835db549d26ba1c96cb1226fb29089afdec0d3b41f75954b4514a12aeea0abeee9135689177b204
+  checksum: 10c0/d6f3752fc21660fb9347f52042903992bfc6ba59e7bb78cac5ebe1166d86ccc9414ffc211e9d1370c333ab2e5edf22e0689d808cfc54fae234cbe649d4f4d489
   languageName: node
   linkType: hard
 
@@ -8828,11 +8855,11 @@ __metadata:
     "@babel/eslint-parser": "npm:^8.0.5"
     "@eslint/js": "npm:^10.0.1"
     "@stylistic/eslint-plugin": "npm:^5.10.0"
-    "@types/node": "npm:^26.5.1"
+    "@types/node": "npm:^26.6.0"
     "@types/webpack-env": "npm:^1.18.8"
     "@typescript-eslint/eslint-plugin": "npm:^8.70.0"
     "@typescript-eslint/parser": "npm:^8.70.0"
-    clientnode: "npm:^4.0.1517"
+    clientnode: "npm:^4.0.1518"
     eslint: "npm:^10.10.0"
     eslint-config-google: "npm:^0.14.0"
     eslint-plugin-jsdoc: "npm:^64.5.0"
@@ -8840,7 +8867,7 @@ __metadata:
     jsdoc: "npm:^4.0.5"
     shx: "npm:^0.4.0"
     typescript-eslint: "npm:^8.70.0"
-    web-documentation: "npm:^1.0.59"
+    web-documentation: "npm:^1.0.60"
     weboptimizer: "npm:^4.0.85"
   peerDependencies:
     clientnode: "*"
