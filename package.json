@@ -56,7 +56,7 @@
     "document": "weboptimizer document",
     "lint": "weboptimizer lint",
     "prepare": "yarn build",
-    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn build && cd ..",
+    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn install && yarn build && cd ..",
     "serve": "yarn build:plain && yarn start",
     "start": "./main.js '{plugin: {hotReloading: true}}'",
     "test": "yarn prepare:test && weboptimizer test",
