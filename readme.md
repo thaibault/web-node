@@ -35,3 +35,71 @@ Use case
 
 WebNode is a high-level JavaScript backend plugin system and configuration
 merger.
+
+<div class="wd-table-of-contents">
+    <h2 id="content">Content<!--deDE:Inhalt--><!--frFR:Contenu--></h2>
+    <!--wd-table-of-contents-->
+</div>
+
+Installation
+------------
+
+You can install via package manager, simply download the compiled version as
+zip file here and inject or request via CDN in HTML:
+<!--deDE:
+    Sie können das Paket über den Paketmanager installieren oder einfach die
+    kompilierte Version als ZIP-Datei hier herunterladen und in HTML einbinden
+    oder über ein CDN abrufen:
+-->
+<!--frFR:
+    Vous pouvez installer le paquet via le gestionnaire de paquets ou
+    simplement télécharger ici la version compilée sous forme de fichier ZIP,
+    puis l'intégrer dans une page HTML ou la récupérer via un CDN:
+-->
+
+```bash
+npm install web-node
+```
+
+<!--|deDE:Verwendung-->
+<!--|frFR:Demande-->
+Usage
+-----
+
+You can initialize the WebNode plugin system by calling the main function in
+your entry point script:
+
+```TypeScript
+// entry-module.ts
+
+import type {PluginHandler as BasePluginHandler} from 'web-node/type'
+
+import main, {isMainModule} from 'web-node'
+
+export const YouWebNodeEntryPlugin: PluginHandler = {
+    ...
+}
+
+if (await isMainModule(fileURLToPath(import.meta.url)))
+    main()
+```
+
+Then simply calling the entry script:
+
+```bash
+ts-node ./entry-module.ts
+```
+
+When hot module reloading is needed (e.g. in development), you can use web-node
+as entry point directly. That way your main entry plugin will be hot reloaded
+as well.
+
+```bash
+ts-node ./node_modules/web-node/main.js
+```
+
+or
+
+```bash
+npm run web-node
+```
