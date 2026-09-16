@@ -82,7 +82,7 @@
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.70.0",
-    "web-documentation": "^1.0.58",
+    "web-documentation": "^1.0.59",
     "weboptimizer": "^4.0.85"
   },
   "peerDependencies": {
