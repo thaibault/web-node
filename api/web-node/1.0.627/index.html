@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3>web-node 1.0.627</h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><!-- !/usr/bin/env markdown
+-*- coding: utf-8 -*-
+region header
+Copyright Torben Sickert (info["~at~"]torben.website) 16.12.2012
+
+License
+-------
+
+This library written by Torben Sickert stands under a creative commons naming
+3.0 unported license. See https://creativecommons.org/licenses/by/3.0/deed.de
+endregion -->
+<h2>Project status</h2>
+<p><a href="https://www.npmjs.com/package/web-node"><img src="https://img.shields.io/npm/v/web-node?color=%23d55e5d&amp;label=npm%20package%20version&amp;logoColor=%23d55e5d&amp;style=for-the-badge" alt="npm"></a>
+<a href="https://www.npmjs.com/package/web-node"><img src="https://img.shields.io/npm/dy/web-node.svg?style=for-the-badge" alt="npm downloads"></a></p>
+<p><a href="https://github.com/thaibault/web-node/actions/workflows/build.yaml"><img src="https://img.shields.io/github/actions/workflow/status/thaibault/web-node/build.yaml?style=for-the-badge" alt="build"></a>
+<a href="https://github.com/thaibault/web-node/actions/workflows/build-package-and-push.yaml"><img src="https://img.shields.io/github/actions/workflow/status/thaibault/web-node/build-package-and-push.yaml?label=build%20push%20package&amp;style=for-the-badge" alt="build push package"></a></p>
+<p><a href="https://github.com/thaibault/web-node/actions/workflows/check-types.yaml"><img src="https://img.shields.io/github/actions/workflow/status/thaibault/web-node/check-types.yaml?label=check%20types&amp;style=for-the-badge" alt="check types"></a>
+<a href="https://github.com/thaibault/web-node/actions/workflows/lint.yaml"><img src="https://img.shields.io/github/actions/workflow/status/thaibault/web-node/lint.yaml?label=lint&amp;style=for-the-badge" alt="lint"></a>
+<a href="https://github.com/thaibault/web-node/actions/workflows/test-coverage-report.yaml"><img src="https://img.shields.io/github/actions/workflow/status/thaibault/web-node/test-coverage-report.yaml?label=test&amp;style=for-the-badge" alt="test"></a></p>
+<p><a href="https://coveralls.io/github/thaibault/web-node"><img src="https://img.shields.io/coverallsCoverage/github/thaibault/web-node?label=code%20coverage&amp;style=for-the-badge" alt="code coverage"></a></p>
+<p><a href="https://github.com/thaibault/web-node/actions/workflows/deploy-web-documentation.yaml"><img src="https://img.shields.io/github/actions/workflow/status/thaibault/web-node/deploy-web-documentation.yaml?label=deploy%20web%20documentation&amp;style=for-the-badge" alt="deploy web documentation"></a>
+<a href="https://torben.website/web-node"><img src="https://img.shields.io/website-up-down-green-red/https/torben.website/web-node.svg?label=web-documentation&amp;style=for-the-badge" alt="web documentation"></a></p>
+<p><a href="https://githubbox.com/thaibault/web-node"><img src="https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=for-the-badge&amp;logo=codesandbox" alt="Open in CodeSandbox"></a></p>
+<h2>Use case</h2>
+<p>WebNode is a high-level JavaScript backend plugin system and configuration
+merger.</p>
+<div class="wd-table-of-contents">
+    <h2 id="content">Content<!--deDE:Inhalt--><!--frFR:Contenu--></h2>
+    <!--wd-table-of-contents-->
+</div>
+<h2>Installation</h2>
+<p>You can install via package manager, simply download the compiled version as
+zip file here and inject or request via CDN in HTML:</p>
+<!--deDE:
+    Sie können das Paket über den Paketmanager installieren oder einfach die
+    kompilierte Version als ZIP-Datei hier herunterladen und in HTML einbinden
+    oder über ein CDN abrufen:
+-->
+<!--frFR:
+    Vous pouvez installer le paquet via le gestionnaire de paquets ou
+    simplement télécharger ici la version compilée sous forme de fichier ZIP,
+    puis l'intégrer dans une page HTML ou la récupérer via un CDN:
+-->
+<pre class="prettyprint source lang-bash"><code>npm install web-node
+</code></pre>
+<!--|deDE:Verwendung-->
+<!--|frFR:Demande-->
+<h2>Usage</h2>
+<p>You can initialize the WebNode plugin system by calling the main function in
+your entry point script:</p>
+<pre class="prettyprint source lang-TypeScript"><code>// entry-module.ts
+
+import type {PluginHandler as BasePluginHandler} from 'web-node/type'
+
+import main, {isMainModule} from 'web-node'
+
+export const YouWebNodeEntryPlugin: PluginHandler = {
+    ...
+}
+
+if (await isMainModule(fileURLToPath(import.meta.url)))
+    main()
+</code></pre>
+<p>Then simply calling the entry script:</p>
+<pre class="prettyprint source lang-bash"><code>ts-node ./entry-module.ts
+</code></pre>
+<p>When hot module reloading is needed (e.g. in development), you can use web-node
+as entry point directly. That way your main entry plugin will be hot reloaded
+as well.</p>
+<pre class="prettyprint source lang-bash"><code>ts-node ./node_modules/web-node/main.js
+</code></pre>
+<p>or</p>
+<pre class="prettyprint source lang-bash"><code>npm run web-node
+</code></pre></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#base">base</a></li><li><a href="global.html#baseMinusTMin">baseMinusTMin</a></li><li><a href="global.html#errors">errors</a></li><li><a href="global.html#maxInt">maxInt</a></li><li><a href="global.html#punycode">punycode</a></li><li><a href="global.html#regexPunycode">regexPunycode</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Wed Sep 16 2026 15:48:46 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
