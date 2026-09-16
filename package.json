@@ -47,10 +47,10 @@
   ],
   "sideEffects": true,
   "scripts": {
-    "build": "yarn build:types; yarn build:plain",
+    "build": "yarn build:types && yarn build:plain",
     "build:plain": "weboptimizer build",
     "build:types": "weboptimizer build:types",
-    "check": "yarn check:types; yarn lint",
+    "check": "yarn check:types && yarn lint",
     "check:types": "weboptimizer check:types",
     "clear": "weboptimizer clear",
     "document": "weboptimizer document",
