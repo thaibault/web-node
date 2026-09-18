@@ -101,7 +101,7 @@ export const callStack = async <
                 )
 
             if (pluginsWithChangedConfiguration.length) {
-                log.info(
+                void log.info(
                     'Configuration for "' +
                     pluginsWithChangedConfiguration
                         .map((plugin: Plugin): string => plugin.name)
@@ -132,7 +132,7 @@ export const callStack = async <
                 await hotReloadAPIFile(plugins)
 
             if (pluginsWithChangedAPIFiles.length) {
-                log.info(
+                void log.info(
                     'API-file for "' +
                     `${pluginsWithChangedAPIFiles.map((
                         plugin: Plugin
@@ -181,7 +181,7 @@ export const callStack = async <
 
             data = result
 
-            log.info(
+            void log.info(
                 `Ran asynchronous hook "${hook}" for plugin "${plugin.name}".`
             )
         }
@@ -237,7 +237,7 @@ export const callStackSynchronous = <
             data = result
 
             if (configuration.core.debug)
-                log.info(
+                void log.info(
                     `Ran synchronous hook "${hook}" for plugin`,
                     `"${plugin.name}".`
                 )
@@ -359,7 +359,7 @@ export const hotReloadAPIFile = async (
                     try {
                         pluginChange.newScope[name] = value
                     } catch {
-                        log.warn(
+                        void log.warn(
                             'Could not update new constant value for',
                             `variable "${name}".`
                         )
@@ -427,7 +427,7 @@ export const hotReloadFiles = async (
                     (await stat(filePath)).mtime.getTime()
 
                 if (plugin[`${type}FileLoadTimestamps`][index] < timestamp) {
-                    log.info(
+                    void log.info(
                         `Determined updated file "${filePath}".`,
                         'Doing a reload.'
                     )
@@ -438,7 +438,7 @@ export const hotReloadFiles = async (
                         filePath, plugin.name, plugin[target]
                     ) as PackageConfiguration
 
-                    log.info(`File "${filePath}" reloaded.`)
+                    void log.info(`File "${filePath}" reloaded.`)
 
                     pluginChanges.push({
                         newScope: plugin[target] as Mapping<unknown>,
@@ -879,7 +879,7 @@ export const loadFile = async (
             scope = fallbackScope
 
             if (doLogging)
-                log.warn(
+                void log.warn(
                     `Couldn't load new api plugin file "${filePath}" for`,
                     `plugin "${name}": ${represent(error)}. Using`,
                     'fallback one.'

@@ -63,7 +63,7 @@ const handleError = async (
         if (state.configuration.core.debug)
             throw error
         else
-            log.error(error)
+            void log.error(error)
     }
 }
 export const main = async (
@@ -82,7 +82,7 @@ export const main = async (
     })
 
     if (plugins.length)
-        log.info(
+        void log.info(
             'Loaded plugins: "' +
             plugins
                 .map((plugin: Plugin): string => plugin.internalName)
@@ -118,7 +118,7 @@ export const main = async (
         })
 
         for (const name of Object.keys(services))
-            log.info(`Service "${name}" initialized.`)
+            void log.info(`Service "${name}" initialized.`)
 
         for (const plugin of plugins)
             if (plugin.api) {
@@ -166,11 +166,11 @@ export const main = async (
                 if (result)
                     for (const [name, promise] of Object.entries(result))
                         if (isObject(promise) && 'then' in promise) {
-                            log.info(`Service "${name}" started.`)
+                            void log.info(`Service "${name}" started.`)
 
                             servicePromises[name] = promise
                         } else
-                            log.info(`Service "${name}" loaded.`)
+                            void log.info(`Service "${name}" loaded.`)
 
                 await callStack({
                     configuration,
@@ -227,11 +227,11 @@ export const main = async (
             void (async (): Promise<void> => {
                 if (key === '\u0003') {
                     if (cancelTriggered)
-                        log.warn('Stopping ungracefully.')
+                        void log.warn('Stopping ungracefully.')
                     else {
                         cancelTriggered = true
 
-                        log.info(
+                        void log.info(
                             'You have requested to shut down all services. A',
                             'second request will force to stop ungracefully.'
                         )
@@ -308,7 +308,7 @@ export const main = async (
         if (configuration.core.debug)
             throw error
         else
-            log.error(error)
+            void log.error(error)
 
         process.exit(1)
     }
