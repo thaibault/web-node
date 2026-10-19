@@ -217,6 +217,12 @@ export interface ChangedConfigurationState<
 > extends ChangedState<Type, ConfigurationType> {
     // List of plugins which have a changed plugin configuration.
     pluginsWithChangedConfiguration: Array<Plugin>
+    /*
+        Application wide services. Not available during initial configuration
+        loading but (usually) provided later e.g. when configurations or code
+        is getting are hot reloaded.
+    */
+    services?: Services
 }
 export interface ChangedAPIFileState<
     Type = unknown, ConfigurationType extends Configuration = Configuration

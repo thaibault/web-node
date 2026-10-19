@@ -74,15 +74,15 @@
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.71.2",
     "@typescript-eslint/parser": "^8.71.2",
-    "clientnode": "^4.0.1522",
+    "clientnode": "^4.0.1523",
     "eslint": "^10.13.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-jsdoc": "^65.3.8",
+    "eslint-plugin-jsdoc": "^65.3.12",
     "jest": "^30.5.2",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.71.2",
-    "web-documentation": "^1.0.61",
+    "web-documentation": "^1.0.63",
     "weboptimizer": "^4.0.89"
   },
   "peerDependencies": {
