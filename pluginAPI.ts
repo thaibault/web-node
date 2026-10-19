@@ -388,17 +388,73 @@ export const hotReloadConfigurationFile = async (
     plugins: Array<Plugin>, configurationPropertyNames: Array<string>
 ): Promise<Array<Plugin>> => {
     const pluginsWithChangedFiles: Array<Plugin> = []
-    const pluginChanges: Array<PluginChange> = await hotReloadFiles(
-        'configuration', 'packageConfiguration', plugins
-    )
 
-    for (const change of pluginChanges) {
-        change.plugin.configuration = loadConfiguration(
-            change.plugin.internalName,
-            change.plugin.packageConfiguration,
+    for (const plugin of plugins) {
+        const timestamps: Array<number> = []
+        let hasChanged = false
+        for (const [index, filePath] of Object.entries(
+            plugin.configurationFilePaths
+        )) {
+            const timestamp: number = (await stat(filePath)).mtime.getTime()
+
+            if (
+                plugin.configurationFileLoadTimestamps[Number(index)] <
+                timestamp
+            ) {
+                void log.info(
+                    `Determined updated file "${filePath}".`,
+                    'Doing a reload.'
+                )
+
+                hasChanged = true
+            }
+
+            timestamps.push(timestamp)
+        }
+
+        plugin.configurationFileLoadTimestamps = timestamps
+
+        if (!hasChanged)
+            continue
+
+        /*
+            NOTE: All configuration files have to be combined again (as done
+            initially in "load") since a single one only holds a part of the
+            plugins configuration (e.g. "package.json" and
+            "private-package.json"). They have to be loaded freshly since
+            combining consumes their modification expressions.
+        */
+        const sourceConfigurations: Array<object> = []
+        try {
+            for (const filePath of plugin.configurationFilePaths)
+                sourceConfigurations.push(
+                    await loadFile(filePath, plugin.name)
+                )
+        } catch (error) {
+            void log.warn(
+                'Could not reload configuration files of plugin',
+                `"${plugin.name}": ${represent(error)}. Using old one.`
+            )
+
+            continue
+        }
+
+        const {name, configuration} = combinePluginConfigurations(
+            plugin.internalName,
+            sourceConfigurations,
             configurationPropertyNames
         )
-        pluginsWithChangedFiles.push(change.plugin)
+
+        plugin.configuration = configuration
+        plugin.packageConfiguration = configuration[name].package
+
+        void log.info(
+            `Configuration files "${plugin.configurationFilePaths.join(
+                '", "'
+            )}" reloaded.`
+        )
+
+        pluginsWithChangedFiles.push(plugin)
     }
 
     return pluginsWithChangedFiles

@@ -30,7 +30,9 @@ import {
     testEachResolvedPromise,
     testEachResolvedPromiseAgainstResolvedPromise
 } from 'clientnode/test-helper'
-import {resolve} from 'path'
+import {mkdtemp, rm as remove, stat, writeFile} from 'fs/promises'
+import {tmpdir} from 'os'
+import {join, resolve} from 'path'
 
 import {describe, expect, test} from '@jest/globals'
 
@@ -182,6 +184,52 @@ describe('pluginAPI', (): void => {
         hotReloadConfigurationFile,
 
         [[], [], []]
+    )
+    test(
+        'hotReloadConfigurationFile combines all configuration files',
+        async (): Promise<void> => {
+            const directoryPath: string =
+                await mkdtemp(join(tmpdir(), 'web-node-test-'))
+            const packageFilePath: string =
+                join(directoryPath, 'package.json')
+            const privatePackageFilePath: string =
+                join(directoryPath, 'private-package.json')
+
+            try {
+                await writeFile(
+                    packageFilePath,
+                    JSON.stringify({webNode: {dummy: {a: 1}}})
+                )
+                await writeFile(
+                    privatePackageFilePath,
+                    JSON.stringify({webNode: {dummy: {secret: 'b'}}})
+                )
+
+                const plugin = {
+                    configuration: {},
+                    configurationFileLoadTimestamps: [
+                        // Only "package.json" has been changed.
+                        0,
+                        (await stat(privatePackageFilePath)).mtime.getTime()
+                    ],
+                    configurationFilePaths:
+                        [packageFilePath, privatePackageFilePath],
+                    internalName: 'dummy',
+                    name: 'dummyPlugin',
+                    packageConfiguration: {}
+                } as unknown as Plugin
+
+                expect(await hotReloadConfigurationFile([plugin], ['webNode']))
+                    .toStrictEqual([plugin])
+                expect(plugin.configuration).toStrictEqual(
+                    {dummy: {a: 1, package: {}, secret: 'b'}}
+                )
+                expect(await hotReloadConfigurationFile([plugin], ['webNode']))
+                    .toStrictEqual([])
+            } finally {
+                await remove(directoryPath, {force: true, recursive: true})
+            }
+        }
     )
     testEachResolvedPromise<typeof hotReloadFiles>(
         'hotReloadFiles',
