@@ -4875,25 +4875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clientnode@npm:4.0.1523":
-  version: 4.0.1523
-  resolution: "clientnode@npm:4.0.1523"
-  peerDependencies:
-    "@types/prop-types": "*"
-    node-fetch: "*"
-    prop-types: "*"
-  peerDependenciesMeta:
-    "@types/prop-types":
-      optional: true
-    node-fetch:
-      optional: true
-    prop-types:
-      optional: true
-  checksum: 10c0/43fc4332bb1a947d1a6db23f8f370d2650e550cff96d779ab0fd509355aefc8a3d4efe901161ae07e8221f4e9d3e8910134d20698ad40ff90a2c3b73fe363caf
-  languageName: node
-  linkType: hard
-
-"clientnode@npm:^4.0.1524":
+"clientnode@npm:4.0.1524, clientnode@npm:^4.0.1524":
   version: 4.0.1524
   resolution: "clientnode@npm:4.0.1524"
   peerDependencies:
@@ -9198,7 +9180,7 @@ __metadata:
     shx: "npm:^0.4.0"
     typescript-eslint: "npm:^8.72.1"
     web-documentation: "npm:^1.0.65"
-    weboptimizer: "npm:^4.0.91"
+    weboptimizer: "npm:^4.0.92"
   peerDependencies:
     clientnode: "*"
   bin:
@@ -9213,9 +9195,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"weboptimizer@npm:^4.0.91":
-  version: 4.0.91
-  resolution: "weboptimizer@npm:4.0.91"
+"weboptimizer@npm:^4.0.92":
+  version: 4.0.92
+  resolution: "weboptimizer@npm:4.0.92"
   dependencies:
     "@babel/core": "npm:^8.0.9"
     "@babel/plugin-proposal-decorators": "npm:^8.0.2"
@@ -9227,7 +9209,7 @@ __metadata:
     babel-loader: "npm:^10.1.1"
     babel-plugin-polyfill-corejs3: "npm:^1.0.0"
     babel-plugin-transform-rewrite-imports: "npm:^1.5.4"
-    clientnode: "npm:4.0.1523"
+    clientnode: "npm:4.0.1524"
     core-js: "npm:^3.51.0"
     ejs: "npm:^7.0.2"
     exports-loader: "npm:^5.0.0"
@@ -9360,7 +9342,7 @@ __metadata:
       optional: true
   bin:
     weboptimizer: index.js
-  checksum: 10c0/4d2bf4a185e1cb006c2fd1e2fe2aa7868f345e5590559396fdf8a89861ace006e7008731a9ee174f8a9e45909bd7d0be8fc362ccd8717a35969d39c2e7637da0
+  checksum: 10c0/bcfa8bf00d926547043e08ab7aa30eedff14ca7f233900f76d6fd15b8b70ccbdd908cb2aaf4160691a5b66e17f9ab376443f186366acf8046602f6bacd99429b
   languageName: node
   linkType: hard
 
