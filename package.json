@@ -1,6 +1,6 @@
 {
   "name": "web-node",
-  "version": "1.0.635",
+  "version": "1.0.636",
   "description": "High level javaScript backend plugin system and configuration merger.",
   "keywords": [
     "api",
@@ -25,9 +25,7 @@
     "url": "https://github.com/thaibault/web-node.git"
   },
   "type": "module",
-  "bin": {
-    "web-node": "main.js"
-  },
+  "bin": "main.js",
   "exports": {
     ".": "./index.js",
     "./main": "./main.js",
