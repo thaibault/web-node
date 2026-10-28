@@ -83,7 +83,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.1",
     "web-documentation": "^1.0.65",
-    "weboptimizer": "^4.0.91"
+    "weboptimizer": "^4.0.92"
   },
   "peerDependencies": {
     "clientnode": "*"
