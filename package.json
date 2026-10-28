@@ -25,7 +25,9 @@
     "url": "https://github.com/thaibault/web-node.git"
   },
   "type": "module",
-  "bin": "main.js",
+  "bin": {
+    "web-node": "main.js"
+  },
   "exports": {
     ".": "./index.js",
     "./main": "./main.js",
