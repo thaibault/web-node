@@ -25,9 +25,7 @@
     "url": "git+https://github.com/thaibault/web-node.git"
   },
   "type": "module",
-  "bin": {
-    "web-node": "main.js"
-  },
+  "bin": "main.js",
   "exports": {
     ".": "./index.js",
     "./main": "./main.js",
@@ -85,7 +83,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.1",
     "web-documentation": "^1.0.65",
-    "weboptimizer": "^4.0.92"
+    "weboptimizer": "^4.0.96"
   },
   "peerDependencies": {
     "clientnode": "*"
