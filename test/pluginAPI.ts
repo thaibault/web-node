@@ -14,7 +14,7 @@
     endregion
 */
 // region imports
-import type {Encoding, ThenParameter} from 'clientnode'
+import type {Encoding, Mapping, ThenParameter} from 'clientnode'
 
 import type {
     Configuration,
@@ -40,9 +40,12 @@ import configuration from '../configurator'
 import {
     callStack,
     callStackSynchronous,
+    combinePluginConfigurations,
+    createNativeAPIFactory,
     determineInternalName,
     determineLocations,
     evaluateConfiguration,
+    gatherConfigurationFilePaths,
     hotReloadAPIFile,
     hotReloadConfigurationFile,
     hotReloadFiles,
@@ -144,6 +147,70 @@ describe('pluginAPI', (): void => {
             }
         ]
     )
+    testEach<typeof combinePluginConfigurations>(
+        'combinePluginConfigurations',
+        combinePluginConfigurations,
+
+        [{name: 'a', configuration: {a: {package: {}}}}, 'a', []],
+        [
+            {name: 'a', configuration: {a: {package: {b: 1, c: 2}}}},
+            'a',
+            [{b: 1}, {c: 2}]
+        ],
+        // Later configurations overwrite earlier ones.
+        [
+            {name: 'a', configuration: {a: {package: {b: {c: 2, d: 3}}}}},
+            'a',
+            [{b: {c: 1, d: 3}}, {b: {c: 2}}]
+        ],
+        // Configured internal name and plugin configuration is respected.
+        [
+            {
+                name: 'b',
+                configuration: {
+                    b: {package: {webNodeInternalName: 'b'}, c: 1}
+                } as unknown as EvaluateablePartialConfiguration
+            },
+            'a',
+            [{webNodeInternalName: 'b'}, {webNode: {b: {c: 1}}}]
+        ],
+        // Custom property names are taken into account.
+        [
+            {
+                name: 'a',
+                configuration: {a: {package: {}, c: 1}} as
+                    unknown as
+                    EvaluateablePartialConfiguration
+            },
+            'a',
+            [{custom: {a: {c: 1}}}],
+            ['custom']
+        ]
+    )
+    test('createNativeAPIFactory', (): void => {
+        const plugins = {
+            a: {
+                scope: {
+                    test: (...parameters: Array<unknown>) => parameters
+                }
+            } as unknown as Plugin,
+            b: {scope: null} as unknown as Plugin
+        }
+        const state = {hook: 'test'} as unknown as Parameters<
+            ReturnType<typeof createNativeAPIFactory>
+        >[0]
+
+        expect(createNativeAPIFactory(plugins, 'a')(state, 2))
+            .toStrictEqual([state, 2])
+        expect((): unknown => createNativeAPIFactory(plugins, 'a')(
+            {...state, hook: 'missing'}
+        )).toThrow(
+            'NotImplemented: API method "missing" is not implemented in ' +
+            'plugin "a".'
+        )
+        expect((): unknown => createNativeAPIFactory(plugins, 'b')(state))
+            .toThrow('NotImplemented')
+    })
     testEach<typeof determineInternalName>(
         'determineInternalName',
         determineInternalName,
@@ -173,11 +240,84 @@ describe('pluginAPI', (): void => {
             }}
         ]
     )
+    testEachResolvedPromise<typeof gatherConfigurationFilePaths>(
+        'gatherConfigurationFilePaths',
+        gatherConfigurationFilePaths,
+
+        [[], resolve(configuration.core.context.path, 'dummyPlugin'), []],
+        [
+            [],
+            resolve(configuration.core.context.path, 'dummyPlugin'),
+            ['missing.json']
+        ],
+        // Only existing files are returned in sorted order.
+        [
+            [
+                resolve(configuration.core.context.path, 'dummyPlugin/index.ts'),
+                resolve(
+                    configuration.core.context.path, 'dummyPlugin/package.json'
+                )
+            ],
+            resolve(configuration.core.context.path, 'dummyPlugin'),
+            ['package.json', 'missing.json', 'index.ts']
+        ]
+    )
     testEachResolvedPromise<typeof hotReloadAPIFile>(
         'hotReloadAPIFile',
         hotReloadAPIFile,
 
         [[], []]
+    )
+    test(
+        'hotReloadAPIFile migrates old scope state',
+        async (): Promise<void> => {
+            const directoryPath: string =
+                await mkdtemp(join(tmpdir(), 'web-node-test-'))
+            const apiFilePath: string = join(directoryPath, 'index.mjs')
+
+            try {
+                await writeFile(
+                    apiFilePath,
+                    `const scope = {
+                        counter: 0,
+                        method: () => 'new'
+                    }
+                    Object.defineProperty(scope, 'constant', {
+                        configurable: true, value: 0, writable: false
+                    })
+                    export default scope`
+                )
+
+                const oldMethod = () => 'old'
+                const plugin = {
+                    apiFileLoadTimestamps: [0],
+                    apiFilePaths: [apiFilePath],
+                    name: 'dummy',
+                    scope: {
+                        constant: 1,
+                        counter: 2,
+                        method: oldMethod,
+                        onlyOld: 3
+                    }
+                } as unknown as Plugin
+
+                expect(await hotReloadAPIFile([plugin])).toStrictEqual([plugin])
+
+                const scope = plugin.scope as unknown as Mapping<unknown>
+                // State is migrated but new functions are kept.
+                expect(scope.counter).toStrictEqual(2)
+                expect(scope.constant).toStrictEqual(1)
+                expect(Object.getOwnPropertyDescriptor(scope, 'constant'))
+                    .toHaveProperty('writable', false)
+                expect((scope.method as () => string)()).toStrictEqual('new')
+                expect(scope).not.toHaveProperty('onlyOld')
+
+                // Nothing has changed since last reload.
+                expect(await hotReloadAPIFile([plugin])).toStrictEqual([])
+            } finally {
+                await remove(directoryPath, {force: true, recursive: true})
+            }
+        }
     )
     testEachResolvedPromise<typeof hotReloadConfigurationFile>(
         'hotReloadConfigurationFile',

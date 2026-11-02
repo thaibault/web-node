@@ -633,7 +633,7 @@ export const createNativeAPIFactory = (
                 plugins[name].scope as
                     unknown as
                     Mapping<APIFunction>
-            )[state.hook](state, ...parameters, module)
+            )[state.hook](state, ...parameters)
 
         throw new Error(
             `NotImplemented: API method "${state.hook}" is not ` +
