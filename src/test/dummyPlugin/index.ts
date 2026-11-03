@@ -20,7 +20,7 @@ import type {
     PluginPromises,
     ServicePromisesState,
     Services
-} from '../type'
+} from '../../type'
 
 import {timeout} from 'clientnode'
 // endregion

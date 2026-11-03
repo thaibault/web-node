@@ -38,17 +38,22 @@ import fileSystemSynchronous from 'fs'
 import fileSystem, {lstat} from 'fs/promises'
 import path, {basename, dirname, join, resolve} from 'path'
 
-import webNodePackageConfiguration from './package.json'
+import webNodePackageConfiguration from '../package.json'
 import pluginAPI from './pluginAPI'
 // endregion
 /*
-    To assume to go two folder up from this file until there is no
+    NOTE: This module is bundled into the "dist/" folder so the package root
+    is one level up.
+*/
+const webNodePath: string = resolve(__dirname, '..')
+/*
+    To assume to go two folder up from the package root until there is no
     "node_modules" parent folder is usually resilient again dealing with
     projects where current working directory isn't the projects directory and
     this library is located as a nested dependency.
 */
 webNodePackageConfiguration.webNode.core.context = {
-    path: __dirname, type: 'relative'
+    path: webNodePath, type: 'relative'
 }
 for (
     let iteration = 0;
@@ -127,7 +132,7 @@ const scope: EvaluateConfigurationScope = {
     fs: fileSystem,
     path,
     pluginAPI,
-    webNodePath: __dirname,
+    webNodePath,
     now,
     nowUTCTimestamp: getUTCTimestamp(now)
 }

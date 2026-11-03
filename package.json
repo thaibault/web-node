@@ -25,25 +25,36 @@
     "url": "git+https://github.com/thaibault/web-node.git"
   },
   "type": "module",
-  "bin": "main.js",
+  "bin": "dist/main.js",
   "exports": {
-    ".": "./index.js",
-    "./main": "./main.js",
-    "./main.js": "./main.js",
+    ".": "./dist/index.js",
+    "./main": "./dist/main.js",
+    "./main.js": "./dist/main.js",
     "./package.json": "./package.json",
-    "./unixCrypt": "./unixCrypt.js",
-    "./unixCrypt.js": "./unixCrypt.js",
-    "./type": "./type.d.ts"
+    "./unixCrypt": "./dist/unixCrypt.js",
+    "./unixCrypt.js": "./dist/unixCrypt.js",
+    "./type": "./dist/type.d.ts"
+  },
+  "main": "dist/index.js",
+  "typesVersions": {
+    "*": {
+      "type": [
+        "./dist/type.d.ts"
+      ],
+      "unixCrypt": [
+        "./dist/unixCrypt.d.ts"
+      ]
+    }
   },
   "files": [
-    "configurator.d.ts",
-    "index.d.ts",
-    "index.js",
-    "main.js",
-    "pluginAPI.d.ts",
-    "type.d.ts",
-    "unixCrypt.d.ts",
-    "unixCrypt.js"
+    "dist/configurator.d.ts",
+    "dist/index.d.ts",
+    "dist/index.js",
+    "dist/main.js",
+    "dist/pluginAPI.d.ts",
+    "dist/type.d.ts",
+    "dist/unixCrypt.d.ts",
+    "dist/unixCrypt.js"
   ],
   "sideEffects": true,
   "scripts": {
@@ -56,9 +67,9 @@
     "document": "weboptimizer document",
     "lint": "weboptimizer lint",
     "prepare": "yarn build",
-    "prepare:test": "yarn clear && cd dummyPlugin && shx touch yarn.lock && yarn install && yarn build && cd ..",
+    "prepare:test": "yarn clear && cd src/test/dummyPlugin && shx touch yarn.lock && yarn install && yarn build && cd ../../..",
     "serve": "yarn build:plain && yarn start",
-    "start": "./main.js '{plugin: {hotReloading: true}}'",
+    "start": "./dist/main.js '{plugin: {hotReloading: true}}'",
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
@@ -66,7 +77,7 @@
     "watch": "weboptimizer build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^8.0.6",
+    "@babel/cli": "^8.1.0",
     "@babel/eslint-parser": "^8.0.7",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
@@ -82,8 +93,8 @@
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.1",
-    "web-documentation": "^1.0.70",
-    "weboptimizer": "^4.0.100"
+    "web-documentation": "^1.0.71",
+    "weboptimizer": "^4.0.102"
   },
   "peerDependencies": {
     "clientnode": "*"
@@ -171,6 +182,23 @@
               }
             }
           }
+        }
+      }
+    },
+    "path": {
+      "ignore": {
+        "#": "Test fixture plugin which is a yarn project on its own.",
+        "__append__": "src/test/dummyPlugin"
+      },
+      "source": {
+        "base": "src/"
+      },
+      "target": {
+        "base": "dist/"
+      },
+      "tidyUpOnClear": {
+        "__append__": {
+          "__evaluate__": "path.resolve(self.path.source.base, 'test/dummyPlugin/index.js')"
         }
       }
     },
