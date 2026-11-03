@@ -25,9 +25,7 @@
     "url": "git+https://github.com/thaibault/web-node.git"
   },
   "type": "module",
-  "bin": {
-    "web-node": "main.js"
-  },
+  "bin": "main.js",
   "exports": {
     ".": "./index.js",
     "./main": "./main.js",
@@ -76,7 +74,7 @@
     "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.72.1",
-    "clientnode": "^4.0.1529",
+    "clientnode": "^4.0.1530",
     "eslint": "^10.14.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^65.4.2",
@@ -84,8 +82,8 @@
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.1",
-    "web-documentation": "^1.0.68",
-    "weboptimizer": "^4.0.98"
+    "web-documentation": "^1.0.70",
+    "weboptimizer": "^4.0.100"
   },
   "peerDependencies": {
     "clientnode": "*"

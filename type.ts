@@ -19,7 +19,7 @@ import type {
 } from 'clientnode'
 import type {
     WebDocumentationConfiguration
-} from 'web-documentation/build/deploy'
+} from 'web-documentation/dist/deploy'
 
 import type {
     callStack,
