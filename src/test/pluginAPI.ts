@@ -57,6 +57,8 @@ import {
     loadFile
 } from '../pluginAPI'
 // endregion
+const dummyPluginPath: string =
+    resolve(configuration.core.context.path, 'src/test/dummyPlugin')
 // region tests
 describe('pluginAPI', (): void => {
     const testConfiguration: Configuration = copy(configuration)
@@ -244,21 +246,19 @@ describe('pluginAPI', (): void => {
         'gatherConfigurationFilePaths',
         gatherConfigurationFilePaths,
 
-        [[], resolve(configuration.core.context.path, 'dummyPlugin'), []],
+        [[], dummyPluginPath, []],
         [
             [],
-            resolve(configuration.core.context.path, 'dummyPlugin'),
+            dummyPluginPath,
             ['missing.json']
         ],
         // Only existing files are returned in sorted order.
         [
             [
-                resolve(configuration.core.context.path, 'dummyPlugin/index.ts'),
-                resolve(
-                    configuration.core.context.path, 'dummyPlugin/package.json'
-                )
+                resolve(dummyPluginPath, 'index.ts'),
+                resolve(dummyPluginPath, 'package.json')
             ],
-            resolve(configuration.core.context.path, 'dummyPlugin'),
+            dummyPluginPath,
             ['package.json', 'missing.json', 'index.ts']
         ]
     )
@@ -383,9 +383,7 @@ describe('pluginAPI', (): void => {
                 api: null,
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
-                    resolve(
-                        configuration.core.context.path, 'dummyPlugin/index.js'
-                    )
+                    resolve(dummyPluginPath, 'index.js')
                 ],
 
                 configurationFileLoadTimestamps: [],
@@ -396,7 +394,7 @@ describe('pluginAPI', (): void => {
                 internalName: 'dummy',
                 name: 'dummy',
 
-                path: resolve(configuration.core.context.path, 'dummyPlugin'),
+                path: dummyPluginPath,
 
                 scope: null
             } as unknown as Plugin,
@@ -404,7 +402,7 @@ describe('pluginAPI', (): void => {
             'dummy',
             {},
             {fileNames: ['package.json'], propertyNames: ['webNode']},
-            resolve(configuration.core.context.path, 'dummyPlugin')
+            dummyPluginPath
         ]
     ])(
         `%p === load('%s', '%s', %p, %p, '%s')`,
@@ -412,7 +410,7 @@ describe('pluginAPI', (): void => {
             expected: Plugin, ...parameters: Parameters<typeof load>
         ): Promise<void> => {
             const packageConfiguration =
-                (await import('../dummyPlugin/package.json')).default
+                (await import('./dummyPlugin/package.json')).default
 
             expected.configuration = {
                 dummy: {
@@ -458,9 +456,7 @@ describe('pluginAPI', (): void => {
                 api: null,
                 apiFileLoadTimestamps: [],
                 apiFilePaths: [
-                    resolve(
-                        configuration.core.context.path, 'dummyPlugin/index.js'
-                    )
+                    resolve(dummyPluginPath, 'index.js')
                 ],
 
                 configuration: {
@@ -469,10 +465,7 @@ describe('pluginAPI', (): void => {
                 },
                 configurationFileLoadTimestamps: [],
                 configurationFilePaths: [
-                    resolve(
-                        configuration.core.context.path,
-                        'dummyPlugin/package.json'
-                    )
+                    resolve(dummyPluginPath, 'package.json')
                 ],
 
                 dependencies: [],
@@ -482,12 +475,12 @@ describe('pluginAPI', (): void => {
 
                 packageConfiguration: {b: 3},
 
-                path: resolve(configuration.core.context.path, 'dummyPlugin'),
+                path: dummyPluginPath,
 
                 scope: null
             },
             ['index.js'],
-            resolve(configuration.core.context.path, 'dummyPlugin'),
+            dummyPluginPath,
             'dummyPlugin',
             'dummy',
             {},
@@ -503,9 +496,7 @@ describe('pluginAPI', (): void => {
                 dummy: {package: {b: 3}}
             },
             [
-                resolve(
-                    configuration.core.context.path, 'dummyPlugin/package.json'
-                )
+                resolve(dummyPluginPath, 'package.json')
             ]
         ]
     ])(
@@ -598,11 +589,9 @@ describe('pluginAPI', (): void => {
         loadFile,
 
         [
-            import('../dummyPlugin/package.json', {with: {type: 'json'}})
+            import('./dummyPlugin/package.json', {with: {type: 'json'}})
                 .then((module) => module.default),
-            resolve(
-                configuration.core.context.path, 'dummyPlugin/package.json'
-            ),
+            resolve(dummyPluginPath, 'package.json'),
             'dummy',
             null,
             false

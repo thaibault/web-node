@@ -97,7 +97,7 @@ as entry point directly. That way your main entry plugin will be hot reloaded
 as well.
 
 ```bash
-ts-node ./node_modules/web-node/main.js
+ts-node ./node_modules/web-node/dist/main.js
 ```
 
 or

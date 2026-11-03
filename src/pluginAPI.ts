@@ -292,7 +292,8 @@ export const evaluateConfiguration = async <
             fs: fileSystem,
             path,
             module,
-            webNodePath: __dirname,
+            // NOTE: This module is bundled into the "dist/" folder.
+            webNodePath: resolve(__dirname, '..'),
             now,
             nowUTCTimestamp: getUTCTimestamp(now)
         }
