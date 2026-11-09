@@ -122,9 +122,7 @@ const name: string =
 const applicationConfiguration =
     mainPackageConfiguration.webNode ?? {[name]: {name}}
 // endregion
-webNodePackageConfiguration.webNode.core.name =
-    (webNodePackageConfiguration.webDocumentation as {name?: string}).name ||
-    webNodePackageConfiguration.name
+webNodePackageConfiguration.webNode.core.name = webNodePackageConfiguration.name
 const now: Date = new Date()
 const scope: EvaluateConfigurationScope = {
     ...UTILITY_SCOPE,
