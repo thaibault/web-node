@@ -152,6 +152,13 @@
       }
     }
   },
+  "webDocumentation": {
+    "languages": [
+      "enUS",
+      "deDE",
+      "frFR"
+    ]
+  },
   "webOptimizer": {
     "assetPattern": {
       "javaScript": {
