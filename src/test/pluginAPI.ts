@@ -34,7 +34,7 @@ import {mkdtemp, rm as remove, stat, writeFile} from 'fs/promises'
 import {tmpdir} from 'os'
 import {join, resolve} from 'path'
 
-import {describe, expect, test} from '@jest/globals'
+import {describe, expect, jest, test} from '@jest/globals'
 
 import configuration from '../configurator'
 import {
@@ -55,7 +55,8 @@ import {
     loadAPI,
     loadConfiguration,
     loadConfigurations,
-    loadFile
+    loadFile,
+    log
 } from '../pluginAPI'
 // endregion
 const dummyPluginPath: string =
@@ -237,6 +238,7 @@ describe('pluginAPI', (): void => {
 
                 const responses = {
                     failing: {message: 'Broken.', status: 500},
+                    informing: {message: 'Done.', result: 1},
                     invalid: 'no json',
                     missing: {status: 404},
                     primitive: 2,
@@ -271,6 +273,19 @@ describe('pluginAPI', (): void => {
             )
             expect((): unknown => api({...state, hook: 'failing'}))
                 .toThrow('status 500 during hook "failing": Broken.')
+
+            const info = jest.spyOn(log, 'info').mockImplementation(
+                (): Promise<void> => Promise.resolve()
+            )
+            try {
+                expect(api({...state, hook: 'informing'})).toStrictEqual(1)
+                expect(info).toHaveBeenCalledWith(
+                    'Plugin "a" during hook "informing": Done.'
+                )
+            } finally {
+                info.mockRestore()
+            }
+
             expect((): unknown => api({...state, hook: 'invalid'}))
                 .toThrow('did not return valid JSON')
             expect((): unknown => api({...state, hook: 'primitive'}))

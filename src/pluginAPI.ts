@@ -649,7 +649,7 @@ export const createNativeAPIFactory = (
  * to print a JSON object to standard output. Its "result" property is used
  * as return value. A "status" of 404 indicates a not implemented hook, any
  * other status from 400 on indicates an error described by an optional
- * "message" property.
+ * "message" property. Without an error status a given "message" is logged.
  * @param filePath - Path to the executable to run.
  * @param name - Name of corresponding plugin to use for proper error
  * messages.
@@ -729,6 +729,9 @@ export const createExecutableAPIFactory = (
                 `responded with status ${String(status)} during hook ` +
                 `"${hook}"` + (message ? `: ${message}` : '.')
             )
+
+        if (message)
+            void log.info(`Plugin "${name}" during hook "${hook}": ${message}`)
 
         return result
     }
