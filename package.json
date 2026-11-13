@@ -69,7 +69,7 @@
     "prepare": "yarn build",
     "prepare:test": "yarn clear && cd src/test/dummyPlugin && shx touch yarn.lock && yarn install && yarn build && cd ../../..",
     "serve": "yarn build:plain && yarn start",
-    "start": "./dist/main.js '{plugin: {hotReloading: true}}'",
+    "start": "./dist/main.js '{core: {plugin: {hotReloading: true}}}'",
     "test": "yarn prepare:test && weboptimizer test",
     "test:coverage": "yarn prepare:test && weboptimizer test:coverage",
     "test:coverage:report": "yarn prepare:test && weboptimizer test:coverage:report",
