@@ -31,6 +31,7 @@ import {
     MAXIMAL_NUMBER_OF_ITERATIONS,
     modifyObject,
     parseEncodedObject,
+    removeKeyPrefixes,
     removeKeysInEvaluation,
     UTILITY_SCOPE
 } from 'clientnode'
@@ -180,7 +181,8 @@ if (Object.keys(result).length > 0) {
 
 configuration = await evaluateAsyncDynamicData<Configuration>(
     evaluateDynamicData<Configuration>(
-        removeKeysInEvaluation(configuration),
+        // NOTE: Remove comments (keys like "#" or "#1") as well.
+        removeKeysInEvaluation(removeKeyPrefixes(configuration)),
         {scope: {
             ...scope,
             fs: fileSystemSynchronous

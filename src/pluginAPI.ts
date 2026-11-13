@@ -62,7 +62,7 @@ import {
     UTILITY_SCOPE
 } from 'clientnode'
 import fileSystemSynchronous from 'fs'
-import fileSystem, {readdir, stat} from 'fs/promises'
+import fileSystem, {access, constants, readdir, stat} from 'fs/promises'
 import path, {basename, extname, join, resolve} from 'path'
 
 import baseConfiguration from './configurator'
@@ -620,6 +620,21 @@ export const load = async (
     )
 }
 /**
+ * Checks whether given file can be executed by the current user.
+ * @param filePath - Path to the file to check.
+ * @returns A promise resolving to a boolean indicating whether given file is
+ * executable.
+ */
+export const isExecutable = async (filePath: string): Promise<boolean> => {
+    try {
+        await access(filePath, constants.X_OK)
+
+        return true
+    } catch {
+        return false
+    }
+}
+/**
  * Creates a function callable by plugin api which calls the corresponding
  * plugin scope method.
  * @param plugins - To search for plugin scope in.
@@ -760,22 +775,36 @@ export const loadAPI = async (
     configurationFilePaths: Array<string> = []
 ): Promise<Plugin> => {
     let filePath: string = resolve(pluginPath, relativeFilePaths[0])
-    if (!(await isFile(filePath)))
-        // Determine entry file if given one does not exist.
-        for (const fileName of await readdir(pluginPath))
+    if (!(await isFile(filePath))) {
+        /*
+            Determine entry file if given one does not exist: Any JavaScript
+            or executable file can serve as api file. Files named "index" or
+            "main" are preferred.
+        */
+        const configurationFileNames: Array<string> =
+            configurationFilePaths.map((filePath: string): string =>
+                basename(filePath)
+            )
+        for (const fileName of (await readdir(pluginPath)).sort()) {
+            const candidate: string = resolve(pluginPath, fileName)
             if (
-                !configurationFilePaths.map((filePath: string): string =>
-                    basename(filePath)
-                ).includes(fileName) &&
-                await isFile(resolve(pluginPath, fileName))
-            ) {
-                filePath = resolve(pluginPath, filePath)
+                configurationFileNames.includes(fileName) ||
+                !(await isFile(candidate)) ||
+                !(
+                    fileName.endsWith('.js') ||
+                    await isExecutable(candidate)
+                )
+            )
+                continue
 
-                if (['index', 'main'].includes(
-                    basename(filePath, extname(fileName))
-                ))
-                    break
-            }
+            filePath = candidate
+
+            if (['index', 'main'].includes(
+                basename(fileName, extname(fileName))
+            ))
+                break
+        }
+    }
 
     let api: APIFunction | null = null
     let nativeAPI = false
@@ -943,6 +972,9 @@ export const loadConfigurations = (
                 )
         }
 
+    // NOTE: Remove comments (keys like "#" or "#1").
+    removeKeyPrefixes(configuration)
+
     return evaluateConfiguration(
         configuration as RecursiveEvaluateable<Configuration>
     ) as Promise<Configuration>
@@ -1033,12 +1065,14 @@ export const loadAll = async (configuration: Configuration): Promise<{
 
     for (const [name, plugin] of Object.entries(PLUGIN_PRELOADER)) {
         const pluginConfigurations =
-            ([] as Array<EvaluateablePartialConfiguration>).concat(
+            ([] as Array<PackageConfiguration>).concat(
                 plugin.configurations || []
             )
         const {name: internalName, configuration: pluginConfiguration} =
             combinePluginConfigurations(
-                plugin.name || name, pluginConfigurations
+                plugin.name || name,
+                pluginConfigurations,
+                configuration.core.plugin.configuration.propertyNames
             )
 
         const hasPluginConfiguration: boolean =

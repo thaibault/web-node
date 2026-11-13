@@ -153,10 +153,11 @@ export type PluginPromises<Type extends Promise<unknown> = Promise<unknown>> =
 
 export interface PluginPreload {
     name?: string
-    configurations?: (
-        Array<EvaluateablePartialConfiguration> |
-        EvaluateablePartialConfiguration
-        )
+    /*
+        Shaped like plugin configuration files ("package.json"), so the plugin
+        configuration has to be placed under a key like "webNode".
+    */
+    configurations?: Array<PackageConfiguration> | PackageConfiguration
     scope?: object
 }
 export type PluginPreloader = Mapping<PluginPreload>
