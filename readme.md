@@ -229,7 +229,8 @@ for every hook. It gets the hook name and further parameters (as JSON) as
 arguments and the hook data (as JSON) via standard input. It has to print a
 JSON object: "result" is its return value, a "status" of 404 marks a hook it
 does not implement and any other status from 400 on an error described in
-"message". Messages for humans go to standard error:
+"message". Without such a status, "message" is logged as information. Further
+output for humans goes to standard error:
 <!--deDE:
     Zeigt "main" auf eine ausführbare Datei, die keine JavaScript-Datei ist,
     wird sie für jeden Hook ausgeführt. Sie erhält den Hook-Namen und weitere
@@ -237,7 +238,8 @@ does not implement and any other status from 400 on an error described in
     Standardeingabe. Sie muss ein JSON-Objekt ausgeben: "result" ist ihr
     Rückgabewert, ein "status" von 404 kennzeichnet einen nicht
     implementierten Hook und jeder andere Status ab 400 einen in "message"
-    beschriebenen Fehler. Meldungen für Menschen gehen auf die
+    beschriebenen Fehler. Ohne einen solchen Status wird "message" als
+    Information protokolliert. Weitere Ausgaben für Menschen gehen auf die
     Standardfehlerausgabe:
 -->
 <!--frFR:
@@ -246,8 +248,9 @@ does not implement and any other status from 400 on an error described in
     paramètres (en JSON) comme arguments et les données du hook (en JSON) via
     l'entrée standard. Il doit afficher un objet JSON: "result" est sa valeur
     de retour, un "status" de 404 signale un hook non implémenté et tout
-    autre statut à partir de 400 une erreur décrite dans "message". Les
-    messages destinés aux humains vont sur la sortie d'erreur standard:
+    autre statut à partir de 400 une erreur décrite dans "message". Sans un
+    tel statut, "message" est journalisé comme information. Les autres
+    sorties destinées aux humains vont sur la sortie d'erreur standard:
 -->
 
 ```bash
@@ -255,8 +258,7 @@ does not implement and any other status from 400 on an error described in
 # plugins/shell/api.sh with "main": "api.sh" in its "package.json"
 case "$1" in
     initialize)
-        echo 'Shell plugin initialized.' >&2
-        echo '{"result": null}'
+        echo '{"message": "Shell plugin initialized.", "result": null}'
         ;;
     *)
         echo '{"status": 404}'
