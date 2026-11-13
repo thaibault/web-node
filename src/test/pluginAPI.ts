@@ -41,6 +41,7 @@ import {
     callStack,
     callStackSynchronous,
     combinePluginConfigurations,
+    createExecutableAPIFactory,
     createNativeAPIFactory,
     determineInternalName,
     determineLocations,
@@ -212,6 +213,76 @@ describe('pluginAPI', (): void => {
         )
         expect((): unknown => createNativeAPIFactory(plugins, 'b')(state))
             .toThrow('NotImplemented')
+    })
+    test('createExecutableAPIFactory', async (): Promise<void> => {
+        const directoryPath: string =
+            await mkdtemp(join(tmpdir(), 'web-node-test-'))
+        const filePath: string = join(directoryPath, 'api')
+
+        /*
+            Responds depending on given hook to cover all possible outcomes.
+            Echoes given parameters and data back as result.
+        */
+        await writeFile(
+            filePath,
+            `#!/usr/bin/env node
+            const [hook, ...parameters] = process.argv.slice(2)
+            let input = ''
+            process.stdin.on('data', (chunk) => {
+                input += chunk
+            })
+            process.stdin.on('end', () => {
+                if (hook === 'crash')
+                    process.exit(3)
+
+                const responses = {
+                    failing: {message: 'Broken.', status: 500},
+                    invalid: 'no json',
+                    missing: {status: 404},
+                    primitive: 2,
+                    test: {
+                        result: {
+                            data: JSON.parse(input),
+                            parameters: parameters.map(JSON.parse)
+                        },
+                        status: 200
+                    }
+                }
+                process.stdout.write(
+                    hook === 'invalid' ?
+                        responses.invalid :
+                        JSON.stringify(responses[hook])
+                )
+            })
+            `.replace(/^ +/gm, ''),
+            {mode: 0o755}
+        )
+
+        try {
+            const api = createExecutableAPIFactory(filePath, 'a')
+            const state = {data: {a: 1}, hook: 'test'} as unknown as
+                Parameters<typeof api>[0]
+
+            expect(api(state, 2, 'b'))
+                .toStrictEqual({data: {a: 1}, parameters: [2, 'b']})
+            expect((): unknown => api({...state, hook: 'missing'})).toThrow(
+                'NotImplemented: API method "missing" is not implemented in ' +
+                'plugin "a".'
+            )
+            expect((): unknown => api({...state, hook: 'failing'}))
+                .toThrow('status 500 during hook "failing": Broken.')
+            expect((): unknown => api({...state, hook: 'invalid'}))
+                .toThrow('did not return valid JSON')
+            expect((): unknown => api({...state, hook: 'primitive'}))
+                .toThrow('has to return a JSON object')
+            expect((): unknown => api({...state, hook: 'crash'}))
+                .toThrow('exited with code 3')
+            expect((): unknown => createExecutableAPIFactory(
+                join(directoryPath, 'missing'), 'a'
+            )(state)).toThrow('ENOENT')
+        } finally {
+            await remove(directoryPath, {force: true, recursive: true})
+        }
     })
     testEach<typeof determineInternalName>(
         'determineInternalName',
