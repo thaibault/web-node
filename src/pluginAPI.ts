@@ -52,6 +52,7 @@ import {
     isDirectory,
     isFile,
     isFunction,
+    isPlainObject,
     Logger,
     modifyObject,
     removeKeyPrefixes,
@@ -642,6 +643,96 @@ export const createNativeAPIFactory = (
         )
     }
 /**
+ * Creates a function callable by plugin api which runs given executable. The
+ * executable gets the hook name and all additional parameters (JSON encoded)
+ * as arguments and the current data (JSON encoded) via standard input. It has
+ * to print a JSON object to standard output. Its "result" property is used
+ * as return value. A "status" of 404 indicates a not implemented hook, any
+ * other status from 400 on indicates an error described by an optional
+ * "message" property.
+ * @param filePath - Path to the executable to run.
+ * @param name - Name of corresponding plugin to use for proper error
+ * messages.
+ * @param encoding - Encoding to use to read and write from child process.
+ * @returns A function which runs the given executable.
+ */
+export const createExecutableAPIFactory = (
+    filePath: string, name: string, encoding: Encoding = 'utf8'
+) =>
+    (
+        {data, hook}: {data?: unknown, hook: string},
+        ...parameters: Array<unknown>
+    ): unknown => {
+        const childProcessResult: SpawnSyncReturns<string> =
+            spawnChildProcessSync(
+                filePath,
+                [
+                    hook,
+                    ...parameters.map((item: unknown): string =>
+                        // NOTE: "undefined" is not representable in JSON.
+                        item === undefined ? 'null' : JSON.stringify(item)
+                    )
+                ],
+                {
+                    cwd: process.cwd(),
+                    encoding,
+                    env: process.env,
+                    input: data === undefined ? 'null' : JSON.stringify(data),
+                    // NOTE: Let error output reach the user directly.
+                    stdio: ['pipe', 'pipe', 'inherit']
+                }
+            )
+
+        if (childProcessResult.error)
+            throw childProcessResult.error
+
+        if (childProcessResult.status !== 0)
+            throw new Error(
+                `API executable "${filePath}" of plugin "${name}" exited ` +
+                `with code ${String(childProcessResult.status)} during hook ` +
+                `"${hook}".`
+            )
+
+        let response: unknown
+        try {
+            response = JSON.parse(childProcessResult.stdout)
+        } catch (error) {
+            throw new Error(
+                `API executable "${filePath}" of plugin "${name}" did not ` +
+                `return valid JSON during hook "${hook}": ` +
+                represent(error),
+                {cause: error}
+            )
+        }
+
+        if (!isPlainObject(response))
+            throw new Error(
+                `API executable "${filePath}" of plugin "${name}" has to ` +
+                `return a JSON object during hook "${hook}".`
+            )
+
+        const {message, result, status} = response as {
+            message?: string
+            result?: unknown
+            status?: number
+        }
+
+        if (status === 404)
+            throw new Error(
+                `NotImplemented: API method "${hook}" is not implemented ` +
+                `in plugin "${name}".`
+            )
+
+        if (typeof status === 'number' && status >= 400)
+            throw new Error(
+                `API executable "${filePath}" of plugin "${name}" ` +
+                `responded with status ${String(status)} during hook ` +
+                `"${hook}"` + (message ? `: ${message}` : '.')
+            )
+
+        return result
+    }
+/**
  * Load given plugin api file in given path and generates a plugin specific
  * data structure with useful meta information.
  * @param relativeFilePaths - Paths to file to load relatively from given
@@ -708,40 +799,7 @@ export const loadAPI = async (
             api = createNativeAPIFactory(plugins, name)
         } else
             // NOTE: Any executable file can represent an api.
-            api = ({hook, data}, ...parameters: Array<unknown>) => {
-                const childProcessResult: SpawnSyncReturns<string> =
-                    spawnChildProcessSync(
-                        filePath,
-                        [
-                            hook,
-                            ...(parameters.map(
-                                (item: unknown): string =>
-                                    JSON.stringify(item)
-                            ))
-                        ],
-                        {
-                            cwd: process.cwd(),
-                            encoding,
-                            env: process.env,
-                            input: JSON.stringify(data),
-                            shell: true,
-                            stdio: 'inherit'
-                        }
-                    )
-
-                if (childProcessResult.status === 404)
-                    return data
-
-                const jsonIndicatorPrefix = '##!JSON!##'
-                if (childProcessResult.stdout.startsWith(
-                    jsonIndicatorPrefix
-                ))
-                    return JSON.parse(childProcessResult.stdout.substring(
-                        jsonIndicatorPrefix.length
-                    )) as unknown
-
-                return data
-            }
+            api = createExecutableAPIFactory(filePath, name, encoding)
 
     const pluginConfiguration: EvaluateablePartialConfiguration =
         configuration ?? {[internalName]: {package: {}}}

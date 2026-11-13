@@ -220,6 +220,50 @@ A plugin which needs another one to be loaded before lists it in
     l'extérieur.
 -->
 
+<!--|deDE:Plugins in anderen Sprachen-->
+<!--|frFR:Plugins dans d'autres langages-->
+### Plugins in other languages
+
+If "main" points to an executable which is not a JavaScript file, it is run
+for every hook. It gets the hook name and further parameters (as JSON) as
+arguments and the hook data (as JSON) via standard input. It has to print a
+JSON object: "result" is its return value, a "status" of 404 marks a hook it
+does not implement and any other status from 400 on an error described in
+"message". Messages for humans go to standard error:
+<!--deDE:
+    Zeigt "main" auf eine ausführbare Datei, die keine JavaScript-Datei ist,
+    wird sie für jeden Hook ausgeführt. Sie erhält den Hook-Namen und weitere
+    Parameter (als JSON) als Argumente und die Hook-Daten (als JSON) über die
+    Standardeingabe. Sie muss ein JSON-Objekt ausgeben: "result" ist ihr
+    Rückgabewert, ein "status" von 404 kennzeichnet einen nicht
+    implementierten Hook und jeder andere Status ab 400 einen in "message"
+    beschriebenen Fehler. Meldungen für Menschen gehen auf die
+    Standardfehlerausgabe:
+-->
+<!--frFR:
+    Si "main" désigne un exécutable qui n'est pas un fichier JavaScript, il
+    est exécuté pour chaque hook. Il reçoit le nom du hook et les autres
+    paramètres (en JSON) comme arguments et les données du hook (en JSON) via
+    l'entrée standard. Il doit afficher un objet JSON: "result" est sa valeur
+    de retour, un "status" de 404 signale un hook non implémenté et tout
+    autre statut à partir de 400 une erreur décrite dans "message". Les
+    messages destinés aux humains vont sur la sortie d'erreur standard:
+-->
+
+```bash
+#!/usr/bin/env bash
+# plugins/shell/api.sh with "main": "api.sh" in its "package.json"
+case "$1" in
+    initialize)
+        echo 'Shell plugin initialized.' >&2
+        echo '{"result": null}'
+        ;;
+    *)
+        echo '{"status": 404}'
+        ;;
+esac
+```
+
 <!--|deDE:Lebenszyklus-->
 <!--|frFR:Cycle de vie-->
 Lifecycle
