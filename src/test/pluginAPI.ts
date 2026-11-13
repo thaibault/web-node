@@ -24,7 +24,7 @@ import type {
     PluginConfiguration
 } from '../type'
 
-import {copy, mask} from 'clientnode'
+import {copy, mask, removeKeyPrefixes} from 'clientnode'
 import {
     testEach,
     testEachResolvedPromise,
@@ -611,6 +611,55 @@ describe('pluginAPI', (): void => {
             }
         }
     )
+    test(
+        'loadAPI determines missing api file',
+        async (): Promise<void> => {
+            const directoryPath: string =
+                await mkdtemp(join(tmpdir(), 'web-node-test-'))
+            const pluginConfiguration = {
+                a: {b: 1, package: {}}
+            } as unknown as EvaluateablePartialConfiguration
+            const load = (): ReturnType<typeof loadAPI> => loadAPI(
+                ['missing.js'],
+                directoryPath,
+                'a',
+                'a',
+                {},
+                'utf8',
+                pluginConfiguration,
+                [join(directoryPath, 'package.json')]
+            )
+
+            try {
+                await writeFile(join(directoryPath, 'package.json'), '{}')
+                await writeFile(join(directoryPath, 'readme.md'), '# A')
+
+                // Neither JavaScript nor executable files are ignored.
+                expect((await load()).api).toBeNull()
+
+                await writeFile(join(directoryPath, 'run'), '', {mode: 0o755})
+                expect((await load()).apiFilePaths)
+                    .toStrictEqual([join(directoryPath, 'run')])
+
+                await writeFile(
+                    join(directoryPath, 'a.js'), 'export const a = 1'
+                )
+                await writeFile(
+                    join(directoryPath, 'main.js'), 'export const b = 2'
+                )
+                await writeFile(
+                    join(directoryPath, 'z.js'), 'export const c = 3'
+                )
+                // Files named "index" or "main" are preferred.
+                const plugin = await load()
+                expect(plugin.apiFilePaths)
+                    .toStrictEqual([join(directoryPath, 'main.js')])
+                expect(plugin.scope).toHaveProperty('b', 2)
+            } finally {
+                await remove(directoryPath, {force: true, recursive: true})
+            }
+        }
+    )
     testEach<typeof loadConfiguration>(
         'loadConfiguration',
         loadConfiguration,
@@ -658,15 +707,28 @@ describe('pluginAPI', (): void => {
             ['b', 'a']
         ]
     )
+    // NOTE: Loaded configurations do not contain comments.
+    const expectedConfiguration: Configuration =
+        removeKeyPrefixes(copy(configuration))
     testEachResolvedPromise<typeof loadConfigurations>(
         'loadConfigurations',
         loadConfigurations,
 
-        [configuration, [], {} as unknown as Configuration],
-        [configuration, [], {a: 2} as unknown as Configuration],
+        [expectedConfiguration, [], {} as unknown as Configuration],
+        [expectedConfiguration, [], {a: 2} as unknown as Configuration],
         [
-            {a: {a: 2}, ...configuration} as unknown as Configuration,
+            {a: {a: 2}, ...expectedConfiguration} as unknown as Configuration,
             [{configuration: {a: {a: 2}}} as unknown as Plugin],
+            {} as unknown as Configuration
+        ],
+        // Comments are removed.
+        [
+            {a: {a: 2}, ...expectedConfiguration} as unknown as Configuration,
+            [
+                {
+                    configuration: {a: {'#': 'Comment.', a: 2, '#1': 'Too.'}}
+                } as unknown as Plugin
+            ],
             {} as unknown as Configuration
         ]
     )

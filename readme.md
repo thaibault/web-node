@@ -153,7 +153,9 @@ A plugin is named in camel case without the suffix, e.g.
 is its key in the shared configuration. Its configuration is read from the
 key "webNode" in "package.json" and an optional "private-package.json", e.g.
 for secrets not to be committed. Its hooks come from the file named in
-"main", otherwise from "index.js":
+"main", otherwise from "index.js". If that file does not exist, another
+JavaScript or executable file is used, preferably one named "index" or
+"main":
 <!--deDE:
     Ein Plugin wird in Camel Case ohne Suffix benannt, z. B. wird
     "application-server-web-node-plugin" zu "applicationServer". Dieser Name
@@ -161,7 +163,9 @@ for secrets not to be committed. Its hooks come from the file named in
     wird aus dem Schlüssel "webNode" in der "package.json" und einer
     optionalen "private-package.json" gelesen, z. B. für Geheimnisse, die
     nicht eingecheckt werden sollen. Seine Hooks kommen aus der unter "main"
-    angegebenen Datei, sonst aus "index.js":
+    angegebenen Datei, sonst aus "index.js". Existiert diese Datei nicht,
+    wird eine andere JavaScript- oder ausführbare Datei verwendet, bevorzugt
+    eine namens "index" oder "main":
 -->
 <!--frFR:
     Un plugin est nommé en camel case sans le suffixe, par exemple
@@ -169,7 +173,9 @@ for secrets not to be committed. Its hooks come from the file named in
     est sa clé dans la configuration commune. Sa configuration est lue depuis
     la clé "webNode" du "package.json" et d'un "private-package.json"
     optionnel, par exemple pour des secrets à ne pas versionner. Ses hooks
-    proviennent du fichier indiqué dans "main", sinon de "index.js":
+    proviennent du fichier indiqué dans "main", sinon de "index.js". Si ce
+    fichier n'existe pas, un autre fichier JavaScript ou exécutable est
+    utilisé, de préférence nommé "index" ou "main":
 -->
 
 ```JSON
@@ -350,22 +356,24 @@ Configuration
 
 All plugin configurations are merged into one object in plugin order, so a
 plugin can change the configuration of the plugins it depends on, e.g. your
-application sets "applicationServer.port". Values can be computed with
-"__evaluate__"; available are e.g. "currentPath", "path", "fs", "now" and
-"webNodePath":
+application sets "applicationServer.port". Keys like "#" or "#1" are
+comments and removed. Values can be computed with "__evaluate__"; available
+are e.g. "currentPath", "path", "fs", "now" and "webNodePath":
 <!--deDE:
     Alle Plugin-Konfigurationen werden in Plugin-Reihenfolge zu einem Objekt
     zusammengeführt, sodass ein Plugin die Konfiguration der Plugins ändern
     kann, von denen es abhängt, z. B. setzt Ihre Anwendung
-    "applicationServer.port". Werte können mit "__evaluate__" berechnet
-    werden; verfügbar sind z. B. "currentPath", "path", "fs", "now" und
+    "applicationServer.port". Schlüssel wie "#" oder "#1" sind Kommentare
+    und werden entfernt. Werte können mit "__evaluate__" berechnet werden;
+    verfügbar sind z. B. "currentPath", "path", "fs", "now" und
     "webNodePath":
 -->
 <!--frFR:
     Toutes les configurations des plugins sont fusionnées en un seul objet
     dans l'ordre des plugins, de sorte qu'un plugin peut modifier la
     configuration des plugins dont il dépend, par exemple votre application
-    définit "applicationServer.port". Les valeurs peuvent être calculées avec
+    définit "applicationServer.port". Les clés comme "#" ou "#1" sont des
+    commentaires et sont supprimées. Les valeurs peuvent être calculées avec
     "__evaluate__"; sont disponibles par exemple "currentPath", "path", "fs",
     "now" et "webNodePath":
 -->
@@ -374,6 +382,7 @@ application sets "applicationServer.port". Values can be computed with
 {
   "webNode": {
     "applicationServer": {
+      "#": "Listen on the host given by the environment.",
       "hostName": {
         "__evaluate__": "process.env.HOST_NAME ?? '127.0.0.1'"
       },
@@ -444,19 +453,21 @@ npx web-node '{core: {plugin: {hotReloading: true}}}'
 ### Own entry point
 
 Instead of the "web-node" command you can start it from your own script and
-add plugins directly in code. "isMainModule" makes sure it only starts when
-the script is executed and not when it is imported:
+add plugins directly in code. Their "configurations" are shaped like a
+"package.json". "isMainModule" makes sure it only starts when the script is
+executed and not when it is imported:
 <!--deDE:
     Statt des Befehls "web-node" können Sie es aus einem eigenen Skript
-    starten und Plugins direkt im Code hinzufügen. "isMainModule" stellt
-    sicher, dass es nur startet, wenn das Skript ausgeführt und nicht
-    importiert wird:
+    starten und Plugins direkt im Code hinzufügen. Ihre "configurations" sind
+    wie eine "package.json" aufgebaut. "isMainModule" stellt sicher, dass es
+    nur startet, wenn das Skript ausgeführt und nicht importiert wird:
 -->
 <!--frFR:
     Au lieu de la commande "web-node", vous pouvez le démarrer depuis votre
-    propre script et ajouter des plugins directement dans le code.
-    "isMainModule" garantit qu'il ne démarre que lorsque le script est
-    exécuté et non importé:
+    propre script et ajouter des plugins directement dans le code. Leurs
+    "configurations" ont la forme d'un "package.json". "isMainModule"
+    garantit qu'il ne démarre que lorsque le script est exécuté et non
+    importé:
 -->
 
 ```JavaScript
@@ -467,8 +478,10 @@ import main, {isMainModule} from 'web-node'
 if (await isMainModule(fileURLToPath(import.meta.url)))
     await main({
         logger: {
+            configurations: {webNode: {logger: {level: 'info'}}},
             scope: {
-                initialize: ({plugins}) => console.log(plugins.length)
+                initialize: ({configuration}) =>
+                    console.log(configuration.logger.level)
             }
         }
     })
