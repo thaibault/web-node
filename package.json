@@ -96,7 +96,7 @@
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.1",
     "web-documentation": "^1.0.74",
-    "weboptimizer": "^4.0.109"
+    "weboptimizer": "^4.0.115"
   },
   "peerDependencies": {
     "clientnode": "*",
