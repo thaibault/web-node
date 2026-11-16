@@ -95,8 +95,8 @@
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.2",
-    "web-documentation": "^1.0.74",
-    "weboptimizer": "^4.0.119"
+    "web-documentation": "^1.0.76",
+    "weboptimizer": "^4.0.121"
   },
   "peerDependencies": {
     "clientnode": "*",
