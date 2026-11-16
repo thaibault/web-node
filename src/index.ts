@@ -63,7 +63,7 @@ const handleError = async (
         if (state.configuration.core.debug)
             throw error
         else
-            void log.error(error)
+            await log.error(error)
     }
 }
 export const main = async (
@@ -227,7 +227,7 @@ export const main = async (
             void (async (): Promise<void> => {
                 if (key === '\u0003') {
                     if (cancelTriggered)
-                        void log.warn('Stopping ungracefully.')
+                        await log.warn('Stopping ungracefully.')
                     else {
                         cancelTriggered = true
 
@@ -307,8 +307,9 @@ export const main = async (
 
         if (configuration.core.debug)
             throw error
-        else
-            void log.error(error)
+
+        // NOTE: Exiting right away would drop the not yet written message.
+        await log.error(error)
 
         process.exit(1)
     }
