@@ -91,22 +91,20 @@
     "eslint": "^10.15.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^65.4.8",
+    "globals": "^17.14.0",
     "jest": "^30.5.2",
     "jsdoc": "^4.0.5",
     "shx": "^0.4.0",
     "typescript-eslint": "^8.72.2",
     "web-documentation": "^1.0.77",
-    "weboptimizer": "^4.0.122"
+    "weboptimizer": "^4.0.124"
   },
   "peerDependencies": {
     "clientnode": "*",
     "core-js": "*"
   },
   "resolutions": {
-    "colors": "1.4.0",
-    "globals@npm:^11.1.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
-    "globals@npm:^14.0.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch",
-    "globals@npm:^9.18.0": "patch:globals@npm%3A11.12.0#~/.yarn/patches/globals-npm-11.12.0-1fa7f41a6c.patch"
+    "colors": "1.4.0"
   },
   "engines": {
     "node": ">=26",
